@@ -12,9 +12,14 @@ app.get('/', (req, res) => {
     res.json({ message: 'Hello, World!' });
 });
 
-app.get('/next', (req, res) => {
-    res.json({ message: `Contacting Next.js at ${NEXT_PUBLIC_API_URL}` });
+app.get('/first', (req, res) => {
+    res.json({ message: `1st: Contacting Next.js at ${NEXT_PUBLIC_API_URL}` });
 });
+
+app.get('/second', (req, res) => {
+    res.json({ message: `2nd: Contacting Next.js at ${NEXT_PUBLIC_API_URL}` });
+});
+
 
 const PORT = 3001;
 app.listen(PORT, () => {
