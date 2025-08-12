@@ -1,7 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
+require('dotenv').config();
+// const { sequelize } = require('./models');
+
+// import routes
+const Videos = require('./routes/videos')
 
 const app = express();
+
+app.use('/videos', Videos)
 
 // Middleware to enable CORS
 app.use(cors());
@@ -12,7 +21,7 @@ app.get('/', (req, res) => {
     res.json({ message: 'Hello, World!' });
 });
 
-app.get('/first', (req, res) => {
+app.get('/videos', (req, res) => {
     res.json({ message: `1st: Contacting Next.js at ${NEXT_PUBLIC_API_URL}` });
 });
 
@@ -21,7 +30,7 @@ app.get('/second', (req, res) => {
 });
 
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
