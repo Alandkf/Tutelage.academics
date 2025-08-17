@@ -11,11 +11,22 @@ const BASE_URL = "http://localhost:3001";
  */
 export async function fetchData(endpoint) {
   try {
+    console.log(`Fetching from: ${BASE_URL}${endpoint}`);
+    
+    // Simplified fetch configuration
     const res = await fetch(`${BASE_URL}${endpoint}`);
-    if (!res.ok) throw new Error("Failed to fetch data");
-    return res.json();
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`API error (${res.status}):`, errorText);
+      throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
+    }
+    
+    const data = await res.json();
+    console.log('Successful response data:', data);
+    return data;
   } catch (err) {
-    console.error(err);
-    return { error: "Failed to load data. Please try again later." };
+    console.error('Fetch error:', err);
+    return { error: err.message || "Failed to load data. Please try again later." };
   }
 }
