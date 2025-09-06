@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
 // const { sequelize } = require('./models');
-
+const { sequelize } = require('./models');
 // import routes
 const Videos = require('./routes/videos')
 
@@ -49,6 +49,13 @@ app.get('/first', (req, res) => {
 
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// { force: true }
+sequelize.sync({ force: true })
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('Failed to sync database:', err);
+    });
