@@ -1,5 +1,6 @@
 // File: models/index.js
 // -------------------------
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
@@ -9,27 +10,42 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 
 
-// Configuration is minimal and picks values from environment variables.
-// Make sure the following env vars exist in your environment or .env:
-// DB_NAME, DB_USER, DB_PASS, DB_HOST, DB_PORT
-
-
+// Database configuration for Aiven MySQL
 const sequelize = new Sequelize(
-process.env.DB_NAME || 'Tutelage.academics',
-process.env.DB_USER || 'root',
-process.env.DB_PASS || '(Aland&DB)',
+process.env.DB_NAME || '',
+process.env.DB_USER || '',
+process.env.DB_PASSWORD || '',
 {
 host: process.env.DB_HOST || 'localhost',
-// port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+port: process.env.DB_PORT || 27724,
 dialect: 'mysql',
-// logging: process.env.SEQ_LOG === 'true' ? console.log : false,
-// define: {
-// underscored: true,
-// freezeTableName: false,
-// timestamps: true
-// }
+dialectOptions: {
+ssl: {
+require: true,
+rejectUnauthorized: false
+}
+},
+logging: false
 }
 );
+
+// Test database connection
+sequelize.authenticate()
+.then(() => {
+console.log('✅ Database connection established successfully!');
+})
+.catch(err => {
+console.error('❌ Unable to connect to the database:', err);
+});
+
+// Sync database and create tables
+sequelize.sync({ force: true })
+.then(() => {
+console.log('✅ All tables created successfully!');
+})
+.catch(err => {
+console.error('❌ Error creating tables:', err);
+});
 
 
 const db = {};
@@ -57,5 +73,6 @@ db[modelName].associate(db);
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+console.log('📊 Database models loaded:', Object.keys(db).filter(key => key !== 'sequelize' && key !== 'Sequelize'));
 
 module.exports = db;
