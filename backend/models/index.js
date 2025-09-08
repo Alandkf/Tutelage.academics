@@ -9,9 +9,7 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 
 
-// Configuration is minimal and picks values from environment variables.
-// Make sure the following env vars exist in your environment or .env:
-// DB_NAME, DB_USER, DB_PASS, DB_HOST, DB_PORT
+
 
 
 const sequelize = new Sequelize(
