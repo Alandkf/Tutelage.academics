@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const path = require('path');
 require('dotenv').config();
 const { sequelize, Blog } = require('./models');
 // import routes
 const Videos = require('./routes/videos')
 const Blogs = require('./routes/blogs')
+const Auth = require('./routes/auth')
 
 const app = express();
 
@@ -26,6 +30,31 @@ app.use((req, res, next) => {
   next();
 });
 
+// Parse cookies
+app.use(cookieParser());
+
+// Session configuration
+const sessionStore = new SequelizeStore({
+  db: sequelize,
+});
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-session-secret-key',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true, // Prevent XSS attacks
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // For cross-origin requests
+  },
+  name: 'tutelage.sid' // Custom session name
+}));
+
+// Sync session store
+sessionStore.sync();
+
 // Parse JSON request body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,6 +62,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use('/videos', Videos)
 app.use('/blogs', Blogs)
+app.use('/auth', Auth)
 
 const NEXT_PUBLIC_API_URL = 'http://localhost:3000'; // Replace with your Next.js app URL
 
