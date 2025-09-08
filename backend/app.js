@@ -6,7 +6,8 @@ const cookieParser = require('cookie-parser');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const path = require('path');
 require('dotenv').config();
-const { sequelize, Blog } = require('./models');
+const { sequelize, Blog, User } = require('./models');
+const bcrypt = require('bcrypt');
 // import routes
 const Videos = require('./routes/videos')
 const Blogs = require('./routes/blogs')
@@ -79,8 +80,33 @@ app.get('/first', (req, res) => {
 });
 
 
+// Function to seed default user
+const seedUsers = async () => {
+    try {
+        const userCount = await User.count();
+        if (userCount === 0) {
+            const hashedPassword = await bcrypt.hash('admin123', 10);
+            const defaultUser = await User.create({
+                name: 'Admin User',
+                email: 'admin@tutelage.com',
+                passwordHash: hashedPassword,
+                role: 'ADMIN'
+            });
+            console.log('✅ Successfully created default admin user!');
+            return defaultUser.id;
+        } else {
+            console.log(`📊 User table already contains ${userCount} entries. Skipping user seeding.`);
+            const firstUser = await User.findOne();
+            return firstUser.id;
+        }
+    } catch (error) {
+        console.error('❌ Error seeding user data:', error);
+        return null;
+    }
+};
+
 // Function to seed blog data
-const seedBlogs = async () => {
+const seedBlogs = async (userId) => {
     try {
         const blogCount = await Blog.count();
         if (blogCount === 0) {
@@ -90,35 +116,35 @@ const seedBlogs = async () => {
                     content: 'Web development is the process of creating websites and web applications. It involves both frontend and backend development skills.',
                     imageRef: 'https://example.com/web-dev.jpg',
                     category: 'Technology',
-                    createdBy: 1
+                    createdBy: userId
                 },
                 {
                     title: 'Understanding Database Design',
                     content: 'Database design is crucial for building scalable applications. Learn about normalization, relationships, and best practices.',
                     imageRef: 'https://example.com/database.jpg',
                     category: 'Database',
-                    createdBy: 1
+                    createdBy: userId
                 },
                 {
                     title: 'JavaScript ES6 Features',
                     content: 'ES6 introduced many powerful features like arrow functions, destructuring, and promises that make JavaScript more efficient.',
                     imageRef: 'https://example.com/js-es6.jpg',
                     category: 'Programming',
-                    createdBy: 1
+                    createdBy: userId
                 },
                 {
                     title: 'React Best Practices',
                     content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
                     imageRef: 'https://example.com/react.jpg',
                     category: 'Frontend',
-                    createdBy: 1
+                    createdBy: userId
                 },
                 {
                     title: 'Node.js and Express Tutorial',
                     content: 'Build powerful backend applications using Node.js and Express framework. Learn about routing, middleware, and API development.',
                     imageRef: 'https://example.com/nodejs.jpg',
                     category: 'Backend',
-                    createdBy: 1
+                    createdBy: userId
                 }
             ];
 
@@ -136,8 +162,11 @@ const PORT = process.env.PORT || 3001;
 // { force: true }
 sequelize.sync({ force: true })
     .then(async () => {
-        // Seed blog data after database sync
-        await seedBlogs();
+        // Seed data after database sync
+        const userId = await seedUsers();
+        if (userId) {
+            await seedBlogs(userId);
+        }
         
         app.listen(PORT, () => {
              console.log(`Server is running on port ${PORT}`);
