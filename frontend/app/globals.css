@@ -25,13 +25,13 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #fec016; /* logo color */
+  --primary: #f59e0b; /* dim yellow */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: #111111;
   --secondary-foreground: #ffffff;
   --muted: #1e1e1e;
   --muted-foreground: #a1a1aa;
-  --accent: #f59e0b; /* Dim Yellow */
+  --accent: #fec016 ; /* Logo color */
   --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
