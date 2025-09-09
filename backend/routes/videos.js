@@ -6,3 +6,4 @@ const VideoController = require('../controller/VideoController');
 router.get('/', VideoController.get);
 
 module.exports = router;
+//k
