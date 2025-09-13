@@ -3,107 +3,60 @@ import { NextResponse } from "next/server"
 
 
 export default async function middleware(req) {
-  //get the token form the cookies
-  const token = req.cookies.get('token')?.value ;
-  const refreshToken = req.cookies.get('refreshToken')?.value ;
+  // Get the token from the cookies
+  const token = req.cookies.get('token')?.value;
+  const refreshToken = req.cookies.get('refreshToken')?.value;
   
-
-  //IF THERE IS NO TOKEN...
-  if (!token || !refreshToken) {
-
-    const { pathname } = req.nextUrl;
-    const publicRoutes = ['/not-found', '/example'];
-    const authRoutes = ['/signin',];
-
-    if (publicRoutes.includes(pathname)) {
-      return NextResponse.next();
-    }
-
-    if (!authRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL('/signin', req.url));
-    }
-
-    return NextResponse.next();
-  }
-
-  //IF WE HAVE THE TOKENS...
-
-  // IF THE TOKEN IS EXPIRES:
-
-  //encode the secret key
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-
-  let payload;
-  let refreshPayload;
-   try {
-      const { payload: verifiedPayload } = await jwtVerify(token, secret);
-      payload = verifiedPayload;
-
-      const { payload: RverifiedPayload } = await jwtVerify(refreshToken, secret);
-      refreshPayload = RverifiedPayload;
-
-      if(!verifiedPayload ) {
-        return NextResponse.redirect(new URL('/signin', req.url));
-      }
-      if(!RverifiedPayload ) {
-        return NextResponse.redirect(new URL('/signin', req.url));
-      }
-
+  const { pathname } = req.nextUrl;
+  
+  // Define routes configuration
+  const authRoutes = ['/signin']; // Routes that should redirect to home when logged in
+  const privateRoutes = ['/admin-dashboard']; // Routes that require authentication
+  
+  // Check if user is authenticated
+  let isAuthenticated = false;
+  let userRole = null;
+  
+  if (token && refreshToken) {
+    try {
+      // Encode the secret key
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       
-
-      const { pathname } = req.nextUrl
-      const isAuth = !!payload   
-         
-      const userRole = payload?.role || 'ADMIN';
-     //IF EVERYTHING IS RIGHT AND USER IS AUTHORIZED, WE CAN PROCEED WITH THE MIDDLEWARE:
-  
-    // Routes that are always public (accessible to everyone)
-    const publicRoutes = ['/not-found', '/example...']     
-      
-    // Public routes when logged out, private when logged in
-    const authRoutes = ['/signin']
-  
-    // Define route permissions
-    const routePermissions = {
-      '/': ['MAIN_MANAGER', 'ADMIN'],
-      '/admin-dashboard': ['MAIN_MANAGER', 'ADMIN'],
-    }
-  
-    // If the current path is a public route, allow access regardless of auth status
-    if (publicRoutes.includes(pathname)) {
-      return NextResponse.next()
-    }
-  
-    if (isAuth && authRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL('/', req.url))
-    }
-    
-    if (!isAuth && !authRoutes.includes(pathname)  && !publicRoutes.includes(pathname)) {
-      return NextResponse.redirect(new URL('/signin', req.url))
-    }
-  
-    // Check route permissions for authenticated users
-    if (isAuth && userRole) {
-      // Admin can access all routes
-      if (userRole === 'ADMIN') {
-        return NextResponse.next()
+      // Verify the token
+      const { payload } = await jwtVerify(token, secret);
+      if (payload) {
+        isAuthenticated = true;
+        userRole = payload.role;
       }
-  
-      // Check if the current path is restricted
-      const allowedRoles = routePermissions[pathname]
-      if (allowedRoles && !allowedRoles.includes(userRole)) {
-        return NextResponse.redirect(new URL('/', req.url))
-      }
-    }
     } catch (err) {
       console.log("Token check failed:", err.code || err.name);
-      payload = null;
-      return NextResponse.redirect(new URL('/signin', req.url))
-
+      // Token is invalid, but we'll handle that based on route requirements
     }
-
-    
-    return NextResponse.next()
+  }
+  
+  // RULE 1: If user is authenticated and tries to access an auth route (e.g., signin)
+  // redirect them to the home page
+  if (isAuthenticated && authRoutes.includes(pathname)) {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+  
+  // RULE 2: If user is not authenticated and tries to access a private route
+  // redirect them to the signin page
+  if (!isAuthenticated && privateRoutes.includes(pathname)) {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+  
+  // Additional role-based access control for admin-dashboard
+  if (isAuthenticated && pathname === '/admin-dashboard') {
+    // Only ADMIN and MAIN_MANAGER roles can access admin-dashboard
+    const allowedRoles = ['ADMIN', 'MAIN_MANAGER'];
+    if (!allowedRoles.includes(userRole)) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+  }
+  
+  // All other routes are public
+  return NextResponse.next();
 }
 
 export const config = {
@@ -118,3 +71,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
+     
