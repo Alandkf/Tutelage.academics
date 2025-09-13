@@ -131,14 +131,6 @@ const LoginPage = () => {
             </Alert>
           )}
         </CardContent>
-        <CardFooter>
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-primary hover:underline">
-              Sign up
-            </a>
-          </p>
-        </CardFooter>
       </Card>
       
       <div className="w-full max-w-md rounded-md bg-amber-50 p-4 border border-amber-300 text-center shadow-sm">
