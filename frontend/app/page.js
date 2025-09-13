@@ -1,10 +1,14 @@
+'use client'
+
 import { useAuth } from "@/components/AuthHook";
 
 
 
- useAuth();
 
 const Home = () => {
+  useAuth();
+
+  
   return (
     <div className=''>Home</div>
   )
