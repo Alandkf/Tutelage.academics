@@ -1,5 +1,8 @@
+import { useAuth } from "@/components/AuthHook";
 
 
+
+ useAuth();
 
 const Home = () => {
   return (
