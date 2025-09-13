@@ -6,6 +6,7 @@ export default async function middleware(req) {
   //get the token form the cookies
   const token = req.cookies.get('token')?.value ;
   const refreshToken = req.cookies.get('refreshToken')?.value ;
+  
 
   //IF THERE IS NO TOKEN...
   if (!token || !refreshToken) {

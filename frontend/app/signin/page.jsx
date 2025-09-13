@@ -57,7 +57,6 @@ const LoginPage = () => {
 
       // Handle successful login
       console.log('Login successful:', data)
-      // Redirect user to dashboard or home page
       router.push('/admin-dashboard')
     } catch (error) {
       console.error("Login failed:", error)
@@ -68,7 +67,7 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 space-y-6">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
@@ -93,11 +92,6 @@ const LoginPage = () => {
           <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -131,28 +125,34 @@ const LoginPage = () => {
               </Button>
             </form>
           </Form>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter>
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
             <a href="/signup" className="text-primary hover:underline">
               Sign up
             </a>
           </p>
-          <div className="mt-4 rounded-md bg-amber-50 p-3 border border-amber-300 text-center">
-            <p className="text-amber-800 text-sm font-medium">
-              ⚠️ Warning: This route is for admins only. If you're not an admin, please {" "}
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); window.history.back(); }} 
-                className="text-amber-600 underline font-bold hover:text-amber-800"
-              >
-                go back
-              </a>
-            </p>
-          </div>
         </CardFooter>
       </Card>
+      
+      <div className="w-full max-w-md rounded-md bg-amber-50 p-4 border border-amber-300 text-center shadow-sm">
+        <p className="text-amber-800 font-medium">
+          ⚠️ Warning: This route is for admins only. If you're not an admin, please{" "}
+          <a 
+            href="#" 
+            onClick={(e) => { e.preventDefault(); window.history.back(); }} 
+            className="text-amber-600 underline font-bold hover:text-amber-800"
+          >
+            go back
+          </a>
+        </p>
+      </div>
     </div>
   )
 }

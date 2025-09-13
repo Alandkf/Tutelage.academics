@@ -125,7 +125,7 @@ class AuthController {
       // Generate refresh token
       const refreshToken = jwt.sign(
         { id: user.id },
-        process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+        process.env.JWT_SECRET || process.env.JWT_SECRET,
         { expiresIn: '30d' }
       );
 
@@ -267,7 +267,7 @@ class AuthController {
       // Generate refresh token
       const refreshToken = jwt.sign(
         { id: user.id },
-        process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+        process.env.JWT_SECRET || process.env.JWT_SECRET,
         { expiresIn: '30d' }
       );
 
@@ -324,7 +324,7 @@ class AuthController {
       // Verify refresh token
       const decoded = jwt.verify(
         refreshToken,
-        process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+        process.env.JWT_SECRET || process.env.JWT_SECRET
       );
 
       // Find user
@@ -354,7 +354,7 @@ class AuthController {
       // Generate new refresh token
       const newRefreshToken = jwt.sign(
         { id: user.id },
-        process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+        process.env.JWT_SECRET || process.env.JWT_SECRET,
         { expiresIn: '30d' }
       );
 
