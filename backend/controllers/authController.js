@@ -459,6 +459,237 @@ class AuthController {
       });
     }
   }
+
+  // ADMIN ONLY - GET /users - Get all users
+  static async getAllUsers(req, res) {
+    try {
+      console.log('📋 Admin requesting all users list');
+      
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'ADMIN') {
+        console.log('❌ Unauthorized access attempt to user list');
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.'
+        });
+      }
+
+      const users = await User.findAll({
+        attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'],
+        order: [['createdAt', 'DESC']]
+      });
+
+      console.log(`✅ Successfully retrieved ${users.length} users`);
+      res.json({
+        success: true,
+        data: {
+          users: users,
+          total: users.length
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error retrieving users:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error while retrieving users',
+        error: error.message
+      });
+    }
+  }
+
+  // ADMIN ONLY - GET /users/:id - Get user by ID
+  static async getUserById(req, res) {
+    try {
+      const { id } = req.params;
+      console.log(`📋 Admin requesting user details for ID: ${id}`);
+      
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'ADMIN') {
+        console.log('❌ Unauthorized access attempt to user details');
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.'
+        });
+      }
+
+      const user = await User.findByPk(id, {
+        attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt']
+      });
+
+      if (!user) {
+        console.log(`❌ User not found with ID: ${id}`);
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      console.log(`✅ Successfully retrieved user: ${user.email}`);
+      res.json({
+        success: true,
+        data: {
+          user: user
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error retrieving user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error while retrieving user',
+        error: error.message
+      });
+    }
+  }
+
+  // ADMIN ONLY - PUT /users/:id - Update user
+  static async updateUser(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, email, role } = req.body;
+      console.log(`📝 Admin updating user ID: ${id}`);
+      
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'ADMIN') {
+        console.log('❌ Unauthorized access attempt to update user');
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.'
+        });
+      }
+
+      // Validate input
+      if (!name || !email) {
+        console.log('❌ Missing required fields for user update');
+        return res.status(400).json({
+          success: false,
+          message: 'Name and email are required'
+        });
+      }
+
+      // Check if email is valid
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.log('❌ Invalid email format provided');
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid email address'
+        });
+      }
+
+      // Find the user to update
+      const user = await User.findByPk(id);
+      if (!user) {
+        console.log(`❌ User not found with ID: ${id}`);
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Check if email is already taken by another user
+      if (email !== user.email) {
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+          console.log('❌ Email already in use by another user');
+          return res.status(400).json({
+            success: false,
+            message: 'Email already in use by another user'
+          });
+        }
+      }
+
+      // Validate role if provided
+      if (role && !['ADMIN', 'MAIN_MANAGER'].includes(role)) {
+        console.log('❌ Invalid role provided');
+        return res.status(400).json({
+          success: false,
+          message: 'Role must be either ADMIN or MAIN_MANAGER'
+        });
+      }
+
+      // Update user
+      const updateData = { name, email };
+      if (role) updateData.role = role;
+
+      await user.update(updateData);
+      
+      const updatedUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        updatedAt: user.updatedAt
+      };
+
+      console.log(`✅ Successfully updated user: ${user.email}`);
+      res.json({
+        success: true,
+        message: 'User updated successfully',
+        data: {
+          user: updatedUser
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error updating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error while updating user',
+        error: error.message
+      });
+    }
+  }
+
+  // ADMIN ONLY - DELETE /users/:id - Delete user
+  static async deleteUser(req, res) {
+    try {
+      const { id } = req.params;
+      console.log(`🗑️ Admin deleting user ID: ${id}`);
+      
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'ADMIN') {
+        console.log('❌ Unauthorized access attempt to delete user');
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.'
+        });
+      }
+
+      // Find the user to delete
+      const user = await User.findByPk(id);
+      if (!user) {
+        console.log(`❌ User not found with ID: ${id}`);
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Prevent admin from deleting themselves
+      if (user.id === req.user.id) {
+        console.log('❌ Admin attempted to delete their own account');
+        return res.status(400).json({
+          success: false,
+          message: 'You cannot delete your own account'
+        });
+      }
+
+      const deletedUserEmail = user.email;
+      await user.destroy();
+
+      console.log(`✅ Successfully deleted user: ${deletedUserEmail}`);
+      res.json({
+        success: true,
+        message: 'User deleted successfully'
+      });
+    } catch (error) {
+      console.error('❌ Error deleting user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error while deleting user',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = AuthController;

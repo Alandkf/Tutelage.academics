@@ -12,6 +12,7 @@ const bcrypt = require('bcrypt');
 const Videos = require('./routes/videos')
 const Blogs = require('./routes/blogs')
 const Auth = require('./routes/auth')
+const Users = require('./routes/users')
 
 const app = express();
 
@@ -53,8 +54,7 @@ app.use(session({
   name: 'tutelage.sid' // Custom session name
 }));
 
-// Sync session store
-sessionStore.sync();
+// Session store will be synced after database sync
 
 // Parse JSON request body
 app.use(bodyParser.json());
@@ -64,6 +64,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/videos', Videos)
 app.use('/blogs', Blogs)
 app.use('/auth', Auth)
+app.use('/users', Users)
 
 const NEXT_PUBLIC_API_URL = 'http://localhost:3000'; // Replace with your Next.js app URL
 
@@ -162,14 +163,22 @@ const PORT = process.env.PORT || 3001;
 // { force: true }
 sequelize.sync({ force: true })
     .then(async () => {
-        // Seed data after database sync
+        console.log('✅ Database synced successfully');
+        
+        // Sync session store after database is ready
+        await sessionStore.sync();
+        console.log('✅ Session store synced successfully');
+        
+        // Seed users and get the admin user ID
         const userId = await seedUsers();
+        
+        // Seed blogs with the admin user ID
         if (userId) {
             await seedBlogs(userId);
         }
         
         app.listen(PORT, () => {
-             console.log(`Server is running on port ${PORT}`);
+            console.log(`🚀 Server running on port ${PORT}`);
         });
     })
     .catch(err => {
