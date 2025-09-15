@@ -90,7 +90,7 @@ export default function Sidebar() {
           </nav>
 
             {/* ADMIN Profile Section */}
-        {session?.user?.role ==="ADMIN" && (
+        {session && (
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3">
               <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
@@ -123,7 +123,7 @@ export default function Sidebar() {
         )}
 
         {
-          session?.user?.role === "ADMIN" && (
+          session && (
             <div className={`p-4 border-t border-gray-200 ${session?.user?.role === 'ADMIN' ? 'block' : 'hidden'}`}>
               <Button 
                 variant="outline" 
@@ -187,7 +187,7 @@ export default function Sidebar() {
 
               {/* MOBILE ADMIN Profile Section */}
               <div className='flex flex-col flex-1 gap-2'>
-                  {session?.user?.role ==="ADMIN" && (
+                  {session && (
                     <div className="p-4 border-t border-gray-200">
                       <div className="flex items-center space-x-3">
                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
@@ -220,7 +220,7 @@ export default function Sidebar() {
                   )}
 
                   {
-                    session?.user?.role === "ADMIN" && (
+                    session && (
                       <div className={`p-4 border-t border-gray-200 ${session?.user?.role === 'ADMIN' ? 'block' : 'hidden'}`}>
                         <Button 
                           variant="outline" 
