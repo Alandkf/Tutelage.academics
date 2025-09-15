@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useRouter } from "next/navigation"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { apiService } from "@/config/axios"
 
 // Define form schema with Zod
 const formSchema = z.object({
@@ -38,11 +37,18 @@ const LoginPage = () => {
     setError(null)
     
     try {
-      console.log("Attempting login with:", values);
-      console.log("API URL:", process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001');
+      // Send login request to backend API
+      const response = await fetch('http://localhost:3001/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+        credentials: 'include', // Include cookies in the request
+      })
+
+      const data = await response.json()
       
-      // Use the auth service instead of direct fetch
-      const data = await apiService.auth.login(values);
 
       if (!data.success) {
         // Handle login failure
@@ -53,29 +59,10 @@ const LoginPage = () => {
       // Handle successful login
       console.log('Login successful:', data)
       router.push('/admin-dashboard')
-    } catch (error) {
-      console.error("Login failed:", error);
-      // More detailed error message
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-        
-        if (error.response.status === 404) {
-          setError('API endpoint not found. Please check your server connection.');
-        } else {
-          setError(`Server error: ${error.response.status} - ${error.response.data.message || 'Unknown error'}`);
-        }
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("Error request:", error.request);
-        setError('No response from server. Please check your network connection.');
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        setError('An error occurred while trying to log in. Please try again.');
-      }
-    } finally {
+    }catch (error) {
+      console.error("Login failed:", error)
+      setError('An error occurred while trying to log in. Please try again.')
+     } finally {
       setIsLoading(false)
     }
   }
