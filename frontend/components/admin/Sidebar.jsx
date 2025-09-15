@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X, User, LogOut } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import AdminProfileSection from "@/components/admin/AdminProfileSection"
 
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
@@ -19,8 +19,29 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
-    const {session, setSession } = useState("haha");
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    async function fetchSession() {
+      try {
+        const res = await fetch("http://localhost:3001/auth/me", {
+          credentials: "include"
+        })
+        const data = await res.json()
+        if (data.success) {
+          setSession({ user: data.data.user })
+        } else {
+          setSession(null)
+        }
+      } catch (e) {
+        setSession(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSession()
+  }, [])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -89,52 +110,8 @@ export default function Sidebar() {
             ))}
           </nav>
 
-            {/* ADMIN Profile Section */}
-        {session && (
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
-                {session?.user?.image ?  (
-                  <Image 
-                    src={session?.user?.image}
-                    alt="Provider Logo"
-                    fill
-                    className="object-cover"
-                  />
-                )
-                :
-                (
-                  <div className="flex items-center justify-center h-full w-full bg-gray-200 text-gray-500">
-                    <User className="h-6 w-6" />
-                  </div>
-                )
-              }
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {session?.user?.name || "Admin"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {session?.user?.email || ""}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {
-          session && (
-            <div className={`p-4 border-t border-gray-200 ${session?.user?.role === 'ADMIN' ? 'block' : 'hidden'}`}>
-              <Button 
-                variant="outline" 
-                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => signOut({ callbackUrl: '/' })}
-              >
-                <LogOut className="mr-3 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-        ) }
+          {/* ADMIN Profile Section (desktop & mobile) */}
+          <AdminProfileSection session={session} loading={loading} />
         </motion.div>
       )}
       
@@ -185,61 +162,12 @@ export default function Sidebar() {
                 ))}
               </nav>
 
-              {/* MOBILE ADMIN Profile Section */}
-              <div className='flex flex-col flex-1 gap-2'>
-                  {session && (
-                    <div className="p-4 border-t border-gray-200">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
-                          {session?.user?.image ?  (
-                            <Image 
-                              src={session?.user?.image}
-                              alt="Provider Logo"
-                              fill
-                              className="object-cover"
-                            />
-                          )
-                          :
-                          (
-                            <div className="flex items-center justify-center h-full w-full bg-gray-200 text-gray-500">
-                              <User className="h-6 w-6" />
-                            </div>
-                          )
-                        }
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {session?.user?.name || "Admin"}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {session?.user?.email || ""}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {
-                    session && (
-                      <div className={`p-4 border-t border-gray-200 ${session?.user?.role === 'ADMIN' ? 'block' : 'hidden'}`}>
-                        <Button 
-                          variant="outline" 
-                          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => signOut({ callbackUrl: '/' })}
-                        >
-                          <LogOut className="mr-3 h-4 w-4" />
-                          Logout
-                        </Button>
-                      </div>
-                  ) }
-              
-              </div>
+              {/* ADMIN Profile Section (desktop & mobile) */}
+              <AdminProfileSection session={session} loading={loading} />
             </motion.div>
           </>
         )}
       </AnimatePresence>
-
-      
     </>
   )
 }
