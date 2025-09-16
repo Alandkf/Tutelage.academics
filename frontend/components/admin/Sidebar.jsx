@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
+import { useAuth } from "@/components/AuthContext"
 
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
@@ -19,29 +20,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchSession() {
-      try {
-        const res = await fetch("http://localhost:3001/auth/me", {
-          credentials: "include"
-        })
-        const data = await res.json()
-        if (data.success) {
-          setSession({ user: data.data.user })
-        } else {
-          setSession(null)
-        }
-      } catch (e) {
-        setSession(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchSession()
-  }, [])
+  const { user, loading } = useAuth()
 
   useEffect(() => {
     const checkMobile = () => {
@@ -111,7 +90,7 @@ export default function Sidebar() {
           </nav>
 
           {/* ADMIN Profile Section (desktop & mobile) */}
-          <AdminProfileSection session={session} loading={loading} />
+          <AdminProfileSection session={user ? { user } : null} loading={loading} />
         </motion.div>
       )}
       
@@ -163,7 +142,7 @@ export default function Sidebar() {
               </nav>
 
               {/* ADMIN Profile Section (desktop & mobile) */}
-              <AdminProfileSection session={session} loading={loading} />
+              <AdminProfileSection session={user ? { user } : null} loading={loading} />
             </motion.div>
           </>
         )}

@@ -8,8 +8,7 @@ import { BlogCard } from "@/components/blogs/BlogCard"
 import BlogForm from "@/components/forms/BlogForm"
 import { Plus } from "lucide-react"
 import { toast } from "sonner"
-
-
+import { useAuth } from "@/components/AuthContext"
 
 export default function BlogsPage() {
   const [blogs, setBlogs] = useState([])
@@ -20,14 +19,14 @@ export default function BlogsPage() {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteBlog, setDeleteBlog] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [currentUser, setCurrentUser] = useState({ role: "ADMIN" }) 
+  const { user } = useAuth()
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
 
   // Fetch blogs (mocked for now, ready for backend integration)
   useEffect(() => {
     setLoading(true)
-    fetch("/api/blogs")
+    fetch("http://localhost:3001/blogs", { credentials: "include" })
       .then(res => res.json())
       .then(data => {
         setBlogs(data.data || [])
@@ -74,7 +73,7 @@ export default function BlogsPage() {
     <div className="max-w-5xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Blogs</h1>
-        {currentUser?.role === "ADMIN" && (
+        {user?.role === "ADMIN" && (
           <Button onClick={() => setShowCreate(true)} className="gap-2">
             <Plus className="h-5 w-5" />
             Create Blog
@@ -98,7 +97,7 @@ export default function BlogsPage() {
           filteredBlogs.map(blog => (
             <div key={blog.id} className="relative group">
               <BlogCard {...blog} />
-              {currentUser?.role === "ADMIN" && (
+              {user?.role === "ADMIN" && (
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}>Edit</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}>Delete</Button>

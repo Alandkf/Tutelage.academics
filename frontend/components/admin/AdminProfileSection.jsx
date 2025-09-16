@@ -1,10 +1,12 @@
 import { User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { useAuth } from "@/components/AuthContext"
 
-export default function AdminProfileSection({ session, loading, onLogout }) {
+export default function AdminProfileSection({ onLogout }) {
+  const { user, loading } = useAuth()
   if (loading) return null
-  if (!session) return null
+  if (!user) return null
 
   const handleLogout = async () => {
     await fetch("http://localhost:3001/auth/logout", {
@@ -20,9 +22,9 @@ export default function AdminProfileSection({ session, loading, onLogout }) {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center space-x-3">
           <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
-            {session.user?.image ? (
+            {user?.image ? (
               <Image
-                src={session.user.image}
+                src={user.image}
                 alt="Provider Logo"
                 fill
                 className="object-cover"
@@ -35,10 +37,10 @@ export default function AdminProfileSection({ session, loading, onLogout }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
-              {session.user?.name || "Admin"}
+              {user?.name || "Admin"}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              {session.user?.email || ""}
+              {user?.email || ""}
             </p>
           </div>
         </div>
