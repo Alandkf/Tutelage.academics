@@ -497,6 +497,97 @@ class AuthController {
     }
   }
 
+  // ADMIN ONLY - POST /users - Create a new user
+  static async createUser(req, res) {
+    try {
+      const { name, email, password, role } = req.body;
+      console.log("1. Starting user creation process by admin");
+      console.log("Request body:", req.body);
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'ADMIN') {
+        console.log('Unauthorized access attempt to create user');
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Admin privileges required.'
+        });
+      }
+      // Validate input
+      if (!name || !email || !password) {
+        console.log('Missing required fields for user creation');
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Name, email, and password are required' 
+        });
+      }
+      if (password.length < 8) {
+        console.log('Password too short for new user');
+        return res.status(400).json({
+          success: false,
+          message: 'Password must be at least 8 characters long'
+        });
+      }
+      // Check if email is valid
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.log('Invalid email format provided');
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid email address'
+        });
+      }
+      // Check if email is already taken
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        console.log('Email already in use by another user');
+        return res.status(400).json({
+          success: false,
+          message: 'Email already in use by another user'
+        });
+      }
+      // Validate role
+      if (role && !['ADMIN', 'MAIN_MANAGER'].includes(role)) {
+        console.log('Invalid role provided');
+        return res.status(400).json({
+          success: false,
+          message: 'Role must be either ADMIN or MAIN_MANAGER'
+        });
+      }
+      // Hash password
+      const saltRounds = 12;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+      // Create user
+      const user = await User.create({
+        name,
+        email,
+        passwordHash,
+        role: role
+      });
+      console.log("2. User created with ID:", user.id);
+      // Prepare consistent user data structure
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      };
+      console.log(`✅ Successfully created user: ${user.email}`);
+      res.status(201).json({
+        success: true,
+        message: 'User created successfully',
+        data: {
+          user: userData
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error creating user:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error while creating user',
+        error: error.message
+      });
+    }
+  }
+
   // ADMIN ONLY - GET /users/:id - Get user by ID
   static async getUserById(req, res) {
     try {

@@ -13,6 +13,9 @@ router.use(adminAuth);
 // GET /api/users - Get all users (Admin only)
 router.get('/', AuthController.getAllUsers);
 
+// POST /api/users - Create a new user (Admin only)
+router.post('/create', AuthController.createUser);
+
 // GET /api/users/:id - Get user by ID (Admin only)
 router.get('/:id', AuthController.getUserById);
 
