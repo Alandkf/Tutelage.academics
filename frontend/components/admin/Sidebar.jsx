@@ -4,14 +4,14 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
-  { icon: ShoppingBag, name: "Food", href: "/admin-dashboard/food-items" },
+  { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
   { icon: MonitorCog, name: "Control-Panel", href: "/admin-dashboard/control-panel" },
 ]
 
