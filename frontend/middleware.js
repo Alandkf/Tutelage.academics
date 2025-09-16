@@ -11,7 +11,8 @@ export default async function middleware(req) {
   
   // Define routes configuration
   const authRoutes = ['/signin']; // Routes that should redirect to home when logged in
-  const privateRoutes = ['/admin-dashboard']; // Routes that require authentication
+  // Any route that starts with /admin-dashboard is private
+  const isPrivateRoute = pathname.startsWith('/admin-dashboard');
   
   // Check if user is authenticated
   let isAuthenticated = false;
@@ -42,12 +43,12 @@ export default async function middleware(req) {
   
   // RULE 2: If user is not authenticated and tries to access a private route
   // redirect them to the signin page
-  if (!isAuthenticated && privateRoutes.includes(pathname)) {
+  if (!isAuthenticated && isPrivateRoute) {
     return NextResponse.redirect(new URL('/', req.url));
   }
   
   // Additional role-based access control for admin-dashboard
-  if (isAuthenticated && pathname === '/admin-dashboard') {
+  if (isAuthenticated && pathname.startsWith('/admin-dashboard')) {
     // Only ADMIN and MAIN_MANAGER roles can access admin-dashboard
     const allowedRoles = ['ADMIN', 'MAIN_MANAGER'];
     if (!allowedRoles.includes(userRole)) {
@@ -71,4 +72,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
-     

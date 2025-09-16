@@ -90,7 +90,7 @@ export default function Sidebar() {
           transition={{ duration: 0.2 }}
         >
           <div className="h-14 px-3 flex items-center border-b border-border">
-            <span className="font-bold text-lg">Second Serve</span>
+            <span className="font-bold text-lg">Tutelage</span>
           </div>
           
           <nav className="flex-1 py-2 flex flex-col gap-1 px-3">
@@ -135,7 +135,7 @@ export default function Sidebar() {
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
             >
               <div className="flex items-center justify-between p-4 border-b border-border">
-                <h1 className="font-bold text-lg">Second Serve</h1>
+                <h1 className="font-bold text-lg">Tutelage</h1>
                 <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="h-8 w-8 p-0">
                   <X className="h-4 w-4" />
                 </Button>

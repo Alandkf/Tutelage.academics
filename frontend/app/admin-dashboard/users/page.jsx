@@ -104,7 +104,7 @@ export default function Page() {
           />
         )}
       </div>
-      <div className="mt-2 text-sm text-muted-foreground text-right">
+      <div className="mt-2 text-sm text-muted-foreground text-left">
         Total users: <span className="font-semibold text-foreground">{users.length}</span>
       </div>
       {/* Create User Dialog */}

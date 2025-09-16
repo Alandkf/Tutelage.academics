@@ -8,10 +8,11 @@ const adminAuth = require('../middlewares/adminAuth');
 router.use(isAuthenticated);
 
 // Apply admin authorization to all user management routes
-router.use(adminAuth);
 
 // GET /api/users - Get all users (Admin only)
 router.get('/', AuthController.getAllUsers);
+
+router.use(adminAuth);
 
 // POST /api/users - Create a new user (Admin only)
 router.post('/create', AuthController.createUser);

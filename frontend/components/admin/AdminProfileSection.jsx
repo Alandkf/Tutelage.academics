@@ -43,7 +43,6 @@ export default function AdminProfileSection({ session, loading, onLogout }) {
           </div>
         </div>
       </div>
-      {session.user?.role === "ADMIN" && (
         <div className="p-4 border-t border-gray-200">
           <Button
             variant="outline"
@@ -54,7 +53,6 @@ export default function AdminProfileSection({ session, loading, onLogout }) {
             Logout
           </Button>
         </div>
-      )}
     </div>
   )
 }

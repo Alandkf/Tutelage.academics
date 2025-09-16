@@ -101,7 +101,7 @@ export default function CreateUserForm({ onSuccess, onCancel, initialValues, mod
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="name@example.com" {...field} disabled={mode === "edit"} />
+                  <Input placeholder="name@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

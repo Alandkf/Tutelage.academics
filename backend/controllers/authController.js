@@ -465,14 +465,7 @@ class AuthController {
     try {
       console.log('📋 Admin requesting all users list');
       
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'ADMIN') {
-        console.log('❌ Unauthorized access attempt to user list');
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. Admin privileges required.'
-        });
-      }
+     
 
       const users = await User.findAll({
         attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'],
