@@ -1,8 +1,95 @@
+// ============================================================================
+// AUTHENTICATION CONTROLLER
+// ============================================================================
+// Handles user authentication, registration, login, logout, and user management
+// Provides JWT-based authentication with refresh token support
+
+// Dependencies
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
+// Constants
+const BCRYPT_SALT_ROUNDS = 12;
+const JWT_ACCESS_TOKEN_EXPIRY = '1h';
+const JWT_REFRESH_TOKEN_EXPIRY = '30d';
+const COOKIE_MAX_AGE_ACCESS = 60 * 60 * 1000; // 1 hour
+const COOKIE_MAX_AGE_REFRESH = 30 * 24 * 60 * 60 * 1000; // 30 days
+const MIN_PASSWORD_LENGTH = 6;
+
+/**
+ * Authentication Controller Class
+ * Manages all authentication-related operations including user registration,
+ * login, logout, token refresh, and user management functions
+ */
 class AuthController {
+  
+  // ============================================================================
+  // HELPER METHODS
+  // ============================================================================
+  
+  /**
+   * Generate secure cookie options based on environment
+   * @param {number} maxAge - Cookie max age in milliseconds
+   * @returns {Object} Cookie configuration object
+   */
+  static getCookieOptions(maxAge) {
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge,
+      path: '/'
+    };
+  }
+  
+  /**
+   * Create standardized user data object
+   * @param {Object} user - User model instance
+   * @returns {Object} Sanitized user data
+   */
+  static createUserDataObject(user) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    };
+  }
+  
+  /**
+   * Generate JWT access token
+   * @param {Object} userData - User data to encode in token
+   * @returns {string} JWT access token
+   */
+  static generateAccessToken(userData) {
+    return jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: JWT_ACCESS_TOKEN_EXPIRY });
+  }
+  
+  /**
+   * Generate JWT refresh token
+   * @param {number} userId - User ID to encode in token
+   * @returns {string} JWT refresh token
+   */
+  static generateRefreshToken(userId) {
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: JWT_REFRESH_TOKEN_EXPIRY });
+  }
+  
+  /**
+   * Set authentication cookies on response
+   * @param {Object} res - Express response object
+   * @param {string} accessToken - JWT access token
+   * @param {string} refreshToken - JWT refresh token
+   */
+  static setAuthenticationCookies(res, accessToken, refreshToken) {
+    res.cookie('token', accessToken, this.getCookieOptions(COOKIE_MAX_AGE_ACCESS));
+    res.cookie('refreshToken', refreshToken, this.getCookieOptions(COOKIE_MAX_AGE_REFRESH));
+  }
+  
+  // ============================================================================
+  // API INFORMATION ENDPOINTS
+  // ============================================================================
+  
   // GET / - Main auth page (not needed for API, but included for completeness)
   static async get(req, res) {
     try {
@@ -46,124 +133,100 @@ class AuthController {
     }
   }
 
-  // POST /register - User registration
+  // ============================================================================
+  // AUTHENTICATION ENDPOINTS
+  // ============================================================================
+  
+  /**
+   * POST /register - User registration endpoint
+   * Creates a new user account with validation and authentication setup
+   */
   static async register(req, res) {
     try {
-      console.log("1. Starting registration process");
-      console.log("Request body:", req.body);
+      console.log('🔐 Starting user registration process');
       
       const { name, email, password, role = 'ADMIN' } = req.body;
+      console.log('📝 Registration attempt for:', { name, email, role });
 
-      // Enhanced validation with specific error messages
-      if (!email) {
-        return res.status(200).json({
+      // Input validation
+      const validationError = AuthController.validateRegistrationInput({ name, email, password });
+      if (validationError) {
+        return res.status(400).json({
           success: false,
-          message: 'Email is required'
+          message: validationError
         });
       }
 
-      if (!name) {
-        return res.status(200).json({
-          success: false,
-          message: 'Name is required'
-        });
-      }
-
-      if (!password) {
-        return res.status(200).json({
-          success: false,
-          message: 'Password is required'
-        });
-      }
-
-      if (password.length < 6) {
-        return res.status(200).json({
-          success: false,
-          message: 'Password must be at least 6 characters long'
-        });
-      }
-
-      console.log("2. Received form data:", { name, email, role });
-
-      // Check if user already exists
+      // Check for existing user
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
-        return res.status(200).json({
+        console.log('❌ Registration failed: Email already exists');
+        return res.status(409).json({
           success: false,
           message: 'Email already in use. Please use a different email address.'
         });
       }
 
-      // Hash password
-      const saltRounds = 12;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
-
-      // Create user
-      const user = await User.create({
+      // Hash password and create user
+      const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+      const newUser = await User.create({
         name,
         email,
-        passwordHash,
+        passwordHash: hashedPassword,
         role
       });
-      console.log("3. User created with ID:", user.id);
+      
+      console.log('✅ User created successfully with ID:', newUser.id);
 
-      // Prepare consistent user data structure
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      };
+      // Generate user data and tokens
+      const userData = AuthController.createUserDataObject(newUser);
+      const accessToken = AuthController.generateAccessToken(userData);
+      const refreshToken = AuthController.generateRefreshToken(newUser.id);
 
-      // Generate JWT token with consistent payload
-      const token = jwt.sign(
-        userData,
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-
-      // Generate refresh token
-      const refreshToken = jwt.sign(
-        { id: user.id },
-        process.env.JWT_SECRET || process.env.JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-
-      // Store user session
-      req.session.userId = user.id;
+      // Set up user session
+      req.session.userId = newUser.id;
       req.session.user = userData;
-      console.log("4. Session set for user:", req.session.user);
+      console.log('🔑 Session established for user:', userData.email);
 
-      // Enhanced cookie security settings
-      res.cookie('token', token, {
-        httpOnly: true,      // Prevent JS access
-        secure: process.env.NODE_ENV === 'production',        // Only HTTPS in production
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',  // Protect CSRF
-        maxAge: 60 * 60 * 1000, // 1 hour in ms
-        path: '/'
-      });
+      // Set authentication cookies
+      AuthController.setAuthenticationCookies(res, accessToken, refreshToken);
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        path: '/'
-      });
-
-      // Send JSON response for API requests
-      return res.status(200).json({
+      return res.status(201).json({
         success: true,
         user: userData,
         message: 'User registered successfully'
       });
+      
     } catch (error) {
-      res.status(500).json({
+      console.error('❌ Registration error:', error);
+      return res.status(500).json({
         success: false,
         message: 'Server error during registration',
         error: error.message
       });
     }
+  }
+  
+  /**
+   * Validate registration input data
+   * @param {Object} data - Registration data to validate
+   * @returns {string|null} Error message or null if valid
+   */
+  static validateRegistrationInput({ name, email, password }) {
+    if (!email) return 'Email is required';
+    if (!name) return 'Name is required';
+    if (!password) return 'Password is required';
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Please provide a valid email address';
+    }
+    
+    return null;
   }
 
   // GET /login - Login page info (not needed for API)
@@ -186,243 +249,199 @@ class AuthController {
     }
   }
 
-  // POST /login - User login
+  /**
+   * POST /login - User authentication endpoint
+   * Authenticates user credentials and establishes session
+   */
   static async login(req, res) {
     try {
-      console.log("1. Starting login process");
+      console.log('🔐 Starting user login process');
+      
       const { email, password } = req.body;
-      console.log("2. Received login data:", { email });
+      console.log('📝 Login attempt for email:', email);
 
-      // Enhanced validation
-      if (!email) {
+      // Input validation
+      const validationError = AuthController.validateLoginInput({ email, password });
+      if (validationError) {
         return res.status(400).json({
           success: false,
-          message: 'Email is required'
+          message: validationError
         });
       }
 
-      if (!password) {
-        return res.status(400).json({
-          success: false,
-          message: 'Password is required'
-        });
-      }
-
-      // Find user
+      // Find and authenticate user
       const user = await User.findOne({ where: { email } });
-      console.log("3. User lookup result:", user ? 'User found' : 'User not found');
-
       if (!user) {
-        console.log("User not found in database");
+        console.log('❌ Login failed: User not found');
         return res.status(401).json({
           success: false,
           message: 'Invalid email or password'
         });
       }
 
-      console.log("User found, validating password");
-      // Enhanced password validation with error handling
-      let isValidPassword = false;
-
-      try {
-        // Ensure both password and stored hash are strings
-        const passwordString = String(password);
-        const storedHash = String(user.passwordHash);
-        
-        isValidPassword = await bcrypt.compare(passwordString, storedHash);
-        console.log("Password validation successful:", isValidPassword);
-      } catch (error) {
-        console.error("Error validating password:", error);
-        return res.status(500).json({
-          success: false,
-          message: 'Error validating password'
-        });
-      }
-
-      console.log("Password validation result:", isValidPassword);
-
-      if (!isValidPassword) {
-        console.log("Password validation failed");
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        console.log('❌ Login failed: Invalid password');
         return res.status(401).json({
           success: false,
           message: 'Invalid email or password'
         });
       }
 
-      // Prepare consistent user data structure
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      };
+      console.log('✅ User authenticated successfully:', user.id);
 
-      // Generate JWT token
-      const token = jwt.sign(
-        userData,
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
+      // Generate user data and tokens
+      const userData = AuthController.createUserDataObject(user);
+      const accessToken = AuthController.generateAccessToken(userData);
+      const refreshToken = AuthController.generateRefreshToken(user.id);
 
-      // Generate refresh token
-      const refreshToken = jwt.sign(
-        { id: user.id },
-        process.env.JWT_SECRET || process.env.JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-
-      // Store user session
+      // Set up user session
       req.session.userId = user.id;
       req.session.user = userData;
-      console.log("4. Session set for user:", req.session.user);
+      console.log('🔑 Session established for user:', userData.email);
 
-      // Enhanced cookie security settings
-      res.cookie('token', token, {
-        httpOnly: true,      // Prevent JS access
-        secure: process.env.NODE_ENV === 'production',        // Only HTTPS in production
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',  // Protect CSRF
-        maxAge: 60 * 60 * 1000, // 1 hour in ms
-        path: '/'
-      });
-
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        path: '/'
-      });
+      // Set authentication cookies
+      AuthController.setAuthenticationCookies(res, accessToken, refreshToken);
 
       return res.status(200).json({
         success: true,
-        message: 'User logged in successfully'
+        user: userData,
+        message: 'Login successful'
       });
+      
     } catch (error) {
-      res.status(500).json({
+      console.error('❌ Login error:', error);
+      return res.status(500).json({
         success: false,
         message: 'Server error during login',
         error: error.message
       });
     }
   }
+  
+  /**
+   * Validate login input data
+   * @param {Object} data - Login data to validate
+   * @returns {string|null} Error message or null if valid
+   */
+  static validateLoginInput({ email, password }) {
+    if (!email) return 'Email is required';
+    if (!password) return 'Password is required';
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Please provide a valid email address';
+    }
+    
+    return null;
+  }
 
-  // POST /refresh-token - Refresh JWT token
+  /**
+   * POST /refresh-token - Refresh JWT token endpoint
+   * Validates refresh token and issues new access token
+   */
   static async refreshToken(req, res) {
     try {
-      // Try to get refresh token from body, cookies, or headers
-      const refreshToken = req.body.refreshToken || 
-                          req.cookies.refreshToken || 
-                          req.header('X-Refresh-Token');
-
+      console.log('🔄 Starting token refresh process');
+      
+      const refreshToken = req.cookies.refreshToken;
+      
       if (!refreshToken) {
-        return res.status(400).json({
-          success: false,
-          message: 'Refresh token is required'
-        });
-      }
-
-      // Verify refresh token
-      const decoded = jwt.verify(
-        refreshToken,
-        process.env.JWT_SECRET || process.env.JWT_SECRET
-      );
-
-      // Find user
-      const user = await User.findByPk(decoded.id);
-      if (!user) {
+        console.log('❌ Token refresh failed: No refresh token provided');
         return res.status(401).json({
           success: false,
-          message: 'Invalid refresh token. User not found.'
+          message: 'Refresh token not found'
         });
       }
 
-      // Prepare consistent user data structure
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      };
+      // Verify and decode refresh token
+      const decodedToken = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      const userId = decodedToken.id;
+      
+      console.log('🔍 Refresh token verified for user ID:', userId);
 
-      // Generate new JWT token
-      const newToken = jwt.sign(
-        userData,
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
+      // Find user by ID
+      const user = await User.findByPk(userId);
+      if (!user) {
+        console.log('❌ Token refresh failed: User not found');
+        return res.status(401).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
 
-      // Generate new refresh token
-      const newRefreshToken = jwt.sign(
-        { id: user.id },
-        process.env.JWT_SECRET || process.env.JWT_SECRET,
-        { expiresIn: '30d' }
-      );
+      // Generate new tokens and user data
+      const userData = AuthController.createUserDataObject(user);
+      const newAccessToken = AuthController.generateAccessToken(userData);
+      const newRefreshToken = AuthController.generateRefreshToken(user.id);
 
-      // Update session
+      // Update user session
       req.session.userId = user.id;
       req.session.user = userData;
+      console.log('🔑 Session updated for user:', userData.email);
 
-      // Set new cookies with enhanced security
-      res.cookie('token', newToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: '/'
-      });
-
-      res.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        path: '/'
-      });
+      // Set new authentication cookies
+      AuthController.setAuthenticationCookies(res, newAccessToken, newRefreshToken);
 
       return res.status(200).json({
         success: true,
-        message: 'Access token refreshed'
+        user: userData,
+        message: 'Token refreshed successfully'
       });
+      
     } catch (error) {
-      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid or expired refresh token'
-        });
-      }
-
-      res.status(500).json({
+      console.error('❌ Token refresh error:', error);
+      
+      // Clear invalid cookies on error
+      res.clearCookie('token', { path: '/' });
+      res.clearCookie('refreshToken', { path: '/' });
+      
+      return res.status(401).json({
         success: false,
-        message: 'Server error during token refresh',
-        error: error.message
+        message: 'Invalid refresh token'
       });
     }
   }
 
-  // POST /logout - User logout
+  /**
+   * POST /logout - User logout endpoint
+   * Destroys user session and clears authentication cookies
+   */
   static async logout(req, res) {
     try {
-      // Clear session
-      req.session.destroy((err) => {
-        if (err) {
+      console.log('🚪 Starting user logout process');
+      
+      // Destroy user session
+      req.session.destroy((sessionError) => {
+        if (sessionError) {
+          console.error('❌ Session destruction error:', sessionError);
           return res.status(500).json({
             success: false,
-            message: 'Could not log out, please try again'
+            message: 'Error during logout'
           });
         }
+        
+        console.log('✅ Session destroyed successfully');
+        
+        // Clear all authentication cookies
+        const cookieOptions = { path: '/' };
+        res.clearCookie('token', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
+        res.clearCookie('connect.sid', cookieOptions);
+        
+        console.log('🍪 Authentication cookies cleared');
+        
+        return res.status(200).json({
+          success: true,
+          message: 'Logged out successfully'
+        });
       });
-
-      // Clear cookies
-      res.clearCookie('token');
-      res.clearCookie('refreshToken');
-      res.clearCookie('tutelage.sid');
-
-      res.json({
-        success: true,
-        message: 'Logged out successfully'
-      });
+      
     } catch (error) {
-      res.status(500).json({
+      console.error('❌ Logout error:', error);
+      return res.status(500).json({
         success: false,
         message: 'Server error during logout',
         error: error.message
@@ -430,346 +449,327 @@ class AuthController {
     }
   }
 
-  // GET /me - Get current user info
+  /**
+   * GET /current-user - Get current user information endpoint
+   * Returns authenticated user's profile data
+   */
   static async getCurrentUser(req, res) {
     try {
-      if (req.user) {
-        res.json({
-          success: true,
-          data: {
-            user: {
-              id: req.user.id,
-              name: req.user.name,
-              email: req.user.email,
-              role: req.user.role
-            }
-          }
-        });
-      } else {
-        res.status(401).json({
+      console.log('👤 Retrieving current user information');
+      
+      // Check authentication via session
+      if (!req.session.userId) {
+        console.log('❌ User not authenticated');
+        return res.status(401).json({
           success: false,
           message: 'Not authenticated'
         });
       }
+
+      // Fetch user from database
+      const currentUser = await User.findByPk(req.session.userId);
+      if (!currentUser) {
+        console.log('❌ User not found in database');
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      console.log('✅ Current user retrieved:', currentUser.email);
+
+      // Create user data object
+      const userData = AuthController.createUserDataObject(currentUser);
+
+      return res.status(200).json({
+        success: true,
+        user: userData
+      });
+      
     } catch (error) {
-      res.status(500).json({
+      console.error('❌ Get current user error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error',
+        message: 'Server error getting user info',
         error: error.message
       });
     }
   }
 
-  // ADMIN ONLY - GET /users - Get all users
+  // ============================================================================
+  // ADMIN USER MANAGEMENT ENDPOINTS
+  // ============================================================================
+  
+  /**
+   * GET /users - Get all users endpoint (Admin only)
+   * Returns list of all registered users
+   */
   static async getAllUsers(req, res) {
     try {
-      console.log('📋 Admin requesting all users list');
+      console.log('👥 Retrieving all users (Admin request)');
       
-     
-
-      const users = await User.findAll({
-        attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'],
+      const allUsers = await User.findAll({
+        attributes: ['id', 'name', 'email', 'role', 'createdAt'],
         order: [['createdAt', 'DESC']]
       });
+      
+      console.log(`✅ Found ${allUsers.length} users`);
 
-      console.log(`✅ Successfully retrieved ${users.length} users`);
-      res.json({
+      return res.status(200).json({
         success: true,
-        data: {
-          users: users,
-          total: users.length
-        }
+        users: allUsers,
+        count: allUsers.length
       });
+      
     } catch (error) {
-      console.error('❌ Error retrieving users:', error);
-      res.status(500).json({
+      console.error('❌ Get all users error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error while retrieving users',
+        message: 'Server error getting users',
         error: error.message
       });
     }
   }
 
-  // ADMIN ONLY - POST /users - Create a new user
+  /**
+   * POST /users - Create new user endpoint (Admin only)
+   * Creates a new user account with admin privileges
+   */
   static async createUser(req, res) {
     try {
-      const { name, email, password, role } = req.body;
-      console.log("1. Starting user creation process by admin");
-      console.log("Request body:", req.body);
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'ADMIN') {
-        console.log('Unauthorized access attempt to create user');
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. Admin privileges required.'
-        });
-      }
-      // Validate input
-      if (!name || !email || !password) {
-        console.log('Missing required fields for user creation');
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Name, email, and password are required' 
-        });
-      }
-      if (password.length < 8) {
-        console.log('Password too short for new user');
+      console.log('👤 Creating new user (Admin request)');
+      
+      const { name, email, password, role = 'ADMIN' } = req.body;
+      console.log('📝 User creation request for:', { name, email, role });
+
+      // Input validation
+      const validationError = AuthController.validateRegistrationInput({ name, email, password });
+      if (validationError) {
         return res.status(400).json({
           success: false,
-          message: 'Password must be at least 8 characters long'
+          message: validationError
         });
       }
-      // Check if email is valid
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        console.log('Invalid email format provided');
-        return res.status(400).json({
-          success: false,
-          message: 'Please provide a valid email address'
-        });
-      }
-      // Check if email is already taken
+
+      // Check for existing user
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
-        console.log('Email already in use by another user');
-        return res.status(400).json({
+        console.log('❌ User creation failed: Email already exists');
+        return res.status(409).json({
           success: false,
-          message: 'Email already in use by another user'
+          message: 'Email already in use'
         });
       }
-      // Validate role
-      if (role && !['ADMIN', 'MAIN_MANAGER'].includes(role)) {
-        console.log('Invalid role provided');
-        return res.status(400).json({
-          success: false,
-          message: 'Role must be either ADMIN or MAIN_MANAGER'
-        });
-      }
-      // Hash password
-      const saltRounds = 12;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
-      // Create user
-      const user = await User.create({
+
+      // Hash password and create user
+      const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+      const newUser = await User.create({
         name,
         email,
-        passwordHash,
-        role: role
+        passwordHash: hashedPassword,
+        role
       });
-      console.log("2. User created with ID:", user.id);
-      // Prepare consistent user data structure
+      
+      console.log('✅ User created successfully with ID:', newUser.id);
+
+      // Create user data object with creation timestamp
       const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
+        ...AuthController.createUserDataObject(newUser),
+        createdAt: newUser.createdAt
       };
-      console.log(`✅ Successfully created user: ${user.email}`);
-      res.status(201).json({
+
+      return res.status(201).json({
         success: true,
-        message: 'User created successfully',
-        data: {
-          user: userData
-        }
+        user: userData,
+        message: 'User created successfully'
       });
     } catch (error) {
-      console.error('❌ Error creating user:', error);
-      res.status(500).json({
+      console.error('❌ Create user error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error while creating user',
+        message: 'Server error creating user',
         error: error.message
       });
     }
   }
 
-  // ADMIN ONLY - GET /users/:id - Get user by ID
+  /**
+   * GET /users/:id - Get user by ID endpoint (Admin only)
+   * Returns specific user information by ID
+   */
   static async getUserById(req, res) {
     try {
-      const { id } = req.params;
-      console.log(`📋 Admin requesting user details for ID: ${id}`);
+      const { id: userId } = req.params;
+      console.log('🔍 Getting user by ID (Admin request)');
       
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'ADMIN') {
-        console.log('❌ Unauthorized access attempt to user details');
-        return res.status(403).json({
+      if (!userId) {
+        return res.status(400).json({
           success: false,
-          message: 'Access denied. Admin privileges required.'
+          message: 'User ID is required'
         });
       }
 
-      const user = await User.findByPk(id, {
+      console.log('📝 Looking for user with ID:', userId);
+
+      const targetUser = await User.findByPk(userId, {
         attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt']
       });
-
-      if (!user) {
-        console.log(`❌ User not found with ID: ${id}`);
+      
+      if (!targetUser) {
+        console.log('❌ User not found');
         return res.status(404).json({
           success: false,
           message: 'User not found'
         });
       }
 
-      console.log(`✅ Successfully retrieved user: ${user.email}`);
-      res.json({
+      console.log('✅ User found:', targetUser.email);
+
+      // Create user data object with timestamps
+      const userData = {
+        ...AuthController.createUserDataObject(targetUser),
+        createdAt: targetUser.createdAt,
+        updatedAt: targetUser.updatedAt
+      };
+
+      return res.status(200).json({
         success: true,
-        data: {
-          user: user
-        }
+        user: userData
       });
+      
     } catch (error) {
-      console.error('❌ Error retrieving user:', error);
-      res.status(500).json({
+      console.error('❌ Get user by ID error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error while retrieving user',
+        message: 'Server error getting user',
         error: error.message
       });
     }
   }
 
-  // ADMIN ONLY - PUT /users/:id - Update user
+  /**
+   * PUT /users/:id - Update user endpoint (Admin only)
+   * Updates user information by ID
+   */
   static async updateUser(req, res) {
     try {
-      const { id } = req.params;
+      const { id: userId } = req.params;
       const { name, email, role } = req.body;
-      console.log(`📝 Admin updating user ID: ${id}`);
+      console.log('✏️ Updating user (Admin request)');
       
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'ADMIN') {
-        console.log('❌ Unauthorized access attempt to update user');
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. Admin privileges required.'
-        });
-      }
-
-      // Validate input
-      if (!name || !email) {
-        console.log('❌ Missing required fields for user update');
+      if (!userId) {
         return res.status(400).json({
           success: false,
-          message: 'Name and email are required'
+          message: 'User ID is required'
         });
       }
 
-      // Check if email is valid
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        console.log('❌ Invalid email format provided');
-        return res.status(400).json({
-          success: false,
-          message: 'Please provide a valid email address'
-        });
-      }
+      console.log('📝 Looking for user to update:', userId);
 
-      // Find the user to update
-      const user = await User.findByPk(id);
-      if (!user) {
-        console.log(`❌ User not found with ID: ${id}`);
+      const targetUser = await User.findByPk(userId);
+      if (!targetUser) {
+        console.log('❌ User not found');
         return res.status(404).json({
           success: false,
           message: 'User not found'
         });
       }
 
-      // Check if email is already taken by another user
-      if (email !== user.email) {
-        const existingUser = await User.findOne({ where: { email } });
+      // Prepare update data object
+      const updateData = {};
+      if (name !== undefined) updateData.name = name;
+      if (email !== undefined) updateData.email = email;
+      if (role !== undefined) updateData.role = role;
+
+      // Validate email uniqueness if email is being updated
+      if (email && email !== targetUser.email) {
+        const existingUser = await User.findOne({ 
+          where: { 
+            email,
+            id: { [require('sequelize').Op.ne]: userId }
+          } 
+        });
         if (existingUser) {
-          console.log('❌ Email already in use by another user');
-          return res.status(400).json({
+          console.log('❌ Email already in use');
+          return res.status(409).json({
             success: false,
             message: 'Email already in use by another user'
           });
         }
       }
 
-      // Validate role if provided
-      if (role && !['ADMIN', 'MAIN_MANAGER'].includes(role)) {
-        console.log('❌ Invalid role provided');
-        return res.status(400).json({
-          success: false,
-          message: 'Role must be either ADMIN or MAIN_MANAGER'
-        });
-      }
+      console.log('📝 Updating user with data:', updateData);
 
-      // Update user
-      const updateData = { name, email };
-      if (role) updateData.role = role;
-
-      await user.update(updateData);
+      // Update user record
+      await targetUser.update(updateData);
       
-      const updatedUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        updatedAt: user.updatedAt
+      console.log('✅ User updated successfully:', targetUser.email);
+
+      // Create updated user data object with timestamp
+      const userData = {
+        ...AuthController.createUserDataObject(targetUser),
+        updatedAt: targetUser.updatedAt
       };
 
-      console.log(`✅ Successfully updated user: ${user.email}`);
-      res.json({
+      return res.status(200).json({
         success: true,
-        message: 'User updated successfully',
-        data: {
-          user: updatedUser
-        }
+        user: userData,
+        message: 'User updated successfully'
       });
+      
     } catch (error) {
-      console.error('❌ Error updating user:', error);
-      res.status(500).json({
+      console.error('❌ Update user error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error while updating user',
+        message: 'Server error updating user',
         error: error.message
       });
     }
   }
 
-  // ADMIN ONLY - DELETE /users/:id - Delete user
+  /**
+   * DELETE /users/:id - Delete user endpoint (Admin only)
+   * Deletes a user account by ID
+   */
   static async deleteUser(req, res) {
     try {
-      const { id } = req.params;
-      console.log(`🗑️ Admin deleting user ID: ${id}`);
+      const { id: userId } = req.params;
+      console.log('🗑️ Deleting user (Admin request)');
       
-      // Check if user is admin
-      if (!req.user || req.user.role !== 'ADMIN') {
-        console.log('❌ Unauthorized access attempt to delete user');
-        return res.status(403).json({
+      if (!userId) {
+        return res.status(400).json({
           success: false,
-          message: 'Access denied. Admin privileges required.'
+          message: 'User ID is required'
         });
       }
 
-      // Find the user to delete
-      const user = await User.findByPk(id);
-      if (!user) {
-        console.log(`❌ User not found with ID: ${id}`);
+      console.log('🔍 Looking for user to delete:', userId);
+
+      const targetUser = await User.findByPk(userId);
+      if (!targetUser) {
+        console.log('❌ User not found');
         return res.status(404).json({
           success: false,
           message: 'User not found'
         });
       }
 
-      // Prevent admin from deleting themselves
-      if (user.id === req.user.id) {
-        console.log('❌ Admin attempted to delete their own account');
-        return res.status(400).json({
-          success: false,
-          message: 'You cannot delete your own account'
-        });
-      }
+      console.log('🗑️ Deleting user:', targetUser.email);
 
-      const deletedUserEmail = user.email;
-      await user.destroy();
-
-      console.log(`✅ Successfully deleted user: ${deletedUserEmail}`);
-      res.json({
+      // Delete the user
+      await targetUser.destroy();
+      
+      console.log('✅ User deleted successfully');
+      return res.status(200).json({
         success: true,
         message: 'User deleted successfully'
       });
+      
     } catch (error) {
-      console.error('❌ Error deleting user:', error);
-      res.status(500).json({
+      console.error('❌ Delete user error:', error);
+      return res.status(500).json({
         success: false,
-        message: 'Server error while deleting user',
+        message: 'Server error deleting user',
         error: error.message
       });
     }
