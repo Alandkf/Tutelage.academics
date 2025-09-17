@@ -115,35 +115,35 @@ const seedBlogs = async (userId) => {
                 {
                     title: 'Introduction to Web Development',
                     content: 'Web development is the process of creating websites and web applications. It involves both frontend and backend development skills.',
-                    imageRef: 'https://example.com/web-dev.jpg',
+                    imageRef: 'https://plus.unsplash.com/premium_photo-1685086785054-d047cdc0e525?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2ViJTIwZGV2ZWxvcG1lbnR8ZW58MHx8MHx8fDA%3D',
                     category: 'Technology',
                     createdBy: userId
                 },
                 {
                     title: 'Understanding Database Design',
                     content: 'Database design is crucial for building scalable applications. Learn about normalization, relationships, and best practices.',
-                    imageRef: 'https://example.com/database.jpg',
+                    imageRef: 'https://plus.unsplash.com/premium_photo-1664297989345-f4ff2063b212?q=80&w=1098&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     category: 'Database',
                     createdBy: userId
                 },
                 {
                     title: 'JavaScript ES6 Features',
                     content: 'ES6 introduced many powerful features like arrow functions, destructuring, and promises that make JavaScript more efficient.',
-                    imageRef: 'https://example.com/js-es6.jpg',
+                    imageRef: 'https://plus.unsplash.com/premium_photo-1661882403999-46081e67c401?q=80&w=1129&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     category: 'Programming',
                     createdBy: userId
                 },
                 {
                     title: 'React Best Practices',
                     content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
-                    imageRef: 'https://example.com/react.jpg',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     category: 'Frontend',
                     createdBy: userId
                 },
                 {
                     title: 'Node.js and Express Tutorial',
                     content: 'Build powerful backend applications using Node.js and Express framework. Learn about routing, middleware, and API development.',
-                    imageRef: 'https://example.com/nodejs.jpg',
+                    imageRef: 'https://images.unsplash.com/photo-1592609931095-54a2168ae893?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     category: 'Backend',
                     createdBy: userId
                 }
