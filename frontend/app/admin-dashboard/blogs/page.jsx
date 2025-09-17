@@ -30,10 +30,21 @@ export default function BlogsPage() {
   } = useInfiniteBlogs({ searchTerm })
 
   // Handlers
-  const handleCreateSuccess = async (newBlog) => {
-    setShowCreate(false)
-    resetAndFetch()
-    toast("Blog created successfully", { variant: "success" })
+  const handleCreateSuccess = async (values) => {
+    try {
+      const res = await fetch("http://localhost:3001/api/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(values)
+      })
+      if (!res.ok) throw new Error("Failed to create blog")
+      setShowCreate(false)
+      resetAndFetch()
+      toast("Blog created successfully", { variant: "success" })
+    } catch {
+      toast("Failed to create blog", { variant: "destructive" })
+    }
   }
 
   //EDITTING
@@ -193,3 +204,10 @@ export default function BlogsPage() {
     </div>
   )
 }
+
+
+
+
+
+
+

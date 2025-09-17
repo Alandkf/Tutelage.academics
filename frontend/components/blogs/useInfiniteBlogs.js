@@ -22,7 +22,7 @@ export function useInfiniteBlogs({ searchTerm = "" }) {
     setError(null)
     try {
       const params = new URLSearchParams()
-      params.append("limit", 4)
+      params.append("limit", 9)
       if (searchTerm) params.append("search", searchTerm)
       if (!reset && nextCursor) params.append("cursor", nextCursor)
       const res = await fetch(`http://localhost:3001/api/blogs?${params.toString()}`, { credentials: "include" })
