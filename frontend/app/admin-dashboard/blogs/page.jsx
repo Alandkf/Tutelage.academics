@@ -25,15 +25,25 @@ export default function BlogsPage() {
 
   // Fetch blogs (mocked for now, ready for backend integration)
   useEffect(() => {
-    setLoading(true)
-    fetch("http://localhost:3001/blogs", { credentials: "include" })
-      .then(res => res.json())
-      .then(data => {
-        setBlogs(data.data || [])
-        setHasMore(false) // No real pagination yet
-      })
-      .catch(() => setBlogs([]))
-      .finally(() => setLoading(false))
+    const fetchBlogs = async () => {
+      try {
+      setLoading(true)
+      const response = await fetch("http://localhost:3001/api/blogs", {
+         credentials: "include"
+         })
+      const data = await response.json()
+      console.log('Fetched blogs data:', data);
+      
+      setBlogs(data.data || [])
+      setHasMore(false) // No real pagination yet
+      } catch (error) {
+      setBlogs([])
+      } finally {
+      setLoading(false)
+      }
+    }
+    
+    fetchBlogs()
   }, [])
 
   // Search filter
