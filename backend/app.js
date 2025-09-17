@@ -20,9 +20,14 @@ require('dotenv').config();
 // Database Models
 const { sequelize, Blog, User } = require('./models');
 
-// Route Modules
+// Route modules
 const videoRoutes = require('./routes/videos');
 const blogRoutes = require('./routes/blogs');
+const audioRoutes = require('./routes/audios');
+const courseRoutes = require('./routes/courses');
+const testRoutes = require('./routes/tests');
+const faqRoutes = require('./routes/faqs');
+const appointmentRoutes = require('./routes/appointments');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 
@@ -95,8 +100,14 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // URL-encode
 // ============================================================================
 // Mount route handlers for different API endpoints
 
-app.use('/videos', videoRoutes);
-app.use('/blogs', blogRoutes);
+// API Routes
+app.use('/api/videos', videoRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/audios', audioRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/tests', testRoutes);
+app.use('/api/faqs', faqRoutes);
+app.use('/api/appointments', appointmentRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 

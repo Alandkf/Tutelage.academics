@@ -56,6 +56,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 'ADMIN',
         comment: 'User role determining access permissions'
+      },
+      
+      // Account status field
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        comment: 'Account activation status - false means deactivated'
       }
     },
     {

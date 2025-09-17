@@ -289,6 +289,15 @@ class AuthController {
         });
       }
 
+      // Check if user account is active
+      if (!user.isActive) {
+        console.log('❌ Login failed: Account deactivated');
+        return res.status(403).json({
+          success: false,
+          message: 'Account has been deactivated. Please contact an administrator.'
+        });
+      }
+
       console.log('✅ User authenticated successfully:', user.id);
 
       // Generate user data and tokens
@@ -369,6 +378,15 @@ class AuthController {
         return res.status(401).json({
           success: false,
           message: 'User not found'
+        });
+      }
+
+      // Check if user account is active
+      if (!user.isActive) {
+        console.log('❌ Token refresh failed: Account deactivated');
+        return res.status(403).json({
+          success: false,
+          message: 'Account has been deactivated. Please contact an administrator.'
         });
       }
 
@@ -770,6 +788,130 @@ class AuthController {
       return res.status(500).json({
         success: false,
         message: 'Server error deleting user',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * PATCH /users/:id/deactivate - Deactivate user endpoint (Admin only)
+   * Deactivates a user account by setting isActive to false
+   */
+  static async deactivateUser(req, res) {
+    try {
+      const { id: userId } = req.params;
+      console.log('🔒 Deactivating user (Admin request)');
+      
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required'
+        });
+      }
+
+      console.log('🔍 Looking for user to deactivate:', userId);
+
+      const targetUser = await User.findByPk(userId);
+      if (!targetUser) {
+        console.log('❌ User not found');
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Check if user is already deactivated
+      if (!targetUser.isActive) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is already deactivated'
+        });
+      }
+
+      console.log('🔒 Deactivating user:', targetUser.email);
+
+      // Deactivate the user
+      await targetUser.update({ isActive: false });
+      
+      console.log('✅ User deactivated successfully');
+      return res.status(200).json({
+        success: true,
+        message: 'User deactivated successfully',
+        data: {
+          id: targetUser.id,
+          email: targetUser.email,
+          name: targetUser.name,
+          isActive: false
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Deactivate user error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error deactivating user',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * PATCH /users/:id/activate - Activate user endpoint (Admin only)
+   * Activates a user account by setting isActive to true
+   */
+  static async activateUser(req, res) {
+    try {
+      const { id: userId } = req.params;
+      console.log('🔓 Activating user (Admin request)');
+      
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required'
+        });
+      }
+
+      console.log('🔍 Looking for user to activate:', userId);
+
+      const targetUser = await User.findByPk(userId);
+      if (!targetUser) {
+        console.log('❌ User not found');
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Check if user is already active
+      if (targetUser.isActive) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is already active'
+        });
+      }
+
+      console.log('🔓 Activating user:', targetUser.email);
+
+      // Activate the user
+      await targetUser.update({ isActive: true });
+      
+      console.log('✅ User activated successfully');
+      return res.status(200).json({
+        success: true,
+        message: 'User activated successfully',
+        data: {
+          id: targetUser.id,
+          email: targetUser.email,
+          name: targetUser.name,
+          isActive: true
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Activate user error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Server error activating user',
         error: error.message
       });
     }

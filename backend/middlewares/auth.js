@@ -86,6 +86,13 @@ const isAuthenticated = async (req, res, next) => {
     if (req.session?.userId) {
       const sessionUser = await User.findByPk(req.session.userId);
       if (sessionUser) {
+        // Check if user account is active
+        if (!sessionUser.isActive) {
+          return res.status(403).json({ 
+            success: false, 
+            message: 'Account has been deactivated. Please contact an administrator.' 
+          });
+        }
         req.user = sessionUser;
         return next();
       }
@@ -112,6 +119,14 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
 
+    // Check if user account is active
+    if (!authenticatedUser.isActive) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Account has been deactivated. Please contact an administrator.' 
+      });
+    }
+
     // Store user data in session and request object
     req.session.userId = authenticatedUser.id;
     req.session.user = createSessionData(authenticatedUser);
@@ -130,6 +145,14 @@ const isAuthenticated = async (req, res, next) => {
           const refreshUser = await User.findByPk(decodedRefreshToken.id);
           
           if (refreshUser) {
+            // Check if user account is active
+            if (!refreshUser.isActive) {
+              return res.status(403).json({ 
+                success: false, 
+                message: 'Account has been deactivated. Please contact an administrator.' 
+              });
+            }
+
             // Generate new access token
             const newAccessToken = generateToken(refreshUser);
             

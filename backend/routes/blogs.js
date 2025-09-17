@@ -1,58 +1,92 @@
 // ============================================================================
+// ============================================================================
 // BLOG ROUTES
 // ============================================================================
-// This file defines all blog-related routes including blog retrieval,
-// creation, updating, and deletion operations.
+// This file defines all routes for blog CRUD operations with proper
+// authentication and authorization middleware.
 // ============================================================================
 
-// ============================================================================
-// DEPENDENCIES
-// ============================================================================
 const express = require('express');
 const router = express.Router();
+const {
+  createBlog,
+  getAllBlogs,
+  getBlogById,
+  updateBlog,
+  deleteBlog,
+  getBlogsByCategory
+} = require('../controllers/blogController');
+const { authenticateToken } = require('../middlewares/auth');
+const { requireAdmin } = require('../middlewares/adminAuth');
 
 // ============================================================================
-// MODELS
-// ============================================================================
-const { Blog } = require('../models');
-
-// ============================================================================
-// BLOG RETRIEVAL ROUTES
+// PUBLIC ROUTES (No authentication required)
 // ============================================================================
 
 /**
  * GET /api/blogs
- * Retrieve all blogs ordered by creation date (newest first)
- * @returns {Object} JSON response with success status and blog data
+ * Get all blog posts with pagination and filtering
+ * Query params: page, limit, category, search, sortBy, sortOrder
  */
-router.get('/', async (req, res) => {
-  try {
-    // Fetch all blogs ordered by creation date (newest first)
-    const blogList = await Blog.findAll({
-      order: [['createdAt', 'DESC']]
-    });
-    
-    console.log(`Successfully fetched ${blogList.length} blogs`);
-    
-    // Return successful response with blog data
-    res.json({
-      success: true,
-      count: blogList.length,
-      data: blogList
-    });
-  } catch (error) {
-    console.error('Error fetching blogs:', error.message);
-    
-    // Return error response
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch blogs',
-      error: error.message
-    });
-  }
-});
+router.get('/', getAllBlogs);
+
+/**
+ * GET /api/blogs/:id
+ * Get a specific blog post by ID
+ */
+router.get('/:id', getBlogById);
+
+/**
+ * GET /api/blogs/category/:category
+ * Get blog posts by category with pagination
+ */
+router.get('/category/:category', getBlogsByCategory);
 
 // ============================================================================
-// EXPORTS
+// PROTECTED ROUTES (Authentication required)
 // ============================================================================
+
+/**
+ * POST /api/blogs
+ * Create a new blog post
+ * Requires authentication
+ */
+router.post('/', authenticateToken, createBlog);
+
+/**
+ * PUT /api/blogs/:id
+ * Update a blog post
+ * Requires authentication (author or admin only)
+ */
+router.put('/:id', authenticateToken, updateBlog);
+
+/**
+ * DELETE /api/blogs/:id
+ * Delete a blog post
+ * Requires authentication (author or admin only)
+ */
+router.delete('/:id', authenticateToken, deleteBlog);
+
+// ============================================================================
+// ADMIN ROUTES (Admin authentication required)
+// ============================================================================
+
+/**
+ * POST /api/blogs/admin
+ * Admin-only blog creation (if needed for special cases)
+ */
+router.post('/admin', authenticateToken, requireAdmin, createBlog);
+
+/**
+ * PUT /api/blogs/admin/:id
+ * Admin-only blog update (can update any blog)
+ */
+router.put('/admin/:id', authenticateToken, requireAdmin, updateBlog);
+
+/**
+ * DELETE /api/blogs/admin/:id
+ * Admin-only blog deletion (can delete any blog)
+ */
+router.delete('/admin/:id', authenticateToken, requireAdmin, deleteBlog);
+
 module.exports = router;
