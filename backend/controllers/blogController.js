@@ -67,12 +67,24 @@ const getAllBlogs = async (req, res) => {
   try {
     const {
       cursor,
-      limit = 9,
+      limit = 2,
       category,
       search,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
+
+    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    
+    console.log('Fetching blogs with params:', {
+      cursor,
+      limit ,
+      category,
+      search,
+      sortBy ,
+      sortOrder 
+    });
+    
 
     // Build where clause for filtering
     const whereClause = {};

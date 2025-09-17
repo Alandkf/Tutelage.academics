@@ -28,6 +28,7 @@ export function useInfiniteBlogs({ searchTerm = "" }) {
       const res = await fetch(`http://localhost:3001/api/blogs?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
       
+      
       if (!data.success) throw new Error(data.message || "Failed to fetch blogs")
       setBlogs(prev => reset ? data.blogs : [...prev, ...data.blogs])
       setHasMore(data.hasMore)
