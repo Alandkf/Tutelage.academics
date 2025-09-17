@@ -17,8 +17,8 @@ const {
   searchFaqsByQuestion,
   getFaqCategories
 } = require('../controllers/faqController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -67,32 +67,31 @@ router.get('/categories/all', getFaqCategories);
  * Create a new FAQ
  * Requires admin authentication
  */
-router.post('/', authenticateToken, requireAdmin, createFaq);
+router.post('/', isAuthenticated, adminAuth, createFaq);
 
 /**
  * PUT /api/faqs/:id
- * Update a FAQ
+ * Update an FAQ
  * Requires admin authentication
  */
-router.put('/:id', authenticateToken, requireAdmin, updateFaq);
+router.put('/:id', isAuthenticated, adminAuth, updateFaq);
 
 /**
  * DELETE /api/faqs/:id
- * Delete a FAQ
+ * Delete an FAQ
  * Requires admin authentication
  */
-router.delete('/:id', authenticateToken, requireAdmin, deleteFaq);
+router.delete('/:id', isAuthenticated, adminAuth, deleteFaq);
 
 // ============================================================================
-// PROTECTED ROUTES (Authentication required - for future use)
+// USER ROUTES (User authentication required)
 // ============================================================================
-// These routes can be used if regular users need to suggest FAQs
 
 /**
  * POST /api/faqs/suggest
- * Suggest a new FAQ (for authenticated users)
- * This could be used for user-submitted FAQ suggestions
+ * Suggest a new FAQ
+ * Requires user authentication
  */
-router.post('/suggest', authenticateToken, createFaq);
+router.post('/suggest', isAuthenticated, createFaq);
 
 module.exports = router;

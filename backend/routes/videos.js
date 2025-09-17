@@ -16,8 +16,8 @@ const {
   searchVideosByTitle,
   get // Legacy function
 } = require('../controllers/videoController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -58,21 +58,21 @@ router.get('/search/title', searchVideosByTitle);
  * Create a new video content
  * Requires authentication
  */
-router.post('/', authenticateToken, createVideo);
+router.post('/', isAuthenticated, createVideo);
 
 /**
  * PUT /api/videos/:id
  * Update a video content
  * Requires authentication (author or admin only)
  */
-router.put('/:id', authenticateToken, updateVideo);
+router.put('/:id', isAuthenticated, updateVideo);
 
 /**
  * DELETE /api/videos/:id
  * Delete a video content
  * Requires authentication (author or admin only)
  */
-router.delete('/:id', authenticateToken, deleteVideo);
+router.delete('/:id', isAuthenticated, deleteVideo);
 
 // ============================================================================
 // ADMIN ROUTES (Admin authentication required)
@@ -82,18 +82,18 @@ router.delete('/:id', authenticateToken, deleteVideo);
  * POST /api/videos/admin
  * Admin-only video creation (if needed for special cases)
  */
-router.post('/admin', authenticateToken, requireAdmin, createVideo);
+router.post('/admin', isAuthenticated, adminAuth, createVideo);
 
 /**
  * PUT /api/videos/admin/:id
  * Admin-only video update (can update any video)
  */
-router.put('/admin/:id', authenticateToken, requireAdmin, updateVideo);
+router.put('/admin/:id', isAuthenticated, adminAuth, updateVideo);
 
 /**
  * DELETE /api/videos/admin/:id
  * Admin-only video deletion (can delete any video)
  */
-router.delete('/admin/:id', authenticateToken, requireAdmin, deleteVideo);
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteVideo);
 
 module.exports = router;

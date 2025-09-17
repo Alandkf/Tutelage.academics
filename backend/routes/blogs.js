@@ -16,8 +16,8 @@ const {
   deleteBlog,
   getBlogsByCategory
 } = require('../controllers/blogController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -51,21 +51,21 @@ router.get('/category/:category', getBlogsByCategory);
  * Create a new blog post
  * Requires authentication
  */
-router.post('/', authenticateToken, createBlog);
+router.post('/', isAuthenticated, createBlog);
 
 /**
  * PUT /api/blogs/:id
  * Update a blog post
  * Requires authentication (author or admin only)
  */
-router.put('/:id', authenticateToken, updateBlog);
+router.put('/:id', isAuthenticated, updateBlog);
 
 /**
  * DELETE /api/blogs/:id
  * Delete a blog post
  * Requires authentication (author or admin only)
  */
-router.delete('/:id', authenticateToken, deleteBlog);
+router.delete('/:id', isAuthenticated, deleteBlog);
 
 // ============================================================================
 // ADMIN ROUTES (Admin authentication required)
@@ -73,20 +73,23 @@ router.delete('/:id', authenticateToken, deleteBlog);
 
 /**
  * POST /api/blogs/admin
- * Admin-only blog creation (if needed for special cases)
+ * Create a new blog post (admin only)
+ * Requires admin authentication
  */
-router.post('/admin', authenticateToken, requireAdmin, createBlog);
+router.post('/admin', isAuthenticated, adminAuth, createBlog);
 
 /**
  * PUT /api/blogs/admin/:id
- * Admin-only blog update (can update any blog)
+ * Update any blog post (admin only)
+ * Requires admin authentication
  */
-router.put('/admin/:id', authenticateToken, requireAdmin, updateBlog);
+router.put('/admin/:id', isAuthenticated, adminAuth, updateBlog);
 
 /**
  * DELETE /api/blogs/admin/:id
- * Admin-only blog deletion (can delete any blog)
+ * Delete any blog post (admin only)
+ * Requires admin authentication
  */
-router.delete('/admin/:id', authenticateToken, requireAdmin, deleteBlog);
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteBlog);
 
 module.exports = router;

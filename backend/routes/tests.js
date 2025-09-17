@@ -16,8 +16,8 @@ const {
   searchTestsByTitle,
   getTestsByAuthor
 } = require('../controllers/testController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -59,21 +59,21 @@ router.get('/author/:authorId', getTestsByAuthor);
  * Create a new test
  * Requires authentication
  */
-router.post('/', authenticateToken, createTest);
+router.post('/', isAuthenticated, createTest);
 
 /**
  * PUT /api/tests/:id
  * Update a test
  * Requires authentication (author or admin only)
  */
-router.put('/:id', authenticateToken, updateTest);
+router.put('/:id', isAuthenticated, updateTest);
 
 /**
  * DELETE /api/tests/:id
  * Delete a test
  * Requires authentication (author or admin only)
  */
-router.delete('/:id', authenticateToken, deleteTest);
+router.delete('/:id', isAuthenticated, deleteTest);
 
 // ============================================================================
 // ADMIN ROUTES (Admin authentication required)
@@ -81,20 +81,23 @@ router.delete('/:id', authenticateToken, deleteTest);
 
 /**
  * POST /api/tests/admin
- * Admin-only test creation (if needed for special cases)
+ * Create a new test (admin only)
+ * Requires admin authentication
  */
-router.post('/admin', authenticateToken, requireAdmin, createTest);
+router.post('/admin', isAuthenticated, adminAuth, createTest);
 
 /**
  * PUT /api/tests/admin/:id
- * Admin-only test update (can update any test)
+ * Update any test (admin only)
+ * Requires admin authentication
  */
-router.put('/admin/:id', authenticateToken, requireAdmin, updateTest);
+router.put('/admin/:id', isAuthenticated, adminAuth, updateTest);
 
 /**
  * DELETE /api/tests/admin/:id
- * Admin-only test deletion (can delete any test)
+ * Delete any test (admin only)
+ * Requires admin authentication
  */
-router.delete('/admin/:id', authenticateToken, requireAdmin, deleteTest);
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteTest);
 
 module.exports = router;

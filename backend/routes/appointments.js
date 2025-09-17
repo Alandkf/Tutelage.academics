@@ -17,8 +17,8 @@ const {
   searchAppointmentsByName,
   getAppointmentStats
 } = require('../controllers/appointmentController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -41,14 +41,14 @@ router.post('/', createAppointment);
  * Query params: page, limit, search, status, country, sortBy, sortOrder
  * Requires admin authentication
  */
-router.get('/', authenticateToken, requireAdmin, getAllAppointments);
+router.get('/', isAuthenticated, adminAuth, getAllAppointments);
 
 /**
  * GET /api/appointments/stats
  * Get appointment statistics (count by status)
  * Requires admin authentication
  */
-router.get('/stats', authenticateToken, requireAdmin, getAppointmentStats);
+router.get('/stats', isAuthenticated, adminAuth, getAppointmentStats);
 
 /**
  * GET /api/appointments/status/:status
@@ -56,7 +56,7 @@ router.get('/stats', authenticateToken, requireAdmin, getAppointmentStats);
  * Query params: page, limit, sortBy, sortOrder
  * Requires admin authentication
  */
-router.get('/status/:status', authenticateToken, requireAdmin, getAppointmentsByStatus);
+router.get('/status/:status', isAuthenticated, adminAuth, getAppointmentsByStatus);
 
 /**
  * GET /api/appointments/search/name
@@ -64,28 +64,28 @@ router.get('/status/:status', authenticateToken, requireAdmin, getAppointmentsBy
  * Query params: query, page, limit, sortBy, sortOrder
  * Requires admin authentication
  */
-router.get('/search/name', authenticateToken, requireAdmin, searchAppointmentsByName);
+router.get('/search/name', isAuthenticated, adminAuth, searchAppointmentsByName);
 
 /**
  * GET /api/appointments/:id
  * Get a specific appointment by ID
  * Requires admin authentication
  */
-router.get('/:id', authenticateToken, requireAdmin, getAppointmentById);
+router.get('/:id', isAuthenticated, adminAuth, getAppointmentById);
 
 /**
  * PUT /api/appointments/:id
  * Update an appointment
  * Requires admin authentication
  */
-router.put('/:id', authenticateToken, requireAdmin, updateAppointment);
+router.put('/:id', isAuthenticated, adminAuth, updateAppointment);
 
 /**
  * DELETE /api/appointments/:id
  * Delete an appointment
  * Requires admin authentication
  */
-router.delete('/:id', authenticateToken, requireAdmin, deleteAppointment);
+router.delete('/:id', isAuthenticated, adminAuth, deleteAppointment);
 
 // ============================================================================
 // PROTECTED ROUTES (Authentication required - for future use)

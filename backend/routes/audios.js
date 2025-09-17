@@ -15,8 +15,8 @@ const {
   deleteAudio,
   searchAudioByTranscript
 } = require('../controllers/audioController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -51,21 +51,21 @@ router.get('/search/transcript', searchAudioByTranscript);
  * Create a new audio content
  * Requires authentication
  */
-router.post('/', authenticateToken, createAudio);
+router.post('/', isAuthenticated, createAudio);
 
 /**
  * PUT /api/audios/:id
  * Update an audio content
  * Requires authentication (author or admin only)
  */
-router.put('/:id', authenticateToken, updateAudio);
+router.put('/:id', isAuthenticated, updateAudio);
 
 /**
  * DELETE /api/audios/:id
  * Delete an audio content
  * Requires authentication (author or admin only)
  */
-router.delete('/:id', authenticateToken, deleteAudio);
+router.delete('/:id', isAuthenticated, deleteAudio);
 
 // ============================================================================
 // ADMIN ROUTES (Admin authentication required)
@@ -75,18 +75,18 @@ router.delete('/:id', authenticateToken, deleteAudio);
  * POST /api/audios/admin
  * Admin-only audio creation (if needed for special cases)
  */
-router.post('/admin', authenticateToken, requireAdmin, createAudio);
+router.post('/admin', isAuthenticated, adminAuth, createAudio);
 
 /**
  * PUT /api/audios/admin/:id
  * Admin-only audio update (can update any audio)
  */
-router.put('/admin/:id', authenticateToken, requireAdmin, updateAudio);
+router.put('/admin/:id', isAuthenticated, adminAuth, updateAudio);
 
 /**
  * DELETE /api/audios/admin/:id
  * Admin-only audio deletion (can delete any audio)
  */
-router.delete('/admin/:id', authenticateToken, requireAdmin, deleteAudio);
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteAudio);
 
 module.exports = router;

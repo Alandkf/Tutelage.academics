@@ -16,8 +16,8 @@ const {
   getCoursesByCategory,
   searchCoursesByTitle
 } = require('../controllers/courseController');
-const { authenticateToken } = require('../middlewares/auth');
-const { requireAdmin } = require('../middlewares/adminAuth');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -59,21 +59,21 @@ router.get('/search/title', searchCoursesByTitle);
  * Create a new course
  * Requires authentication
  */
-router.post('/', authenticateToken, createCourse);
+router.post('/', isAuthenticated, createCourse);
 
 /**
  * PUT /api/courses/:id
  * Update a course
  * Requires authentication (author or admin only)
  */
-router.put('/:id', authenticateToken, updateCourse);
+router.put('/:id', isAuthenticated, updateCourse);
 
 /**
  * DELETE /api/courses/:id
  * Delete a course
  * Requires authentication (author or admin only)
  */
-router.delete('/:id', authenticateToken, deleteCourse);
+router.delete('/:id', isAuthenticated, deleteCourse);
 
 // ============================================================================
 // ADMIN ROUTES (Admin authentication required)
@@ -81,20 +81,23 @@ router.delete('/:id', authenticateToken, deleteCourse);
 
 /**
  * POST /api/courses/admin
- * Admin-only course creation (if needed for special cases)
+ * Create a new course (admin only)
+ * Requires admin authentication
  */
-router.post('/admin', authenticateToken, requireAdmin, createCourse);
+router.post('/admin', isAuthenticated, adminAuth, createCourse);
 
 /**
  * PUT /api/courses/admin/:id
- * Admin-only course update (can update any course)
+ * Update any course (admin only)
+ * Requires admin authentication
  */
-router.put('/admin/:id', authenticateToken, requireAdmin, updateCourse);
+router.put('/admin/:id', isAuthenticated, adminAuth, updateCourse);
 
 /**
  * DELETE /api/courses/admin/:id
- * Admin-only course deletion (can delete any course)
+ * Delete any course (admin only)
+ * Requires admin authentication
  */
-router.delete('/admin/:id', authenticateToken, requireAdmin, deleteCourse);
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteCourse);
 
 module.exports = router;
