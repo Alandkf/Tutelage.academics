@@ -65,10 +65,10 @@ const createBlog = async (req, res) => {
  */
 const getAllBlogs = async (req, res) => {
   try {
-    const { 
-      cursor, // For cursor-based pagination (ID of last item)
-      limit = 10, 
-      category, 
+    const {
+      cursor,
+      limit = 9,
+      category,
       search,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
@@ -76,18 +76,15 @@ const getAllBlogs = async (req, res) => {
 
     // Build where clause for filtering
     const whereClause = {};
-    
     if (category) {
       whereClause.category = category;
     }
-    
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
         { content: { [Op.like]: `%${search}%` } }
       ];
     }
-
     // Add cursor condition for infinite scroll
     if (cursor) {
       if (sortOrder.toUpperCase() === 'DESC') {
@@ -96,45 +93,33 @@ const getAllBlogs = async (req, res) => {
         whereClause.id = { [Op.gt]: parseInt(cursor) };
       }
     }
-
     // Fetch one extra item to check if there are more items
     const fetchLimit = parseInt(limit) + 1;
-
     const blogs = await Blog.findAll({
       where: whereClause,
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: fetchLimit,
       order: [
         [sortBy, sortOrder.toUpperCase()],
-        ['id', sortOrder.toUpperCase()] // Secondary sort by ID for consistent pagination
+        ['id', sortOrder.toUpperCase()]
       ],
       distinct: true
     });
-
     // Check if there are more items
     const hasMore = blogs.length > parseInt(limit);
-    
     // Remove the extra item if it exists
     const items = hasMore ? blogs.slice(0, parseInt(limit)) : blogs;
-    
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
-
     res.status(200).json({
       success: true,
-      data: {
-        blogs: items,
-        pagination: {
-          nextCursor,
-          hasMore,
-          itemsPerPage: parseInt(limit),
-          totalItemsReturned: items.length
-        }
-      }
+      blogs: items,
+      hasMore,
+      nextCursor
     });
   } catch (error) {
     console.error('Error fetching blogs:', error);
@@ -223,7 +208,7 @@ const updateBlog = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 

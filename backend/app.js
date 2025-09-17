@@ -233,6 +233,176 @@ const seedSampleBlogPosts = async (adminUserId) => {
                     createdBy: adminUserId
                 },
                 {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
+                    title: 'React Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    title: 'React Development Best Practices',
+                    content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
+                    imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
+                    category: 'Frontend',
+                    createdBy: adminUserId
+                },
+                {
                     title: 'Node.js and Express Tutorial',
                     content: 'Build powerful backend applications using Node.js and Express framework. Learn about routing, middleware, and API development.',
                     imageRef: 'https://images.unsplash.com/photo-1592609931095-54a2168ae893?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',

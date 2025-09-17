@@ -6,13 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { BlogCard } from "@/components/blogs/BlogCard"
 import BlogForm from "@/components/forms/BlogForm"
-import { Plus } from "lucide-react"
+import { Plus, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
+import { useInfiniteBlogs } from "@/components/blogs/useInfiniteBlogs"
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const [editBlog, setEditBlog] = useState(null)
@@ -20,63 +19,49 @@ export default function BlogsPage() {
   const [deleteBlog, setDeleteBlog] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(false)
-
-  // Fetch blogs (mocked for now, ready for backend integration)
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-      setLoading(true)
-      const response = await fetch("http://localhost:3001/api/blogs", {
-         credentials: "include"
-         })
-      const data = await response.json()
-      console.log('Fetched blogs data:', data);
-      
-      setBlogs(data.data || [])
-      setHasMore(false) // No real pagination yet
-      } catch (error) {
-      setBlogs([])
-      } finally {
-      setLoading(false)
-      }
-    }
-    
-    fetchBlogs()
-  }, [])
-
-  // Search filter
-  const filteredBlogs = blogs.filter(blog =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    blog.content.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const {
+    blogs,
+    loading,
+    hasMore,
+    error,
+    fetchBlogs,
+    resetAndFetch,
+    lastBlogRef
+  } = useInfiniteBlogs({ searchTerm })
 
   // Handlers
-  const handleCreateSuccess = (newBlog) => {
+  const handleCreateSuccess = async (newBlog) => {
     setShowCreate(false)
-    setBlogs([newBlog, ...blogs])
+    resetAndFetch()
     toast("Blog created successfully", { variant: "success" })
   }
-  const handleEdit = (blog) => {
-    setEditBlog(blog)
+
+  //EDITTING
+  const handleEdit = (editBlog) => {
+    setEditBlog(editBlog)
     setShowEdit(true)
   }
-  const handleEditSuccess = (updatedBlog) => {
-    setShowEdit(false)
-    setEditBlog(null)
-    setBlogs(blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b))
-    toast("Blog updated successfully", { variant: "success" })
-  }
+ 
+
+  
   const handleDelete = (blog) => {
     setDeleteBlog(blog)
     setShowDelete(true)
   }
-  const confirmDelete = () => {
-    setBlogs(blogs.filter(b => b.id !== deleteBlog.id))
-    setShowDelete(false)
-    setDeleteBlog(null)
-    toast("Blog deleted successfully", { variant: "destructive" })
+  const confirmDelete = async () => {
+    if (!deleteBlog) return
+    try {
+      await fetch(`http://localhost:3001/api/blogs/${deleteBlog.id}`, {
+        method: "DELETE",
+        credentials: "include"
+      })
+      setShowDelete(false)
+      setDeleteBlog(null)
+      resetAndFetch()
+      toast("Blog deleted successfully", { variant: "destructive" })
+    } catch {
+      toast("Failed to delete blog", { variant: "destructive" })
+    }
   }
 
   return (
@@ -90,37 +75,63 @@ export default function BlogsPage() {
           </Button>
         )}
       </div>
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <Input
           placeholder="Search blogs..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="max-w-xs"
         />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={resetAndFetch}
+          title="Refresh blogs"
+          className="ml-2"
+          disabled={loading}
+        >
+          <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
+        {loading && blogs.length === 0 ? (
           <div className="col-span-full text-center text-muted-foreground py-12">Loading blogs...</div>
-        ) : filteredBlogs.length === 0 ? (
+        ) : blogs.length === 0 ? (
           <div className="col-span-full text-center text-muted-foreground py-12">No blogs found.</div>
         ) : (
-          filteredBlogs.map(blog => (
-            <div key={blog.id} className="relative group">
-              <BlogCard {...blog} />
-              {user?.role === "ADMIN" && (
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}>Edit</Button>
-                  <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}>Delete</Button>
-                </div>
-              )}
-            </div>
-          ))
+          blogs.map((blog, idx) => {
+            const isLast = idx === blogs.length - 1
+            return (
+              <div key={blog.id} className="relative group" ref={isLast ? lastBlogRef : null}>
+                <BlogCard
+                  {...blog}
+                  author={blog.author?.name || ''}
+                  authorEmail={blog.author?.email || ''}
+                />
+                {user?.role === "ADMIN" && (
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}>Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}>Delete</Button>
+                  </div>
+                )}
+              </div>
+            )
+          })
         )}
       </div>
-      {/* Pagination (load more) - for now, just a placeholder */}
-      {hasMore && !loading && (
+      {/* Show More fallback button */}
+      {hasMore && blogs.length !== 0 && !loading && (
         <div className="flex justify-center mt-8 mb-4">
-          <Button variant="outline" disabled>Load more (not implemented)</Button>
+          <Button variant="outline" onClick={() => fetchBlogs()}>Show More</Button>
+        </div>
+      )}
+      {/* Loading indicator for more fetches */}
+      {loading && blogs.length > 0 && (
+        <div className="flex justify-center p-4 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-blue-500 animate-spin"></div>
+            <span className="text-muted-foreground text-sm">Loading more...</span>
+          </div>
         </div>
       )}
       {/* Create Blog Dialog */}
@@ -141,7 +152,25 @@ export default function BlogsPage() {
           <BlogForm
             mode="edit"
             initialValues={editBlog}
-            onSuccess={handleEditSuccess}
+            onSuccess={async (values) => {
+              if (!editBlog) return
+              try {
+                // API call for editing blog (PUT)
+                const res = await fetch(`http://localhost:3001/api/blogs/${editBlog.id}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify(values)
+                })
+                if (!res.ok) throw new Error("Failed to update blog")
+                setShowEdit(false)
+                setEditBlog(null)
+                resetAndFetch()
+                toast("Blog updated successfully", { variant: "success" })
+              } catch {
+                toast("Failed to update blog", { variant: "destructive" })
+              }
+            }}
             onCancel={() => { setShowEdit(false); setEditBlog(null) }}
           />
         </DialogContent>
