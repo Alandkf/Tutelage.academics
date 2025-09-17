@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { MoreVertical } from "lucide-react"
 import Image from "next/image"
 
-export default function UserTable({ users, currentUserRole, onEdit, onDelete, onDeactivate }) {
+export default function UserTable({ users, currentUserRole, onEdit, onDelete, onToggleActive }) {
   return (
     <div className="overflow-x-auto w-full">
       <Table>
@@ -14,6 +14,7 @@ export default function UserTable({ users, currentUserRole, onEdit, onDelete, on
             <TableHead className="text-xs">Name</TableHead>
             <TableHead className="text-xs">Email</TableHead>
             <TableHead className="text-xs">Role</TableHead>
+            <TableHead className="text-xs">Status</TableHead>
             <TableHead className="text-xs">Created</TableHead>
             <TableHead className="text-xs text-center">Actions</TableHead>
           </TableRow>
@@ -34,6 +35,13 @@ export default function UserTable({ users, currentUserRole, onEdit, onDelete, on
                   {user.role}
                 </span>
               </TableCell>
+              <TableCell className="py-2 text-xs">
+                {user.isActive ? (
+                  <span className="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700">Active</span>
+                ) : (
+                  <span className="px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-700">Inactive</span>
+                )}
+              </TableCell>
               <TableCell className="py-2 text-xs text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
               <TableCell className="py-2 text-xs text-center">
                 {currentUserRole === "ADMIN" ? (
@@ -45,7 +53,11 @@ export default function UserTable({ users, currentUserRole, onEdit, onDelete, on
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-[140px]">
                       <DropdownMenuItem onClick={() => onEdit(user)}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDeactivate(user)}>Deactivate</DropdownMenuItem>
+                      {user.isActive ? (
+                        <DropdownMenuItem onClick={() => onToggleActive(user, false)} className="text-yellow-700">Deactivate</DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem onClick={() => onToggleActive(user, true)} className="text-green-700">Activate</DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={() => onDelete(user)} className="text-destructive">Delete</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

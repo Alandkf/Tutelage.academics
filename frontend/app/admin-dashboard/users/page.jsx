@@ -77,9 +77,18 @@ export default function Page() {
       setLoading(false)
     }
   }
-  const handleDeactivate = (user) => {
-    // Placeholder for deactivate logic
-    // You can add a dialog here if needed
+  const handleToggleActive = async (user, activate) => {
+    setLoading(true)
+    try {
+      const url = `http://localhost:3001/users/${user.id}/${activate ? "activate" : "deactivate"}`
+      await fetch(url, {
+        method: "POST",
+        credentials: "include"
+      })
+      fetchUsers()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -102,7 +111,7 @@ export default function Page() {
             currentUserRole={currentUser?.role}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onDeactivate={handleDeactivate}
+            onToggleActive={handleToggleActive}
           />
         )}
       </div>

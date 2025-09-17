@@ -74,13 +74,13 @@ router.delete('/:id', AuthController.deleteUser);
  * PATCH /api/users/:id/deactivate
  * Deactivate user account (Admin only)
  */
-router.patch('/:id/deactivate', AuthController.deactivateUser);
+router.post('/:id/deactivate', AuthController.deactivateUser);
 
 /**
- * PATCH /api/users/:id/activate
+ * post /api/users/:id/activate
  * Activate user account (Admin only)
  */
-router.patch('/:id/activate', AuthController.activateUser);
+router.post('/:id/activate', AuthController.activateUser);
 
 // ============================================================================
 // EXPORTS
