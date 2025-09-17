@@ -22,8 +22,8 @@ export default function Page() {
     async function fetchCurrentUser() {
       try {
         const res = await fetch("http://localhost:3001/auth/me", { credentials: "include" })
-        const data = await res.json()
-        if (data.success) setCurrentUser(data.data.user)
+        const data = await res.json()        
+        if (data.success) setCurrentUser(data.user)
       } catch {}
     }
     fetchCurrentUser()
@@ -35,7 +35,9 @@ export default function Page() {
     try {
       const res = await fetch("http://localhost:3001/users", { credentials: "include" })
       const data = await res.json()
-      if (data.success) setUsers(data.data.users)
+      console.log('Fetched users data:', data.users);
+      
+      if (data.success) setUsers(data.users)
     } finally {
       setLoading(false)
     }

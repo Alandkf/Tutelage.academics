@@ -12,10 +12,9 @@ export function AuthProvider({ children }) {
     setLoading(true)
     try {
       const res = await fetch("http://localhost:3001/auth/me", { credentials: "include" })
-      console.log('AuthContext fetchUser data:', res);
       const data = await res.json()
       
-      if (data.success) setUser(data.data.user)
+      if (data.success) setUser(data.user)
       else setUser(null)
     } catch {
       setUser(null)

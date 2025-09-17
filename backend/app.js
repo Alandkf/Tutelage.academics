@@ -195,65 +195,50 @@ const seedSampleBlogPosts = async (adminUserId) => {
             const SAMPLE_BLOG_POSTS = [
                 {
                     title: 'Introduction to Web Development',
-<<<<<<< HEAD
                     content: 'Web development is the process of creating websites and web applications. It involves both frontend and backend development skills.',
                     imageRef: 'https://plus.unsplash.com/premium_photo-1685086785054-d047cdc0e525?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2ViJTIwZGV2ZWxvcG1lbnR8ZW58MHx8MHx8fDA%3D',
-=======
                     content: 'Web development is the process of creating websites and web applications. It involves both frontend and backend development skills, covering everything from user interface design to server-side logic and database management.',
                     imageRef: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800',
->>>>>>> 74030718cda52f4301db2804aba8afc321fc0e1c
                     category: 'Technology',
                     createdBy: adminUserId
                 },
                 {
-<<<<<<< HEAD
                     title: 'Understanding Database Design',
                     content: 'Database design is crucial for building scalable applications. Learn about normalization, relationships, and best practices.',
                     imageRef: 'https://plus.unsplash.com/premium_photo-1664297989345-f4ff2063b212?q=80&w=1098&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-=======
                     title: 'Understanding Database Design Principles',
                     content: 'Database design is crucial for building scalable applications. Learn about normalization, relationships, indexing strategies, and best practices for creating efficient and maintainable database schemas.',
                     imageRef: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800',
->>>>>>> 74030718cda52f4301db2804aba8afc321fc0e1c
                     category: 'Database',
                     createdBy: adminUserId
                 },
                 {
-<<<<<<< HEAD
                     title: 'JavaScript ES6 Features',
                     content: 'ES6 introduced many powerful features like arrow functions, destructuring, and promises that make JavaScript more efficient.',
                     imageRef: 'https://plus.unsplash.com/premium_photo-1661882403999-46081e67c401?q=80&w=1129&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-=======
                     title: 'Modern JavaScript ES6+ Features',
                     content: 'ES6 and beyond introduced many powerful features like arrow functions, destructuring, promises, async/await, and modules that make JavaScript more efficient and developer-friendly.',
                     imageRef: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?w=800',
->>>>>>> 74030718cda52f4301db2804aba8afc321fc0e1c
                     category: 'Programming',
                     createdBy: adminUserId
                 },
                 {
-<<<<<<< HEAD
                     title: 'React Best Practices',
                     content: 'Learn the best practices for building React applications including component structure, state management, and performance optimization.',
                     imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-=======
                     title: 'React Development Best Practices',
                     content: 'Learn the best practices for building React applications including component structure, state management, performance optimization, testing strategies, and modern development patterns.',
                     imageRef: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800',
->>>>>>> 74030718cda52f4301db2804aba8afc321fc0e1c
                     category: 'Frontend',
                     createdBy: adminUserId
                 },
                 {
-<<<<<<< HEAD
                     title: 'Node.js and Express Tutorial',
                     content: 'Build powerful backend applications using Node.js and Express framework. Learn about routing, middleware, and API development.',
                     imageRef: 'https://images.unsplash.com/photo-1592609931095-54a2168ae893?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-=======
                     title: 'Node.js and Express Framework Guide',
                     content: 'Build powerful backend applications using Node.js and Express framework. Learn about routing, middleware, API development, authentication, and deployment strategies.',
                     imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800',
->>>>>>> 74030718cda52f4301db2804aba8afc321fc0e1c
                     category: 'Backend',
                     createdBy: adminUserId
                 }

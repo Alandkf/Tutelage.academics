@@ -527,7 +527,7 @@ class AuthController {
       console.log('👥 Retrieving all users (Admin request)');
       
       const allUsers = await User.findAll({
-        attributes: ['id', 'name', 'email', 'role', 'createdAt'],
+        attributes: ['id', 'name', 'email', 'role', 'createdAt', 'isActive'],
         order: [['createdAt', 'DESC']]
       });
       
