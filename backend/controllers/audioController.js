@@ -1,40 +1,42 @@
 // ============================================================================
-// VIDEO CONTROLLER
+// AUDIO CONTROLLER
 // ============================================================================
-// This controller handles all CRUD operations for video content with pagination
+// This controller handles all CRUD operations for audio content with pagination
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Video, User } = require('../models');
+const { Audio, User } = require('../models');
 const { Op } = require('sequelize');
 
 /**
- * Create a new video content
+ * Create a new audio content
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const createVideo = async (req, res) => {
+const createAudio = async (req, res) => {
   try {
-    const { title, videoRef, description } = req.body;
+    const { title, content, transcript, audioRef, pdfRef } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
-    if (!title || !videoRef) {
+    if (!title || !audioRef) {
       return res.status(400).json({
         success: false,
-        message: 'Title and video reference are required'
+        message: 'Title and audio reference are required'
       });
     }
 
-    const video = await Video.create({
+    const audio = await Audio.create({
       title,
-      videoRef,
-      description,
+      content,
+      transcript,
+      audioRef,
+      pdfRef,
       createdBy
     });
 
-    // Fetch the created video with author information
-    const videoWithAuthor = await Video.findByPk(video.id, {
+    // Fetch the created audio with author information
+    const audioWithAuthor = await Audio.findByPk(audio.id, {
       include: [{
         model: User,
         as: 'author',
@@ -44,11 +46,11 @@ const createVideo = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Video content created successfully',
-      data: videoWithAuthor
+      message: 'Audio content created successfully',
+      data: audioWithAuthor
     });
   } catch (error) {
-    console.error('Error creating video:', error);
+    console.error('Error creating audio:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -58,11 +60,11 @@ const createVideo = async (req, res) => {
 };
 
 /**
- * Get all video content with infinite scroll pagination
+ * Get all audio content with infinite scroll pagination
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const getAllVideos = async (req, res) => {
+const getAllAudios = async (req, res) => {
   try {
     const { 
       cursor, // For cursor-based pagination (ID of last item)
@@ -78,7 +80,8 @@ const getAllVideos = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { description: { [Op.like]: `%${search}%` } }
+        { content: { [Op.like]: `%${search}%` } },
+        { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
 
@@ -94,7 +97,7 @@ const getAllVideos = async (req, res) => {
     // Fetch one extra item to check if there are more items
     const fetchLimit = parseInt(limit) + 1;
 
-    const videos = await Video.findAll({
+    const audios = await Audio.findAll({
       where: whereClause,
       include: [{
         model: User,
@@ -110,10 +113,10 @@ const getAllVideos = async (req, res) => {
     });
 
     // Check if there are more items
-    const hasMore = videos.length > parseInt(limit);
+    const hasMore = audios.length > parseInt(limit);
     
     // Remove the extra item if it exists
-    const items = hasMore ? videos.slice(0, parseInt(limit)) : videos;
+    const items = hasMore ? audios.slice(0, parseInt(limit)) : audios;
     
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
@@ -121,7 +124,7 @@ const getAllVideos = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        videos: items,
+        audios: items,
         pagination: {
           nextCursor,
           hasMore,
@@ -131,7 +134,7 @@ const getAllVideos = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching videos:', error);
+    console.error('Error fetching audios:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -141,15 +144,15 @@ const getAllVideos = async (req, res) => {
 };
 
 /**
- * Get a single video content by ID
+ * Get a single audio content by ID
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const getVideoById = async (req, res) => {
+const getAudioById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const video = await Video.findByPk(id, {
+    const audio = await Audio.findByPk(id, {
       include: [{
         model: User,
         as: 'author',
@@ -157,19 +160,19 @@ const getVideoById = async (req, res) => {
       }]
     });
 
-    if (!video) {
+    if (!audio) {
       return res.status(404).json({
         success: false,
-        message: 'Video content not found'
+        message: 'Audio content not found'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: video
+      data: audio
     });
   } catch (error) {
-    console.error('Error fetching video:', error);
+    console.error('Error fetching audio:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -179,40 +182,42 @@ const getVideoById = async (req, res) => {
 };
 
 /**
- * Update a video content
+ * Update an audio content
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const updateVideo = async (req, res) => {
+const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description } = req.body;
+    const { title, content, transcript, audioRef, pdfRef } = req.body;
 
-    const video = await Video.findByPk(id);
+    const audio = await Audio.findByPk(id);
 
-    if (!video) {
+    if (!audio) {
       return res.status(404).json({
         success: false,
-        message: 'Video content not found'
+        message: 'Audio content not found'
       });
     }
 
     // Check if user is the author or admin
-    if (video.createdBy !== req.user.id && req.user.role !== 'admin') {
+    if (audio.createdBy !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'You can only update your own video content'
+        message: 'You can only update your own audio content'
       });
     }
 
-    await video.update({
-      title: title || video.title,
-      videoRef: videoRef || video.videoRef,
-      description: description || video.description
+    await audio.update({
+      title: title || audio.title,
+      content: content || audio.content,
+      transcript: transcript || audio.transcript,
+      audioRef: audioRef || audio.audioRef,
+      pdfRef: pdfRef || audio.pdfRef
     });
 
-    // Fetch updated video with author information
-    const updatedVideo = await Video.findByPk(id, {
+    // Fetch updated audio with author information
+    const updatedAudio = await Audio.findByPk(id, {
       include: [{
         model: User,
         as: 'author',
@@ -222,11 +227,11 @@ const updateVideo = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Video content updated successfully',
-      data: updatedVideo
+      message: 'Audio content updated successfully',
+      data: updatedAudio
     });
   } catch (error) {
-    console.error('Error updating video:', error);
+    console.error('Error updating audio:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -236,39 +241,39 @@ const updateVideo = async (req, res) => {
 };
 
 /**
- * Delete a video content
+ * Delete an audio content
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const deleteVideo = async (req, res) => {
+const deleteAudio = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const video = await Video.findByPk(id);
+    const audio = await Audio.findByPk(id);
 
-    if (!video) {
+    if (!audio) {
       return res.status(404).json({
         success: false,
-        message: 'Video content not found'
+        message: 'Audio content not found'
       });
     }
 
     // Check if user is the author or admin
-    if (video.createdBy !== req.user.id && req.user.role !== 'admin') {
+    if (audio.createdBy !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'You can only delete your own video content'
+        message: 'You can only delete your own audio content'
       });
     }
 
-    await video.destroy();
+    await audio.destroy();
 
     res.status(200).json({
       success: true,
-      message: 'Video content deleted successfully'
+      message: 'Audio content deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting video:', error);
+    console.error('Error deleting audio:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -278,11 +283,11 @@ const deleteVideo = async (req, res) => {
 };
 
 /**
- * Get videos by title search with pagination
+ * Search audio content by transcript
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const searchVideosByTitle = async (req, res) => {
+const searchAudioByTranscript = async (req, res) => {
   try {
     const { query } = req.query;
     const { page = 1, limit = 10 } = req.query;
@@ -295,9 +300,9 @@ const searchVideosByTitle = async (req, res) => {
       });
     }
 
-    const { count, rows } = await Video.findAndCountAll({
+    const { count, rows } = await Audio.findAndCountAll({
       where: {
-        title: { [Op.like]: `%${query}%` }
+        transcript: { [Op.like]: `%${query}%` }
       },
       include: [{
         model: User,
@@ -315,7 +320,7 @@ const searchVideosByTitle = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        videos: rows,
+        audios: rows,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -327,7 +332,7 @@ const searchVideosByTitle = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error searching videos by title:', error);
+    console.error('Error searching audio by transcript:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -336,46 +341,11 @@ const searchVideosByTitle = async (req, res) => {
   }
 };
 
-// Legacy function for backward compatibility
-const get = (req, res) => {
-   return res.status(200).json({
-      success: true,
-      message: 'Videos fetched successfully',
-      data: [
-         {
-            id: 1,
-            title: 'Introduction to Mathematics',
-            description: 'Learn the basics of mathematics',
-            url: 'https://www.youtube.com/embed/Kp2bYWRQylk',
-            thumbnail: 'https://img.youtube.com/vi/Kp2bYWRQylk/hqdefault.jpg',
-            category: 'Mathematics'
-         },
-         {
-            id: 2,
-            title: 'Advanced Physics Concepts',
-            description: 'Explore advanced physics theories',
-            url: 'https://www.youtube.com/embed/0NbBjNiw4tk',
-            thumbnail: 'https://img.youtube.com/vi/0NbBjNiw4tk/hqdefault.jpg',
-            category: 'Physics'
-         },
-         {
-            id: 3,
-            title: 'Chemistry Fundamentals',
-            description: 'Understanding basic chemistry principles',
-            url: 'https://www.youtube.com/embed/FSyAehMdpyI',
-            thumbnail: 'https://img.youtube.com/vi/FSyAehMdpyI/hqdefault.jpg',
-            category: 'Chemistry'
-         }
-      ]
-    }); 
-};
-
 module.exports = {
-  createVideo,
-  getAllVideos,
-  getVideoById,
-  updateVideo,
-  deleteVideo,
-  searchVideosByTitle,
-  get // Legacy export
+  createAudio,
+  getAllAudios,
+  getAudioById,
+  updateAudio,
+  deleteAudio,
+  searchAudioByTranscript
 };

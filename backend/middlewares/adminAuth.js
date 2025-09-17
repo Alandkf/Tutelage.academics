@@ -1,33 +1,50 @@
+// ============================================================================
+// ADMIN AUTHENTICATION MIDDLEWARE
+// ============================================================================
+// This middleware provides strict admin-only authentication, requiring
+// users to have the 'ADMIN' role specifically (excludes MAIN_MANAGER).
+// ============================================================================
+
+/**
+ * Middleware to verify strict admin privileges
+ * Only allows users with 'ADMIN' role (excludes MAIN_MANAGER)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
 const adminAuth = (req, res, next) => {
   try {
-    // Check if user is authenticated
+    // Verify user authentication
     if (!req.user) {
-      console.log('❌ Admin middleware: User not authenticated');
+      console.log('❌ Admin Auth: User not authenticated');
       return res.status(401).json({
         success: false,
         message: 'Authentication required'
       });
     }
 
-    // Check if user has admin role
+    // Verify admin role (strict ADMIN only)
     if (req.user.role !== 'ADMIN') {
-      console.log(`❌ Admin middleware: User ${req.user.email} attempted admin access with role: ${req.user.role}`);
+      console.log(`❌ Admin Auth: User ${req.user.email} denied access (Role: ${req.user.role})`);
       return res.status(403).json({
         success: false,
         message: 'Access denied. Admin privileges required.'
       });
     }
 
-    console.log(`✅ Admin middleware: Admin ${req.user.email} authorized`);
+    console.log(`✅ Admin Auth: Admin ${req.user.email} authorized`);
     next();
-  } catch (error) {
-    console.error('❌ Admin middleware error:', error);
-    res.status(500).json({
+  } catch (authError) {
+    console.error('❌ Admin Auth Error:', authError);
+    return res.status(500).json({
       success: false,
       message: 'Server error in admin authorization',
-      error: error.message
+      error: authError.message
     });
   }
 };
 
+// ============================================================================
+// EXPORTS
+// ============================================================================
 module.exports = adminAuth;

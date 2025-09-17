@@ -1,30 +1,95 @@
-const express = require('express');
-const { Blog } = require('../models');
-const router = express.Router();
+// ============================================================================
+// ============================================================================
+// BLOG ROUTES
+// ============================================================================
+// This file defines all routes for blog CRUD operations with proper
+// authentication and authorization middleware.
+// ============================================================================
 
-// GET /blogs - Fetch all blogs
-router.get('/', async (req, res) => {
-    try {
-        const blogs = await Blog.findAll({
-            order: [['createdAt', 'DESC']] // Order by newest first
-        });
-        
-        console.log(`✅ Successfully fetched ${blogs.length} blog entries`);
-        
-        res.status(200).json({
-            success: true,
-            count: blogs.length,
-            data: blogs
-        });
-    } catch (error) {
-        console.error('❌ Error fetching blogs:', error);
-        
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch blogs',
-            error: error.message
-        });
-    }
-});
+const express = require('express');
+const router = express.Router();
+const {
+  createBlog,
+  getAllBlogs,
+  getBlogById,
+  updateBlog,
+  deleteBlog,
+  getBlogsByCategory
+} = require('../controllers/blogController');
+const { isAuthenticated } = require('../middlewares/auth');
+const adminAuth = require('../middlewares/adminAuth');
+
+// ============================================================================
+// PUBLIC ROUTES (No authentication required)
+// ============================================================================
+
+/**
+ * GET /api/blogs
+ * Get all blog posts with pagination and filtering
+ * Query params: page, limit, category, search, sortBy, sortOrder
+ */
+router.get('/', getAllBlogs);
+
+/**
+ * GET /api/blogs/:id
+ * Get a specific blog post by ID
+ */
+router.get('/:id', getBlogById);
+
+/**
+ * GET /api/blogs/category/:category
+ * Get blog posts by category with pagination
+ */
+router.get('/category/:category', getBlogsByCategory);
+
+// ============================================================================
+// PROTECTED ROUTES (Authentication required)
+// ============================================================================
+
+/**
+ * POST /api/blogs
+ * Create a new blog post
+ * Requires authentication
+ */
+router.post('/', isAuthenticated, createBlog);
+
+/**
+ * PUT /api/blogs/:id
+ * Update a blog post
+ * Requires authentication (author or admin only)
+ */
+router.put('/:id', isAuthenticated, updateBlog);
+
+/**
+ * DELETE /api/blogs/:id
+ * Delete a blog post
+ * Requires authentication (author or admin only)
+ */
+router.delete('/:id', isAuthenticated, deleteBlog);
+
+// ============================================================================
+// ADMIN ROUTES (Admin authentication required)
+// ============================================================================
+
+/**
+ * POST /api/blogs/admin
+ * Create a new blog post (admin only)
+ * Requires admin authentication
+ */
+router.post('/admin', isAuthenticated, adminAuth, createBlog);
+
+/**
+ * PUT /api/blogs/admin/:id
+ * Update any blog post (admin only)
+ * Requires admin authentication
+ */
+router.put('/admin/:id', isAuthenticated, adminAuth, updateBlog);
+
+/**
+ * DELETE /api/blogs/admin/:id
+ * Delete any blog post (admin only)
+ * Requires admin authentication
+ */
+router.delete('/admin/:id', isAuthenticated, adminAuth, deleteBlog);
 
 module.exports = router;
