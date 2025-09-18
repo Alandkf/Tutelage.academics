@@ -146,7 +146,7 @@ const getBlogById = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
