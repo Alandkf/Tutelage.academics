@@ -287,7 +287,7 @@ const getBlogsByCategory = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: parseInt(limit),
       offset: parseInt(offset),

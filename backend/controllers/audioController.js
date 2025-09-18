@@ -40,7 +40,7 @@ const createAudio = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -102,7 +102,7 @@ const getAllAudios = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: fetchLimit,
       order: [
@@ -156,7 +156,7 @@ const getAudioById = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -221,7 +221,7 @@ const updateAudio = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -307,7 +307,7 @@ const searchAudioByTranscript = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: parseInt(limit),
       offset: parseInt(offset),

@@ -42,7 +42,7 @@ exports.createCourse = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -111,7 +111,7 @@ exports.getAllCourses = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       order: [
         [sortBy, sortOrder.toUpperCase()],
@@ -137,12 +137,7 @@ exports.getAllCourses = async (req, res) => {
         nextCursor,
         hasMore,
         itemsPerPage: parseInt(limit),
-        totalItemsReturned: items.length,
-        totalPages,
-        totalItems: count,
-        itemsPerPage: parseInt(limit),
-        hasNextPage,
-        hasPrevPage
+        totalItemsReturned: items.length
       }
     });
   } catch (error) {
@@ -171,7 +166,7 @@ exports.getCourseById = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -239,7 +234,7 @@ exports.updateCourse = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -330,7 +325,7 @@ exports.getCoursesByCategory = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       order: [[sortBy, sortOrder.toUpperCase()]],
       limit: parseInt(limit),
@@ -398,7 +393,7 @@ exports.searchCoursesByTitle = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       order: [[sortBy, sortOrder.toUpperCase()]],
       limit: parseInt(limit),

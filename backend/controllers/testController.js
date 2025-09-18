@@ -40,7 +40,7 @@ exports.createTest = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -105,12 +105,12 @@ exports.getAllTests = async (req, res) => {
         {
           model: User,
           as: 'author',
-          attributes: ['id', 'firstName', 'lastName', 'email']
+          attributes: ['id', 'name', 'email']
         },
         {
           model: TestQuestion,
           as: 'questions',
-          attributes: ['id', 'question', 'type']
+          attributes: ['id', 'questionText']
         }
       ],
       order: [
@@ -137,12 +137,7 @@ exports.getAllTests = async (req, res) => {
         nextCursor,
         hasMore,
         itemsPerPage: parseInt(limit),
-        totalItemsReturned: items.length,
-        totalPages,
-        totalItems: count,
-        itemsPerPage: parseInt(limit),
-        hasNextPage,
-        hasPrevPage
+        totalItemsReturned: items.length
       }
     });
   } catch (error) {
@@ -172,12 +167,12 @@ exports.getTestById = async (req, res) => {
         {
           model: User,
           as: 'author',
-          attributes: ['id', 'firstName', 'lastName', 'email']
+          attributes: ['id', 'name', 'email']
         },
         {
           model: TestQuestion,
           as: 'questions',
-          attributes: ['id', 'question', 'type', 'options', 'correctAnswer']
+          attributes: ['id', 'questionText']
         },
         {
           model: TestResult,
@@ -185,7 +180,7 @@ exports.getTestById = async (req, res) => {
           attributes: ['id', 'score', 'totalQuestions', 'createdAt'],
           include: [{
             model: User,
-            attributes: ['id', 'firstName', 'lastName']
+            attributes: ['id', 'name']
           }]
         }
       ]
@@ -253,7 +248,7 @@ exports.updateTest = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'firstName', 'lastName', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -352,12 +347,12 @@ exports.searchTestsByTitle = async (req, res) => {
         {
           model: User,
           as: 'author',
-          attributes: ['id', 'firstName', 'lastName', 'email']
+          attributes: ['id', 'name', 'email']
         },
         {
           model: TestQuestion,
           as: 'questions',
-          attributes: ['id', 'question', 'type']
+          attributes: ['id', 'questionText']
         }
       ],
       order: [[sortBy, sortOrder.toUpperCase()]],
@@ -420,12 +415,12 @@ exports.getTestsByAuthor = async (req, res) => {
         {
           model: User,
           as: 'author',
-          attributes: ['id', 'firstName', 'lastName', 'email']
+          attributes: ['id', 'name', 'email']
         },
         {
           model: TestQuestion,
           as: 'questions',
-          attributes: ['id', 'question', 'type']
+          attributes: ['id', 'questionText']
         }
       ],
       order: [[sortBy, sortOrder.toUpperCase()]],

@@ -38,7 +38,7 @@ const createVideo = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -99,7 +99,7 @@ const getAllVideos = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: fetchLimit,
       order: [
@@ -153,7 +153,7 @@ const getVideoById = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -216,7 +216,7 @@ const updateVideo = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }]
     });
 
@@ -302,7 +302,7 @@ const searchVideosByTitle = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'email']
+        attributes: ['id', 'name', 'email']
       }],
       limit: parseInt(limit),
       offset: parseInt(offset),
