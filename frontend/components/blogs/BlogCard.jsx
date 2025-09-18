@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function BlogCard({ title, content, imageRef, category, author, createdAt }) {
   return (
@@ -20,12 +20,30 @@ export function BlogCard({ title, content, imageRef, category, author, createdAt
       )}
       <CardHeader className="space-y-1 pb-2">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-base line-clamp-1">{title}</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className="font-semibold text-base line-clamp-1 cursor-pointer">{title}</h3>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs break-words">
+                {title}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {category && <Badge variant="secondary">{category}</Badge>}
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <p className="text-sm text-muted-foreground mb-2 line-clamp-3">{content}</p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-sm text-muted-foreground mb-2 line-clamp-3 cursor-pointer">{content}</p>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs break-words">
+              {content}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
           {author && <span>By {author}</span>}
           {createdAt && <span>{new Date(createdAt).toLocaleDateString()}</span>}
