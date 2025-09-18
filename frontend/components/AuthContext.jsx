@@ -1,5 +1,6 @@
 'use client'
 
+import BASE_URL from "@/app/config/url"
 import { createContext, useContext, useEffect, useState } from "react"
 
 const AuthContext = createContext({ user: null, loading: true, refresh: () => {} })
@@ -11,7 +12,7 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:3001/auth/me", { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" })
       const data = await res.json()
       
       if (data.success) setUser(data.user)

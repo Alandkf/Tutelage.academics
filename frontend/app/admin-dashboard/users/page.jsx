@@ -6,6 +6,7 @@ import UserTable from "@/components/admin/UserTable"
 import CreateUserForm from "@/components/forms/CreateUserForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
+import BASE_URL from "@/app/config/url"
 
 export default function Page() {
   const [users, setUsers] = useState([])
@@ -21,7 +22,7 @@ export default function Page() {
   useEffect(() => {
     async function fetchCurrentUser() {
       try {
-        const res = await fetch("http://localhost:3001/auth/me", { credentials: "include" })
+        const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" })
         const data = await res.json()        
         if (data.success) setCurrentUser(data.user)
       } catch {}
@@ -33,7 +34,7 @@ export default function Page() {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:3001/users", { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/users`, { credentials: "include" })
       const data = await res.json()
       console.log('Fetched users data:', data.users);
       
@@ -66,7 +67,7 @@ export default function Page() {
     if (!deleteUser) return
     setLoading(true)
     try {
-      await fetch(`http://localhost:3001/users/${deleteUser.id}`, {
+      await fetch(`${BASE_URL}/users/${deleteUser.id}`, {
         method: "DELETE",
         credentials: "include"
       })
@@ -80,7 +81,7 @@ export default function Page() {
   const handleToggleActive = async (user, activate) => {
     setLoading(true)
     try {
-      const url = `http://localhost:3001/users/${user.id}/${activate ? "activate" : "deactivate"}`
+      const url = `${BASE_URL}/users/${user.id}/${activate ? "activate" : "deactivate"}`
       await fetch(url, {
         method: "POST",
         credentials: "include"

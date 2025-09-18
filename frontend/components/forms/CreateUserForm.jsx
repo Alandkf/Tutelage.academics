@@ -5,6 +5,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import BASE_URL from "@/app/config/url"
 
 const createSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -48,14 +49,14 @@ export default function CreateUserForm({ onSuccess, onCancel, initialValues, mod
         // Remove password if blank
         const payload = { ...values }
         if (!payload.password) delete payload.password
-        res = await fetch(`http://localhost:3001/users/${initialValues.id}`, {
+        res = await fetch(`${BASE_URL}/users/${initialValues.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           credentials: "include"
         })
       } else {
-        res = await fetch("http://localhost:3001/users/create", {
+        res = await fetch(`${BASE_URL}/users/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(values),

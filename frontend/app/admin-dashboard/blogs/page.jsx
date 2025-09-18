@@ -10,6 +10,7 @@ import { Plus, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
+import BASE_URL from "@/app/config/url"
 
 export default function BlogsPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -34,7 +35,7 @@ export default function BlogsPage() {
       params.append("limit", 9)
       if (searchTerm) params.append("search", searchTerm)
       if (!reset && nextCursor) params.append("cursor", nextCursor)
-      const res = await fetch(`http://localhost:3001/api/blogs?${params.toString()}`, { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/blogs?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
       if (!data.success) throw new Error(data.message || "Failed to fetch blogs")
       setBlogs(prev => reset ? data.blogs : [...prev, ...data.blogs])
@@ -67,7 +68,7 @@ export default function BlogsPage() {
   // Handlers
   const handleCreateSuccess = async (values) => {
     try {
-      const res = await fetch("http://localhost:3001/api/blogs", {
+      const res = await fetch(`${BASE_URL}/api/blogs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -97,7 +98,7 @@ export default function BlogsPage() {
   const confirmDelete = async () => {
     if (!deleteBlog) return
     try {
-      await fetch(`http://localhost:3001/api/blogs/${deleteBlog.id}`, {
+      await fetch(`${BASE_URL}/api/blogs/${deleteBlog.id}`, {
         method: "DELETE",
         credentials: "include"
       })
@@ -202,7 +203,7 @@ export default function BlogsPage() {
               if (!editBlog) return
               try {
                 // API call for editing blog (PUT)
-                const res = await fetch(`http://localhost:3001/api/blogs/${editBlog.id}`, {
+                const res = await fetch(`${BASE_URL}/api/blogs/${editBlog.id}`, {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
                   credentials: "include",

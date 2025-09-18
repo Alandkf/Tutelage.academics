@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
+import BASE_URL from '@/app/config/url'
 
 const SingleBlog = () => {
   const router = useRouter()
@@ -16,7 +17,7 @@ const SingleBlog = () => {
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    fetch(`http://localhost:3001/api/blogs/${id}`)
+    fetch(`${BASE_URL}/api/blogs/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setBlog(data.data)

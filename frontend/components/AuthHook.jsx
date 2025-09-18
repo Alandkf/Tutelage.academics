@@ -1,5 +1,6 @@
 'use client'
 
+import BASE_URL from "@/app/config/url";
 import { useEffect } from "react";
 
 // app/hooks/useAuth.js
@@ -8,7 +9,7 @@ export function useAuth() {
     // ✅ 1️⃣ On first mount: refresh immediately
     const refreshNow = async () => {
       try {
-        await fetch('http://localhost:3001/auth/refresh-token', {
+        await fetch(`${BASE_URL}/auth/refresh-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -26,7 +27,7 @@ export function useAuth() {
     // ✅ 2️⃣ Then refresh every 30 mins
     const interval = setInterval(async () => {
       try {
-         await fetch('http://localhost:3001/auth/refresh-token', {
+         await fetch(`${BASE_URL}/auth/refresh-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

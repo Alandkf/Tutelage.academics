@@ -2,6 +2,7 @@ import { User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useAuth } from "@/components/AuthContext"
+import BASE_URL from "@/app/config/url"
 
 export default function AdminProfileSection({ onLogout }) {
   const { user, loading } = useAuth()
@@ -9,7 +10,7 @@ export default function AdminProfileSection({ onLogout }) {
   if (!user) return null
 
   const handleLogout = async () => {
-    await fetch("http://localhost:3001/auth/logout", {
+    await fetch(`${BASE_URL}/auth/logout`, {
       method: "POST",
       credentials: "include"
     })

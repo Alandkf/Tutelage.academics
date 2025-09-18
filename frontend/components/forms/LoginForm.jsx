@@ -9,6 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useRouter } from "next/navigation"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
+import BASE_URL from "@/app/config/url"
 
 // Define form schema with Zod
 const formSchema = z.object({
@@ -38,7 +39,7 @@ const LoginForm = () => {
     
     try {
       // Send login request to backend API
-      const response = await fetch('http://localhost:3001/auth/login', {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
