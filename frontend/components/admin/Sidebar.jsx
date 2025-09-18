@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 import { useAuth } from "@/components/AuthContext"
@@ -13,7 +13,7 @@ const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
   { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
-  { icon: MonitorCog, name: "Control-Panel", href: "/admin-dashboard/control-panel" },
+  { icon: Video, name: "Videos", href: "/admin-dashboard/videos" },
 ]
 
 export default function Sidebar() {

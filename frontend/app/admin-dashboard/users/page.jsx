@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import UserTable from "@/components/admin/user/UserTable"
+import UserTable from "@/components/admin/users/UserTable"
 import CreateUserForm from "@/components/forms/CreateUserForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
@@ -93,7 +93,7 @@ export default function Page() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto w-full">
+    <div className="mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Users</h1>
         {currentUser?.role === "ADMIN" && (

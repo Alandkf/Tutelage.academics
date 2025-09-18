@@ -112,7 +112,7 @@ export default function BlogsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto w-full">
+    <div className="mx-auto w-full">
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Blogs</h1>
         {user?.role === "ADMIN" && (

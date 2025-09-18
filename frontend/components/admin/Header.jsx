@@ -12,7 +12,7 @@ export default function Header() {
         </div>        
         <div className="flex items-center gap-1">
               <Link href="/">
-                <Button size="sm">
+                <Button variant={"secondary"} size="sm">
                     Back to Main Page
                 </Button>
               </Link>
