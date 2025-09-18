@@ -1,6 +1,7 @@
 import { Toaster } from "sonner";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthContext";
+import RefreshTokenProvider from "@/components/AuthHook";
 
 
 
@@ -13,10 +14,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <RefreshTokenProvider>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </RefreshTokenProvider>
       </body>
     </html>
   );

@@ -8,13 +8,14 @@ export function useAuth() {
     // ✅ 1️⃣ On first mount: refresh immediately
     const refreshNow = async () => {
       try {
-        await fetch('http://localhost:3001/refresh-token', {
+        await fetch('http://localhost:3001/auth/refresh-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
         });
+        
       } catch (error) {
         console.error('Error refreshing token on mount:', error);
       }
@@ -25,8 +26,7 @@ export function useAuth() {
     // ✅ 2️⃣ Then refresh every 30 mins
     const interval = setInterval(async () => {
       try {
-        console.log('Refreshing token (interval)...');
-         await fetch('http://localhost:3001/refresh-token', {
+         await fetch('http://localhost:3001/auth/refresh-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -36,8 +36,15 @@ export function useAuth() {
       } catch (error) {
         console.error('Error refreshing token (interval):', error);
       }
-    }, 30 * 60 * 1000); // every 30 mins
+    }, 20000); // every 30 mins
 
     return () => clearInterval(interval);
   }, []);
+}
+
+
+// AuthProvider component to wrap the app and keep the token refresh active
+export default function RefreshTokenProvider({ children }) {
+  useAuth();
+  return <>{children}</>;
 }
