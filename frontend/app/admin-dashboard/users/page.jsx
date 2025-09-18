@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import UserTable from "@/components/admin/UserTable"
+import UserTable from "@/components/admin/user/UserTable"
 import CreateUserForm from "@/components/forms/CreateUserForm"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
