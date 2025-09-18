@@ -9,7 +9,7 @@ import BlogForm from "@/components/forms/BlogForm"
 import { Plus, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
-import { useInfiniteBlogs } from "@/components/blogs/useInfiniteBlogs"
+import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
 
 export default function BlogsPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -19,15 +19,50 @@ export default function BlogsPage() {
   const [deleteBlog, setDeleteBlog] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
-  const {
-    blogs,
-    loading,
-    hasMore,
-    error,
-    fetchBlogs,
-    resetAndFetch,
-    lastBlogRef
-  } = useInfiniteBlogs({ searchTerm })
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [nextCursor, setNextCursor] = useState(null)
+  const [error, setError] = useState(null)
+
+  // Fetch blogs with cursor-based pagination
+  const fetchBlogs = async (reset = false) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const params = new URLSearchParams()
+      params.append("limit", 9)
+      if (searchTerm) params.append("search", searchTerm)
+      if (!reset && nextCursor) params.append("cursor", nextCursor)
+      const res = await fetch(`http://localhost:3001/api/blogs?${params.toString()}`, { credentials: "include" })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.message || "Failed to fetch blogs")
+      setBlogs(prev => reset ? data.blogs : [...prev, ...data.blogs])
+      setHasMore(data.hasMore)
+      setNextCursor(data.nextCursor)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Reset and fetch blogs (for search/refresh)
+  const resetAndFetch = () => {
+    setBlogs([])
+    setNextCursor(null)
+    setHasMore(true)
+    fetchBlogs(true)
+  }
+
+  // Fetch on mount and when searchTerm changes
+  useEffect(() => {
+    resetAndFetch()
+    // eslint-disable-next-line
+  }, [searchTerm])
+
+  // Reusable infinite scroll observer
+  const lastBlogRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchBlogs })
 
   // Handlers
   const handleCreateSuccess = async (values) => {
