@@ -112,10 +112,10 @@ export default function BlogsPage() {
 
   return (
     <div className="max-w-5xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+      <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Blogs</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
             <Plus className="h-5 w-5" />
             Create Blog
           </Button>

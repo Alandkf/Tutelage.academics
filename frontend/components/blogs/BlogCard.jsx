@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 
 export function BlogCard({ title, content, imageRef, category, author, createdAt }) {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">
+    <Card className="pt-0 overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">
       {imageRef && (
-        <div className="relative h-40 w-full">
+        <div className="relative h-44 w-full">
           <Image
             src={imageRef}
             alt={title}
