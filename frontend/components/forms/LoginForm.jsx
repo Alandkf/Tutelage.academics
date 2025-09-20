@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
 import BASE_URL from "@/app/config/url"
+console.log('BASE_URL:', BASE_URL);
 
 // Define form schema with Zod
 const formSchema = z.object({
@@ -39,7 +40,7 @@ const LoginForm = () => {
     
     try {
       // Send login request to backend API
-      const response = await fetch(`${BASE_URL}/auth/login`, {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

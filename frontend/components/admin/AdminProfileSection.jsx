@@ -10,7 +10,7 @@ export default function AdminProfileSection({ onLogout }) {
   if (!user) return null
 
   const handleLogout = async () => {
-    await fetch(`${BASE_URL}/auth/logout`, {
+    await fetch(`${BASE_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include"
     })

@@ -49,14 +49,14 @@ export default function CreateUserForm({ onSuccess, onCancel, initialValues, mod
         // Remove password if blank
         const payload = { ...values }
         if (!payload.password) delete payload.password
-        res = await fetch(`${BASE_URL}/users/${initialValues.id}`, {
+        res = await fetch(`${BASE_URL}/api/users/${initialValues.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           credentials: "include"
         })
       } else {
-        res = await fetch(`${BASE_URL}/users/create`, {
+        res = await fetch(`${BASE_URL}/api/users/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(values),

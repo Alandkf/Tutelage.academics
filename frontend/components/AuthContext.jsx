@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/auth/me`, { credentials: "include" })
       const data = await res.json()
       
       if (data.success) setUser(data.user)

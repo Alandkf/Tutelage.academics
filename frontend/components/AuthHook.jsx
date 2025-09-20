@@ -9,7 +9,7 @@ export function useAuth() {
     // ✅ 1️⃣ On first mount: refresh immediately
     const refreshNow = async () => {
       try {
-        await fetch(`${BASE_URL}/auth/refresh-token`, {
+        await fetch(`${BASE_URL}/api/auth/refresh-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export function useAuth() {
     // ✅ 2️⃣ Then refresh every 30 mins
     const interval = setInterval(async () => {
       try {
-         await fetch(`${BASE_URL}/auth/refresh-token`, {
+         await fetch(`${BASE_URL}/api/auth/refresh-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

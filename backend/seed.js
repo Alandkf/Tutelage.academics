@@ -15,7 +15,7 @@ const { sequelize, User, Blog, Video, Audio, Course, Test, Faq, Appointment } = 
 // ============================================================================
 
 const BCRYPT_SALT_ROUNDS = 12;
-const DEFAULT_ADMIN_PASSWORD = 'admin123';
+const DEFAULT_ADMIN_PASSWORD = '12121212';
 const DEFAULT_USER_PASSWORD = 'user123';
 
 // ============================================================================
@@ -46,6 +46,12 @@ const SEED_USERS = [
         email: 'emily.davis@example.com',
         role: 'ADMIN',
         password: DEFAULT_USER_PASSWORD
+    },
+    {
+        name: 'Rekar',
+        email: 'r@gmail.com',
+        role: 'ADMIN',
+        password: DEFAULT_ADMIN_PASSWORD
     },
     {
         name: 'Michael Brown',
@@ -91,6 +97,108 @@ const SEED_BLOGS = [
         category: 'Backend'
     },
     {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
+        title: 'Node.js Backend Development Guide',
+        content: 'Master backend development with Node.js. Learn about Express.js, middleware, authentication, database integration, API design, and deployment strategies. Build robust and scalable server-side applications.',
+        imageRef: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
+        category: 'Backend'
+    },
+    {
         title: 'CSS Grid and Flexbox Mastery',
         content: 'Modern CSS layout techniques using Grid and Flexbox. Learn how to create responsive, flexible layouts that work across all devices. Includes practical examples and real-world use cases.',
         imageRef: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=60',
@@ -107,6 +215,86 @@ const SEED_VIDEOS = [
         title: 'Introduction to Calculus',
         videoRef: 'https://example.com/videos/calculus-intro.mp4',
         description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+    },
+    {
+        title: 'Physics: Newton\'s Laws',
+        videoRef: 'https://example.com/videos/newton-laws.mp4',
+        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
     },
     {
         title: 'Physics: Newton\'s Laws',
@@ -152,6 +340,118 @@ const SEED_AUDIOS = [
         category: 'Technology'
     },
     {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
+        title: 'Tech Talk - Future of Web Development',
+        description: 'Exploring emerging trends and technologies shaping the future of web development.',
+        audioRef: 'https://www.soundcloud.com/example/future-web-dev',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
+        duration: '38:45',
+        category: 'Technology'
+    },
+    {
         title: 'Career Advice - Breaking into Tech',
         description: 'Practical advice for newcomers looking to start their career in technology and programming.',
         audioRef: 'https://www.soundcloud.com/example/breaking-into-tech',
@@ -182,6 +482,150 @@ const SEED_COURSES = [
         duration: '12 weeks',
         level: 'Beginner',
         category: 'Web Development'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
+    },
+    {
+        title: 'Advanced React Development',
+        description: 'Master advanced React concepts including hooks, context, performance optimization, testing, and modern development patterns.',
+        imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
+        price: 149.99,
+        duration: '8 weeks',
+        level: 'Advanced',
+        category: 'Frontend'
     },
     {
         title: 'Advanced React Development',
@@ -319,6 +763,41 @@ const SEED_FAQS = [
         question: 'How long does it take to learn programming?',
         answer: 'The timeline varies depending on your goals and dedication. Basic programming concepts can be learned in a few months with consistent practice. Becoming proficient enough for a job typically takes 6-12 months of focused learning and practice.',
         category: 'Learning'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
+    },
+    {
+        question: 'Which programming language should I learn first?',
+        answer: 'For web development, start with JavaScript as it works for both frontend and backend. For general programming, Python is beginner-friendly. The choice depends on your goals - web development, mobile apps, data science, etc.',
+        category: 'Programming Languages'
     },
     {
         question: 'Which programming language should I learn first?',
