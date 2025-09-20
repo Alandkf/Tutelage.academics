@@ -200,8 +200,8 @@ const updateAudio = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (audio.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only update your own audio content'
@@ -258,8 +258,8 @@ const deleteAudio = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (audio.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only delete your own audio content'
