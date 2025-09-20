@@ -190,8 +190,8 @@ const updateBlog = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (blog.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only update your own blog posts'
@@ -247,8 +247,8 @@ const deleteBlog = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (blog.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only delete your own blog posts'

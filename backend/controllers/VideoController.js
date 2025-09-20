@@ -197,8 +197,8 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (video.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only update your own video content'
@@ -253,8 +253,8 @@ const deleteVideo = async (req, res) => {
       });
     }
 
-    // Check if user is the author or admin
-    if (video.createdBy !== req.user.id && req.user.role !== 'admin') {
+    // Check if user is the admin
+    if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'You can only delete your own video content'
