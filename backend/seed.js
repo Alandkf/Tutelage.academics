@@ -213,109 +213,109 @@ const SEED_BLOGS = [
 const SEED_VIDEOS = [
     {
         title: 'Introduction to Calculus',
-        videoRef: 'https://example.com/videos/calculus-intro.mp4',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
         description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Physics: Newton\'s Laws',
-        videoRef: 'https://example.com/videos/newton-laws.mp4',
-        description: 'Understanding the three fundamental laws of motion by Sir Isaac Newton.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Chemistry: Periodic Table',
-        videoRef: 'https://example.com/videos/periodic-table.mp4',
-        description: 'Exploring the periodic table of elements and their properties.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'Biology: Cell Structure',
-        videoRef: 'https://example.com/videos/cell-structure.mp4',
-        description: 'Detailed examination of plant and animal cell structures and functions.'
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
     },
     {
-        title: 'History: World War II',
-        videoRef: 'https://example.com/videos/wwii-overview.mp4',
-        description: 'A comprehensive overview of World War II events and their global impact.'
-    }
+        title: 'Introduction to Calculus',
+        videoRef: 'https://youtu.be/XCaCD7Yn8AI?si=80P4WEcsETpTNt22',
+        description: 'A comprehensive introduction to calculus concepts including limits, derivatives, and integrals.'
+    },
 ];
 
 // ============================================================================

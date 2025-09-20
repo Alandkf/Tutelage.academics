@@ -145,7 +145,7 @@ const initializeServer = async () => {
         
         // Sync database models (WARNING: force: true drops existing tables)
         const FORCE_DB_RESET = process.env.NODE_ENV === 'development';
-        await sequelize.sync({ force: FORCE_DB_RESET });
+        await sequelize.sync({ force: false });
         console.log('✅ Database models synchronized successfully');
         
         // Initialize session store
