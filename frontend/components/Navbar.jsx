@@ -71,7 +71,7 @@ export default function Navbar (){
   return (
     <nav className="sticky top-0 z-50">
       {/* Top Bar */}
-      <div className="w-full flex items-center justify-between mb-2 px-4 sm:px-6 lg:px-8 h-14 bg-background">
+      <div className="w-full flex items-center justify-between my-2 px-4 sm:px-6 lg:px-8 h-14 bg-background">
         <div className="max-w-6xl w-full flex items-center justify-between mx-auto">
           {/* Logo */}
           <div className="flex items-center gap-3">
