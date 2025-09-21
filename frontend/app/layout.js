@@ -2,6 +2,8 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthContext";
 import RefreshTokenProvider from "@/components/AuthHook";
+import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 
 
 
@@ -16,6 +18,9 @@ export default function RootLayout({ children }) {
       <body>
         <RefreshTokenProvider>
           <AuthProvider>
+            <NavbarWrapper>
+              <Navbar />
+            </NavbarWrapper>
             {children}
             <Toaster />
           </AuthProvider>
