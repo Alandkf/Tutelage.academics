@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
+import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 
 
 export default function Navbar (){
@@ -67,98 +69,123 @@ export default function Navbar (){
   ]
 
   return (
-    <nav className="bg-black border-b border-yellow-400/20 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="sticky top-0 z-50">
+      {/* Top Bar */}
+      <div className="w-full flex items-center justify-between mb-2 px-4 sm:px-6 lg:px-8 h-14 bg-background">
+        <div className="max-w-6xl w-full flex items-center justify-between mx-auto">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center space-x-4 md:space-x-10">
-            <div className="text-yellow-400 font-bold text-lg md:text-xl">
-              <div className='flex items-center space-x-2 md:space-x-4'>
-                  <Image src={'/only-logo-black-border-yellow-bg.svg'} className='w-[35px] h-[35px] md:w-[40px] md:h-[40px]' alt='logo' width={40} height={40} />
-                  <h3 className="font-bold text-white">Tutelage</h3>
+          <div className="flex items-center gap-3">
+            <Image src={'/only-logo-black-border-yellow-bg.svg'} className='w-[35px] h-[35px] md:w-[40px] md:h-[40px]' alt='logo' width={40} height={40} />
+            <h3 className="font-bold text-foreground text-lg md:text-xl">Tutelage</h3>
+          </div>
+          {/* Search + ThemeToggle */}
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Desktop search */}
+            <div className="hidden md:flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="Search..."
+                className="w-48 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm"
+              />
+              <ThemeToggle />
+            </div>
+            {/* Mobile search icon */}
+            <div className="lg:hidden flex items-center gap-2">
+              <MobileSearchOverlay />
+              <ThemeToggle />
+            </div>
+            {/* Changing Websites */}
+            <div className='hidden lg:flex items-center justify-center gap-2 text-md md:text-lg ml-4'>
+              <div className='text-primary font-bold cursor-pointer'>
+                <h1>Tutelage</h1>
               </div>
+              <p className='text-foreground'>|</p>
+              <Link href="http://tutelage.vercel.app" className='text-muted-foreground font-bold cursor-pointer'>
+                <h1>Tutelage AI</h1>
+              </Link>
             </div>
-            
-
-            {/* CHAHNGING WEBSITES */}
-            <div className='flex items-center justify-center gap-2 text-md md:text-lg'>
-                <div className='text-white font-bold cursor-pointer'>
-                  <h1>Tutelage</h1>
-                </div>
-
-                <p className='text-white'>|</p>
-
-                <div className='text-gray-500 font-bold cursor-pointer'>
-                  <h1>Tutelage AI</h1>
-                </div>
-            </div>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {navItems.map((item) => (
-                <div
-                  key={item.name}
-                  className="relative"
-                  onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <a
-                    href={item.href}
-                    className="text-white hover:text-yellow-400 px-3 py-2 text-sm font-medium flex items-center gap-1 transition-colors duration-200"
-                  >
-                    {item.name}
-                    {item.dropdown && (
-                      <div
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </div>
-                    )}
-                  </a>
-
-                  {/* Dropdown Menu */}
-                  <AnimatePresence>
-                    {item.dropdown && activeDropdown === item.name && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="absolute top-full left-0 mt-2 w-56 bg-black/95 backdrop-blur-sm border border-yellow-400/20 rounded-lg shadow-xl overflow-hidden"
-                      >
-                        <div className="py-2">
-                          {item.dropdown.map((dropdownItem, index) => (
-                            <a
-                              key={dropdownItem.name}
-                              href={dropdownItem.href}
-                              className="block px-4 py-3 text-sm text-white hover:text-yellow-400 hover:bg-yellow-400/10 transition-all duration-200"
-                            >
-                              {dropdownItem.name}
-                            </a>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white hover:text-yellow-400 p-2"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </motion.button>
           </div>
         </div>
       </div>
+      {/* Bottom Bar: Navigation */}
+      <div className="w-full bg-background border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16">
+            <div className="flex-1 flex items-center justify-center">
+              <div className="hidden lg:flex space-x-8">
+                {navItems.map((item) => (
+                  <div
+                    key={item.name}
+                    className="relative"
+                    onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <Link
+                      href={item.href}
+                      className="text-foreground hover:text-primary px-4 py-2 text-lg font-semibold flex items-center gap-1 transition-colors duration-200"
+                    >
+                      {item.name}
+                      {item.dropdown && (
+                        <ChevronDown className="w-5 h-5" />
+                      )}
+                    </Link>
+                    <AnimatePresence>
+                      {item.dropdown && activeDropdown === item.name && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          className="absolute top-full left-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-xl overflow-hidden"
+                        >
+                          <div className="py-2">
+                            {item.dropdown.map((dropdownItem, index) => (
+                              <Link
+                                key={dropdownItem.name}
+                                href={dropdownItem.href}
+                                className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                              >
+                                {dropdownItem.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Mobile menu button */}
+            <div className="flex items-center justify-between w-full lg:hidden ml-auto">
 
+              <div className=''>
+                    {/* Changing Websites */}
+                    <div className='flex items-center justify-center gap-2 text-lg'>
+                        <div className='text-foreground font-bold cursor-pointer'>
+                            <h1>Tutelage</h1>
+                        </div>
+                        <p className='text-foreground'>|</p>
+                        <div className='text-muted-foreground font-bold cursor-pointer'>
+                            <h1>Tutelage AI</h1>
+                        </div>
+                    </div>
+              </div>
+
+              {/* MENU ICON */}
+              <div className=''>
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="text-foreground hover:text-primary p-2"
+                >
+                    {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </motion.button>
+              </div>  
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Mobile Navigation */}
       <AnimatePresence>
         {mobileMenuOpen && (
@@ -166,42 +193,74 @@ export default function Navbar (){
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-black/95 backdrop-blur-sm border-t border-yellow-400/20 overflow-y-auto"
-            style={{ maxHeight: 'calc(100dvh - 4rem)' }}
+            className="lg:hidden bg-background border-t border-border overflow-y-auto"
+            style={{ maxHeight: 'calc(88dvh - 4rem)' }}
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item, index) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <a
+                <div key={item.name}>
+                  <Link
                     href={item.href}
-                    className="text-white hover:text-yellow-400 block px-3 py-2 text-base font-medium transition-colors duration-200"
+                    className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
                   >
                     {item.name}
-                  </a>
+                  </Link>
                   {item.dropdown && (
                     <div className="ml-4 space-y-1">
                       {item.dropdown.map((dropdownItem) => (
-                        <a
+                        <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href}
-                          className="text-gray-300 hover:text-yellow-400 block px-3 py-2 text-sm transition-colors duration-200"
+                          className="text-muted-foreground hover:text-primary block px-3 py-2 text-sm transition-colors duration-200"
                         >
                           {dropdownItem.name}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </nav>
+  )
+}
+
+// Mobile search overlay
+function MobileSearchOverlay() {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        className="text-foreground hover:text-primary"
+        onClick={() => setOpen(true)}
+        aria-label="Open search"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+        </svg>
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-[100] bg-background/95 flex items-start justify-center pt-10 px-4">
+          <div className="relative w-full max-w-xs mx-auto">
+            <Input
+              type="text"
+              placeholder="Search..."
+              className="w-full bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm"
+              autoFocus
+            />
+            <button
+              className="absolute top-2 right-2 text-muted-foreground hover:text-primary"
+              onClick={() => setOpen(false)}
+              aria-label="Close search"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
