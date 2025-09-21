@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/AuthContext";
 import RefreshTokenProvider from "@/components/AuthHook";
 import Navbar from "@/components/Navbar";
 import NavbarWrapper from "@/components/NavbarWrapper";
+import ThemeProvider from "@/components/ThemeProvider";
 
 
 
@@ -16,15 +17,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <RefreshTokenProvider>
-          <AuthProvider>
-            <NavbarWrapper>
-              <Navbar />
-            </NavbarWrapper>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </RefreshTokenProvider>
+        <ThemeProvider>
+          <RefreshTokenProvider>
+            <AuthProvider>
+              <NavbarWrapper>
+                <Navbar />
+              </NavbarWrapper>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </RefreshTokenProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

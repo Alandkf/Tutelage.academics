@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import Image from 'next/image'
+import ThemeToggle from './ThemeToggle'
 
 
 export default function Navbar (){
@@ -77,7 +78,9 @@ export default function Navbar (){
                   <h3 className="font-bold text-white">Tutelage</h3>
               </div>
             </div>
+            
 
+            {/* CHAHNGING WEBSITES */}
             <div className='flex items-center justify-center gap-2 text-md md:text-lg'>
                 <div className='text-white font-bold cursor-pointer'>
                   <h1>Tutelage</h1>
