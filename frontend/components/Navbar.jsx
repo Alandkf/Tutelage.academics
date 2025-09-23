@@ -7,11 +7,13 @@ import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 
 export default function Navbar (){
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   const navItems = [
     {
@@ -69,7 +71,7 @@ export default function Navbar (){
   ]
 
   return (
-    <nav className="top-0 z-50 bg-background">
+    <nav className="top-0 z-50 bg-background md:pt-4 ">
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 bg-background">
         <div className="max-w-6xl w-full flex items-center justify-between mx-auto">
@@ -113,47 +115,50 @@ export default function Navbar (){
           <div className="flex items-center h-16">
             <div className="flex-1 flex items-center justify-center">
               <div className="hidden lg:flex space-x-8">
-                {navItems.map((item) => (
-                  <div
-                    key={item.name}
-                    className="relative"
-                    onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
-                    onMouseLeave={() => setActiveDropdown(null)}
-                  >
-                    <Link
-                      href={item.href}
-                      className="text-foreground hover:text-primary px-4 py-2 text-lg font-semibold flex items-center gap-1 transition-colors duration-200"
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href.trim()
+                  return (
+                    <div
+                      key={item.name}
+                      className="relative"
+                      onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
+                      onMouseLeave={() => setActiveDropdown(null)}
                     >
-                      {item.name}
-                      {item.dropdown && (
-                        <ChevronDown className="w-5 h-5" />
-                      )}
-                    </Link>
-                    <AnimatePresence>
-                      {item.dropdown && activeDropdown === item.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
-                          className="absolute top-full left-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-xl overflow-hidden"
-                        >
-                          <div className="py-2">
-                            {item.dropdown.map((dropdownItem, index) => (
-                              <Link
-                                key={dropdownItem.name}
-                                href={dropdownItem.href}
-                                className="block px-4 py-3 text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
-                              >
-                                {dropdownItem.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+                      <Link
+                        href={item.href}
+                        className={`px-4 py-2 text-lg font-semibold flex items-center gap-1 transition-colors duration-200 ${isActive ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
+                      >
+                        {item.name}
+                        {item.dropdown && (
+                          <ChevronDown className="w-5 h-5" />
+                        )}
+                      </Link>
+                      <AnimatePresence>
+                        {item.dropdown && activeDropdown === item.name && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="absolute top-full left-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-xl overflow-hidden"
+                          >
+                            <div className="py-2">
+                              {item.dropdown.map((dropdownItem, index) => (
+                                <Link
+                                  key={dropdownItem.name}
+                                  href={dropdownItem.href}
+                                  className={`block px-4 py-3 transition-all duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-bold' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}
+                                >
+                                  {dropdownItem.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })}
               </div>
             </div>
             {/* Mobile menu button */}
@@ -201,7 +206,7 @@ export default function Navbar (){
                 <div key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-foreground hover:text-primary block px-3 py-2 text-base font-medium transition-colors duration-200"
+                    className={`block px-3 py-2 text-base font-medium transition-colors duration-200 ${pathname === item.href.trim() ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
                   >
                     {item.name}
                   </Link>
@@ -211,7 +216,7 @@ export default function Navbar (){
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href}
-                          className="text-muted-foreground hover:text-primary block px-3 py-2 text-sm transition-colors duration-200"
+                          className={`block px-3 py-2 text-sm transition-colors duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'}`}
                         >
                           {dropdownItem.name}
                         </Link>

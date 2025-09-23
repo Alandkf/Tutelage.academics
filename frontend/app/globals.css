@@ -34,7 +34,7 @@ html, body {
   --secondary: #111111;
   --secondary-foreground: #ffffff;
   --muted: #1e1e1e;
-  --muted-foreground: #a1a1aa;
+  --muted-foreground: #4a4a50;
   --accent: #fec016 ; /* Logo color */
   --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
