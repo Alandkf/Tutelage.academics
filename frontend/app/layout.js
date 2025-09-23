@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="mt-0 pt-0">
       <head>
         <link
           rel="icon"
@@ -21,14 +21,16 @@ export default function RootLayout({ children }) {
           type="image/svg+xml"
         />
       </head>
-      <body>
+      <body className="relative">
         <ThemeProvider>
           <RefreshTokenProvider>
             <AuthProvider>
               <NavbarWrapper>
-                <Navbar />
+                <div className="absolute top-0 left-0 w-full z-50">
+                  <Navbar />
+                </div>
               </NavbarWrapper>
-              {children}
+              <div className="relative z-10">{children}</div>
               <Toaster />
             </AuthProvider>
           </RefreshTokenProvider>
