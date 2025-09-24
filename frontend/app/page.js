@@ -1,5 +1,6 @@
 'use client'
 
+import { AboutUsSection } from '@/components/landing/About'
 import HeroSection from '@/components/landing/Hero'
 import Image from 'next/image'
 
@@ -10,6 +11,10 @@ const Home = () => {
   {/* HERO SECTION */}
   <HeroSection />
 
+    {/* ABOUT SECTION */}
+    <div className='mt-4 sm:mt-0'>
+      <AboutUsSection />
+    </div>
    </>
   )
 }

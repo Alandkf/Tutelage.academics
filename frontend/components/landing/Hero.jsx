@@ -11,6 +11,7 @@ export default function HeroSection() {
           alt="Landing Hero"
           fill
           priority
+          quality={100}
           className="object-cover object-center w-full h-full"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
         />
