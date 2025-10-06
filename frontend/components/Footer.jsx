@@ -179,7 +179,7 @@ export const Footer = () => {
               className={`flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs sm:text-sm md:justify-end`}
             >
               <Link href="/privacy" className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200">
-                  rivacy Policy
+                  Privacy Policy
               </Link>
               <Link href="/terms" className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200">
                 Terms of Service
