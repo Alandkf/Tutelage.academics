@@ -22,46 +22,61 @@ export default function Navbar (){
       dropdown: null,
     },
     {
-      name: "ESL resources ",
-      href: "/eslresources ",
-      dropdown: [
-        { name: "Short Story", href: "/shortstory" },
-        { name: "Blog", href: "/blogs" },
-        { name: "Video", href: "/Video" },
-        { name: "authentic material", href: "/authenticmaterial" },
-      ],
-    },
-    {
       name: "Courses",
       href: "/courses",
       dropdown: [
         { name: "General English", href: "/generalenglish" },
         { name: "Academic English", href: "/academicenglish" },
-        { name: "Language Preparation Test", href: "/languagepreparationtest" },
+        { name: "English proficiency Tests", href: "/Englishproficiencytests" },
         { name: "ESP", href: "/esp" },
         { name: "Business English", href: "/businessenglish" },
         { name: "Entrepreneurship", href: "/entrepreneurship" },
       ],
     },
-     {
-      name: "Services",
-      href: "/services",
+    {
+      name: "Slills ",
+      href: "/skills ",
       dropdown: [
-        { name: "Group VIP Classes", href: "/vipclasses" },
-        { name: "Private Tutoring", href: "/privatetouring" },
-        { name: "Virtual Classes", href: "/virtualclasses, " },
-        { name: "Physical Classes", href: "/physicalclasses" },
-        { name: "Corporate Training ", href: "/corporatetraining " }
+        { name: "Listening", href: "/listening" },
+        { name: "Speaking", href: "/speaking" },
+        { name: "Reading", href: "/reading" },
+        { name: "Writing", href: "/writing" },
+      ],
+    },
+    {
+      name: "ESL resources ",
+      href: "/eslresources ",
+      dropdown: [
+        { name: "Story Library", href: "/storys" },
+        { name: "Blog Library", href: "/blogs" },
+        { name: "Video Library", href: "/video" },
+        { name: "Audio Library", href: "/audio" },
+      ],
+    },
+     {
+      name: "Levels",
+      href: "/levels",
+      dropdown: [
+        { name: "A1 Level", href: "/A1level" },
+        { name: "A2 Level", href: "/A2level" },
+        { name: "B1 Level", href: "/B1level, " },
+        { name: "B2 Level", href: "/B2level" },
+        { name: "C1 Level", href: "/C1level " },
       ],
     },
     {
       name: "Tutelage Tests ",
       href: "/tutelagetests ",
       dropdown: [
-        { name: "Practice Tests", href: "/practicetests" },
-        { name: "IELTS Preparation", href: "/IELTS-preparation" },
-        { name: "Mock exams", href: "/mockexams" },
+        { name: "Free Practice Tests", href: "/practicetests" },
+        { name: "Language placement test", href: "/languageplacement" },
+        { name: "International/ mock test", href: "/mockexams" },
       ],
+    },
+    {
+      name: "About Us",
+      href: "/aboutus",
+      dropdown: null,
     },
     {
       name: "Contact",
@@ -111,10 +126,10 @@ export default function Navbar (){
       </div>
       {/* Bottom Bar: Navigation */}
       <div className="w-full bg-background border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <div className="flex-1 flex items-center justify-center">
-              <div className="hidden lg:flex space-x-8">
+              <div className="hidden lg:flex lg:space-x-2 xl:space-x-8">
                 {navItems.map((item) => {
                   const isActive = pathname === item.href.trim()
                   return (

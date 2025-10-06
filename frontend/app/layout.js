@@ -5,6 +5,7 @@ import RefreshTokenProvider from "@/components/AuthHook";
 import Navbar from "@/components/Navbar";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import ThemeProvider from "@/components/ThemeProvider";
+import { Footer } from "@/components/Footer";
 
 export const metadata = {
   title: "Tutelage",
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
                 </div>
               </NavbarWrapper>
               <div className="relative z-10">{children}</div>
+              <Footer />
               <Toaster />
             </AuthProvider>
           </RefreshTokenProvider>
