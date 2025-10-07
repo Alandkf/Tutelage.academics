@@ -27,9 +27,7 @@ export default function RootLayout({ children }) {
           <RefreshTokenProvider>
             <AuthProvider>
               <NavbarWrapper>
-                <div className="absolute top-0 left-0 w-full z-50">
                   <Navbar />
-                </div>
               </NavbarWrapper>
               <div className="relative z-10">{children}</div>
               <Footer />

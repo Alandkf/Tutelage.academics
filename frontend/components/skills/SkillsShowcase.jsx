@@ -9,7 +9,7 @@ const SkillsShowcase = () => {
     {
       title: "Listening",
       description: "Enhance your ability to understand spoken English through interactive audio exercises, podcasts, and conversation practice.",
-      image: "/hero.jpg", // You'll need to add these images
+      image: "/hero.jpg", 
       href: "/skills/listening",
       features: ["Audio Comprehension", "Pronunciation Training", "Interactive Dialogues"]
     },
@@ -24,7 +24,7 @@ const SkillsShowcase = () => {
       title: "Reading",
       description: "Improve reading comprehension and vocabulary through diverse texts, articles, and interactive reading materials.",
       image: "/hero.jpg",
-      href: "skills//reading",
+      href: "/skills/reading",
       features: ["Comprehension Exercises", "Vocabulary Building", "Speed Reading"]
     },
     {
