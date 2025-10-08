@@ -28,9 +28,7 @@ export default function Navbar (){
         { name: "General English", href: "/courses/generalenglish" },
         { name: "Academic English", href: "/courses/academicenglish" },
         { name: "English proficiency Tests", href: "/courses/Englishproficiencytests" },
-        { name: "ESP", href: "/courses/esp" },
         { name: "Business English", href: "/courses/businessenglish" },
-        { name: "Entrepreneurship", href: "/courses/entrepreneurship" },
       ],
     },
     {
