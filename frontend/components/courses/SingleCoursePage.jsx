@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, Users, Award, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Clock, Users, Award, ChevronRight, ArrowRight } from 'lucide-react'
 
 const SingleCoursePage = ({ courseData }) => {
   const { 
@@ -16,6 +16,45 @@ const SingleCoursePage = ({ courseData }) => {
     enrollButtonText = "Enroll Now",
     backLink = "/courses"
   } = courseData
+
+  // All available courses data
+  const allCourses = [
+    {
+      title: "General English",
+      description: "Build a strong foundation in English with our comprehensive General English program.",
+      image: "/hero.jpg",
+      href: "/courses/generalenglish",
+      level: "All Levels",
+      duration: "12-16 weeks"
+    },
+    {
+      title: "Academic English",
+      description: "Master academic English skills for university study and professional research.",
+      image: "/hero.jpg", 
+      href: "/courses/academicenglish",
+      level: "B2-C2",
+      duration: "16-20 weeks"
+    },
+    {
+      title: "English Proficiency Tests",
+      description: "Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.",
+      image: "/hero.jpg",
+      href: "/courses/Englishproficiencytests", 
+      level: "B1-C2",
+      duration: "8-12 weeks"
+    },
+    {
+      title: "Business English",
+      description: "Master professional English communication for the global business world.",
+      image: "/hero.jpg",
+      href: "/courses/businessenglish",
+      level: "B1-C2", 
+      duration: "12-16 weeks"
+    }
+  ]
+
+  // Filter out the current course from similar courses
+  const similarCourses = allCourses.filter(course => course.title !== title)
 
   return (
     <div className="relative min-h-screen bg-background pt-4">
@@ -141,6 +180,84 @@ const SingleCoursePage = ({ courseData }) => {
               {enrollButtonText}
               <ChevronRight className="ml-3 w-6 h-6" />
             </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Similar Courses Section */}
+      <div className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/20">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Similar Courses
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore other English courses that might interest you and complement your learning journey.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {similarCourses.map((course, index) => (
+              <div 
+                key={index}
+                className="bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+              >
+                {/* Course Image */}
+                <div className="relative h-48 w-full overflow-hidden">
+                  <Image
+                    src={course.image}
+                    alt={`${course.title} course`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                </div>
+
+                {/* Course Content */}
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                    {course.title}
+                  </h3>
+                  
+                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                    {course.description}
+                  </p>
+
+                  {/* Course Details */}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-6">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>{course.duration}</span>
+                    </div>
+                    {/* <div className="bg-primary/10 text-primary px-2 py-1 rounded-full">
+                      {course.level}
+                    </div> */}
+                  </div>
+
+                  {/* View Course Button */}
+                  <Link href={course.href} className="block">
+                    <Button 
+                      className="w-full group-hover:bg-primary/90 transition-colors duration-200"
+                      size="sm"
+                    >
+                      View Course
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* View All Courses Button */}
+          <div className="text-center mt-12">
+            <Link href="/courses">
+              <Button variant="outline" size="lg" className="px-8 py-3">
+                View All Courses
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
