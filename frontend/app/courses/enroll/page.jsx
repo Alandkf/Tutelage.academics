@@ -197,7 +197,6 @@ const EnrollPage = () => {
   }
 
   const redirectAfterSuccess = () => {
-    setShowSuccessDialog(false)
     router.push("/")
   }
 
@@ -475,7 +474,7 @@ const EnrollPage = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-4">
-            <Button onClick={() => setShowSuccessDialog(false)}>
+            <Button onClick={redirectAfterSuccess}>
               Continue Exploring
             </Button>
           </div>
