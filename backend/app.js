@@ -29,6 +29,8 @@ const faqRoutes = require('./routes/faqs');
 const appointmentRoutes = require('./routes/appointments');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+const enrollmentRoutes = require('./routes/enrollment');
+
 
 // ============================================================================
 // EXPRESS APPLICATION SETUP
@@ -105,6 +107,8 @@ app.use('/api/faqs', faqRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/enrollment', enrollmentRoutes);
+
 
 // ============================================================================
 // HEALTH CHECK ENDPOINTS

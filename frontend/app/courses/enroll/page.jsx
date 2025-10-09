@@ -53,6 +53,7 @@ const EnrollPage = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [preselectedCourse, setPreselectedCourse] = useState('')
   const [selectKey, setSelectKey] = useState(0) // Add this to force re-render
+  const [loading, setLoading] = useState(false)
 
   // Form setup
   const {
@@ -129,15 +130,51 @@ const EnrollPage = () => {
   // Form submission handler
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      setLoading(true)
       
-      console.log('Enrollment data:', data)
+      console.log('Submitting enrollment data:', data)
+      
+      // Send enrollment data to API
+      const response = await fetch(`${BASE_URL}/api/enrollment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to submit enrollment')
+      }
+      
+      console.log('Enrollment submitted successfully:', result)
       
       // Show success dialog
       setShowSuccessDialog(true)
+      
+      // Reset form
+      setValue('name', '')
+      setValue('email', '')
+      setValue('phone', '')
+      setValue('age', '')
+      setValue('education', '')
+      // Keep the course selection if it was pre-selected
+      if (!preselectedCourse) {
+        setValue('course', '')
+      }
+      
     } catch (error) {
       console.error('Enrollment error:', error)
+      
+      // Show user-friendly error message
+      const errorMessage = error.message || 'Failed to submit enrollment. Please try again.'
+      
+      // You could add a toast notification here instead of alert
+      alert(`Error: ${errorMessage}`)
+    } finally {
+      setLoading(false)
     }
   }
 
