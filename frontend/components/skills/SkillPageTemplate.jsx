@@ -128,8 +128,55 @@ const SkillPageTemplate = ({ skillData }) => {
         </div>
       </div>
 
+      {/* Level Assessment Section */}
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6">
+              Unsure About Your Current Level?
+            </h2>
+            
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 leading-relaxed">
+              Discover your English proficiency level with our comprehensive assessment. 
+              Take our free language placement test to get personalized recommendations 
+              and find the perfect starting point for your {title.toLowerCase()} journey.
+            </p>
+
+            {/* Benefits Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+              <div className="text-center p-4">
+                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
+                <p className="text-sm font-medium text-foreground">Free Assessment</p>
+              </div>
+              <div className="text-center p-4">
+                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
+                <p className="text-sm font-medium text-foreground">Instant Results</p>
+              </div>
+              <div className="text-center p-4">
+                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
+                <p className="text-sm font-medium text-foreground">Personalized Guidance</p>
+              </div>
+            </div>
+
+            <Link href="/tutelagetests/languageplacement">
+              <Button 
+                size="lg" 
+                className="px-10 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+              >
+                Take Language Placement Test
+                <ChevronRight className="ml-3 w-6 h-6" />
+              </Button>
+            </Link>
+
+            <p className="text-sm text-muted-foreground mt-4">
+              No registration required • Results in 15-20 minutes • Completely free
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Learn Confidently Section */}
-      <div className="py-20">
+      <div className="py-20 bg-muted/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-8">

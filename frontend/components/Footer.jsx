@@ -33,7 +33,7 @@ export const Footer = () => {
   ]
 
   return (
-    <footer className="bg-background text-foreground relative overflow-hidden border-t border-gray-800">
+    <footer className="bg-primary text-primary-foreground relative overflow-hidden border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 relative">
         {/* Main Footer Content */}
         <div className="py-14 sm:py-20">
@@ -45,9 +45,9 @@ export const Footer = () => {
               >
                 <div className={`flex items-center justify-start mb-4 w-full space-x-4`}>
                   <Image  src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-                  <h3 className="text-2xl sm:text-3xl font-bold text-foreground">Tutelage</h3>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-primary-foreground">Tutelage</h3>
                 </div>
-                <p className={`text-muted-foreground w-full mb-6 leading-relaxed text-sm sm:text-base text-left`}>
+                <p className={`text-primary-foreground w-full mb-6 leading-relaxed text-sm sm:text-base text-left`}>
                   Empowering students worldwide with innovative English learning solutions. Join thousands who have achieved their language goals with us.
                 </p>
                 {/* Social Media Links */}
@@ -56,7 +56,7 @@ export const Footer = () => {
                     <a
                       key={social.name}
                       href={social.href}
-                      className="bg-muted  hover:bg-yellow-400 hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
+                      className="bg-muted  hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
                       aria-label={social.name}
                       target="_blank"
                     >
@@ -96,13 +96,13 @@ export const Footer = () => {
               <div
                 className='text-left'
               >
-                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">Popular Courses</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-primary-foreground mb-4 sm:mb-6">Popular Courses</h4>
                 <ul className="space-y-3">
                   {courses.map((course) => (
                     <li key={course.name}>
                       <a
                         href={course.href}
-                        className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
+                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
                       >
                         {course.name}
                       </a>
@@ -117,37 +117,37 @@ export const Footer = () => {
               <div
                 className={'text-left'}
               >
-                <h4 className="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">Contact Us</h4>
+                <h4 className="text-lg sm:text-xl font-semibold text-primary-foreground mb-4 sm:mb-6">Contact Us</h4>
                 <div className="space-y-4">
                   <div className={`flex items-start space-x-3`}>
-                    <MapPin className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
                     <div className={'text-left'}>
-                      <p className="text-muted-foreground text-sm sm:text-base">Suli Innovation house</p>
-                      <p className="text-muted-foreground text-sm sm:text-base">Sulaimaniyah - Kurdistan Region</p>
+                      <p className="text-primary-foreground text-sm sm:text-base">Suli Innovation house</p>
+                      <p className="text-primary-foreground text-sm sm:text-base">Sulaimaniyah - Kurdistan Region</p>
                     </div>
                   </div>
                   <div className={`flex items-center space-x-3`}>
-                    <Phone className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-black flex-shrink-0" />
                     <div className={`flex flex-col text-left`}>
                       <a
                         href="tel:+9647501534240"
-                        className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
+                        className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
                       >
                         (964+) 07501534240
                       </a>
                       <a
                         href="tel:+9647701946364"
-                        className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
+                        className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
                       >
                         (964+) 07701946364
                       </a>
                     </div>
                   </div>
                   <div className={`flex items-center space-x-3`}>
-                    <Mail className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-black flex-shrink-0" />
                     <a
                       href="mailto:Info@tutelage.krd"
-                      className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
+                      className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
                     >
                       Info@tutelage.krd
                     </a>
@@ -156,7 +156,7 @@ export const Footer = () => {
                 {/* Office Hours */}
                 <div className="mt-6">
                   <h5 className="text-base sm:text-lg font-medium text-white mb-3">Office Hours</h5>
-                  <div className={`text-muted-foreground text-sm sm:text-base space-y-1 text-left`}>
+                  <div className={`text-primary-foreground text-sm sm:text-base space-y-1 text-left`}>
                     <p>Sunday : 1:00 PM - 5:00 PM</p>
                     <p>Tuesday: 1:00 PM - 5:00 PM</p>
                     <p>Thursday: 1:00 PM - 5:00 PM</p>
@@ -171,20 +171,20 @@ export const Footer = () => {
         <div className="border-t border-gray-800 py-5 sm:py-7">
           <div className={`flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 `}>
             <p
-              className={`text-muted-foreground text-xs sm:text-sm text-center md:text-left`}
+              className={`text-primary-foreground text-xs sm:text-sm text-center md:text-left`}
             >
               © {currentYear} Tutelage. All rights reserved.
             </p>
             <div
               className={`flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs sm:text-sm md:justify-end`}
             >
-              <Link href="/privacy" className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200">
+              <Link href="/privacy" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
                   Privacy Policy
               </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200">
+              <Link href="/terms" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="text-muted-foreground hover:text-yellow-400 transition-colors duration-200">
+              <Link href="/cookies" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
                 Cookies
               </Link>
             </div>

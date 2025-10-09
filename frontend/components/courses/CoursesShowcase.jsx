@@ -7,11 +7,18 @@ import { ArrowRight } from 'lucide-react'
 const CoursesShowcase = () => {
   const courses = [
     {
-      title: "General English",
-      description: "Build a strong foundation in English with comprehensive lessons covering grammar, vocabulary, speaking, listening, reading, and writing skills for everyday communication.",
+      title: "English for Kids and Teens",
+      description: "Engaging and interactive English learning program designed specifically for young learners aged 6-17. Fun activities, games, and age-appropriate content help children develop strong language skills naturally.",
       image: "/hero.jpg",
-      href: "/courses/generalenglish",
-      features: ["Grammar Fundamentals", "Vocabulary Building", "Conversational Skills"]
+      href: "/courses/englishforkids",
+      features: ["Interactive Games", "Age-Appropriate Content", "Fun Learning Activities"]
+    },
+    {
+      title: "English for Adults",
+      description: "Comprehensive English language program tailored for adult learners with busy schedules. Focus on practical skills for work, travel, and daily communication with flexible learning options.",
+      image: "/hero.jpg",
+      href: "/courses/englishforadults",
+      features: ["Flexible Scheduling", "Practical Communication", "Career-Focused Skills"]
     },
     {
       title: "Academic English",
