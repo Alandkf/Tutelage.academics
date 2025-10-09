@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -14,6 +14,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { ExternalLink, GraduationCap, FileText, Target } from 'lucide-react'
 import Link from 'next/link'
+import BASE_URL from '@/app/config/url'
+import { toast } from 'sonner'
 
 // Form validation schema
 const enrollmentSchema = z.object({
@@ -52,7 +54,8 @@ const EnrollPage = () => {
   const searchParams = useSearchParams()
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [preselectedCourse, setPreselectedCourse] = useState('')
-  const [selectKey, setSelectKey] = useState(0) // Add this to force re-render
+  const [selectKey, setSelectKey] = useState(0) 
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   // Form setup
@@ -146,10 +149,25 @@ const EnrollPage = () => {
       const result = await response.json()
       
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to submit enrollment')
+        // Show error toast with description
+        toast("Enrollment Failed", {
+          description: result.message || 'Please check your information and try again'
+        });
+        return;
       }
       
       console.log('Enrollment submitted successfully:', result)
+      
+      // Show success toast
+      if (result.warning) {
+        toast("Enrollment Submitted", {
+          description: result.message || 'Your application has been received successfully'
+        });
+      } else {
+        toast("Enrollment Successful! 🎉", {
+          description: "Check your email for confirmation details"
+        });
+      }
       
       // Show success dialog
       setShowSuccessDialog(true)
@@ -168,14 +186,19 @@ const EnrollPage = () => {
     } catch (error) {
       console.error('Enrollment error:', error)
       
-      // Show user-friendly error message
-      const errorMessage = error.message || 'Failed to submit enrollment. Please try again.'
+      // Show error toast
+      toast("Connection Error", {
+        description: "Unable to submit enrollment. Please check your internet connection and try again."
+      });
       
-      // You could add a toast notification here instead of alert
-      alert(`Error: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
+  }
+
+  const redirectAfterSuccess = () => {
+    setShowSuccessDialog(false)
+    router.push("/")
   }
 
   return (

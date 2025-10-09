@@ -46,21 +46,39 @@ const processEnrollment = async (req, res) => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      age: ageNum,
+      age: age,
       education: education.trim(),
       course: course.trim()
     };
     
     console.log('📧 Sending enrollment emails...');
     
-    // Send emails concurrently
-    await Promise.all([
-      sendEnrollmentApplicationEmail(enrollmentData),
-      sendEnrollmentConfirmationEmail(enrollmentData)
-    ]);
-    
-    console.log('✅ Enrollment emails sent successfully');
-    console.log(`📋 New enrollment: ${name} applied for ${course}`);
+    // Send emails concurrently with better error handling
+    try {
+      await Promise.all([
+        sendEnrollmentApplicationEmail(enrollmentData),
+        sendEnrollmentConfirmationEmail(enrollmentData)
+      ]);
+      
+      console.log('✅ Enrollment emails sent successfully');
+      console.log(`📋 New enrollment: ${name} applied for ${course}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      // Even if email fails, we should still respond with success for the enrollment
+      // but indicate the email issue
+      return res.status(200).json({
+        success: true,
+        message: 'Enrollment application submitted successfully! However, there was an issue sending confirmation emails. Our team will contact you directly.',
+        data: {
+          name: enrollmentData.name,
+          course: enrollmentData.course,
+          email: enrollmentData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
     
     res.status(200).json({
       success: true,
@@ -75,19 +93,11 @@ const processEnrollment = async (req, res) => {
   } catch (error) {
     console.error('❌ Enrollment processing error:', error);
     
-    // Check if it's an email sending error
-    if (error.code === 'EAUTH' || error.code === 'ESOCKET') {
-      return res.status(500).json({
-        success: false,
-        message: 'Email service temporarily unavailable. Please try again later.',
-        error: 'EMAIL_SERVICE_ERROR'
-      });
-    }
-    
+    // Return a more specific error response
     res.status(500).json({
       success: false,
-      message: 'An error occurred while processing your enrollment. Please try again.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: 'Failed to process enrollment application. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };

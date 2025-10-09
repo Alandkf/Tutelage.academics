@@ -33,8 +33,8 @@ export default function Navbar (){
       ],
     },
     {
-      name: "SKills ",
-      href: "/skills ",
+      name: "Skills",
+      href: "/skills",
       dropdown: [
         { name: "Listening", href: "/skills/listening" },
         { name: "Speaking", href: "/skills/speaking" },
@@ -43,8 +43,8 @@ export default function Navbar (){
       ],
     },
     {
-      name: "ESL resources ",
-      href: "/eslresources ",
+      name: "ESL resources",
+      href: "/eslresources",
       dropdown: [
         { name: "Story Library", href: "/eslresources/storys" },
         { name: "Blog Library", href: "/eslresources/blogs" },
@@ -58,14 +58,14 @@ export default function Navbar (){
       dropdown: [
         { name: "A1 Level", href: "/levels/A1level" },
         { name: "A2 Level", href: "/levels/A2level" },
-        { name: "B1 Level", href: "/levels/B1level, " },
+        { name: "B1 Level", href: "/levels/B1level" },
         { name: "B2 Level", href: "/levels/B2level" },
-        { name: "C1 Level", href: "/levels/C1level " },
+        { name: "C1 Level", href: "/levels/C1level" },
       ],
     },
     {
-      name: "Tutelage Tests ",
-      href: "/tutelagetests ",
+      name: "Tutelage Tests",
+      href: "/tutelagetests",
       dropdown: [
         { name: "Free Practice Tests", href: "/tutelagetests/practicetests" },
         { name: "Language placement test", href: "/tutelagetests/languageplacement" },
