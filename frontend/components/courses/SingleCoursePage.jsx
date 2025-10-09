@@ -316,18 +316,18 @@ const ClassCard = ({ classType }) => (
         description: "Our enrollment advisor will contact you within 24 hours"
       })
 
-      // // Reset form
-      // setFormData({
-      //   countryOfResidence: '',
-      //   firstName: '',
-      //   lastName: '',
-      //   email: '',
-      //   phone: '',
-      //   zipCode: '',
-      //   interestedIn: '',
-      //   classType: '',
-      //   testType: ''
-      // })
+      // Reset form
+      setFormData({
+        countryOfResidence: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        zipCode: '',
+        interestedIn: '',
+        classType: '',
+        testType: ''
+      })
 
     } catch (error) {
       toast("Connection Error", {
