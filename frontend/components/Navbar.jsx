@@ -25,7 +25,8 @@ export default function Navbar (){
       name: "Courses",
       href: "/courses",
       dropdown: [
-        { name: "General English", href: "/courses/generalenglish" },
+        { name: "English for kids and teens", href: "/courses/englishforkids" },
+        { name: "English for adults", href: "/courses/englishforadults" },
         { name: "Academic English", href: "/courses/academicenglish" },
         { name: "English proficiency Tests", href: "/courses/Englishproficiencytests" },
         { name: "Business English", href: "/courses/businessenglish" },
@@ -160,7 +161,7 @@ export default function Navbar (){
                                 <Link
                                   key={dropdownItem.name}
                                   href={dropdownItem.href}
-                                  className={`block px-4 py-3 transition-all duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-bold' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}
+                                  className={`block px-4 py-3 transition-all duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-semibold' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}
                                 >
                                   {dropdownItem.name}
                                 </Link>

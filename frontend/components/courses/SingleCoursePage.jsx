@@ -1,10 +1,15 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Clock, Users, Award, ChevronRight, ArrowRight } from 'lucide-react'
+import {  Clock, Users, Award, ChevronRight, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const SingleCoursePage = ({ courseData }) => {
+  const router = useRouter()
+  
   const { 
     title, 
     heroImage, 
@@ -17,14 +22,28 @@ const SingleCoursePage = ({ courseData }) => {
     backLink = "/courses"
   } = courseData
 
+  const handleEnrollClick = () => {
+    console.log('Enrolling for course:', title);
+    console.log('Encoded course:', encodeURIComponent(title));
+    router.push(`/courses/enroll?course=${encodeURIComponent(title)}`)
+  }
+
   // All available courses data
   const allCourses = [
     {
-      title: "General English",
-      description: "Build a strong foundation in English with our comprehensive General English program.",
+      title: "English for Kids and Teens",
+      description: "Engaging and interactive English learning program designed specifically for young learners.",
       image: "/hero.jpg",
-      href: "/courses/generalenglish",
-      level: "All Levels",
+      href: "/courses/englishforkids",
+      level: "A1-B2",
+      duration: "10-14 weeks"
+    },
+    {
+      title: "English for Adults",
+      description: "Comprehensive English language program tailored for adult learners with busy schedules.",
+      image: "/hero.jpg",
+      href: "/courses/englishforadults",
+      level: "A1-C2",
       duration: "12-16 weeks"
     },
     {
@@ -72,15 +91,14 @@ const SingleCoursePage = ({ courseData }) => {
             <div className="flex-shrink-0">
               <div className="p-4">
                 <div className="flex flex-wrap items-center gap-2 ">
-                    <Link href={"#"} >
-                        <Button 
-                            size={"lg"} 
-                            className=" md:px-12 py-4 flex items-center justify-center md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                            >
-                            {enrollButtonText}
-                            <ChevronRight className="md:ml-3 w-6 h-6" />
-                        </Button>
-                    </Link>
+                    <Button 
+                        onClick={handleEnrollClick}
+                        size={"lg"} 
+                        className=" md:px-12 py-4 flex items-center justify-center md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                        >
+                        {enrollButtonText}
+                        <ChevronRight className="md:ml-3 w-6 h-6" />
+                    </Button>
                 </div>
               </div>
             </div>
@@ -174,6 +192,7 @@ const SingleCoursePage = ({ courseData }) => {
             </p>
             
             <Button 
+              onClick={handleEnrollClick}
               size="lg" 
               className="px-12 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
             >
