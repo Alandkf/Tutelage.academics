@@ -48,16 +48,12 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
     subject: `New Course Enrollment Application: ${course}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <!-- Header with Tutelage branding and logo -->
+        <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <!-- Use your local SVG converted to base64 or hosted on your domain -->
-            <img src="${process.env.FRONTEND_URL}/only-logo-black-border-yellow-bg.svg" alt="Tutelage Logo" style="width: 40px; height: 40px; margin-right: 12px;" />
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              TUTELAGE
-            </h1>
-          </div>
-          <p style="color: #ffffff; margin: 0; font-size: 16px; opacity: 0.9;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            TUTELAGE
+          </h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
             English Learning Platform
           </p>
         </div>
@@ -149,15 +145,12 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
     subject: 'Enrollment Application Received - Welcome to Tutelage!',
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <!-- Header with Tutelage branding and logo -->
+        <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <img src="${process.env.FRONTEND_URL}/only-logo-black-border-yellow-bg.svg" alt="Tutelage Logo" style="width: 40px; height: 40px; margin-right: 12px;" />
-            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              TUTELAGE
-            </h1>
-          </div>
-          <p style="color: #ffffff; margin: 0; font-size: 16px; opacity: 0.9;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            TUTELAGE
+          </h1>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
             English Learning Platform
           </p>
         </div>
