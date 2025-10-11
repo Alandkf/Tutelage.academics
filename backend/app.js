@@ -10,14 +10,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const SequelizeStore = require('connect-session-sequelize')(session.Store);
+// const SequelizeStore = require('connect-session-sequelize')(session.Store);
 const path = require('path');
 
 // Environment Configuration
 require('dotenv').config();
 
-// Database Models
-const { sequelize } = require('./models');
+// Database Models - COMMENTED OUT FOR NOW
+// const { sequelize } = require('./models');
 
 // Route modules
 const videoRoutes = require('./routes/videos');
@@ -65,18 +65,18 @@ app.use((req, res, next) => {
 
 app.use(cookieParser());
 
-// Session store configuration
-const sessionStore = new SequelizeStore({
-  db: sequelize,
-  tableName: 'Sessions',
-  checkExpirationInterval: 15 * 60 * 1000, // Check every 15 minutes
-  expiration: 24 * 60 * 60 * 1000 // 24 hours
-});
+// Session store configuration - USING MEMORY STORE FOR NOW
+// const sessionStore = new SequelizeStore({
+//   db: sequelize,
+//   tableName: 'Sessions',
+//   checkExpirationInterval: 15 * 60 * 1000, // Check every 15 minutes
+//   expiration: 24 * 60 * 60 * 1000 // 24 hours
+// });
 
-// Session configuration
+// Session configuration - USING MEMORY STORE
 const SESSION_CONFIG = {
   secret: process.env.SESSION_SECRET || 'your-session-secret-key',
-  store: sessionStore,
+  // store: sessionStore, // COMMENTED OUT - using default memory store
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -120,7 +120,8 @@ app.get('/', (req, res) => {
     message: 'Tutelage Academics Backend Server is running!',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    database: 'disabled (running without database)'
   });
 });
 
@@ -128,7 +129,7 @@ app.get('/', (req, res) => {
 app.get('/api/status', (req, res) => {
   res.json({
     status: 'healthy',
-    database: 'connected',
+    database: 'disabled',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
@@ -137,24 +138,39 @@ app.get('/api/status', (req, res) => {
 });
 
 // ============================================================================
-// SERVER INITIALIZATION
+// ERROR HANDLING MIDDLEWARE
+// ============================================================================
+
+// Global error handler (add this before server initialization)
+app.use((err, req, res, next) => {
+  console.error('🚨 Global error handler:', err);
+  
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
+
+
+// ============================================================================
+// SERVER INITIALIZATION - SIMPLIFIED WITHOUT DATABASE
 // ============================================================================
 
 /**
- * Initialize the database, sync models, and start the server
+ * Initialize the server without database connection
  */
 const initializeServer = async () => {
     try {
-        console.log('🔄 Initializing Tutelage Academics Server...');
+        console.log('🔄 Initializing Tutelage Academics Server (No Database)...');
         
-        // Sync database models (WARNING: force: true drops existing tables)
-        const FORCE_DB_RESET = process.env.NODE_ENV === 'development';
-        await sequelize.sync({ force: false });
-        console.log('✅ Database models synchronized successfully');
+        // SKIP DATABASE CONNECTION FOR NOW
+        console.log('⚠️  Database connection skipped - running without database');
         
-        // Initialize session store
-        await sessionStore.sync();
-        console.log('✅ Session store initialized successfully');
+        // SKIP SESSION STORE SYNC
+        // await sessionStore.sync();
+        console.log('⚠️  Using memory session store (sessions will not persist)');
         
         // Start the Express server
         app.listen(SERVER_PORT, () => {
@@ -163,10 +179,15 @@ const initializeServer = async () => {
             console.log('='.repeat(60));
             console.log(`📡 Server running on: http://localhost:${SERVER_PORT}`);
             console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
-            console.log(`🗄️  Database: Connected and synced`);
-            console.log(`🔐 Session store: Active`);
+            console.log(`🗄️  Database: DISABLED (running without database)`);
+            console.log(`🔐 Session store: Memory only (not persistent)`);
             console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
             console.log('='.repeat(60) + '\n');
+            
+            console.log('💡 NOTE: Server is running without database connection');
+            console.log('💡 Most API endpoints will not work until database is connected');
+            console.log('💡 Email enrollment service should work if credentials are configured\n');
         });
         
     } catch (error) {

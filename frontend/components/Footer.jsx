@@ -56,7 +56,7 @@ export const Footer = () => {
                     <a
                       key={social.name}
                       href={social.href}
-                      className="bg-muted  hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
+                      className="bg-[#1e1e1e]  hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
                       aria-label={social.name}
                       target="_blank"
                     >
@@ -120,14 +120,14 @@ export const Footer = () => {
                 <h4 className="text-lg sm:text-xl font-semibold text-primary-foreground mb-4 sm:mb-6">Contact Us</h4>
                 <div className="space-y-4">
                   <div className={`flex items-start space-x-3`}>
-                    <MapPin className="w-5 h-5 text-black mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-[#1e1e1e] mt-0.5 flex-shrink-0" />
                     <div className={'text-left'}>
                       <p className="text-primary-foreground text-sm sm:text-base">Suli Innovation house</p>
                       <p className="text-primary-foreground text-sm sm:text-base">Sulaimaniyah - Kurdistan Region</p>
                     </div>
                   </div>
                   <div className={`flex items-center space-x-3`}>
-                    <Phone className="w-5 h-5 text-black flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-[#1e1e1e] flex-shrink-0" />
                     <div className={`flex flex-col text-left`}>
                       <a
                         href="tel:+9647501534240"
@@ -144,7 +144,7 @@ export const Footer = () => {
                     </div>
                   </div>
                   <div className={`flex items-center space-x-3`}>
-                    <Mail className="w-5 h-5 text-black flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-[#1e1e1e] flex-shrink-0" />
                     <a
                       href="mailto:Info@tutelage.krd"
                       className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
