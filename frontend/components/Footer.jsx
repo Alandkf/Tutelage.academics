@@ -9,22 +9,52 @@ import Image from 'next/image'
 export const Footer = () => {
   const currentYear = new Date().getFullYear()
 
-
-  const quickLinks = [
+  // Main navigation links
+  const mainLinks = [
     { name: "Home", href: "/" },
-    { name: "About Us", href: "/about" },
-    { name: "Courses", href: "/courses" },
-    { name: "Services", href: "/services" },
-    { name: "Contact", href: "/contact" },
+    { name: "About Us", href: "/aboutus" },
+    { name: "Contact Us", href: "/contact" },
   ]
 
-  const courses = [
-    { name: "General English", href: "/generalenglish" },
-    { name: "Academic English", href: "/academicenglish" },
-    { name: "English proficiency Tests", href: "/Englishproficiencytests" },
-    { name: "ESP", href: "/esp" },
-    { name: "Business English", href: "/businessenglish" },
-    { name: "Entrepreneurship", href: "/entrepreneurship" },
+  // Course links
+  const courseLinks = [
+    { name: "English for Kids and Teens", href: "/courses/englishforkids" },
+    { name: "English for Adults", href: "/courses/englishforadults" },
+    { name: "Academic English", href: "/courses/academicenglish" },
+    { name: "English Proficiency Tests", href: "/courses/Englishproficiencytests" },
+    { name: "Business English", href: "/courses/businessenglish" },
+  ]
+
+  // Skills links
+  const skillsLinks = [
+    { name: "Listening", href: "/skills/listening" },
+    { name: "Speaking", href: "/skills/speaking" },
+    { name: "Reading", href: "/skills/reading" },
+    { name: "Writing", href: "/skills/writing" },
+  ]
+
+  // ESL Resources links
+  const eslResourcesLinks = [
+    { name: "Story Library", href: "/eslresources/storys" },
+    { name: "Blog Library", href: "/eslresources/blogs" },
+    { name: "Video Library", href: "/eslresources/video" },
+    { name: "Audio Library", href: "/eslresources/audio" },
+  ]
+
+  // Levels links
+  const levelsLinks = [
+    { name: "A1 Level", href: "/levels/A1level" },
+    { name: "A2 Level", href: "/levels/A2level" },
+    { name: "B1 Level", href: "/levels/B1level" },
+    { name: "B2 Level", href: "/levels/B2level" },
+    { name: "C1 Level", href: "/levels/C1level" },
+  ]
+
+  // Tutelage Tests links
+  const tutelageTestsLinks = [
+    { name: "Free Practice Tests", href: "/tutelagetests/practicetests" },
+    { name: "Language Placement Test", href: "/tutelagetests/languageplacement" },
+    { name: "International/Mock Tests", href: "/tutelagetests/mockexams" },
   ]
 
   const socialLinks = [
@@ -34,130 +64,188 @@ export const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 relative">
-        {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 xl:px-16 relative">
+        {/* Top Section - Links */}
         <div className="py-14 sm:py-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 lg:gap-20">
-            {/* Institute Info */}
-            <div className="lg:col-span-1 flex flex-col justify-between h-full">
-              <div
-                className='text-left'
-              >
-                <div className={`flex items-center justify-start mb-4 w-full space-x-4`}>
-                  <Image  src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-                  <h3 className="text-2xl sm:text-3xl font-bold text-primary-foreground">Tutelage</h3>
+          <div className="flex flex-col xl:flex-row gap-8 xl:gap-12">
+            {/* Links Section */}
+            <div className="flex-1">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 xl:gap-y-10">
+                {/* Main Links */}
+                <div className="space-y-4">
+                  <Link href="/courses">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Main</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {mainLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className={`text-primary-foreground w-full mb-6 leading-relaxed text-sm sm:text-base text-left`}>
+
+                {/* Course Links */}
+                <div className="space-y-4">
+                  <Link href="/courses">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Courses</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {courseLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Skills Links */}
+                <div className="space-y-4">
+                  <Link href="/skills">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Skills</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {skillsLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* ESL Resources Links */}
+                <div className="space-y-4">
+                  <Link href="/eslresources">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">ESL Resources</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {eslResourcesLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Levels Links */}
+                <div className="space-y-4">
+                  <Link href="/levels">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Levels</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {levelsLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Tutelage Tests Links */}
+                <div className="space-y-4">
+                  <Link href="/tutelagetests">
+                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Tutelage Tests</h4>
+                  </Link>
+                  <ul className="space-y-2">
+                    {tutelageTestsLinks.map((link) => (
+                      <li key={link.name}>
+                        <Link
+                          href={link.href}
+                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Logo & Contact Info */}
+            <div className="flex-shrink-0 pt-4 xl:pt-0 border-t xl:border-t-0 xl:border-l border-primary-foreground/30 xl:pl-8 xl:w-80">
+              <div className="space-y-6">
+                {/* Logo & Name */}
+                <div className="flex items-center gap-3">
+                  <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
+                  <h3 className="text-2xl font-bold text-primary-foreground">Tutelage</h3>
+                </div>
+
+                {/* Description */}
+                <p className="text-primary-foreground leading-relaxed text-sm max-w-lg">
                   Empowering students worldwide with innovative English learning solutions. Join thousands who have achieved their language goals with us.
                 </p>
-                {/* Social Media Links */}
-                <div className={`flex mt-2 space-x-3`}>
-                  {socialLinks.map((social) => (
-                    <a
-                      key={social.name}
-                      href={social.href}
-                      className="bg-[#1e1e1e]  hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
-                      aria-label={social.name}
-                      target="_blank"
-                    >
-                      {social.icon}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            {/* Quick Links (section intentionally left as comment for future use)
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-              >
-                <h4 className="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Quick Links</h4>
-                <ul className="space-y-3">
-                  {quickLinks.map((link) => (
-                    <li key={link.name}>
-                      <motion.a
-                        href={link.href}
-                        whileHover={{ x: 4 }}
-                        className="text-gray-300 hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
-                      >
-                        {link.name}
-                      </motion.a>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div> */}
-
-            {/* Courses */}
-            <div className="md:col-span-1">
-              <div
-                className='text-left'
-              >
-                <h4 className="text-lg sm:text-xl font-semibold text-primary-foreground mb-4 sm:mb-6">Popular Courses</h4>
-                <ul className="space-y-3">
-                  {courses.map((course) => (
-                    <li key={course.name}>
-                      <a
-                        href={course.href}
-                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm sm:text-base"
-                      >
-                        {course.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <div className="md:col-span-1">
-              <div
-                className={'text-left'}
-              >
-                <h4 className="text-lg sm:text-xl font-semibold text-primary-foreground mb-4 sm:mb-6">Contact Us</h4>
-                <div className="space-y-4">
-                  <div className={`flex items-start space-x-3`}>
-                    <MapPin className="w-5 h-5 text-[#1e1e1e] mt-0.5 flex-shrink-0" />
-                    <div className={'text-left'}>
-                      <p className="text-primary-foreground text-sm sm:text-base">Suli Innovation house</p>
-                      <p className="text-primary-foreground text-sm sm:text-base">Sulaimaniyah - Kurdistan Region</p>
+                {/* Contact Information */}
+                <div className="space-y-3">
+                  <h5 className="text-base font-bold text-black">Contact Information</h5>
+                  <div className="flex items-start space-x-3">
+                    <MapPin className="w-4 h-4 text-[#1e1e1e] mt-0.5 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="text-primary-foreground text-sm">Suli Innovation house</p>
+                      <p className="text-primary-foreground text-sm">Sulaimaniyah - Kurdistan Region</p>
                     </div>
                   </div>
-                  <div className={`flex items-center space-x-3`}>
-                    <Phone className="w-5 h-5 text-[#1e1e1e] flex-shrink-0" />
-                    <div className={`flex flex-col text-left`}>
+                  
+                  <div className="flex items-center space-x-3">
+                    <Phone className="w-4 h-4 text-[#1e1e1e] flex-shrink-0" />
+                    <div className="flex flex-col text-left">
                       <a
                         href="tel:+9647501534240"
-                        className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
+                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
                       >
                         (964+) 07501534240
                       </a>
                       <a
                         href="tel:+9647701946364"
-                        className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
+                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
                       >
                         (964+) 07701946364
                       </a>
                     </div>
                   </div>
-                  <div className={`flex items-center space-x-3`}>
-                    <Mail className="w-5 h-5 text-[#1e1e1e] flex-shrink-0" />
+                  
+                  <div className="flex items-center space-x-3">
+                    <Mail className="w-4 h-4 text-[#1e1e1e] flex-shrink-0" />
                     <a
                       href="mailto:Info@tutelage.krd"
-                      className="text-primary-foreground hover:text-black transition-colors duration-200 text-sm sm:text-base"
+                      className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
                     >
                       Info@tutelage.krd
                     </a>
                   </div>
                 </div>
+
                 {/* Office Hours */}
-                <div className="mt-6">
-                  <h5 className="text-base sm:text-lg font-medium text-white mb-3">Office Hours</h5>
-                  <div className={`text-primary-foreground text-sm sm:text-base space-y-1 text-left`}>
-                    <p>Sunday : 1:00 PM - 5:00 PM</p>
+                <div className="space-y-2">
+                  <h5 className="text-base font-bold text-black">Office Hours</h5>
+                  <div className="text-primary-foreground text-sm space-y-1">
+                    <p>Sunday: 1:00 PM - 5:00 PM</p>
                     <p>Tuesday: 1:00 PM - 5:00 PM</p>
                     <p>Thursday: 1:00 PM - 5:00 PM</p>
                   </div>
@@ -167,26 +255,39 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 py-5 sm:py-7">
-          <div className={`flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 `}>
-            <p
-              className={`text-primary-foreground text-xs sm:text-sm text-center md:text-left`}
-            >
-              © {currentYear} Tutelage. All rights reserved.
-            </p>
-            <div
-              className={`flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs sm:text-sm md:justify-end`}
-            >
-              <Link href="/privacy" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
-                  Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200">
-                Cookies
-              </Link>
+        {/* Separator Line */}
+        <div className="border-t border-primary-foreground/20"></div>
+
+        {/* Bottom Section - Logo, Copyright, Socials */}
+        <div className="py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
+              <h3 className="text-xl font-bold text-primary-foreground">Tutelage</h3>
+            </div>
+
+            {/* Copyright */}
+            <div className="text-center">
+              <p className="text-primary-foreground text-sm">
+                © {currentYear} Tutelage. All rights reserved.
+              </p>
+            </div>
+
+            {/* Social Media Links */}
+            <div className="flex space-x-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  className="bg-[#1e1e1e] hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
+                  aria-label={social.name}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </div>
         </div>
