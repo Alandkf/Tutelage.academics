@@ -260,11 +260,11 @@ export const Footer = () => {
 
         {/* Bottom Section - Logo, Copyright, Socials */}
         <div className="py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-row items-start md:items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center gap-3">
               <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-              <h3 className="text-xl font-bold text-primary-foreground">Tutelage</h3>
+              <h3 className="text-xl hidden sm:block font-bold text-primary-foreground">Tutelage</h3>
             </div>
 
             {/* Copyright */}

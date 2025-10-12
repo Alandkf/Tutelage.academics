@@ -11,11 +11,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ExternalLink, GraduationCap, FileText, Target } from 'lucide-react'
 import Link from 'next/link'
 import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 // Form validation schema
 const enrollmentSchema = z.object({
@@ -359,23 +359,56 @@ const EnrollPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {courses.filter(course => course !== preselectedCourse).map((course) => (
-                  <div key={course} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">{course}</p>
-                      <Badge variant="outline" className="text-xs mt-1">
-                        Available
-                      </Badge>
-                    </div>
-                    <Link href={`/courses/${course.toLowerCase().replace(/\s+/g, '').replace(/&/g, '')}`}>
-                      <Button variant="ghost" size="sm">
-                        View
-                      </Button>
+                {courses.filter(course => course !== preselectedCourse).slice(0, 2).map((course) => {
+                  // Get the correct href based on course name
+                  const getHref = (courseName) => {
+                    switch(courseName) {
+                      case 'English for Kids and Teens':
+                        return '/courses/englishforkids';
+                      case 'English for Adults':
+                        return '/courses/englishforadults';
+                      case 'Academic English':
+                        return '/courses/academicenglish';
+                      case 'English Proficiency Tests':
+                        return '/courses/Englishproficiencytests';
+                      case 'Business English':
+                        return '/courses/businessenglish';
+                      default:
+                        return '/courses';
+                    }
+                  };
+
+                  return (
+                    <Link key={course} href={getHref(course)}>
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer">
+                        <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
+                          <Image
+                            src="/hero.jpg"
+                            alt={`${course} course`}
+                            fill
+                            quality={100}
+                            className="object-cover"
+                            sizes="1000px"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm text-foreground mb-1 truncate">
+                            {course}
+                          </h3>
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                            {course === 'English for Adults' ? 'Comprehensive English language program tailored for adult learners with busy schedules.' :
+                             course === 'Academic English' ? 'Master academic English skills for university study and professional research.' :
+                             course === 'English Proficiency Tests' ? 'Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.' :
+                             course === 'Business English' ? 'Master professional English communication for the global business world.' :
+                             'Engaging and interactive English learning program designed specifically for young learners.'}
+                          </p>
+                        </div>
+                      </div>
                     </Link>
-                  </div>
-                ))}
+                  )
+                })}
                 <Link href="/courses">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full mt-4">
                     View All Courses
                   </Button>
                 </Link>
