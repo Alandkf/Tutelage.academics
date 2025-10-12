@@ -438,13 +438,13 @@ const EnglishCourseForKidsAndTeens = () => {
       </div>
 
       {/* Learn a New Language the Fun Way Section */}
-      <div className="py-10 bg-muted/20">
+      <div className="py-10 bg-muted/20 p-4">
         <div className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg">
-          <div className="flex flex-col lg:flex-row items-stretch gap-0">
+          <div className="flex flex-col-reverse lg:flex-row items-stretch gap-0">
             {/* Left Content */}
             <div className="w-full lg:w-1/2 flex items-center px-4 sm:px-6 lg:ml-10">
-              <div className="w-full py-16 lg:py-24 lg:pr-12">
-                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4 sm:mb-6">
+              <div className="w-full py-10 lg:py-24 lg:pr-12">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6">
                   Learn a New Language the Fun Way
                 </h2>
                 
