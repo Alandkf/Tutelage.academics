@@ -20,8 +20,8 @@ export default function HeroSection() {
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-black/60 z-10" />
         {/* Centered hero text and search (all screens) */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 text-center mt-36">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow mb-4">Empowering students worldwide with innovative virtual learning solutions </h1>
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 text-center mt-40">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl max-w-4xl font-bold text-white drop-shadow mb-4">Empowering students worldwide with innovative virtual learning solutions </h1>
           <p className="text-sm sm:text-base md:text-lg text-white/80 font-normal max-w-5xl mx-auto mb-7">
             Education is vital to everyone on this planet. With a passion for education, compassion for teachers, and advanced technology, we believe we can provide high-quality education for learners everywhere.</p>
           {/* Search box with filter */}
