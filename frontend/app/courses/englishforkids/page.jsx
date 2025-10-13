@@ -664,24 +664,6 @@ const EnglishCourseForKidsAndTeens = () => {
                 />
               </div>
 
-              {/* Information Points */}
-              <div className="">
-                <ul className="space-y-3" dir={isRTL ? 'ltr' : 'ltr'}>
-                  <li className="flex items-start w-full">
-                    <div className={`w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0 ${isRTL ? 'ml-3 order-2' : 'mr-3 order-1'}`}></div>
-                    <span className={`text-sm text-muted-foreground flex-1 ${isRTL ? 'text-right order-1' : 'order-2'}`}>
-                      {t('inglishForKids.requestPricing.form.info1')}
-                    </span>
-                  </li>
-                  <li className="flex items-start w-full">
-                    <div className={`w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0 ${isRTL ? 'ml-3 order-2' : 'mr-3 order-1'}`}></div>
-                    <span className={`text-sm text-muted-foreground flex-1 ${isRTL ? 'text-right order-1' : 'order-2'}`}>
-                      {t('inglishForKids.requestPricing.form.info2')}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
               {/* Submit Button */}
               <div className="pt-6 flex justify-center">
                 <Button 
