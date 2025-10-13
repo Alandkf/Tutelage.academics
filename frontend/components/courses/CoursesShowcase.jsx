@@ -1,46 +1,32 @@
+'use client'
+
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 
 const CoursesShowcase = () => {
-  const courses = [
-    {
-      title: "English for Kids and Teens",
-      description: "Engaging and interactive English learning program designed specifically for young learners aged 6-17. Fun activities, games, and age-appropriate content help children develop strong language skills naturally.",
-      image: "/hero.jpg",
-      href: "/courses/englishforkids",
-      features: ["Interactive Games", "Age-Appropriate Content", "Fun Learning Activities"]
-    },
-    {
-      title: "English for Adults",
-      description: "Comprehensive English language program tailored for adult learners with busy schedules. Focus on practical skills for work, travel, and daily communication with flexible learning options.",
-      image: "/hero.jpg",
-      href: "/courses/englishforadults",
-      features: ["Flexible Scheduling", "Practical Communication", "Career-Focused Skills"]
-    },
-    {
-      title: "Academic English",
-      description: "Master the English skills needed for academic success, including essay writing, research techniques, presentation skills, and critical thinking in English.",
-      image: "/hero.jpg",
-      href: "/courses/academicenglish",
-      features: ["Academic Writing", "Research Skills", "Presentation Techniques"]
-    },
-    {
-      title: "English Proficiency Tests",
-      description: "Prepare for international English proficiency exams like IELTS, TOEFL, and Cambridge with targeted practice and test-taking strategies.",
-      image: "/hero.jpg",
-      href: "/courses/Englishproficiencytests",
-      features: ["IELTS Preparation", "TOEFL Training", "Cambridge Exams"]
-    },
-    {
-      title: "Business English",
-      description: "Develop professional English communication skills for the workplace, including business writing, presentations, negotiations, and meeting facilitation.",
-      image: "/hero.jpg",
-      href: "/courses/businessenglish",
-      features: ["Business Communication", "Professional Writing", "Meeting Skills"]
-    },
+  const { t, i18n } = useTranslation()
+  const isRTL = i18n.language === 'ku'
+
+  const coursesData = t('courses.CoursesShowcase.courses', { returnObjects: true })
+  
+  const courseHrefs = [
+    "/courses/englishforkids",
+    "/courses/englishforadults",
+    "/courses/academicenglish",
+    "/courses/Englishproficiencytests",
+    "/courses/businessenglish"
+  ]
+
+  const courseImages = [
+    "/hero.jpg",
+    "/hero.jpg",
+    "/hero.jpg",
+    "/hero.jpg",
+    "/hero.jpg"
   ]
 
   return (
@@ -48,26 +34,30 @@ const CoursesShowcase = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Choose Your Perfect English Course
+            {t('courses.CoursesShowcase.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Explore our comprehensive range of English courses designed to meet your specific learning goals and career aspirations
+            {t('courses.CoursesShowcase.description')}
           </p>
         </div>
 
         <div className="space-y-20">
-          {courses.map((course, index) => {
+          {coursesData.map((course, index) => {
             const isEven = index % 2 === 0
             return (
               <div
                 key={index}
-                className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} ${index === 0 && 'pt-0'} items-center gap-8 lg:gap-20 py-6`}
+                className={`flex flex-col ${
+                  isRTL 
+                    ? (isEven ? 'lg:flex-row-reverse' : 'lg:flex-row')
+                    : (isEven ? 'lg:flex-row' : 'lg:flex-row-reverse')
+                } ${index === 0 && 'pt-0'} items-center gap-8 lg:gap-20 py-6`}
               >
                 {/* Image */}
                 <div className="w-full lg:w-1/2">
                   <div className="relative w-full h-72 sm:h-80 lg:h-[26rem] rounded-sm overflow-hidden shadow-lg">
                     <Image
-                      src={course.image}
+                      src={courseImages[index]}
                       alt={`${course.title} course`}
                       fill
                       className="object-cover hover:scale-105 transition-transform duration-500"
@@ -77,7 +67,7 @@ const CoursesShowcase = () => {
                 </div>
 
                 {/* Content */}
-                <div className="w-full lg:w-1/2 text-left space-y-4">
+                <div className={`w-full lg:w-1/2 space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                   <h3 className="text-3xl sm:text-4xl font-bold text-foreground">
                     {course.title}
                   </h3>
@@ -88,25 +78,27 @@ const CoursesShowcase = () => {
 
                   {/* Features */}
                   <div className="space-y-2">
-                    <h4 className="text-lg font-semibold text-foreground">Key Features:</h4>
-                    <ul className="space-y-1">
+                    <h4 className="text-lg font-semibold text-foreground">
+                      {t('courses.CoursesShowcase.keyFeatures')}
+                    </h4>
+                    <ul className="space-y-1" dir="ltr">
                       {course.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="text-sm text-muted-foreground flex items-center">
-                          <div className="w-2 h-2 bg-primary rounded-full mr-3 flex-shrink-0"></div>
-                          {feature}
+                        <li key={featureIndex} className="text-sm text-muted-foreground flex items-center w-full">
+                          <div className={`w-2 h-2 bg-primary rounded-full flex-shrink-0 ${isRTL ? 'ml-3 order-2' : 'mr-3 order-1'}`}></div>
+                          <span className={`flex-1 ${isRTL ? 'text-right order-1' : 'order-2'}`}>{feature}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   
                   <div className="pt-4">
-                    <Link href={course.href} className="inline-block">
+                    <Link href={courseHrefs[index]} className="inline-block">
                       <Button 
                         size="lg" 
                         className="px-10 cursor-pointer py-4 text-lg group hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
-                        Explore {course.title}
-                        <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                        {course.buttonText}
+                        <ArrowRight className={`w-6 h-6 group-hover:translate-x-2 transition-transform duration-300 ${isRTL ? 'mr-3 rotate-180 group-hover:-translate-x-2' : 'ml-3'}`} />
                       </Button>
                     </Link>
                   </div>

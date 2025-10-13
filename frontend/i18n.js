@@ -4,8 +4,59 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      courses : {
-
+      courses: {
+        CoursesHero: {
+          title: "Comprehensive English Courses with Tutelage",
+          description: "Discover our expertly designed English courses tailored for every learning goal. From general communication to specialized business English, we offer structured programs that guide you from beginner to advanced proficiency with confidence."
+        },
+        CoursesShowcase: {
+          title: "Choose Your Perfect English Course",
+          description: "Explore our comprehensive range of English courses designed to meet your specific learning goals and career aspirations",
+          courses: [
+            {
+              title: "English for Kids and Teens",
+              description: "Engaging and interactive English learning program designed specifically for young learners aged 6-17. Fun activities, games, and age-appropriate content help children develop strong language skills naturally.",
+              features: ["Interactive Games", "Age-Appropriate Content", "Fun Learning Activities"],
+              buttonText: "Explore English for Kids and Teens"
+            },
+            {
+              title: "English for Adults",
+              description: "Comprehensive English language program tailored for adult learners with busy schedules. Focus on practical skills for work, travel, and daily communication with flexible learning options.",
+              features: ["Flexible Scheduling", "Practical Communication", "Career-Focused Skills"],
+              buttonText: "Explore English for Adults"
+            },
+            {
+              title: "Academic English",
+              description: "Master the English skills needed for academic success, including essay writing, research techniques, presentation skills, and critical thinking in English.",
+              features: ["Academic Writing", "Research Skills", "Presentation Techniques"],
+              buttonText: "Explore Academic English"
+            },
+            {
+              title: "English Proficiency Tests",
+              description: "Prepare for international English proficiency exams like IELTS, TOEFL, and Cambridge with targeted practice and test-taking strategies.",
+              features: ["IELTS Preparation", "TOEFL Training", "Cambridge Exams"],
+              buttonText: "Explore English Proficiency Tests"
+            },
+            {
+              title: "Business English",
+              description: "Develop professional English communication skills for the workplace, including business writing, presentations, negotiations, and meeting facilitation.",
+              features: ["Business Communication", "Professional Writing", "Meeting Skills"],
+              buttonText: "Explore Business English"
+            }
+          ],
+          keyFeatures: "Key Features:"
+        },
+        CoursesCTA: {
+          title: "Not Sure Which Course is Right for You?",
+          description: "Take our comprehensive assessment quiz to discover the perfect English course tailored to your current level, learning goals, and career aspirations. Get personalized recommendations in just a few minutes.",
+          features: [
+            "5-Minute Assessment",
+            "Personalized Results",
+            "Expert Recommendations"
+          ],
+          buttonText: "Take the Course Quiz",
+          info: "Free assessment • No registration required • Instant results"
+        }
       },
       inglishForKids: {
         first: {
@@ -251,8 +302,59 @@ const resources = {
   },
   ku: {
     translation: {
-      courses : {
-
+      courses: {
+        CoursesHero: {
+          title: "کۆرسە گشتگیرەکانی ئینگلیزی لەگەڵ توتڵج",
+          description: "کۆرسە پسپۆڕانە داڕێژراوەکانی ئینگلیزیمان بدۆزەرەوە کە بۆ هەموو ئامانجێکی فێربوون گونجاون. لە پەیوەندی کردنی گشتییەوە تا ئینگلیزی بازرگانی تایبەت، پڕۆگرامە پێکهاتەکانمان پێشکەش دەکەین کە بە متمانە ڕێنماییت دەکەن لە ئاستی سەرەتاییەوە بۆ پسپۆڕی."
+        },
+        CoursesShowcase: {
+          title: "کۆرسی تەواوی ئینگلیزیت هەڵبژێرە",
+          description: "گەڕان بۆ کۆمەڵە گشتگیری کۆرسەکانی ئینگلیزیمان کە داڕێژراون بۆ دابینکردنی ئامانجە تایبەتەکانی فێربوون و ئاواتەکانی کارییەکانت",
+          courses: [
+            {
+              title: "ئینگلیزی بۆ منداڵ و گەنجان",
+              description: "پڕۆگرامێکی سەرنجڕاکێش و کارلێککراوی فێربوونی ئینگلیزی کە بە تایبەتی بۆ فێرخوازانی گەنجی تەمەن ٦-١٧ ساڵ داڕێژراوە. چالاکی خۆش، یاری و ناوەڕۆکی گونجاو بۆ تەمەن یارمەتی منداڵان دەدات بە سروشتی لێهاتوویی زمانی بەهێز پەرە پێ بدەن.",
+              features: ["یاری کارلێککراو", "ناوەڕۆکی گونجاو بۆ تەمەن", "چالاکی فێربوونی خۆش"],
+              buttonText: "گەڕان بۆ ئینگلیزی بۆ منداڵ و گەنجان"
+            },
+            {
+              title: "ئینگلیزی بۆ گەورەسالان",
+              description: "پڕۆگرامێکی گشتگیری زمانی ئینگلیزی کە بۆ فێرخوازانی گەورەسال کە خشتەی سەرقاڵیان هەیە گونجاوە. گرنگی بە لێهاتوویی کارپێکراو دەدرێت بۆ کار، گەشت و پەیوەندی ڕۆژانە لەگەڵ بژاردەی فێربوونی نەرم.",
+              features: ["خشتەکاری نەرم", "پەیوەندی کارپێکراو", "لێهاتووی تەرکیزکراو لەسەر کار"],
+              buttonText: "گەڕان بۆ ئینگلیزی بۆ گەورەسالان"
+            },
+            {
+              title: "ئینگلیزی ئەکادیمی",
+              description: "لێهاتوویەکانی ئینگلیزی کە پێویستە بۆ سەرکەوتنی ئەکادیمی فێرببە، لەوانە نووسینی وتار، تەکنیکەکانی لێکۆڵینەوە، لێهاتوویی پێشکەشکردن و بیرکردنەوەی ڕەخنەیی بە ئینگلیزی.",
+              features: ["نووسینی ئەکادیمی", "لێهاتوویی لێکۆڵینەوە", "تەکنیکەکانی پێشکەشکردن"],
+              buttonText: "گەڕان بۆ ئینگلیزی ئەکادیمی"
+            },
+            {
+              title: "تاقیکردنەوەکانی پسپۆڕی ئینگلیزی",
+              description: "ئامادەکاری بۆ تاقیکردنەوەکانی نێودەوڵەتی پسپۆڕی ئینگلیزی وەک ئایێڵتس، تۆفڵ و کەیمبریج لەگەڵ مەشقی ئامانجدار و ستراتیژی تاقیکردنەوە.",
+              features: ["ئامادەکاری ئایێڵتس", "ڕاهێنانی تۆفڵ", "تاقیکردنەوەکانی کەیمبریج"],
+              buttonText: "گەڕان بۆ تاقیکردنەوەکانی پسپۆڕی ئینگلیزی"
+            },
+            {
+              title: "ئینگلیزی بازرگانی",
+              description: "لێهاتوویی پەیوەندی پیشەیی ئینگلیزی بۆ شوێنی کار پەرە پێ بدە، لەوانە نووسینی بازرگانی، پێشکەشکردن، دانوستان و ئاسانکاری کۆبوونەوە.",
+              features: ["پەیوەندی بازرگانی", "نووسینی پیشەیی", "لێهاتوویی کۆبوونەوە"],
+              buttonText: "گەڕان بۆ ئینگلیزی بازرگانی"
+            }
+          ],
+          keyFeatures: "تایبەتمەندییە سەرەکییەکان:"
+        },
+        CoursesCTA: {
+          title: "دڵنیا نیت کام کۆرس گونجاوە بۆ تۆ؟",
+          description: "تاقیکردنەوەی هەڵسەنگاندنی گشتگیرمان ئەنجام بدە بۆ دۆزینەوەی کۆرسی تەواوی ئینگلیزی کە بۆ ئاستی ئێستات، ئامانجەکانی فێربوون و ئاواتە کارییەکانت گونجاوە. ڕاسپاردەی کەسیکراو لە چەند خولەکێکدا وەربگرە.",
+          features: [
+            "هەڵسەنگاندنی ٥ خولەکی",
+            "ئەنجامی کەسیکراو",
+            "ڕاسپاردەی پسپۆڕانە"
+          ],
+          buttonText: "تاقیکردنەوەی کۆرس ئەنجام بدە",
+          info: "هەڵسەنگاندنی بێبەرامبەر • پێویستی بە تۆمارکردن نییە • ئەنجامی یەکسەر"
+        }
       },
       inglishForKids: {
         first: {
@@ -464,7 +566,7 @@ const resources = {
             },
             {
               title: "دەستکردن بە فێربوون",
-              description: "پەیوەندی بکە بە پۆلە خشتەکراوەکانت لەگەڵ ڕاهێنەرانی پسپۆڕ و دەست بکە بە ئەزموونی فێربوونی کارلێکی ئینگلیزی."
+              description: "پەیوەندی بکە بە پۆلە خشتەکراوەکانت لەگەڵ مامۆستایانی پسپۆڕ و دەست بکە بە ئەزموونی فێربوونی کارلێکی ئینگلیزی."
             }
           ]
         },
