@@ -11,6 +11,7 @@ import {  Clock, Users, Award, ChevronRight, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import BASE_URL from '@/app/config/url'
+import { useTranslation } from 'react-i18next'
 
 // Class type data
 const classTypes = [
@@ -87,12 +88,13 @@ const allCourses = [
 
 const EnglishCourseForKidsAndTeens = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   
   // Actual course data for English for Kids and Teens
-  const title = "English for Kids and Teens"
+  const title = t('inglishForKids.first.title')
   const heroImage = "/hero.jpg"
-  const description = "Engaging and interactive English learning program designed specifically for young learners aged 5-17. Our innovative approach combines fun games, creative activities, and age-appropriate content to make learning English an enjoyable and effective experience."
-  const enrollButtonText = "Enroll Now"
+  const description = t('inglishForKids.first.description')
+  const enrollButtonText = t('inglishForKids.first.enrollButtonText')
 
   // Reusable Class Card Component
   const ClassCard = ({ classType }) => (

@@ -8,6 +8,8 @@ import ThemeToggle from './ThemeToggle'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import LanguageWrapper from './LanguageWrapper'
+import Language from './Language'
 
 
 export default function Navbar (){
@@ -103,6 +105,9 @@ export default function Navbar (){
                 placeholder="Search..."
                 className="w-48 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm"
               />
+              <LanguageWrapper >
+                <Language />
+              </LanguageWrapper>
               <ThemeToggle />
             </div>
             {/* Mobile search icon */}
