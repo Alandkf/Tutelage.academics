@@ -3,49 +3,49 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-// Sample data - replace with your actual blog data
+// English learning practice resources
 const practiceCards = [
 	{
 		id: 1,
-		image: 'https://images.unsplash.com/photo-1516397281156-ca07cf9746fc?w=500',
-		title: 'Getting Started with React',
+		image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80',
+		title: 'English Grammar Fundamentals',
 		description:
-			'Learn the fundamentals of React and build your first component. This comprehensive guide will walk you through everything you need to know.',
+			'Master essential grammar rules including tenses, articles, and sentence structure. Build a strong foundation for confident English communication.',
 	},
 	{
 		id: 2,
-		image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500',
-		title: 'Advanced JavaScript Concepts',
+		image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80',
+		title: 'Vocabulary Building Techniques',
 		description:
-			'Deep dive into closures, promises, and async/await patterns in modern JavaScript development.',
+			'Learn effective strategies to expand your vocabulary with context-based learning, word families, and practical usage examples.',
 	},
 	{
 		id: 3,
-		image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500',
-		title: 'CSS Grid Mastery',
+		image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
+		title: 'English Pronunciation Guide',
 		description:
-			'Master CSS Grid layout system and create responsive designs with ease and flexibility.',
+			'Improve your speaking skills with phonetics, stress patterns, and intonation practice for clear and natural English pronunciation.',
 	},
 	{
 		id: 4,
-		image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=500',
-		title: 'TypeScript Best Practices',
+		image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80',
+		title: 'Reading Comprehension Skills',
 		description:
-			'Improve your code quality and catch bugs early with TypeScript type safety and modern features.',
+			'Enhance your reading abilities through diverse texts, skimming techniques, and strategies to understand complex passages.',
 	},
 	{
 		id: 5,
-		image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500',
-		title: 'Node.js Development',
+		image: 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?w=800&q=80',
+		title: 'Business English Essentials',
 		description:
-			'Build scalable backend applications with Node.js and Express framework.',
+			'Learn professional English for workplace communication, emails, presentations, and meetings in international business settings.',
 	},
 	{
 		id: 6,
-		image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=500',
-		title: 'Database Design Patterns',
+		image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80',
+		title: 'IELTS & TOEFL Preparation',
 		description:
-			'Learn essential database design patterns and optimization techniques for better performance.',
+			'Comprehensive test preparation strategies, practice exercises, and tips for achieving high scores in international English exams.',
 	},
 ];
 

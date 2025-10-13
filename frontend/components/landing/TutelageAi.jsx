@@ -66,7 +66,7 @@ const TutelageAi = () => {
             <div className="w-full lg:w-1/2">
               <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
                 <Image
-                  src="/hero.jpg"
+                  src="https://1051thebounce.com/uploads/2025/05/GettyImages-1515913422.jpg?format=auto&optimize=high&width=1920"
                   alt="Fun language learning for kids and teens"
                   fill
                   className="object-cover lg:rounded-tr-[4rem] max-lg:rounded-tl-[2rem]"
