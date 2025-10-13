@@ -298,8 +298,52 @@ const resources = {
           }
         }
       },
-      enroll : {
-        
+      enroll: {
+        title: "Enroll",
+        titleWithCourse: "Enroll in",
+        subtitle: "Take the first step towards mastering English. Fill out the form below and we'll get in touch with you soon.",
+        form: {
+          fullName: "Full Name",
+          fullNamePlaceholder: "Enter your full name",
+          email: "Email Address",
+          emailPlaceholder: "Enter your email address",
+          phone: "Phone Number",
+          phonePlaceholder: "Enter your phone number",
+          age: "Age",
+          agePlaceholder: "Enter your age",
+          profession: "Profession",
+          professionPlaceholder: "Select your profession",
+          professionTooltip: "Choose the option that best describes your current education or work status.",
+          course: "Course",
+          coursePlaceholder: "Select a course",
+          submitButton: "Submit Enrollment",
+          submittingButton: "Submitting...",
+          required: "*"
+        },
+        infoMessage: "Please fill out this form to enroll in your chosen course. Our team will contact you as soon as possible via email or phone to discuss your learning goals and schedule.",
+        sidebar: {
+          exploreOtherCourses: "Explore Other Courses",
+          exploreDescription: "Discover more ways to improve your English",
+          viewAllCourses: "View All Courses",
+          tryTutelageAI: "Try Tutelage AI",
+          aiDescription: "Powerful tutoring AI designed for English learning",
+          aiContent: "Experience our AI-powered English tutor that helps you learn and speak more confidently. Practice conversations, get instant feedback, and improve faster.",
+          launchAI: "Launch Tutelage AI",
+          findYourLevel: "Find Your Level",
+          levelDescription: "Discover your English proficiency level",
+          levelContent: "Take our comprehensive language placement test to determine your current English level and get personalized course recommendations.",
+          takePlacementTest: "Take Placement Test",
+          practiceTests: "Practice Tests",
+          practiceDescription: "Test your skills with our practice exams",
+          freePracticeTests: "Free Practice Tests",
+          mockTests: "International Mock Tests"
+        },
+        successDialog: {
+          title: "Enrollment Successful! 🎉",
+          description: "Thank you for enrolling with Tutelage! We have successfully received your application.",
+          message: "Our team will be in touch with you via email or phone number within 24 hours to discuss your learning goals and help you get started on your English learning journey.",
+          button: "Continue Exploring"
+        }
       }
     }
   },
@@ -600,7 +644,51 @@ const resources = {
         }
       },
       enroll : {
-
+        title: "تۆماربوون",
+        titleWithCourse: "لە",
+        subtitle: "هەنگاوی یەکەم بنێ بۆ شارەزابوون لە ئینگلیزی. فۆڕمەکە لە خوارەوە پڕبکەرەوە و بە زوویی پەیوەندیت پێوە دەکەین.",
+        form: {
+          fullName: "ناوی تەواو",
+          fullNamePlaceholder: "ناوی تەواوت بنووسە",
+          email: "ئیمەیڵ",
+          emailPlaceholder: "ئیمەیڵەکەت بنووسە",
+          phone: "ژمارەی تەلەفۆن",
+          phonePlaceholder: "ژمارەی تەلەفۆنەکەت بنووسە",
+          age: "تەمەن",
+          agePlaceholder: "تەمەنەکەت بنووسە",
+          profession: "پیشە",
+          professionPlaceholder: "پیشەکەت هەڵبژێرە",
+          professionTooltip: "ئەو بژاردەیە هەڵبژێرە کە باشترین وەسفی دۆخی ئێستای خوێندن یان کارەکەت دەکات.",
+          course: "کۆرس",
+          coursePlaceholder: "کۆرسێک هەڵبژێرە",
+          submitButton: "ناردنی تۆماربوون",
+          submittingButton: "ناردن...",
+          required: "*"
+        },
+        infoMessage: "تکایە ئەم فۆڕمە پڕبکەرەوە بۆ تۆماربوون لە کۆرسی هەڵبژێردراوت. تیمەکەمان بە زووترین کات لە ڕێگەی ئیمەیڵ یان تەلەفۆنەوە پەیوەندیت پێوە دەکات بۆ گفتوگۆ دەربارەی ئامانجەکانی فێربوون و خشتەکاتەکەت.",
+        sidebar: {
+          exploreOtherCourses: "گەڕان بۆ کۆرسەکانی تر",
+          exploreDescription: "ڕێگای زیاتر بدۆزەرەوە بۆ باشترکردنی ئینگلیزیت",
+          viewAllCourses: "بینینی هەموو کۆرسەکان",
+          tryTutelageAI: "تاقیکردنەوەی توتڵج AI",
+          aiDescription: "هۆشی دەستکرد بەهێز کە بۆ فێربوونی ئینگلیزی داڕێژراوە",
+          aiContent: "ئەزموونی مامۆستای ئینگلیزی هۆشمەندمان بکە کە یارمەتیت دەدات بە متمانەتر فێربیت و قسە بکەیت. مەشقی گفتوگۆ بکە، گەڕاندنەوەی یەکسەر وەربگرە و خێراتر باشتر ببە.",
+          launchAI: "دەستپێکردنی توتڵج AI",
+          findYourLevel: "ئاستەکەت بدۆزەرەوە",
+          levelDescription: "ئاستی پسپۆڕی ئینگلیزیت بدۆزەرەوە",
+          levelContent: "تاقیکردنەوەی گشتگیری پلەبەندی زمانمان ئەنجام بدە بۆ دیاریکردنی ئاستی ئینگلیزیت لە ئێستادا و وەرگرتنی ڕاسپاردەی کەسیکراوی کۆرس.",
+          takePlacementTest: "تاقیکردنەوەی پلەبەندی ئەنجام بدە",
+          practiceTests: "تاقیکردنەوەی مەشق",
+          practiceDescription: "لێهاتووییەکانت تاقی بکەرەوە لەگەڵ تاقیکردنەوە مەشقییەکانمان",
+          freePracticeTests: "تاقیکردنەوەی مەشقی بێبەرامبەر",
+          mockTests: "تاقیکردنەوەی نێودەوڵەتی/موک"
+        },
+        successDialog: {
+          title: "تۆماربوون سەرکەوتووبوو! 🎉",
+          description: "سوپاس بۆ تۆماربوونت لەگەڵ توتڵج! داواکاریەکەمان بە سەرکەوتوویی وەرگرتووە.",
+          message: "تیمەکەمان لە ماوەی ٢٤ کاتژمێردا لە ڕێگەی ئیمەیڵ یان ژمارەی تەلەفۆنەوە پەیوەندیت پێوە دەکات بۆ گفتوگۆ دەربارەی ئامانجەکانی فێربوونت و یارمەتیدانت بۆ دەستپێکردنی گەشتی فێربوونی ئینگلیزیت.",
+          button: "بەردەوامبوون لە گەڕان"
+        }
       }
     }
   }

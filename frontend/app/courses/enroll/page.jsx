@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useTranslation } from 'react-i18next'
 
 // Form validation schema
 const enrollmentSchema = z.object({
@@ -57,6 +58,8 @@ const professionOptions = [
 ]
 
 const EnrollPage = () => {
+  const { t, i18n } = useTranslation()
+  const isRTL = i18n.language === 'ku'
   const searchParams = useSearchParams()
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [preselectedCourse, setPreselectedCourse] = useState('')
@@ -181,19 +184,70 @@ const EnrollPage = () => {
       setShowSuccessDialog(false)
   }
 
+  const getImage = (courseName) => {
+    switch(courseName) {
+      case 'English for Kids and Teens':
+        return 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80';
+      case 'English for Adults':
+        return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80';
+      case 'Academic English':
+        return 'https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800&q=80';
+      case 'English Proficiency Tests':
+        return 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80';
+      case 'Business English':
+        return 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80';
+      default:
+        return '/hero.jpg';
+    }
+  };
+
+  const getDescription = (courseName) => {
+    switch(courseName) {
+      case 'English for Kids and Teens':
+        return 'Engaging and interactive English learning program designed specifically for young learners.';
+      case 'English for Adults':
+        return 'Comprehensive English language program tailored for adult learners with busy schedules.';
+      case 'Academic English':
+        return 'Master academic English skills for university study and professional research.';
+      case 'English Proficiency Tests':
+        return 'Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.';
+      case 'Business English':
+        return 'Master professional English communication for the global business world.';
+      default:
+        return 'Explore this English course to enhance your language skills.';
+    }
+  };
+
+  const getHref = (courseName) => {
+    switch(courseName) {
+      case 'English for Kids and Teens':
+        return '/courses/englishforkids';
+      case 'English for Adults':
+        return '/courses/englishforadults';
+      case 'Academic English':
+        return '/courses/academicenglish';
+      case 'English Proficiency Tests':
+        return '/courses/Englishproficiencytests';
+      case 'Business English':
+        return '/courses/businessenglish';
+      default:
+        return '/courses';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="lg:col-span-2">
             <div className="bg-card border border-border rounded-lg shadow-sm p-6 sm:p-8">
               <div className="mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-                  Enroll {preselectedCourse ? `in ${preselectedCourse}` : 'in Course'}
+                <h1 className={`text-3xl sm:text-4xl font-bold text-foreground mb-2 ${isRTL ? 'text-right' : ''}`}>
+                  {t('enroll.title')} {preselectedCourse ? `${t('enroll.titleWithCourse')} ${preselectedCourse}` : ''}
                 </h1>
-                <p className="text-muted-foreground text-lg">
-                  Take the first step towards mastering English. Fill out the form below and we'll get in touch with you soon.
+                <p className={`text-muted-foreground text-lg ${isRTL ? 'text-right' : ''}`}>
+                  {t('enroll.subtitle')}
                 </p>
               </div>
 
@@ -201,63 +255,71 @@ const EnrollPage = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Name Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name" className={isRTL ? 'text-right block' : ''}>
+                    {t('enroll.form.fullName')} {t('enroll.form.required')}
+                  </Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder={t('enroll.form.fullNamePlaceholder')}
                     {...register('name')}
-                    className={errors.name ? 'border-destructive focus:ring-destructive' : ''}
+                    className={`${errors.name ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
                   />
                   {errors.name && (
-                    <p className="text-sm text-destructive">{errors.name.message}</p>
+                    <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.name.message}</p>
                   )}
                 </div>
 
                 {/* Email Field - Full Width */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className={isRTL ? 'text-right block' : ''}>
+                    {t('enroll.form.email')} {t('enroll.form.required')}
+                  </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder={t('enroll.form.emailPlaceholder')}
                     {...register('email')}
-                    className={errors.email ? 'border-destructive focus:ring-destructive' : ''}
+                    className={`${errors.email ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
                   />
                   {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                    <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.email.message}</p>
                   )}
                 </div>
 
                 {/* Phone and Age Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Label htmlFor="phone" className={isRTL ? 'text-right block' : ''}>
+                      {t('enroll.form.phone')} {t('enroll.form.required')}
+                    </Label>
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="Enter your phone number"
+                      placeholder={t('enroll.form.phonePlaceholder')}
                       {...register('phone')}
-                      className={errors.phone ? 'border-destructive focus:ring-destructive' : ''}
+                      className={`${errors.phone ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
                     />
                     {errors.phone && (
-                      <p className="text-sm text-destructive">{errors.phone.message}</p>
+                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.phone.message}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="age">Age *</Label>
+                    <Label htmlFor="age" className={isRTL ? 'text-right block' : ''}>
+                      {t('enroll.form.age')} {t('enroll.form.required')}
+                    </Label>
                     <Input
                       id="age"
                       type="number"
                       min="5"
                       max="100"
-                      placeholder="Enter your age"
+                      placeholder={t('enroll.form.agePlaceholder')}
                       {...register('age')}
-                      className={errors.age ? 'border-destructive focus:ring-destructive' : ''}
+                      className={`${errors.age ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
                     />
                     {errors.age && (
-                      <p className="text-sm text-destructive">{errors.age.message}</p>
+                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.age.message}</p>
                     )}
                   </div>
                 </div>
@@ -266,8 +328,8 @@ const EnrollPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Profession with Tooltip */}
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Label>Profession *</Label>
+                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+                      <Label className={isRTL ? 'text-right' : ''}>{t('enroll.form.profession')} {t('enroll.form.required')}</Label>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -276,14 +338,14 @@ const EnrollPage = () => {
                             </div>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
-                            <p className="text-sm">Choose the option that best describes your current education or work status.</p>
+                            <p className="text-sm">{t('enroll.form.professionTooltip')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </div>
                     <Select onValueChange={(value) => setValue('profession', value)}>
-                      <SelectTrigger className={errors.profession ? 'border-destructive focus:ring-destructive' : ''}>
-                        <SelectValue placeholder="Select your profession" />
+                      <SelectTrigger className={`${errors.profession ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}>
+                        <SelectValue placeholder={t('enroll.form.professionPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {professionOptions.map((profession) => (
@@ -294,20 +356,20 @@ const EnrollPage = () => {
                       </SelectContent>
                     </Select>
                     {errors.profession && (
-                      <p className="text-sm text-destructive">{errors.profession.message}</p>
+                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.profession.message}</p>
                     )}
                   </div>
 
                   {/* Course Selection */}
                   <div className="space-y-2">
-                    <Label>Course *</Label>
+                    <Label className={isRTL ? 'text-right block' : ''}>{t('enroll.form.course')} {t('enroll.form.required')}</Label>
                     <Select 
                       key={selectKey}
                       onValueChange={(value) => setValue('course', value)} 
                       defaultValue={watch('course')}
                     >
-                      <SelectTrigger className={errors.course ? 'border-destructive focus:ring-destructive' : ''}>
-                        <SelectValue placeholder="Select a course" />
+                      <SelectTrigger className={`${errors.course ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}>
+                        <SelectValue placeholder={t('enroll.form.coursePlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {courses.map((course) => (
@@ -318,7 +380,7 @@ const EnrollPage = () => {
                       </SelectContent>
                     </Select>
                     {errors.course && (
-                      <p className="text-sm text-destructive">{errors.course.message}</p>
+                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.course.message}</p>
                     )}
                   </div>
                 </div>
@@ -330,15 +392,14 @@ const EnrollPage = () => {
                   className="w-full text-lg py-3"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Enrollment'}
+                  {isSubmitting ? t('enroll.form.submittingButton') : t('enroll.form.submitButton')}
                 </Button>
               </form>
 
               {/* Info Message */}
               <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground text-center">
-                  Please fill out this form to enroll in your chosen course. Our team will contact you as soon as possible 
-                  via email or phone to discuss your learning goals and schedule.
+                <p className={`text-sm text-muted-foreground text-center ${isRTL ? 'text-right' : ''}`}>
+                  {t('enroll.infoMessage')}
                 </p>
               </div>
             </div>
@@ -349,95 +410,42 @@ const EnrollPage = () => {
             {/* Other Courses */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? '' : ''}`}>
                   <GraduationCap className="h-5 w-5" />
-                  Explore Other Courses
+                  {t('enroll.sidebar.exploreOtherCourses')}
                 </CardTitle>
-                <CardDescription>
-                  Discover more ways to improve your English
+                <CardDescription className={isRTL ? 'text-right' : ''}>
+                  {t('enroll.sidebar.exploreDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {courses.filter(course => course !== preselectedCourse).slice(0, 2).map((course) => {
-                  const getHref = (courseName) => {
-                    switch(courseName) {
-                      case 'English for Kids and Teens':
-                        return '/courses/englishforkids';
-                      case 'English for Adults':
-                        return '/courses/englishforadults';
-                      case 'Academic English':
-                        return '/courses/academicenglish';
-                      case 'English Proficiency Tests':
-                        return '/courses/Englishproficiencytests';
-                      case 'Business English':
-                        return '/courses/businessenglish';
-                      default:
-                        return '/courses';
-                    }
-                  };
-
-                  const getImage = (courseName) => {
-                    switch(courseName) {
-                      case 'English for Kids and Teens':
-                        return 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80';
-                      case 'English for Adults':
-                        return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80';
-                      case 'Academic English':
-                        return 'https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800&q=80';
-                      case 'English Proficiency Tests':
-                        return 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80';
-                      case 'Business English':
-                        return 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80';
-                      default:
-                        return '/hero.jpg';
-                    }
-                  };
-
-                  const getDescription = (courseName) => {
-                    switch(courseName) {
-                      case 'English for Kids and Teens':
-                        return 'Engaging and interactive English learning program designed specifically for young learners.';
-                      case 'English for Adults':
-                        return 'Comprehensive English language program tailored for adult learners with busy schedules.';
-                      case 'Academic English':
-                        return 'Master academic English skills for university study and professional research.';
-                      case 'English Proficiency Tests':
-                        return 'Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.';
-                      case 'Business English':
-                        return 'Master professional English communication for the global business world.';
-                      default:
-                        return 'Explore this English course to enhance your language skills.';
-                    }
-                  };
-
-                  return (
-                    <Link key={course} href={getHref(course)}>
-                      <div className="flex items-center gap-3 p-3 bg-muted/50 mb-2 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer">
-                        <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
-                          <Image
-                            src={getImage(course)}
-                            alt={`${course} course`}
-                            fill
-                            quality={100}
-                            className="object-cover"
-                            sizes="96px"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm text-foreground mb-1 truncate">
-                            {course}
-                          </h3>
-                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {getDescription(course)}
-                          </p>
-                        </div>
+                {courses.filter(course => course !== preselectedCourse).slice(0, 2).map((course) => (
+                  <Link key={course} href={getHref(course)}>
+                    <div className={`flex items-center gap-3 p-3 bg-muted/50 mb-2 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
+                        <Image
+                          src={getImage(course)}
+                          alt={`${course} course`}
+                          fill
+                          quality={100}
+                          className="object-cover"
+                          sizes="96px"
+                        />
                       </div>
-                    </Link>
-                  )
-                })}
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`font-semibold text-sm text-foreground mb-1 truncate ${isRTL ? 'text-left' : ''}`}>
+                          {course}
+                        </h3>
+                        <p className={`text-xs text-muted-foreground line-clamp-2 leading-relaxed ${isRTL ? 'text-left' : ''}`}>
+                          {getDescription(course)}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
                 <Link href="/courses">
                   <Button variant="outline" className="w-full mt-4">
-                    View All Courses
+                    {t('enroll.sidebar.viewAllCourses')}
                   </Button>
                 </Link>
               </CardContent>
@@ -446,23 +454,22 @@ const EnrollPage = () => {
             {/* Tutelage AI CTA */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? '' : ''}`}>
                   <ExternalLink className="h-5 w-5" />
-                  Try Tutelage AI
+                  {t('enroll.sidebar.tryTutelageAI')}
                 </CardTitle>
-                <CardDescription>
-                  Powerful tutoring AI designed for English learning
+                <CardDescription className={isRTL ? 'text-right' : ''}>
+                  {t('enroll.sidebar.aiDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Experience our AI-powered English tutor that helps you learn and speak more confidently. 
-                  Practice conversations, get instant feedback, and improve faster.
+                <p className={`text-sm text-muted-foreground mb-4 ${isRTL ? 'text-right' : ''}`}>
+                  {t('enroll.sidebar.aiContent')}
                 </p>
                 <Link href="https://tutelage.vercel.app/" target="_blank" rel="noopener noreferrer">
-                  <Button className="w-full">
-                    Launch Tutelage AI
-                    <ExternalLink className="ml-2 h-4 w-4" />
+                  <Button className={`w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    {t('enroll.sidebar.launchAI')}
+                    <ExternalLink className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                   </Button>
                 </Link>
               </CardContent>
@@ -471,22 +478,21 @@ const EnrollPage = () => {
             {/* English Level Test */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? '' : ''}`}>
                   <Target className="h-5 w-5" />
-                  Find Your Level
+                  {t('enroll.sidebar.findYourLevel')}
                 </CardTitle>
-                <CardDescription>
-                  Discover your English proficiency level
+                <CardDescription className={isRTL ? 'text-right' : ''}>
+                  {t('enroll.sidebar.levelDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Take our comprehensive language placement test to determine your current English level 
-                  and get personalized course recommendations.
+                <p className={`text-sm text-muted-foreground mb-4 ${isRTL ? 'text-right' : ''}`}>
+                  {t('enroll.sidebar.levelContent')}
                 </p>
                 <Link href="/tutelagetests/languageplacement">
                   <Button variant="outline" className="w-full mb-3">
-                    Take Placement Test
+                    {t('enroll.sidebar.takePlacementTest')}
                   </Button>
                 </Link>
               </CardContent>
@@ -495,23 +501,23 @@ const EnrollPage = () => {
             {/* Other Tests */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className={`flex items-center gap-2 ${isRTL ? '' : ''}`}>
                   <FileText className="h-5 w-5" />
-                  Practice Tests
+                  {t('enroll.sidebar.practiceTests')}
                 </CardTitle>
-                <CardDescription>
-                  Test your skills with our practice exams
+                <CardDescription className={isRTL ? '' : ''}>
+                  {t('enroll.sidebar.practiceDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Link href="/tutelagetests/practicetests">
-                  <Button variant="ghost" className="w-full justify-start text-sm">
-                    Free Practice Tests
+                  <Button variant="ghost" className={`w-full text-sm ${isRTL ? 'justify-start' : 'justify-start'}`}>
+                    {t('enroll.sidebar.freePracticeTests')}
                   </Button>
                 </Link>
                 <Link href="/tutelagetests/mockexams">
-                  <Button variant="ghost" className="w-full justify-start text-sm">
-                    International Mock Tests
+                  <Button variant="ghost" className={`w-full text-sm ${isRTL ? 'justify-start' : 'justify-start'}`}>
+                    {t('enroll.sidebar.mockTests')}
                   </Button>
                 </Link>
               </CardContent>
@@ -524,25 +530,30 @@ const EnrollPage = () => {
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl text-green-600 dark:text-green-400">
-              Enrollment Successful! 🎉
+            <DialogTitle className={`text-center text-xl text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : ''}`}>
+              {t('enroll.successDialog.title')}
             </DialogTitle>
-            <DialogDescription className="text-center text-base pt-4">
-              Thank you for enrolling with Tutelage! We have successfully received your application.
+            <DialogDescription className={`text-center text-base pt-4 ${isRTL ? 'text-right' : ''}`}>
+              {t('enroll.successDialog.description')}
               <br /><br />
-              Our team will be in touch with you via email or phone number within 24 hours to discuss 
-              your learning goals and help you get started on your English learning journey.
+              {t('enroll.successDialog.message')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-4">
             <Button onClick={redirectAfterSuccess}>
-              Continue Exploring
+              {t('enroll.successDialog.button')}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
+    
   )
 }
 
 export default EnrollPage
+
+
+
+
+
