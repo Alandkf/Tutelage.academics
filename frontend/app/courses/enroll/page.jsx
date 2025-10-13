@@ -376,17 +376,51 @@ const EnrollPage = () => {
                     }
                   };
 
+                  const getImage = (courseName) => {
+                    switch(courseName) {
+                      case 'English for Kids and Teens':
+                        return 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80';
+                      case 'English for Adults':
+                        return 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80';
+                      case 'Academic English':
+                        return 'https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800&q=80';
+                      case 'English Proficiency Tests':
+                        return 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80';
+                      case 'Business English':
+                        return 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80';
+                      default:
+                        return '/hero.jpg';
+                    }
+                  };
+
+                  const getDescription = (courseName) => {
+                    switch(courseName) {
+                      case 'English for Kids and Teens':
+                        return 'Engaging and interactive English learning program designed specifically for young learners.';
+                      case 'English for Adults':
+                        return 'Comprehensive English language program tailored for adult learners with busy schedules.';
+                      case 'Academic English':
+                        return 'Master academic English skills for university study and professional research.';
+                      case 'English Proficiency Tests':
+                        return 'Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.';
+                      case 'Business English':
+                        return 'Master professional English communication for the global business world.';
+                      default:
+                        return 'Explore this English course to enhance your language skills.';
+                    }
+                  };
+
                   return (
                     <Link key={course} href={getHref(course)}>
                       <div className="flex items-center gap-3 p-3 bg-muted/50 mb-2 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer">
                         <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
                           <Image
-                            src="/hero.jpg"
+                            src={getImage(course)}
                             alt={`${course} course`}
                             fill
                             quality={100}
                             className="object-cover"
-                            sizes="1000px"
+                            sizes="96px"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -394,11 +428,7 @@ const EnrollPage = () => {
                             {course}
                           </h3>
                           <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                            {course === 'English for Adults' ? 'Comprehensive English language program tailored for adult learners with busy schedules.' :
-                             course === 'Academic English' ? 'Master academic English skills for university study and professional research.' :
-                             course === 'English Proficiency Tests' ? 'Prepare for IELTS, TOEFL, PTE, and other international English proficiency tests.' :
-                             course === 'Business English' ? 'Master professional English communication for the global business world.' :
-                             'Engaging and interactive English learning program designed specifically for young learners.'}
+                            {getDescription(course)}
                           </p>
                         </div>
                       </div>

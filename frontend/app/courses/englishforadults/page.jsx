@@ -20,21 +20,21 @@ const EnglishForAdultsPage = () => {
   const isRTL = i18n.language === 'ku'
   
   const title = t('inglishForAdults.first.title')
-  const heroImage = "/hero.jpg"
+  const heroImage = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&q=80" // Adults studying together
   const description = t('inglishForAdults.first.description')
   const enrollButtonText = t('inglishForAdults.first.enrollButtonText')
 
   // Get class types from translation
   const publicClass = {
     title: t('inglishForAdults.classTypes.public.title'),
-    image: "/hero.jpg",
+    image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80", // Group learning/classroom
     features: t('inglishForAdults.classTypes.public.features', { returnObjects: true }),
     buttonText: t('inglishForAdults.classTypes.public.buttonText')
   }
 
   const privateClass = {
     title: t('inglishForAdults.classTypes.private.title'),
-    image: "/hero.jpg",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80", // One-on-one professional tutoring
     features: t('inglishForAdults.classTypes.private.features', { returnObjects: true }),
     buttonText: t('inglishForAdults.classTypes.private.buttonText')
   }
@@ -184,7 +184,11 @@ const EnglishForAdultsPage = () => {
   }
 
   const courseOptions = [
-    'English for Adults',
+    'English for Kids and Teens',
+    'English for Adults', 
+    'Academic English',
+    'Business English',
+    'English Proficiency Tests'  
   ]
 
   // FAQ state
@@ -335,11 +339,11 @@ const EnglishForAdultsPage = () => {
               </div>
             </div>
 
-            {/* Image */}
+            {/* Image - Interactive learning for adults */}
             <div className="w-full lg:w-1/2">
               <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
                 <Image
-                  src="/hero.jpg"
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
                   alt="Interactive English learning for adults"
                   fill
                   className="object-cover"
@@ -539,4 +543,3 @@ const EnglishForAdultsPage = () => {
 }
 
 export default EnglishForAdultsPage
-                   

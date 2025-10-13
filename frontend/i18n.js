@@ -297,6 +297,9 @@ const resources = {
             info2: "Please check your email and phone for our response within 24 hours"
           }
         }
+      },
+      enroll : {
+        
       }
     }
   },
@@ -595,6 +598,9 @@ const resources = {
             info2: "تکایە ئیمەیڵ و تەلەفۆنەکەت بپشکنە بۆ وەڵامەکەمان لە ماوەی ٢٤ کاتژمێردا"
           }
         }
+      },
+      enroll : {
+
       }
     }
   }
