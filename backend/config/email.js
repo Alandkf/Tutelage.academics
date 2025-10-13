@@ -4,6 +4,8 @@
 // Nodemailer setup for sending enrollment and notification emails
 
 const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
@@ -42,7 +44,20 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
   
+  // Debug: Check if file exists
+  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
+  console.log('Logo path:', logoPath);
+  console.log('File exists:', fs.existsSync(logoPath));
+  
   await transporter.sendMail({
+    attachments: [
+      {
+        filename: 'tutelage-logo.svg',
+        path: logoPath,
+        cid: 'tutelage-logo',
+        contentDisposition: 'inline'
+      }
+    ],
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_USER, // Send to admin email
     subject: `New Course Enrollment Application: ${course}`,
@@ -50,12 +65,15 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            TUTELAGE
-          </h1>
-          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
-            English Learning Platform
-          </p>
+           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+              <img src="cid:tutelage-logo" alt="Tutelage Logo" width="45" height="45" style="vertical-align: middle; border-radius: 8px; display: block;" />
+              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                 TUTELAGE
+              </h1>
+            </div>
+              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+                 English Learning Platform
+              </p>
         </div>
         
         <!-- Main content -->
@@ -139,7 +157,17 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
 async function sendEnrollmentConfirmationEmail(enrollmentData) {
   const { name, email, course } = enrollmentData;
   
+  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
+  
   await transporter.sendMail({
+    attachments: [
+      {
+        filename: 'tutelage-logo.svg',
+        path: logoPath,
+        cid: 'tutelage-logo',
+        contentDisposition: 'inline'
+      }
+    ],
     from: process.env.EMAIL_USER,
     to: email,
     subject: 'Enrollment Application Received - Welcome to Tutelage!',
@@ -147,12 +175,15 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            TUTELAGE
-          </h1>
-          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
-            English Learning Platform
-          </p>
+           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+              <img src="cid:tutelage-logo" alt="Tutelage Logo" width="45" height="45" style="vertical-align: middle; border-radius: 8px; display: block;" />
+              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                 TUTELAGE
+              </h1>
+            </div>
+              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+                 English Learning Platform
+              </p>
         </div>
         
         <!-- Main content -->
