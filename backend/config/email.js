@@ -66,7 +66,6 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
            <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <img src="cid:tutelage-logo" alt="Tutelage Logo" width="45" height="45" style="vertical-align: middle; border-radius: 8px; display: block;" />
               <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                  TUTELAGE
               </h1>
@@ -176,7 +175,6 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
            <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <img src="cid:tutelage-logo" alt="Tutelage Logo" width="45" height="45" style="vertical-align: middle; border-radius: 8px; display: block;" />
               <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                  TUTELAGE
               </h1>
@@ -252,8 +250,155 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
   });
 }
 
+/**
+ * Send pricing information email to the student for English for Kids and Teens
+ * @param {Object} pricingData - The pricing request data
+ */
+async function sendPricingRequestEmail(pricingData) {
+  const { firstName, lastName, email, course } = pricingData;
+  
+  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
+  
+  await transporter.sendMail({
+    attachments: [
+      {
+        filename: 'tutelage-logo.svg',
+        path: logoPath,
+        cid: 'tutelage-logo',
+        contentDisposition: 'inline'
+      }
+    ],
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: `${course} - Course Information & Pricing`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header with Tutelage branding -->
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <div style="display: flex; align-items: center; justify-center; gap: 12px;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              TUTELAGE
+            </h1>
+          </div>
+          <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
+        </div>
+        
+        <!-- Main content -->
+        <div style="padding: 30px 20px; background-color: #ffffff;">
+          <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
+            ${course} - Course Information
+          </h2>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear <strong>${firstName} ${lastName}</strong>,</p>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Thank you for your interest in our <strong style="color: #f59e0b;">${course}</strong> program! 
+            We're excited to share detailed information about our course options.
+          </p>
+
+          <!-- Public Classes Section -->
+          <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #f59e0b; margin-top: 0; font-size: 20px; margin-bottom: 15px;">📚 Public Classes</h3>
+            <ul style="color: #333; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Live Online classes</strong></li>
+              <li>For ages <strong>5-17</strong></li>
+              <li>Small groups (<strong>3-5 learners only</strong>)</li>
+              <li>Practice with AI companion</li>
+              <li>Fun games and interactive lessons backed by Tutelage Method</li>
+              <li>Age-specific for top results</li>
+              <li>Certificate of completion</li>
+              <li><strong>32 lessons per course</strong></li>
+            </ul>
+            <div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border-radius: 6px;">
+              <p style="margin: 0; color: #856404; font-size: 14px;">
+                💰 <strong>Pricing:</strong> Contact us for current rates and available discounts
+              </p>
+            </div>
+          </div>
+
+          <!-- Private Classes Section -->
+          <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #f59e0b; margin-top: 0; font-size: 20px; margin-bottom: 15px;">👤 Private Classes</h3>
+            <ul style="color: #333; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Live Online classes</strong></li>
+              <li>For ages <strong>5-17</strong></li>
+              <li>One-on-one lessons (<strong>1 learner only</strong>)</li>
+              <li>Designed course for each learner</li>
+              <li>Practice with AI companion</li>
+              <li>Fun games and interactive lessons backed by Tutelage Method</li>
+              <li>Certificate of completion</li>
+              <li>Flexibility in time and schedule</li>
+              <li><strong>16 lessons</strong></li>
+            </ul>
+            <div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border-radius: 6px;">
+              <p style="margin: 0; color: #856404; font-size: 14px;">
+                💰 <strong>Pricing:</strong> Contact us for personalized pricing based on your schedule
+              </p>
+            </div>
+          </div>
+
+          <!-- Why Choose Tutelage -->
+          <div style="background-color: #e0f2fe; border: 1px solid #bae6fd; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #0369a1; margin-top: 0; font-size: 18px;">
+              🌟 Why Choose Tutelage?
+            </h3>
+            <ul style="color: #0369a1; margin: 0; padding-left: 20px; line-height: 1.6;">
+              <li>Expert native English instructors</li>
+              <li>Proven Tutelage Method for effective learning</li>
+              <li>Small class sizes for personalized attention</li>
+              <li>AI companion for extra practice</li>
+              <li>Certificate of completion</li>
+              <li>Flexible scheduling options</li>
+            </ul>
+          </div>
+
+          <!-- Next Steps -->
+          <div style="background-color: #dcfce7; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #166534; margin-top: 0; font-size: 16px;">
+              📞 Ready to Get Started?
+            </h3>
+            <p style="color: #166534; margin: 0; line-height: 1.6; font-size: 14px;">
+              <strong>Contact our enrollment team:</strong><br>
+              📧 Email: Info@tutelage.krd<br>
+              📱 Phone: (964+) 07501534240 or (964+) 07701946364<br>
+              <br>
+              Our team will be happy to discuss pricing details, payment plans, and help you choose the best option for your child!
+            </p>
+          </div>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            We look forward to helping your child master English in a fun and engaging way!
+          </p>
+
+          <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p style="color: #333; margin: 0; font-size: 16px;">
+              <strong>Have questions?</strong>
+            </p>
+            <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+              Reply to this email or contact us directly for personalized assistance!
+            </p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="color: #ffffff; margin: 0; font-size: 14px;">
+            <strong>Tutelage English Learning Platform</strong>
+          </p>
+          <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
+            Empowering students to achieve English fluency
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
-  sendEnrollmentConfirmationEmail
+  sendEnrollmentConfirmationEmail,
+  sendPricingRequestEmail
 };

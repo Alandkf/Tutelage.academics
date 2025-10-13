@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -102,7 +102,88 @@ const processEnrollment = async (req, res) => {
   }
 };
 
+/**
+ * Process pricing request for courses
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const processPricingRequest = async (req, res) => {
+  try {
+    console.log('💰 Processing pricing request');
+    
+    const { firstName, lastName, email, course } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !course) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+    
+    const pricingData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim().toLowerCase(),
+      course: course.trim()
+    };
+    
+    console.log('📧 Sending pricing information email...');
+    
+    // Send pricing email to user
+    try {
+      await sendPricingRequestEmail(pricingData);
+      
+      console.log('✅ Pricing email sent successfully');
+      console.log(`📋 Pricing request: ${pricingData.name} for ${course}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Pricing request submitted successfully! However, there was an issue sending the email. Our team will contact you directly.',
+        data: {
+          name: pricingData.name,
+          course: pricingData.course,
+          email: pricingData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Pricing information sent successfully! Check your email.',
+      data: {
+        name: pricingData.name,
+        course: pricingData.course,
+        email: pricingData.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Pricing request processing error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process pricing request. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
 
 module.exports = {
   processEnrollment,
+  processPricingRequest,
 };

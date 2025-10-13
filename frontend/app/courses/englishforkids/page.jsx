@@ -167,25 +167,19 @@ const EnglishCourseForKidsAndTeens = () => {
     ...step
   }))
 
-  // Form state
+  // Form state - simplified for pricing request
   const [formData, setFormData] = useState({
-    countryOfResidence: '',
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
-    zipCode: '',
     interestedIn: '',
-    classType: '',
-    testType: ''
   })
   const [formLoading, setFormLoading] = useState(false)
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value,
-      ...(field === 'interestedIn' && { classType: '', testType: '' })
+      [field]: value
     }))
   }
 
@@ -194,7 +188,7 @@ const EnglishCourseForKidsAndTeens = () => {
     setFormLoading(true)
 
     try {
-      const requiredFields = ['countryOfResidence', 'firstName', 'lastName', 'email', 'phone', 'interestedIn']
+      const requiredFields = ['firstName', 'lastName', 'email', 'interestedIn']
       const missingFields = requiredFields.filter(field => !formData[field])
       
       if (missingFields.length > 0) {
@@ -202,23 +196,16 @@ const EnglishCourseForKidsAndTeens = () => {
         return
       }
 
-      const response = await fetch(`${BASE_URL}/api/enrollment`, {
+      const response = await fetch(`${BASE_URL}/api/enrollment/pricing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
-          phone: formData.phone,
-          age: '18',
-          education: 'Not specified',
-          course: formData.interestedIn,
-          classType: formData.classType,
-          testType: formData.testType,
-          countryOfResidence: formData.countryOfResidence,
-          zipCode: formData.zipCode,
-          requestType: 'pricing_information'
+          course: formData.interestedIn
         })
       })
 
@@ -231,20 +218,15 @@ const EnglishCourseForKidsAndTeens = () => {
         return
       }
 
-      toast("Request Submitted Successfully! 🎉", {
-        description: "Our enrollment advisor will contact you within 24 hours"
+      toast("Pricing Information Sent! 🎉", {
+        description: "Check your email for detailed course information and pricing"
       })
 
       setFormData({
-        countryOfResidence: '',
         firstName: '',
         lastName: '',
         email: '',
-        phone: '',
-        zipCode: '',
         interestedIn: '',
-        classType: '',
-        testType: ''
       })
 
     } catch (error) {
@@ -263,25 +245,6 @@ const EnglishCourseForKidsAndTeens = () => {
     'Business English',
     'English Proficiency Tests'
   ]
-
-  const classTypeOptions = [
-    'Private Classes',
-    'Public Classes',
-    'In-person Classes'
-  ]
-
-  const testTypeOptions = [
-    'IELTS Academic',
-    'IELTS General',
-    'IELTS for UKVI', 
-    'IELTS Life Skills',
-    'TOEFL',
-    'PTE',
-    'OET'
-  ]
-
-  const showClassType = formData.interestedIn && formData.interestedIn !== 'English Proficiency Tests'
-  const showTestType = formData.interestedIn === 'English Proficiency Tests'
 
   return (
     <div className="relative min-h-screen bg-background pt-4" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -523,21 +486,12 @@ const EnglishCourseForKidsAndTeens = () => {
 
           <div className="bg-card border border-border rounded-lg shadow-sm p-8 sm:p-10 lg:p-12">
             <form onSubmit={handleFormSubmit} className="space-y-8">
-              {/* First Row: Country and Names */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {/* First Row: Names */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1 items-start">
-                  <Label htmlFor="country" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.country')} {t('inglishForKids.requestPricing.form.required')}</Label>
-                  <Input
-                    id="country"
-                    type="text"
-                    value={formData.countryOfResidence}
-                    onChange={(e) => handleInputChange('countryOfResidence', e.target.value)}
-                    required
-                    className={isRTL ? 'text-right' : ''}
-                  />
-                </div>
-                <div className="flex flex-col gap-1 items-start">
-                  <Label htmlFor="firstName" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.firstName')} {t('inglishForKids.requestPricing.form.required')}</Label>
+                  <Label htmlFor="firstName" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForKids.requestPricing.form.firstName')} {t('inglishForKids.requestPricing.form.required')}
+                  </Label>
                   <Input
                     id="firstName"
                     type="text"
@@ -548,7 +502,9 @@ const EnglishCourseForKidsAndTeens = () => {
                   />
                 </div>
                 <div className="flex flex-col gap-1 items-start">
-                  <Label htmlFor="lastName" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.lastName')} {t('inglishForKids.requestPricing.form.required')}</Label>
+                  <Label htmlFor="lastName" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForKids.requestPricing.form.lastName')} {t('inglishForKids.requestPricing.form.required')}
+                  </Label>
                   <Input
                     id="lastName"
                     type="text"
@@ -560,10 +516,12 @@ const EnglishCourseForKidsAndTeens = () => {
                 </div>
               </div>
 
-              {/* Second Row: Email, Phone, Zip Code */}
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-6">
-                <div className="sm:col-span-3 flex flex-col gap-1 items-start">
-                  <Label htmlFor="email" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.email')} {t('inglishForKids.requestPricing.form.required')}</Label>
+              {/* Second Row: Email and Course Interest (side by side on md+) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-1 items-start">
+                  <Label htmlFor="email" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForKids.requestPricing.form.email')} {t('inglishForKids.requestPricing.form.required')}
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -573,35 +531,13 @@ const EnglishCourseForKidsAndTeens = () => {
                     className={isRTL ? 'text-right' : ''}
                   />
                 </div>
-                <div className="flex flex-col gap-1 items-start">
-                  <Label htmlFor="phone" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.phone')} {t('inglishForKids.requestPricing.form.required')}</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    required
-                    className={isRTL ? 'text-right' : ''}
-                  />
-                </div>
-                <div className="flex flex-col gap-1 items-start">
-                  <Label htmlFor="zipCode" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.zipCode')}</Label>
-                  <Input
-                    id="zipCode"
-                    type="text"
-                    value={formData.zipCode}
-                    onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                    className={isRTL ? 'text-right' : ''}
-                  />
-                </div>
-              </div>
 
-              {/* Third Row: Course Interest and Additional Options */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-6">
                 <div className="flex flex-col gap-1 items-start">
-                  <Label className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.interestedIn')} {t('inglishForKids.requestPricing.form.required')}</Label>
-                  <Select onValueChange={(value) => handleInputChange('interestedIn', value)}>
-                    <SelectTrigger className="w-full" >
+                  <Label className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForKids.requestPricing.form.interestedIn')} {t('inglishForKids.requestPricing.form.required')}
+                  </Label>
+                  <Select value={formData.interestedIn} onValueChange={(value) => handleInputChange('interestedIn', value)}>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder={t('inglishForKids.requestPricing.form.selectCourse')} />
                     </SelectTrigger>
                     <SelectContent>
@@ -613,55 +549,6 @@ const EnglishCourseForKidsAndTeens = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {showClassType && (
-                  <div className="flex flex-col gap-1 items-start">
-                    <Label className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.classType')} {t('inglishForKids.requestPricing.form.required')}</Label>
-                    <Select onValueChange={(value) => handleInputChange('classType', value)}>
-                      <SelectTrigger className="w-full" >
-                        <SelectValue placeholder={t('inglishForKids.requestPricing.form.selectClassType')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classTypeOptions.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {showTestType && (
-                  <div className="flex flex-col gap-1 items-start">
-                    <Label className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.testType')} {t('inglishForKids.requestPricing.form.required')}</Label>
-                    <Select onValueChange={(value) => handleInputChange('testType', value)}>
-                      <SelectTrigger >
-                        <SelectValue placeholder={t('inglishForKids.requestPricing.form.selectTestType')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {testTypeOptions.map((test) => (
-                          <SelectItem key={test} value={test}>
-                            {test}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-
-              {/* Message Field */}
-              <div className="flex flex-col gap-1 items-start">
-                <Label htmlFor="message" className={`text-base font-medium ${isRTL ? 'items-end' : ''}`}>{t('inglishForKids.requestPricing.form.message')}</Label>
-                <textarea
-                  id="message"
-                  rows={4}
-                  placeholder={t('inglishForKids.requestPricing.form.messagePlaceholder')}
-                  value={formData.message || ''}
-                  onChange={(e) => handleInputChange('message', e.target.value)}
-                  className={`w-full min-h-[100px] px-3 py-2 text-sm border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 resize-y ${isRTL ? 'text-right' : ''}`}
-                />
               </div>
 
               {/* Submit Button */}
@@ -683,5 +570,6 @@ const EnglishCourseForKidsAndTeens = () => {
     </div>
   )
 }
+
 
 export default EnglishCourseForKidsAndTeens
