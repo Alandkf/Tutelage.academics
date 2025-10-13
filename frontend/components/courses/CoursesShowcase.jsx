@@ -21,12 +21,13 @@ const CoursesShowcase = () => {
     "/courses/businessenglish"
   ]
 
+  // Relevant images for each course
   const courseImages = [
-    "/hero.jpg",
-    "/hero.jpg",
-    "/hero.jpg",
-    "/hero.jpg",
-    "/hero.jpg"
+    "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80", // Kids learning - colorful, playful
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80", // Adults studying together
+    "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800&q=80", // Academic/University setting - library
+    "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80", // Test preparation/studying
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80"  // Business meeting/professional
   ]
 
   return (
