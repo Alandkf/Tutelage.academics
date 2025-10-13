@@ -63,7 +63,7 @@ export const Footer = () => {
   ]
 
   return (
-    <footer className="bg-primary text-primary-foreground relative overflow-hidden border-t border-gray-800">
+    <footer className="bg-black text-white relative overflow-hidden border-t border-border">
       <div className="max-w-7xl mx-auto px-6 sm:px-10 xl:px-16 relative">
         {/* Top Section - Links */}
         <div className="py-14 sm:py-20">
@@ -74,14 +74,14 @@ export const Footer = () => {
                 {/* Main Links */}
                 <div className="space-y-4">
                   <Link href="/courses">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Main</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Main</h4>
                   </Link>
                   <ul className="space-y-2">
                     {mainLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -93,14 +93,14 @@ export const Footer = () => {
                 {/* Course Links */}
                 <div className="space-y-4">
                   <Link href="/courses">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Courses</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Courses</h4>
                   </Link>
                   <ul className="space-y-2">
                     {courseLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -112,14 +112,14 @@ export const Footer = () => {
                 {/* Skills Links */}
                 <div className="space-y-4">
                   <Link href="/skills">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Skills</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Skills</h4>
                   </Link>
                   <ul className="space-y-2">
                     {skillsLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -131,14 +131,14 @@ export const Footer = () => {
                 {/* ESL Resources Links */}
                 <div className="space-y-4">
                   <Link href="/eslresources">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">ESL Resources</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">ESL Resources</h4>
                   </Link>
                   <ul className="space-y-2">
                     {eslResourcesLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -150,14 +150,14 @@ export const Footer = () => {
                 {/* Levels Links */}
                 <div className="space-y-4">
                   <Link href="/levels">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Levels</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Levels</h4>
                   </Link>
                   <ul className="space-y-2">
                     {levelsLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -169,14 +169,14 @@ export const Footer = () => {
                 {/* Tutelage Tests Links */}
                 <div className="space-y-4">
                   <Link href="/tutelagetests">
-                    <h4 className="text-lg font-bold text-black hover:text-yellow-400 transition-colors duration-200 mb-4 cursor-pointer">Tutelage Tests</h4>
+                    <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Tutelage Tests</h4>
                   </Link>
                   <ul className="space-y-2">
                     {tutelageTestsLinks.map((link) => (
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                          className="text-white hover:text-primary transition-colors duration-200 text-sm"
                         >
                           {link.name}
                         </Link>
@@ -188,42 +188,42 @@ export const Footer = () => {
             </div>
 
             {/* Right Side - Logo & Contact Info */}
-            <div className="flex-shrink-0 pt-4 xl:pt-0 border-t xl:border-t-0 xl:border-l border-primary-foreground/30 xl:pl-8 xl:w-80">
+            <div className="flex-shrink-0 pt-4 xl:pt-0 border-t xl:border-t-0 xl:border-l border-border xl:pl-8 xl:w-80">
               <div className="space-y-6">
                 {/* Logo & Name */}
                 <div className="flex items-center gap-3">
                   <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-                  <h3 className="text-2xl font-bold text-primary-foreground">Tutelage</h3>
+                  <h3 className="text-2xl font-bold text-white">Tutelage</h3>
                 </div>
 
                 {/* Description */}
-                <p className="text-primary-foreground leading-relaxed text-sm max-w-lg">
+                <p className="text-white leading-relaxed text-sm max-w-lg">
                   Empowering students worldwide with innovative English learning solutions. Join thousands who have achieved their language goals with us.
                 </p>
 
                 {/* Contact Information */}
                 <div className="space-y-3">
-                  <h5 className="text-base font-bold text-black">Contact Information</h5>
+                  <h5 className="text-base font-bold text-white">Contact Information</h5>
                   <div className="flex items-start space-x-3">
-                    <MapPin className="w-4 h-4 text-[#1e1e1e] mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <div className="text-left">
-                      <p className="text-primary-foreground text-sm">Suli Innovation house</p>
-                      <p className="text-primary-foreground text-sm">Sulaimaniyah - Kurdistan Region</p>
+                      <p className="text-white text-sm">Suli Innovation house</p>
+                      <p className="text-white text-sm">Sulaimaniyah - Kurdistan Region</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <Phone className="w-4 h-4 text-[#1e1e1e] flex-shrink-0" />
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0" />
                     <div className="flex flex-col text-left">
                       <a
                         href="tel:+9647501534240"
-                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        className="text-white hover:text-primary transition-colors duration-200 text-sm"
                       >
                         (964+) 07501534240
                       </a>
                       <a
                         href="tel:+9647701946364"
-                        className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                        className="text-white hover:text-primary transition-colors duration-200 text-sm"
                       >
                         (964+) 07701946364
                       </a>
@@ -231,10 +231,10 @@ export const Footer = () => {
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <Mail className="w-4 h-4 text-[#1e1e1e] flex-shrink-0" />
+                    <Mail className="w-4 h-4 text-primary flex-shrink-0" />
                     <a
                       href="mailto:Info@tutelage.krd"
-                      className="text-primary-foreground hover:text-yellow-400 transition-colors duration-200 text-sm"
+                      className="text-white hover:text-primary transition-colors duration-200 text-sm"
                     >
                       Info@tutelage.krd
                     </a>
@@ -243,8 +243,8 @@ export const Footer = () => {
 
                 {/* Office Hours */}
                 <div className="space-y-2">
-                  <h5 className="text-base font-bold text-black">Office Hours</h5>
-                  <div className="text-primary-foreground text-sm space-y-1">
+                  <h5 className="text-base font-bold text-white">Office Hours</h5>
+                  <div className="text-white text-sm space-y-1">
                     <p>Sunday: 1:00 PM - 5:00 PM</p>
                     <p>Tuesday: 1:00 PM - 5:00 PM</p>
                     <p>Thursday: 1:00 PM - 5:00 PM</p>
@@ -256,7 +256,7 @@ export const Footer = () => {
         </div>
 
         {/* Separator Line */}
-        <div className="border-t border-primary-foreground/20"></div>
+        <div className="border-t border-border"></div>
 
         {/* Bottom Section - Logo, Copyright, Socials */}
         <div className="py-8">
@@ -264,12 +264,12 @@ export const Footer = () => {
             {/* Logo */}
             <div className="flex items-center gap-3">
               <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-              <h3 className="text-xl hidden sm:block font-bold text-primary-foreground">Tutelage</h3>
+              <h3 className="text-xl hidden sm:block font-bold text-white">Tutelage</h3>
             </div>
 
             {/* Copyright */}
             <div className="text-center">
-              <p className="text-primary-foreground text-sm">
+              <p className="text-white text-sm">
                 © {currentYear} Tutelage. All rights reserved.
               </p>
             </div>
@@ -280,12 +280,14 @@ export const Footer = () => {
                 <a
                   key={social.name}
                   href={social.href}
-                  className="bg-[#1e1e1e] hover:bg-white hover:text-black p-2.5 rounded-full transition-all duration-300 shadow-sm"
+                  className="bg-primary text-white p-2.5 rounded-full transition-all duration-300 shadow-sm group"
                   aria-label={social.name}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {social.icon}
+                  <div className="text-white transition-colors">
+                    {social.icon}
+                  </div>
                 </a>
               ))}
             </div>

@@ -380,7 +380,7 @@ const EnrollPage = () => {
 
                   return (
                     <Link key={course} href={getHref(course)}>
-                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer">
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 mb-2 rounded-lg hover:bg-muted/70 transition-colors duration-200 cursor-pointer">
                         <div className="relative w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
                           <Image
                             src="/hero.jpg"

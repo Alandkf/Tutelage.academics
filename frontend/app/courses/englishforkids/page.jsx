@@ -126,14 +126,15 @@ const EnglishCourseForKidsAndTeens = () => {
         </ul>
 
         {/* CTA Button */}
-        <Button 
-          onClick={handleEnrollClick}
-          size="lg" 
-          className="w-full py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-        >
-          Enroll Now
-          <ChevronRight className="ml-2 w-5 h-5" />
+        <Link href={"#form-section"}>
+          <Button 
+            size="lg" 
+            className="w-full py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            Request Price
+            <ChevronRight className="ml-2 w-5 h-5" />
         </Button>
+        </Link>
       </div>
     </div>
   )
@@ -214,23 +215,23 @@ const EnglishCourseForKidsAndTeens = () => {
   const enrollmentSteps = [
     {
       number: 1,
-      title: "Register",
-      description: "Create a free account as a student to access our platform and begin your English learning journey with us."
+      title: "Request Payment",
+      description: "Fill out our enrollment form with your information and course preferences to begin your journey with us."
     },
     {
       number: 2,
-      title: "Perform Placement Test",
-      description: "Check your current level of English proficiency with our comprehensive assessment to find the perfect starting point."
+      title: "Enroll",
+      description: "Complete the secure payment process and receive instant confirmation of your enrollment via email."
     },
     {
       number: 3,
-      title: "Arrange Lessons",
-      description: "Buy the course and get full access to our platform with personalized learning materials and expert guidance."
+      title: "placement test",
+      description: "Take our comprehensive placement test to determine your current English level and find the right starting point."
     },
     {
       number: 4,
-      title: "Start the Fun",
-      description: "Join classes and learn according to your course schedule with interactive lessons and engaging activities."
+      title: "Start learning",
+      description: "Join your scheduled classes with expert instructors and begin your interactive English learning experience."
     }
   ]
 
@@ -603,7 +604,7 @@ const EnglishCourseForKidsAndTeens = () => {
       </div>
 
       {/* Request Pricing and Course Information Section */}
-      <div className="py-20 bg-muted/20">
+      <div className="py-20 bg-muted/20" id="form-section">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6">

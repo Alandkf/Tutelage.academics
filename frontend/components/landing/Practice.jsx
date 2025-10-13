@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 // Sample data - replace with your actual blog data
 const practiceCards = [
@@ -54,11 +55,27 @@ const Practice = () => {
 	const [startX, setStartX] = useState(0);
 	const [translateX, setTranslateX] = useState(0);
 	const [isTransitioning, setIsTransitioning] = useState(true);
+	const [cardsPerView, setCardsPerView] = useState(3.5);
 	const sliderRef = useRef(null);
 
 	// Create infinite loop by duplicating cards
 	const extendedCards = [...practiceCards, ...practiceCards, ...practiceCards];
 	const totalCards = practiceCards.length;
+
+	// Handle responsive cards per view
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth >= 1024) {
+				setCardsPerView(3.5);
+			} else {
+				setCardsPerView(2.5);
+			}
+		};
+
+		handleResize();
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
 
 	// Start from middle set to enable infinite scrolling
 	useEffect(() => {
@@ -130,14 +147,14 @@ const Practice = () => {
 				</h2>
 
 				{/* Slider Container */}
-				<div className="relative px-12 sm:px-16">
+				<div className="relative md:px-16">
 					{/* Left Button */}
 					<Button
 						size="icon"
-						className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground w-12 h-12 sm:w-14 sm:h-14"
+						className="absolute left-2 md:-left-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
 						onClick={handlePrev}
 					>
-						<ChevronLeft className="h-6 w-6 sm:h-7 sm:w-7" />
+						<ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
 					</Button>
 
 					{/* Cards Container */}
@@ -157,14 +174,14 @@ const Practice = () => {
 								isTransitioning ? 'transition-transform duration-300 ease-out' : ''
 							}`}
 							style={{
-								transform: `translateX(calc(-${currentIndex * (100 / 3.5)}% + ${translateX}px))`,
+								transform: `translateX(calc(-${currentIndex * (100 / cardsPerView)}% + ${translateX}px))`,
 							}}
 						>
 							{extendedCards.map((card, index) => (
 								<div
 									key={`${card.id}-${index}`}
 									className="flex-shrink-0 px-2 sm:px-3"
-									style={{ width: `${100 / 3.5}%` }}
+									style={{ width: `${100 / cardsPerView}%` }}
 								>
 									<div className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-border">
 										{/* Image */}
@@ -195,11 +212,23 @@ const Practice = () => {
 					{/* Right Button */}
 					<Button
 						size="icon"
-						className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground w-12 h-12 sm:w-14 sm:h-14"
+						className="absolute right-2 md:-right-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
 						onClick={handleNext}
 					>
-						<ChevronRight className="h-6 w-6 sm:h-7 sm:w-7" />
+						<ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
 					</Button>
+				</div>
+
+				{/* All Resources Button */}
+				<div className="flex justify-center mt-12">
+					<Link href="/eslresources">
+						<Button
+							size="lg"
+							className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+						>
+							All Resources
+						</Button>
+					</Link>
 				</div>
 			</div>
 		</section>
