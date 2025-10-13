@@ -600,15 +600,37 @@ const resources = {
   }
 };
 
+// Get saved language from localStorage or default to 'en'
+const getSavedLanguage = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('tutelage-language') || 'en';
+  }
+  return 'en';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', 
+    lng: getSavedLanguage(), // Use saved language instead of hardcoded 'en'
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false
     }
   });
+
+// Save language to localStorage whenever it changes
+i18n.on('languageChanged', (lng) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('tutelage-language', lng);
+    
+    // Update RTL class on body
+    if (lng === 'ku') {
+      document.body.classList.add('rtl');
+    } else {
+      document.body.classList.remove('rtl');
+    }
+  }
+});
 
 export default i18n;

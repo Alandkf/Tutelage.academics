@@ -17,6 +17,30 @@ const Language = () => {
   const [isRTL, setIsRTL] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Initialize language from localStorage on mount
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('tutelage-language') || 'en';
+    const language = languages.find(lang => lang.code === savedLanguage);
+    
+    if (language) {
+      setSelectedLanguage(language.label);
+      
+      // Apply RTL if Kurdish
+      if (savedLanguage === 'ku') {
+        document.body.classList.add('rtl');
+        setIsRTL(true);
+      } else {
+        document.body.classList.remove('rtl');
+        setIsRTL(false);
+      }
+
+      // Sync with i18n if different
+      if (i18n.language !== savedLanguage && i18n.changeLanguage) {
+        i18n.changeLanguage(savedLanguage);
+      }
+    }
+  }, [i18n]);
+
   // Check for RTL direction changes
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
@@ -38,19 +62,6 @@ const Language = () => {
     return () => observer.disconnect()
   }, [])
 
-  useEffect(() => {
-    const language = languages.find(lang => lang.label === selectedLanguage);
-    if (language && i18n.changeLanguage) {
-      i18n.changeLanguage(language.code);
-
-      if (language.code === 'ku') {
-        document.body.classList.add('rtl');
-      } else {
-        document.body.classList.remove('rtl');
-      }
-    }
-  }, [selectedLanguage, i18n]);
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -71,14 +82,22 @@ const Language = () => {
   const changeLanguage = (code) => {
     const language = languages.find(lang => lang.code === code);
     setSelectedLanguage(language.label);
+    
+    // Save to localStorage
+    localStorage.setItem('tutelage-language', code);
+    
+    // Change language in i18n
     if (i18n.changeLanguage) {
       i18n.changeLanguage(code);
     }
 
+    // Update RTL class on body
     if (code === 'ku') {
       document.body.classList.add('rtl');
+      setIsRTL(true);
     } else {
       document.body.classList.remove('rtl');
+      setIsRTL(false);
     }
 
     setIsOpen(false);
