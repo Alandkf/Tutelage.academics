@@ -20,21 +20,21 @@ const EnglishCourseForKidsAndTeens = () => {
   
   // Actual course data
   const title = t('inglishForKids.first.title')
-  const heroImage = "/hero.jpg"
+  const heroImage = "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=1200&q=80" // Happy kids learning together - bright classroom
   const description = t('inglishForKids.first.description')
   const enrollButtonText = t('inglishForKids.first.enrollButtonText')
 
   // Get class types from translation
   const publicClass = {
     title: t('inglishForKids.classTypes.public.title'),
-    image: "/hero.jpg",
+    image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80", // Kids in classroom - colorful/engaging
     features: t('inglishForKids.classTypes.public.features', { returnObjects: true }),
     buttonText: t('inglishForKids.classTypes.public.buttonText')
   }
 
   const privateClass = {
     title: t('inglishForKids.classTypes.private.title'),
-    image: "/hero.jpg",
+    image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=800&q=80", // One-on-one tutoring - focused learning
     features: t('inglishForKids.classTypes.private.features', { returnObjects: true }),
     buttonText: t('inglishForKids.classTypes.private.buttonText')
   }
@@ -86,26 +86,26 @@ const EnglishCourseForKidsAndTeens = () => {
     router.push(`/courses/enroll?course=${encodeURIComponent(title)}`)
   }
 
-  // All available courses data
+  // All available courses data - using same images as CoursesShowcase
   const allCourses = [
     {
       title: "English for Adults",
       description: "Comprehensive English language program tailored for adult learners with busy schedules.",
-      image: "/hero.jpg",
+      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80", // Adults studying
       href: "/courses/englishforadults",
       duration: "12-16 weeks"
     },
     {
       title: "Academic English",
       description: "Master academic English skills for university study and professional research.",
-      image: "/hero.jpg", 
+      image: "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=800&q=80", // Academic/Library
       href: "/courses/academicenglish",
       duration: "16-20 weeks"
     },
     {
       title: "Business English",
       description: "Master professional English communication for the global business world.",
-      image: "/hero.jpg",
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80", // Business meeting
       href: "/courses/businessenglish",
       duration: "12-16 weeks"
     }
@@ -339,11 +339,11 @@ const EnglishCourseForKidsAndTeens = () => {
               </div>
             </div>
 
-            {/* Image */}
+            {/* Image - Fun interactive learning */}
             <div className="w-full lg:w-1/2">
               <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
                 <Image
-                  src="/hero.jpg"
+                  src="https://images.unsplash.com/photo-1588072432836-e10032774350?w=800&q=80"
                   alt="Fun language learning for kids and teens"
                   fill
                   className="object-cover"
