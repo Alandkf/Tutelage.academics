@@ -4,6 +4,9 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
+      courses : {
+
+      },
       inglishForKids: {
         first: {
           title: "English for Kids and Teens",
@@ -248,6 +251,9 @@ const resources = {
   },
   ku: {
     translation: {
+      courses : {
+
+      },
       inglishForKids: {
         first: {
           title: "ئینگلیزی بۆ منداڵ و گەنجان",
