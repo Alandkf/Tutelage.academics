@@ -125,6 +125,9 @@ const resources = {
           }
         }
       },
+      inglishForAdults: {
+        
+      }
     }
   },
   ku: {
@@ -250,6 +253,9 @@ const resources = {
           }
         }
       },
+      inglishForAdults: {
+
+      }
     }
   }
 };
