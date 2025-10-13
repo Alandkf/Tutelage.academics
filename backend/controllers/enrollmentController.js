@@ -14,10 +14,10 @@ const processEnrollment = async (req, res) => {
   try {
     console.log('📝 Processing course enrollment application');
     
-    const { name, email, phone, age, education, course } = req.body;
+    const { name, email, phone, age, profession, course } = req.body;
     
     // Validate required fields
-    if (!name || !email || !phone || !age || !education || !course) {
+    if (!name || !email || !phone || !age || !profession || !course) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
@@ -33,7 +33,6 @@ const processEnrollment = async (req, res) => {
       });
     }
     
-    
     // Validate phone number (basic validation)
     if (phone.length < 10 || phone.length > 15) {
       return res.status(400).json({
@@ -47,7 +46,7 @@ const processEnrollment = async (req, res) => {
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       age: age,
-      education: education.trim(),
+      profession: profession.trim(),
       course: course.trim()
     };
     
@@ -66,8 +65,6 @@ const processEnrollment = async (req, res) => {
     } catch (emailError) {
       console.error('❌ Email sending error:', emailError);
       
-      // Even if email fails, we should still respond with success for the enrollment
-      // but indicate the email issue
       return res.status(200).json({
         success: true,
         message: 'Enrollment application submitted successfully! However, there was an issue sending confirmation emails. Our team will contact you directly.',
@@ -93,7 +90,6 @@ const processEnrollment = async (req, res) => {
   } catch (error) {
     console.error('❌ Enrollment processing error:', error);
     
-    // Return a more specific error response
     res.status(500).json({
       success: false,
       message: 'Failed to process enrollment application. Please try again or contact support.',

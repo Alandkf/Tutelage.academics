@@ -11,11 +11,17 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ExternalLink, GraduationCap, FileText, Target } from 'lucide-react'
+import { ExternalLink, GraduationCap, FileText, Target, Info } from 'lucide-react'
 import Link from 'next/link'
 import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Form validation schema
 const enrollmentSchema = z.object({
@@ -24,13 +30,13 @@ const enrollmentSchema = z.object({
   phone: z.string().min(10, 'Phone number must be at least 10 digits').max(15, 'Phone number must be less than 15 digits'),
   age: z.string().min(1, 'Age is required').refine((val) => {
     const num = parseInt(val)
-    return num >= 12 && num <= 100
-  }, 'Age must be between 12 and 100'),
-  education: z.string().min(1, 'Please select your education level'),
+    return num >= 5 && num <= 100
+  }, 'Age must be between 5 and 100'),
+  profession: z.string().min(1, 'Please select your profession'),
   course: z.string().min(1, 'Please select a course')
 })
 
-// Available courses - moved outside component to prevent re-creation
+// Available courses
 const courses = [
   'English for Kids and Teens',
   'English for Adults',
@@ -39,15 +45,15 @@ const courses = [
   'Business English'
 ]
 
-// Education levels - moved outside component to prevent re-creation
-const educationLevels = [
-  'Middle School',
-  'High School',
-  'University Student',
+// Profession options
+const professionOptions = [
+  'Kindergarten Student',
+  'School Student',
+  'Undergraduate',
   'Graduate',
-  'Working Professional',
-  'Other',
-  'None'
+  'Postgraduate',
+  'Employed',
+  'Unemployed'
 ]
 
 const EnrollPage = () => {
@@ -73,7 +79,7 @@ const EnrollPage = () => {
       email: '',
       phone: '',
       age: '',
-      education: '',
+      profession: '',
       course: ''
     }
   })
@@ -81,52 +87,38 @@ const EnrollPage = () => {
   // Get course from URL parameters
   useEffect(() => {
     const courseParam = searchParams.get('course')
-    console.log('Raw course param from URL:', courseParam);
     
     if (courseParam) {
-      // Decode the URL parameter in case it was encoded
       const decodedCourse = decodeURIComponent(courseParam)
-      console.log('Decoded course:', decodedCourse);
-      console.log('Available courses:', courses);
       
-      // Try exact match first
       if (courses.includes(decodedCourse)) {
-        console.log('Exact match found:', decodedCourse);
         setPreselectedCourse(decodedCourse)
-        // Use reset to update the entire form with the new course value
         reset({
           name: '',
           email: '',
           phone: '',
           age: '',
-          education: '',
+          profession: '',
           course: decodedCourse
         })
-        setSelectKey(prev => prev + 1) // Force Select re-render
+        setSelectKey(prev => prev + 1)
       } else {
-        // Try case-insensitive match
         const matchedCourse = courses.find(course => 
           course.toLowerCase() === decodedCourse.toLowerCase()
         )
         if (matchedCourse) {
-          console.log('Case-insensitive match found:', matchedCourse);
           setPreselectedCourse(matchedCourse)
           reset({
             name: '',
             email: '',
             phone: '',
             age: '',
-            education: '',
+            profession: '',
             course: matchedCourse
           })
-          setSelectKey(prev => prev + 1) // Force Select re-render
-        } else {
-          console.log('No match found for:', decodedCourse);
-          console.log('Available courses are:', courses);
+          setSelectKey(prev => prev + 1)
         }
       }
-    } else {
-      console.log('No course parameter found in URL');
     }
   }, [searchParams, reset])
 
@@ -135,9 +127,6 @@ const EnrollPage = () => {
     try {
       setLoading(true)
       
-      console.log('Submitting enrollment data:', data)
-      
-      // Send enrollment data to API
       const response = await fetch(`${BASE_URL}/api/enrollment`, {
         method: 'POST',
         headers: {
@@ -149,16 +138,12 @@ const EnrollPage = () => {
       const result = await response.json()
       
       if (!response.ok) {
-        // Show error toast with description
         toast("Enrollment Failed", {
           description: result.message || 'Please check your information and try again'
         });
         return;
       }
       
-      console.log('Enrollment submitted successfully:', result)
-      
-      // Show success toast
       if (result.warning) {
         toast("Enrollment Submitted", {
           description: result.message || 'Your application has been received successfully'
@@ -169,16 +154,13 @@ const EnrollPage = () => {
         });
       }
       
-      // Show success dialog
       setShowSuccessDialog(true)
       
-      // Reset form
       setValue('name', '')
       setValue('email', '')
       setValue('phone', '')
       setValue('age', '')
-      setValue('education', '')
-      // Keep the course selection if it was pre-selected
+      setValue('profession', '')
       if (!preselectedCourse) {
         setValue('course', '')
       }
@@ -186,7 +168,6 @@ const EnrollPage = () => {
     } catch (error) {
       console.error('Enrollment error:', error)
       
-      // Show error toast
       toast("Connection Error", {
         description: "Unable to submit enrollment. Please check your internet connection and try again."
       });
@@ -197,7 +178,7 @@ const EnrollPage = () => {
   }
 
   const redirectAfterSuccess = () => {
-    router.push("/")
+      setShowSuccessDialog(false)
   }
 
   return (
@@ -233,7 +214,7 @@ const EnrollPage = () => {
                   )}
                 </div>
 
-                {/* Email Field */}
+                {/* Email Field - Full Width */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
                   <Input
@@ -248,80 +229,98 @@ const EnrollPage = () => {
                   )}
                 </div>
 
-                {/* Phone Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    {...register('phone')}
-                    className={errors.phone ? 'border-destructive focus:ring-destructive' : ''}
-                  />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone.message}</p>
-                  )}
+                {/* Phone and Age Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      {...register('phone')}
+                      className={errors.phone ? 'border-destructive focus:ring-destructive' : ''}
+                    />
+                    {errors.phone && (
+                      <p className="text-sm text-destructive">{errors.phone.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="age">Age *</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      min="5"
+                      max="100"
+                      placeholder="Enter your age"
+                      {...register('age')}
+                      className={errors.age ? 'border-destructive focus:ring-destructive' : ''}
+                    />
+                    {errors.age && (
+                      <p className="text-sm text-destructive">{errors.age.message}</p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Age Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="age">Age *</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    min="12"
-                    max="100"
-                    placeholder="Enter your age"
-                    {...register('age')}
-                    className={errors.age ? 'border-destructive focus:ring-destructive' : ''}
-                  />
-                  {errors.age && (
-                    <p className="text-sm text-destructive">{errors.age.message}</p>
-                  )}
-                </div>
+                {/* Profession and Course Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Profession with Tooltip */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label>Profession *</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="w-5 h-5 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center cursor-help hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors">
+                              <Info className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="text-sm">Choose the option that best describes your current education or work status.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <Select onValueChange={(value) => setValue('profession', value)}>
+                      <SelectTrigger className={errors.profession ? 'border-destructive focus:ring-destructive' : ''}>
+                        <SelectValue placeholder="Select your profession" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {professionOptions.map((profession) => (
+                          <SelectItem key={profession} value={profession}>
+                            {profession}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.profession && (
+                      <p className="text-sm text-destructive">{errors.profession.message}</p>
+                    )}
+                  </div>
 
-                {/* Education Level */}
-                <div className="space-y-2">
-                  <Label>Education Level *</Label>
-                  <Select onValueChange={(value) => setValue('education', value)}>
-                    <SelectTrigger className={errors.education ? 'border-destructive focus:ring-destructive' : ''}>
-                      <SelectValue placeholder="Select your education level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {educationLevels.map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.education && (
-                    <p className="text-sm text-destructive">{errors.education.message}</p>
-                  )}
-                </div>
-
-                {/* Course Selection */}
-                <div className="space-y-2">
-                  <Label>Course *</Label>
-                  <Select 
-                    key={selectKey} // Force re-render when key changes
-                    onValueChange={(value) => setValue('course', value)} 
-                    defaultValue={watch('course')} // Use defaultValue instead of value
-                  >
-                    <SelectTrigger className={errors.course ? 'border-destructive focus:ring-destructive' : ''}>
-                      <SelectValue placeholder="Select a course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses.map((course) => (
-                        <SelectItem key={course} value={course}>
-                          {course}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.course && (
-                    <p className="text-sm text-destructive">{errors.course.message}</p>
-                  )}
+                  {/* Course Selection */}
+                  <div className="space-y-2">
+                    <Label>Course *</Label>
+                    <Select 
+                      key={selectKey}
+                      onValueChange={(value) => setValue('course', value)} 
+                      defaultValue={watch('course')}
+                    >
+                      <SelectTrigger className={errors.course ? 'border-destructive focus:ring-destructive' : ''}>
+                        <SelectValue placeholder="Select a course" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses.map((course) => (
+                          <SelectItem key={course} value={course}>
+                            {course}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.course && (
+                      <p className="text-sm text-destructive">{errors.course.message}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -360,7 +359,6 @@ const EnrollPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {courses.filter(course => course !== preselectedCourse).slice(0, 2).map((course) => {
-                  // Get the correct href based on course name
                   const getHref = (courseName) => {
                     switch(courseName) {
                       case 'English for Kids and Teens':

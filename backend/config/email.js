@@ -37,17 +37,14 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
     email,
     phone,
     age,
-    education,
+    profession,
     course
   } = enrollmentData;
   
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
   
-  // Debug: Check if file exists
   const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
-  console.log('Logo path:', logoPath);
-  console.log('File exists:', fs.existsSync(logoPath));
   
   await transporter.sendMail({
     attachments: [
@@ -59,7 +56,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
       }
     ],
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER, // Send to admin email
+    to: process.env.EMAIL_USER,
     subject: `New Course Enrollment Application: ${course}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -106,8 +103,8 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
                 <td style="padding: 8px 0; color: #666;">${age} years</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Education Level:</td>
-                <td style="padding: 8px 0; color: #666;">${education}</td>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Profession:</td>
+                <td style="padding: 8px 0; color: #666;">${profession}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
@@ -145,7 +142,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
         </div>
       </div>
     `,
-    replyTo: email, // Allow direct reply to the applicant
+    replyTo: email,
   });
 }
 
