@@ -381,7 +381,7 @@ const EnglishForAdultsPage = () => {
                   className={` ${isRTL ? "flex-row-reverse" : ""} w-full flex items-center justify-between p-5 text-left transition-colors duration-200 hover:bg-muted/50`}
                 >
                   <div className={`flex items-center ${isRTL ? 'flex-row-reverse justify-between' : ""} gap-4 flex-1 `}>
-                    <HelpCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                    <HelpCircle className={`w-5 h-5 text-primary flex-shrink-0 ${isRTL && "transform scale-x-[-1]" }`} />
                     <span className={`text-base font-semibold text-foreground pr-4 `}>
                       {faq.question}
                     </span>
