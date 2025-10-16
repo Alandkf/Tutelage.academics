@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -44,7 +44,7 @@ const EnglishCourseForKidsAndTeens = () => {
   // Reusable Class Card Component
   const ClassCard = ({ classType }) => (
     <div className="bg-card border border-border rounded-sm shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-      <div className="relative h-72 sm:h-96">
+      <div className="relative h-72 sm:h-96 md:h-60 lg:h-96">
         <Image
           src={classType.image}
           alt={classType.title}
@@ -314,7 +314,7 @@ const EnglishCourseForKidsAndTeens = () => {
           </div>
 
           {/* Class Type Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
             {classTypes.map((classType, index) => (
               <ClassCard key={index} classType={classType} />
             ))}
