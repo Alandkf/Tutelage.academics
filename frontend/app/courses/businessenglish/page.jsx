@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Briefcase, Users, Phone, Presentation, Rocket, Handshake, MessageCircle, Type } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
@@ -140,6 +140,31 @@ const inPersonClass = {
   )
 
 
+  const skillsData = [
+    { icon: Briefcase, title: "Business English" },
+    { icon: Users, title: "Meetings" },
+    { icon: Phone, title: "Telephoning" },
+    { icon: Presentation, title: "Presentation" },
+    { icon: Rocket, title: "Job Interviews" },
+    { icon: Handshake, title: "Negotiation" },
+    { icon: MessageCircle, title: "Socializing" },
+    { icon: Type, title: "Vocabulary" }
+  ]
+
+  const SkillCard = ({ icon: Icon, title }) => (
+    <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-primary/20 border border-border rounded-lg px-6 py-8 shadow-md hover:shadow-lg transition-all duration-300 text-center">
+      <div className="mb-6 flex justify-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center border-2 border-white/20 shadow-md">
+          <Icon className="w-8 h-8 text-white" />
+        </div>
+      </div>
+      
+      <h3 className="text-lg font-bold text-foreground">
+        {title}
+      </h3>
+    </div>
+  )
+
   return (
     <>
       <div className="relative min-h-screen bg-background pt-4" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -272,6 +297,28 @@ const inPersonClass = {
           </div>
         </div>
 
+        {/* Finish Our Course and You Can Section */}
+        <div className="pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Title */}
+            <div className="text-center mb-16">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+                Finish Our Course and You Can:
+              </h2>
+            </div>
+
+            {/* Skills Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+              {skillsData.map((skill, index) => (
+                <SkillCard
+                  key={index}
+                  icon={skill.icon}
+                  title={skill.title}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
 
       </div>
     </>
