@@ -1,11 +1,13 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Briefcase, Users, Phone, Presentation, Rocket, Handshake, MessageCircle, Type } from 'lucide-react'
+import { ChevronRight, Briefcase, Users, Phone, Presentation, Rocket, Handshake, MessageCircle, Type, HelpCircle, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const BusinessEnglishPage = () => {
   const router = useRouter()
@@ -165,6 +167,45 @@ const inPersonClass = {
     </div>
   )
 
+  // FAQ state
+  const [openFaqIndex, setOpenFaqIndex] = useState(null)
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index)
+  }
+
+  // Business English FAQs
+  const businessFaqs = [
+    {
+      question: "Who is Business English for?",
+      answer: "Business English is designed for professionals, students, or anyone who wants to improve their English for workplace, academic, or international business settings."
+    },
+    {
+      question: "What levels are available?",
+      answer: "We offer three levels: Preliminary (B1) to build a foundation in workplace communication, Vantage (B2) to develop fluency and confidence in practical business situations, and Higher (C1) to master professional and advanced communication for leadership roles."
+    },
+    {
+      question: "What skills will I learn?",
+      answer: "You will improve your speaking, writing, reading, and listening skills, with a focus on: emails, meetings, presentations, negotiations, reports, and professional vocabulary."
+    },
+    {
+      question: "Are the courses online or in-person?",
+      answer: "Both! You can choose flexible online learning or join in-person classes at select locations."
+    },
+    {
+      question: "Do I get feedback on my progress?",
+      answer: "Yes — our expert instructors provide continuous, detailed feedback to help you improve fluency, accuracy, and confidence."
+    },
+    {
+      question: "Can these courses help me take official exams?",
+      answer: "Absolutely! Our curriculum is aligned with international standards like CEFR and Cambridge Business English exams."
+    },
+    {
+      question: "How long does each level take?",
+      answer: "Course duration varies based on your starting level and pace, but each level is designed to build skills progressively and effectively."
+    }
+  ]
+
   return (
     <>
       <div className="relative min-h-screen bg-background pt-4" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -315,6 +356,66 @@ const inPersonClass = {
                   icon={skill.icon}
                   title={skill.title}
                 />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Business English FAQ Section */}
+        <div className="py-20">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section Title */}
+            <div className="text-center mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+                Business English – FAQ
+              </h2>
+            </div>
+
+            {/* FAQ Items */}
+            <div className="space-y-4">
+              {businessFaqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="bg-card border border-border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-md"
+                >
+                  {/* Question Bar */}
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className={`${isRTL ? "flex-row-reverse" : ""} w-full flex items-center justify-between p-5 text-left transition-colors duration-200 hover:bg-muted/50`}
+                  >
+                    <div className={`flex items-center ${isRTL ? 'flex-row-reverse justify-between' : ""} gap-4 flex-1`}>
+                      <HelpCircle className={`w-5 h-5 text-primary flex-shrink-0 ${isRTL && "transform scale-x-[-1]"}`} />
+                      <span className={`text-base font-semibold text-foreground pr-4`}>
+                        {faq.question}
+                      </span>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: openFaqIndex === index ? 180 : 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <ChevronDown className="w-5 h-5 text-primary flex-shrink-0" />
+                    </motion.div>
+                  </button>
+
+                  {/* Answer */}
+                  <AnimatePresence initial={false}>
+                    {openFaqIndex === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div className="px-5 pb-5 pt-2">
+                          <p className={`text-muted-foreground leading-relaxed ${isRTL ? 'text-right pr-9' : 'pl-9'}`}>
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
             </div>
           </div>
