@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronRight, ArrowRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import BASE_URL from '@/app/config/url'
 
@@ -30,25 +30,49 @@ const EnglishProficiencyTestsPage = () => {
       title: "IELTS Academic",
       description: "Comprehensive preparation for IELTS Academic test covering all four skills with expert strategies and practice materials.",
       image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ieltsacademic"
+      href: "/courses/Englishproficiencytests/ieltsacademic",
+      features: [
+        "Comprehensive coverage of all four IELTS sections",
+        "Practice with authentic IELTS materials",
+        "Personalized feedback from expert instructors",
+        "Proven strategies for each test component"
+      ]
     },
     {
-      title: "IELTS General",
+      title: "IELTS General Training",
       description: "Targeted preparation for IELTS General Training with focus on practical English skills for work and migration.",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ieltsgeneral"
+      href: "/courses/Englishproficiencytests/ieltsgeneral",
+      features: [
+        "Focus on practical English for everyday situations",
+        "Targeted preparation for migration and work visa requirements",
+        "Expert guidance on all four test components",
+        "Practice with authentic General Training materials"
+      ]
     },
     {
       title: "TOEFL Preparation Course",
       description: "Complete TOEFL iBT preparation with proven strategies for Reading, Listening, Speaking, and Writing sections.",
       image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
-      href: "/courses/Englishproficiencytests/toeflpreparationcourse"
+      href: "/courses/Englishproficiencytests/toeflpreparationcourse",
+      features: [
+        "Master the computer-based TOEFL format",
+        "Comprehensive training in all four sections",
+        "Proven test-taking strategies",
+        "Extensive practice with authentic materials"
+      ]
     },
     {
       title: "PTE Preparation Course",
       description: "Expert coaching for PTE Academic with computer-based practice and scoring strategies for all test sections.",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ptepreparationcourse"
+      href: "/courses/Englishproficiencytests/ptepreparationcourse",
+      features: [
+        "Specialized computer-based testing preparation",
+        "Understanding of automated scoring algorithm",
+        "Practice with PTE-style questions",
+        "Fast results and global recognition"
+      ]
     }
   ]
 
@@ -58,6 +82,8 @@ const EnglishProficiencyTestsPage = () => {
     lastName: '',
     email: '',
     interestedIn: '',
+    testType: '',
+    classPreference: ''
   })
   const [formLoading, setFormLoading] = useState(false)
 
@@ -70,7 +96,7 @@ const EnglishProficiencyTestsPage = () => {
     setFormLoading(true)
 
     try {
-      const requiredFields = ['firstName', 'lastName', 'email', 'interestedIn']
+      const requiredFields = ['firstName', 'lastName', 'email', 'interestedIn', 'testType', 'classPreference']
       const missingFields = requiredFields.filter(field => !formData[field])
       
       if (missingFields.length > 0) {
@@ -85,7 +111,7 @@ const EnglishProficiencyTestsPage = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          course: formData.interestedIn
+          course: `${formData.interestedIn} - ${formData.testType} - ${formData.classPreference}`
         })
       })
 
@@ -102,7 +128,7 @@ const EnglishProficiencyTestsPage = () => {
         description: "Check your email for detailed course information and pricing"
       })
 
-      setFormData({ firstName: '', lastName: '', email: '', interestedIn: '' })
+      setFormData({ firstName: '', lastName: '', email: '', interestedIn: '', testType: '', classPreference: '' })
 
     } catch (error) {
       toast("Connection Error", {
@@ -114,10 +140,19 @@ const EnglishProficiencyTestsPage = () => {
   }
 
   const courseOptions = [
+    'English Proficiency Test Preparation'
+  ]
+
+  const testTypeOptions = [
     'IELTS Academic',
     'IELTS General',
-    'TOEFL Preparation Course',
-    'PTE Preparation Course'
+    'TOEFL',
+    'PTE'
+  ]
+
+  const classPreferenceOptions = [
+    'Group class',
+    'Private classes'
   ]
 
   return (
@@ -171,55 +206,72 @@ const EnglishProficiencyTestsPage = () => {
         </div>
       </div>
 
-      {/* Test Courses Section */}
-      <div className="py-16 bg-muted/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Choose Your Test Preparation
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {testCourses.map((course, index) => (
-              <div
-                key={index}
-                className="bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
-              >
-                <div className="relative h-48 w-full overflow-hidden">
-                  <Image
-                    src={course.image}
-                    alt={`${course.title} preparation`}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-foreground mb-3">
-                    {course.title}
-                  </h3>
-                  
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                    {course.description}
-                  </p>
-
-                  <Link href={course.href} className="block">
-                    <Button 
-                      className="w-full group-hover:bg-primary/90 transition-colors duration-200"
-                      size="sm"
-                    >
-                      Learn More
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Section Title */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <div className="text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            Choose Your Test Preparation
+          </h2>
         </div>
       </div>
+
+      {/* Test Courses Sections */}
+      {testCourses.map((course, index) => {
+        const isEven = index % 2 === 0
+        return (
+          <div key={index} className="py-10 px-4">
+            <div className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg lg:rounded-tr-[4rem] lg:rounded-bl-[4rem] max-lg:rounded-tl-[2rem] max-lg:rounded-br-[2rem]">
+              <div className={`flex flex-col-reverse ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-stretch gap-0`}>
+                {/* Content */}
+                <div className={`w-full lg:w-1/2 flex items-center px-4 sm:px-6 ${isEven ? 'lg:ml-10' : 'lg:mr-10'}`}>
+                  <div className={`w-full py-10 lg:py-0 ${isEven ? 'lg:pr-12' : 'lg:pl-12'}`}>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+                      {course.title}
+                    </h2>
+                    
+                    <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed mb-6">
+                      {course.description}
+                    </p>
+
+                    {/* Bullet Points */}
+                    <ul className="space-y-3 mb-8">
+                      {course.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                          <span className="text-sm sm:text-base text-foreground font-medium">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Learn More Button */}
+                    <Link href={course.href}>
+                      <Button 
+                        size="lg" 
+                        className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                      >
+                        Learn More
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+        
+                {/* Image */}
+                <div className="w-full lg:w-1/2">
+                  <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
+                    <Image
+                      src={course.image}
+                      alt={course.title}
+                      fill
+                      className={`object-cover ${isEven ? 'lg:rounded-tr-[4rem]' : 'lg:rounded-tl-[4rem]'} max-lg:rounded-tl-[2rem]`}
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })}
 
       {/* Request Pricing Section */}
       <div className="py-20 bg-background" id="form-section">
@@ -282,7 +334,7 @@ const EnglishProficiencyTestsPage = () => {
                   </Label>
                   <Select value={formData.interestedIn} onValueChange={(value) => handleInputChange('interestedIn', value)}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a test" />
+                      <SelectValue placeholder="Select course" />
                     </SelectTrigger>
                     <SelectContent>
                       {courseOptions.map((course) => (
@@ -295,11 +347,49 @@ const EnglishProficiencyTestsPage = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-1 items-start">
+                  <Label className="text-base font-medium">
+                    Test Type *
+                  </Label>
+                  <Select value={formData.testType} onValueChange={(value) => handleInputChange('testType', value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select test type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {testTypeOptions.map((test) => (
+                        <SelectItem key={test} value={test}>
+                          {test}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-1 items-start">
+                  <Label className="text-base font-medium">
+                    I Prefer *
+                  </Label>
+                  <Select value={formData.classPreference} onValueChange={(value) => handleInputChange('classPreference', value)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select class preference" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {classPreferenceOptions.map((preference) => (
+                        <SelectItem key={preference} value={preference}>
+                          {preference}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="pt-6 flex justify-center">
                 <Button 
                   type="submit" 
                   size="lg" 
-                  className="px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="px-12 py-4 cursor-pointer text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                   disabled={formLoading}
                 >
                   {formLoading ? 'Submitting Request...' : 'Request Pricing'}

@@ -9,18 +9,47 @@ export default function TOEFLPreparationPage() {
       heroImage="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&q=80"
       description="Excel in the TOEFL iBT with our comprehensive preparation program designed for students aiming to study at American universities. Master all four sections with proven strategies and extensive practice with authentic materials."
       
-      firstSectionTitle="About TOEFL iBT"
-      firstSectionContent="The TOEFL iBT (Internet-Based Test) is the most widely accepted English-language test in the world, recognized by more than 11,000 universities and institutions in over 150 countries. The test measures your ability to use and understand English at the university level, evaluating how well you combine listening, reading, speaking and writing skills to perform academic tasks. Our preparation course provides comprehensive training in all four sections, helping you achieve the scores needed for admission to your target universities."
+      firstSectionTitle="About TOEFL preparation Course"
+      firstSectionContent="The TOEFL (Test of English as a Foreign Language) is a widely recognized English proficiency exam used to measure your ability to understand and use academic English. It evaluates reading, listening, speaking, and writing skills and is accepted by universities, colleges, and institutions worldwide for admissions and scholarships."
       
       showSecondSection={true}
-      secondSectionTitle="Master the TOEFL Format"
-      secondSectionContent="Our TOEFL preparation course familiarizes you with the unique computer-based format of the test. You'll practice with simulated testing environments, learn effective note-taking strategies, and develop the integrated skills needed to excel. From reading academic passages to responding to spoken prompts, we cover every aspect of the TOEFL iBT comprehensively."
+      secondSectionTitle="Why Choose TOEFL?"
+      secondSectionContent="Our TOEFL Preparation Course helps students achieve their aimed scores through structured lessons, practice tests, and personalized feedback. The course focuses on improving language skills, test strategies, and confidence for the real exam. The TOEFL is recognized worldwide as proof of English proficiency. It is accepted by universities for undergraduate and graduate admissions and scholarships, recognized by some countries for study or work visa applications, and used for professional registration where English competency is required."
       secondSectionImage="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
       
       showThirdSection={true}
-      thirdSectionTitle="Your Gateway to American Universities"
-      thirdSectionContent="With expert instruction, targeted practice, and proven test-taking strategies, our TOEFL preparation course gives you the competitive edge needed for university admission. Our instructors are experienced in all aspects of the TOEFL iBT and provide personalized feedback to help you improve rapidly and achieve your target score."
-      thirdSectionImage="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80"
+      thirdSectionTitle="TOEFL Course Highlights"
+      thirdSectionBulletPoints={[
+        {
+          title: "Flexible online program:",
+          description: "15 interactive lessons across 5 weeks (total 30 hours)"
+        },
+        {
+          title: "Class options:",
+          description: "Join small groups of 3 students or take private one-on-one lessons"
+        },
+        {
+          title: "Full skill development:",
+          description: "Master reading, listening, speaking, and writing"
+        },
+        {
+          title: "Smart learning techniques:",
+          description: "Practical strategies to tackle every test section"
+        },
+        {
+          title: "Ongoing feedback:",
+          description: "Receive guidance to refine your speaking and writing skills"
+        },
+        {
+          title: "Authentic practice materials:",
+          description: "Experience realistic TOEFL test questions"
+        },
+        {
+          title: "Experienced instructors:",
+          description: "Learn from teachers who know the TOEFL inside out"
+        }
+      ]}
+      thirdSectionImage="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80"
       
       showFourthSection={false}
     />

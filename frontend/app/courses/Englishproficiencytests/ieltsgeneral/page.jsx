@@ -10,28 +10,53 @@ export default function IELTSGeneralPage() {
       description="Master IELTS General Training with our targeted preparation program designed for migration and work visa applications. Our course focuses on practical English skills needed for everyday situations in English-speaking countries."
       
       firstSectionTitle="About IELTS General Training"
-      firstSectionContent="IELTS General Training is designed for those who are going to English-speaking countries for secondary education, work experience or training programs. It is also a requirement for migration to Australia, Canada, New Zealand and the UK. The test focuses on basic survival skills in broad social and workplace contexts. Our preparation course helps you develop the practical English skills needed to succeed in everyday situations while achieving your required band score."
+      firstSectionContent="The IELTS General Training test measures your English skills for work, migration, and daily communication. Unlike the Academic test, it's designed for practical, real-life English rather than university study. It's accepted by immigration authorities and employers in over 140 countries, including the UK, Canada, Australia, New Zealand, the USA, Ireland, and Singapore — some of the world's most popular destinations for migration and work."
       
       showSecondSection={true}
-      secondSectionTitle="Practical English for Real-Life Situations"
-      secondSectionContent="Our IELTS General Training course emphasizes practical English usage for work and social situations. You'll practice with authentic materials that reflect real-life scenarios, from workplace communications to social interactions. Learn how to navigate the test successfully while building English skills that will serve you well in your new English-speaking environment."
+      secondSectionTitle="Who should take this course?"
+      secondSectionBulletPoints={[
+        "Adults applying for work or family visas in English-speaking countries.",
+        "Job seekers and professionals needing workplace English.",
+        "People preparing for vocational training or community integration.",
+        "Learners who want focused practice in everyday English skills (listening, reading, writing, speaking)."
+      ]}
       secondSectionImage="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
       
       showThirdSection={true}
-      thirdSectionTitle="Your Path to Migration Success"
-      thirdSectionContent="Whether you're planning to migrate, work abroad, or pursue vocational training, our IELTS General Training program provides the skills and confidence you need. With experienced instructors, proven strategies, and comprehensive practice materials, we'll help you achieve the band score required for your visa application or professional registration."
+      thirdSectionTitle="Why Your Goals Deserve Tutelage"
+      thirdSectionBulletPoints={[
+        {
+          title: "Test Advice & Tips:",
+          description: "Receive necessary test advice and tips prior to your test."
+        },
+        {
+          title: "Live Expert Classes:",
+          description: "Practice in an engaging live classroom with an expert IELTS instructor."
+        },
+        {
+          title: "Detailed Feedback:",
+          description: "Get detailed feedback on your performance throughout your class with Tutelage."
+        },
+        {
+          title: "Extra Materials:",
+          description: "Access extra free of charge studying materials beside your own course materials."
+        },
+        {
+          title: "Fair Pricing:",
+          description: "Fairly-priced compared to other language institutions."
+        }
+      ]}
       thirdSectionImage="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80"
       
       showFourthSection={true}
       fourthSectionFeatures={[
-        "Focus on practical English for everyday situations",
-        "Targeted preparation for migration and work visa requirements",
-        "Expert guidance on all four test components",
-        "Practice with authentic General Training materials",
-        "Strategies for workplace and social communication",
-        "Regular progress assessments and feedback",
-        "Flexible class schedules",
-        "Tutelage certificate upon completion"
+        "Flexible Online Course: 15 engaging lessons delivered over 5 weeks (30 hours total)",
+        "Learning Options: Join a small group (3–5 students) or choose private one-on-one lessons",
+        "Complete Skill Training: Improve your speaking, writing, reading, and listening skills",
+        "Smart Study Techniques: Learn effective strategies for study and test success",
+        "Ongoing Support: Receive personalized feedback to monitor progress and enhance results",
+        "Authentic Exam Practice: Work with real IELTS General-style materials and mock tests",
+        "Qualified Instructors: Get guidance from experienced and certified IELTS trainers"
       ]}
     />
   )
