@@ -141,6 +141,71 @@ const getAllVideos = async (req, res) => {
 };
 
 /**
+ * Get all video content with pagination (for React frontend)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getPaginatedVideos = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC'
+    } = req.query;
+    
+    const offset = (page - 1) * limit;
+
+    // Build where clause for filtering
+    const whereClause = {};
+    if (search) {
+      whereClause[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    const { count, rows } = await Video.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'author',
+        attributes: ['id', 'name', 'email']
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [[sortBy, sortOrder.toUpperCase()]],
+      distinct: true
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        videos: rows,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: count,
+          itemsPerPage: parseInt(limit),
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching paginated videos:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Get a single video content by ID
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -373,6 +438,7 @@ const get = (req, res) => {
 module.exports = {
   createVideo,
   getAllVideos,
+  getPaginatedVideos,
   getVideoById,
   updateVideo,
   deleteVideo,

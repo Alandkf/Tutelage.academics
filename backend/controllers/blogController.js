@@ -276,6 +276,75 @@ const deleteBlog = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
+/**
+ * Get all blog posts with pagination (for React frontend)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getPaginatedBlogs = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      category, 
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC'
+    } = req.query;
+    
+    const offset = (page - 1) * limit;
+
+    // Build where clause for filtering
+    const whereClause = {};
+    if (category) {
+      whereClause.category = category;
+    }
+    if (search) {
+      whereClause[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { content: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    const { count, rows } = await Blog.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'author',
+        attributes: ['id', 'name', 'email']
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [[sortBy, sortOrder.toUpperCase()]],
+      distinct: true
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        blogs: rows,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: count,
+          itemsPerPage: parseInt(limit),
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching paginated blogs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
 const getBlogsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
@@ -324,6 +393,7 @@ const getBlogsByCategory = async (req, res) => {
 module.exports = {
   createBlog,
   getAllBlogs,
+  getPaginatedBlogs,
   getBlogById,
   updateBlog,
   deleteBlog,

@@ -10,6 +10,7 @@ const router = express.Router();
 const {
   createCourse,
   getAllCourses,
+  getPaginatedCourses,
   getCourseById,
   updateCourse,
   deleteCourse,
@@ -25,10 +26,17 @@ const adminAuth = require('../middlewares/adminAuth');
 
 /**
  * GET /api/courses
- * Get all courses with pagination and filtering
- * Query params: page, limit, search, category, sortBy, sortOrder
+ * Get all courses with infinite scroll pagination and filtering
+ * Query params: cursor, limit, search, category, sortBy, sortOrder
  */
 router.get('/', getAllCourses);
+
+/**
+ * GET /api/courses/paginated
+ * Get all courses with page-based pagination (for React frontend)
+ * Query params: page, limit, search, category, sortBy, sortOrder
+ */
+router.get('/paginated', getPaginatedCourses);
 
 /**
  * GET /api/courses/:id

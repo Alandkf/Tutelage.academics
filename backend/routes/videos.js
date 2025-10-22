@@ -10,6 +10,7 @@ const router = express.Router();
 const {
   createVideo,
   getAllVideos,
+  getPaginatedVideos,
   getVideoById,
   updateVideo,
   deleteVideo,
@@ -25,10 +26,17 @@ const adminAuth = require('../middlewares/adminAuth');
 
 /**
  * GET /api/videos
- * Get all video content with pagination and filtering
- * Query params: page, limit, search, sortBy, sortOrder
+ * Get all video content with infinite scroll pagination and filtering
+ * Query params: cursor, limit, search, sortBy, sortOrder
  */
 router.get('/', getAllVideos);
+
+/**
+ * GET /api/videos/paginated
+ * Get all video content with page-based pagination (for React frontend)
+ * Query params: page, limit, search, sortBy, sortOrder
+ */
+router.get('/paginated', getPaginatedVideos);
 
 /**
  * GET /api/videos/legacy

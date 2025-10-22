@@ -11,6 +11,7 @@ const router = express.Router();
 const {
   createBlog,
   getAllBlogs,
+  getPaginatedBlogs,
   getBlogById,
   updateBlog,
   deleteBlog,
@@ -25,10 +26,17 @@ const adminAuth = require('../middlewares/adminAuth');
 
 /**
  * GET /api/blogs
- * Get all blog posts with pagination and filtering
- * Query params: page, limit, category, search, sortBy, sortOrder
+ * Get all blog posts with infinite scroll pagination and filtering
+ * Query params: cursor, limit, category, search, sortBy, sortOrder
  */
 router.get('/', getAllBlogs);
+
+/**
+ * GET /api/blogs/paginated
+ * Get all blog posts with page-based pagination (for React frontend)
+ * Query params: page, limit, category, search, sortBy, sortOrder
+ */
+router.get('/paginated', getPaginatedBlogs);
 
 /**
  * GET /api/blogs/:id

@@ -144,6 +144,72 @@ const getAllAudios = async (req, res) => {
 };
 
 /**
+ * Get all audio content with pagination (for React frontend)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getPaginatedAudios = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC'
+    } = req.query;
+    
+    const offset = (page - 1) * limit;
+
+    // Build where clause for filtering
+    const whereClause = {};
+    if (search) {
+      whereClause[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { content: { [Op.like]: `%${search}%` } },
+        { transcript: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
+    const { count, rows } = await Audio.findAndCountAll({
+      where: whereClause,
+      include: [{
+        model: User,
+        as: 'author',
+        attributes: ['id', 'name', 'email']
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [[sortBy, sortOrder.toUpperCase()]],
+      distinct: true
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        audios: rows,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages,
+          totalItems: count,
+          itemsPerPage: parseInt(limit),
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching paginated audios:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Get a single audio content by ID
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -344,6 +410,7 @@ const searchAudioByTranscript = async (req, res) => {
 module.exports = {
   createAudio,
   getAllAudios,
+  getPaginatedAudios,
   getAudioById,
   updateAudio,
   deleteAudio,

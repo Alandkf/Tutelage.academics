@@ -10,6 +10,7 @@ const router = express.Router();
 const {
   createAudio,
   getAllAudios,
+  getPaginatedAudios,
   getAudioById,
   updateAudio,
   deleteAudio,
@@ -24,10 +25,17 @@ const adminAuth = require('../middlewares/adminAuth');
 
 /**
  * GET /api/audios
- * Get all audio content with pagination and filtering
- * Query params: page, limit, search, sortBy, sortOrder
+ * Get all audio content with infinite scroll pagination and filtering
+ * Query params: cursor, limit, search, sortBy, sortOrder
  */
 router.get('/', getAllAudios);
+
+/**
+ * GET /api/audios/paginated
+ * Get all audio content with page-based pagination (for React frontend)
+ * Query params: page, limit, search, sortBy, sortOrder
+ */
+router.get('/paginated', getPaginatedAudios);
 
 /**
  * GET /api/audios/:id
