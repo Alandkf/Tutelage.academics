@@ -14,10 +14,11 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 // Environment Configuration
-require('dotenv').config();
+// Ensure we always load the backend/.env regardless of where the server starts
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
-// Database Models - COMMENTED OUT FOR NOW
-// const { sequelize } = require('./models');
+// Database Models
+const { sequelize } = require('./models');
 
 // Route modules
 const videoRoutes = require('./routes/videos');
@@ -121,7 +122,7 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    database: 'disabled (running without database)'
+    database: `${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
   });
 });
 
@@ -129,7 +130,7 @@ app.get('/', (req, res) => {
 app.get('/api/status', (req, res) => {
   res.json({
     status: 'healthy',
-    database: 'disabled',
+    database: `${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
@@ -159,18 +160,21 @@ app.use((err, req, res, next) => {
 // ============================================================================
 
 /**
- * Initialize the server without database connection
+ * Initialize the server with database connection
  */
 const initializeServer = async () => {
     try {
-        console.log('🔄 Initializing Tutelage Academics Server (No Database)...');
+        console.log('🔄 Initializing Tutelage Academics Server...');
         
-        // SKIP DATABASE CONNECTION FOR NOW
-        console.log('⚠️  Database connection skipped - running without database');
+        // Test database connection
+        console.log('🔗 Connecting to database...');
+        await sequelize.authenticate();
+        console.log('✅ Database connection established successfully');
         
-        // SKIP SESSION STORE SYNC
-        // await sessionStore.sync();
-        console.log('⚠️  Using memory session store (sessions will not persist)');
+        // Sync database models (create tables if they don't exist)
+        console.log('🔄 Synchronizing database models...');
+        await sequelize.sync({ alter: false }); // Use alter: true only in development if you want to modify existing tables
+        console.log('✅ Database models synchronized successfully');
         
         // Start the Express server
         app.listen(SERVER_PORT, () => {
@@ -179,15 +183,13 @@ const initializeServer = async () => {
             console.log('='.repeat(60));
             console.log(`📡 Server running on: http://localhost:${SERVER_PORT}`);
             console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
-            console.log(`🗄️  Database: DISABLED (running without database)`);
-            console.log(`🔐 Session store: Memory only (not persistent)`);
+            console.log(`🗄️  Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+            console.log(`🔐 Session store: Memory (consider using database sessions for production)`);
             console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
             console.log('='.repeat(60) + '\n');
             
-            console.log('💡 NOTE: Server is running without database connection');
-            console.log('💡 Most API endpoints will not work until database is connected');
-            console.log('💡 Email enrollment service should work if credentials are configured\n');
+            console.log('✅ All systems operational - API endpoints ready to serve requests\n');
         });
         
     } catch (error) {
@@ -195,6 +197,15 @@ const initializeServer = async () => {
         console.error('💥 FATAL ERROR: Failed to initialize server');
         console.error('❌'.repeat(20));
         console.error('Error details:', error);
+        
+        if (error.name === 'SequelizeConnectionError') {
+            console.error('\n🔍 Database Connection Troubleshooting:');
+            console.error('1. Check if your database server is running');
+            console.error('2. Verify database credentials in .env file');
+            console.error('3. Ensure network connectivity to database host');
+            console.error('4. Check if SSL/TLS settings are correct');
+        }
+        
         console.error('❌'.repeat(20) + '\n');
         process.exit(1);
     }

@@ -306,19 +306,20 @@ const getPaginatedBlogs = async (req, res) => {
       ];
     }
 
+    console.log('🔍 Starting getPaginatedBlogs query...');
+    console.log('📊 Query parameters:', { page, limit, offset });
+    console.log('🔎 Where clause:', whereClause);
+    
     const { count, rows } = await Blog.findAndCountAll({
       where: whereClause,
-      include: [{
-        model: User,
-        as: 'author',
-        attributes: ['id', 'name', 'email']
-      }],
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [[sortBy, sortOrder.toUpperCase()]],
       distinct: true
     });
-
+    
+    console.log('📈 Query results:', { count, rowsLength: rows.length });
+    console.log('📝 First blog (if any):', rows[0] ? rows[0].toJSON() : 'No blogs found');
     const totalPages = Math.ceil(count / limit);
 
     res.status(200).json({

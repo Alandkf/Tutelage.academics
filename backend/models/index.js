@@ -22,7 +22,7 @@ const environment = process.env.NODE_ENV || 'development';
 // ============================================================================
 // DATABASE CONNECTION
 // ============================================================================
-// Initialize Sequelize with MySQL database connection
+// Initialize Sequelize with PostgreSQL database connection (Neon.tech)
 const sequelizeConnection = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -30,14 +30,20 @@ const sequelizeConnection = new Sequelize(
   {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT),
-    dialect: 'mysql',
+    dialect: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
         rejectUnauthorized: false
       }
     },
-    logging: false // Disable SQL query logging
+    logging: false, // Disable SQL query logging
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 );
 

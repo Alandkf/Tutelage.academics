@@ -36,7 +36,10 @@ router.get('/', getAllBlogs);
  * Get all blog posts with page-based pagination (for React frontend)
  * Query params: page, limit, category, search, sortBy, sortOrder
  */
-router.get('/paginated', getPaginatedBlogs);
+router.get('/paginated', (req, res, next) => {
+  console.log('🎯 Paginated route hit!', req.query);
+  next();
+}, getPaginatedBlogs);
 
 /**
  * GET /api/blogs/:id
