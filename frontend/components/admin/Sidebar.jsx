@@ -16,115 +16,86 @@ const menuItems = [
   { icon: Video, name: "Videos", href: "/admin-dashboard/videos" },
   { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
   { icon: CircleQuestionMark, name: "Faqs", href: "/admin-dashboard/faqs" },
+  { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const [isMobile, setIsMobile] = useState(false)
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth >= 768) {
-        setIsOpen(false) 
-      }
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    if (isMobile && isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'auto'
-    }
-    return () => {
-      document.body.style.overflow = 'auto'
-    }
-  }, [isMobile, isOpen])
+    setIsOpen(false)
+  }, [pathname])
 
   return (
-   <>
-      {/* Mobile hamburger button */}
-      {isMobile && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="fixed top-3 left-3 z-50 h-8 w-8 p-0"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Menu className="h-4 w-4" />
-        </Button>
-      )}
-      
-      {/* Desktop sidebar with icons and labels */}
-      {!isMobile && (
-        <motion.div
-          className="sticky top-0 h-screen bg-card border-r border-border shadow-sm flex flex-col"
-          initial={{ width: 200 }}
-          animate={{ width: 200 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="h-14 px-3 flex items-center border-b border-border">
-            <span className="font-bold text-lg">Tutelage</span>
+    <>
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-background border-b border-border">
+        <div className="flex items-center justify-between p-2">
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          {/* Profile */}
+          <div className="flex items-center gap-2">
+            <AdminProfileSection />
           </div>
-          
-          <nav className="flex-1 py-2 flex flex-col gap-1 px-3">
-            {menuItems.map((item) => (
-              <Link key={item.name} href={item.href} className="w-full">
-                <div
-                  className={`flex items-center p-2 rounded-md transition-colors ${
-                    pathname === item.href
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4 mr-3 flex-shrink-0" />
-                  <span className="text-sm">{item.name}</span>
-                </div>
-              </Link>
-            ))}
-          </nav>
+        </div>
+      </div>
 
-          {/* ADMIN Profile Section (desktop & mobile) */}
-          <AdminProfileSection session={user ? { user } : null} loading={loading} />
-        </motion.div>
-      )}
-      
-      {/* Mobile sidebar - overlay with full menu */}
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:block fixed left-0 top-0 bottom-0 w-64 bg-background border-r border-border">
+        <div className="h-14 border-b border-border flex items-center px-4">
+          <span className="font-semibold">Admin Menu</span>
+        </div>
+        <nav className="p-2">
+          {menuItems.map((item) => (
+            <Link key={item.name} href={item.href}>
+              <div
+                className={`flex items-center px-3 py-2 my-1 rounded-md ${
+                  pathname === item.href
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <item.icon className="h-4 w-4 mr-3" />
+                <span>{item.name}</span>
+              </div>
+            </Link>
+          ))}
+        </nav>
+        <div className="absolute bottom-0 w-full p-2 border-t border-border">
+          <AdminProfileSection />
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar */}
       <AnimatePresence>
-        {isMobile && isOpen && (
+        {isOpen && (
           <>
-            <motion.div 
-              className="fixed inset-0 bg-black/50 z-40"
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
               onClick={() => setIsOpen(false)}
             />
-            
             <motion.div
-              className="fixed left-0 top-0 h-full z-50 bg-background border-r border-border w-[70%] max-w-[250px]"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed top-0 left-0 bottom-0 w-64 bg-background border-r border-border z-50"
             >
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <h1 className="font-bold text-lg">Tutelage</h1>
-                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="h-8 w-8 p-0">
-                  <X className="h-4 w-4" />
+              <div className="flex items-center justify-between p-2 border-b border-border">
+                <span className="font-semibold">Admin Menu</span>
+                <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
-              
               <nav className="p-2">
                 {menuItems.map((item) => (
-                  <Link 
+                  <Link
                     key={item.name} 
                     href={item.href}
                     onClick={() => setIsOpen(false)}

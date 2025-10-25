@@ -1,15 +1,20 @@
+'use client'
+
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { Filter, FilterIcon, SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal } from 'lucide-react'
 
+export default function HeroSection({ title, subtitle, imageUrl }) {
+  const safeTitle = title || 'Empowering students worldwide with innovative virtual learning solutions'
+  const safeSubtitle = subtitle || 'Education is vital to everyone on this planet. With a passion for education, compassion for teachers, and advanced technology, we believe we can provide high-quality education for learners everywhere.'
+  const imageSrc = imageUrl || '/hero.jpg'
 
-export default function HeroSection() {
   return (
     <>
       <div className="relative w-full aspect-[16/7] min-h-[300px] h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[100vh]">
         <Image
-          src="/hero.jpg"
+          src={imageSrc}
           alt="Landing Hero"
           fill
           priority
@@ -17,14 +22,10 @@ export default function HeroSection() {
           className="object-cover object-center w-full h-full"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
         />
-        {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-black/60 z-10" />
-        {/* Centered hero text and search (all screens) */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 text-center mt-40">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl max-w-4xl font-bold text-white drop-shadow mb-4">Empowering students worldwide with innovative virtual learning solutions </h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/80 font-normal max-w-5xl mx-auto mb-7">
-            Education is vital to everyone on this planet. With a passion for education, compassion for teachers, and advanced technology, we believe we can provide high-quality education for learners everywhere.</p>
-          {/* Search box with filter */}
+          <h1 className="text-2xl sm:text-4xl md:text-5xl max-w-4xl font-bold text-white drop-shadow mb-4">{safeTitle}</h1>
+          <p className="text-sm sm:text-base md:text-lg text-white/80 font-normal max-w-5xl mx-auto mb-7">{safeSubtitle}</p>
           <form className="hidden w-full max-w-2xl md:flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 mx-auto">
             <Input
               type="text"
