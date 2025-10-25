@@ -10,7 +10,8 @@ const blogSchema = z.object({
   title: z.string().min(2, "Title is required"),
   content: z.string().min(2, "Content is required"),
   imageRef: z.string().optional(),
-  category: z.string().optional()
+  category: z.string().optional(),
+  description: z.string().optional()
 })
 
 export default function BlogForm({ onSuccess, onCancel, initialValues, mode = "create" }) {
@@ -22,13 +23,21 @@ export default function BlogForm({ onSuccess, onCancel, initialValues, mode = "c
       title: "",
       content: "",
       imageRef: "",
-      category: ""
+      category: "",
+      description: ""
     }
   })
 
   useEffect(() => {
     if (initialValues) {
-      form.reset(initialValues)
+      const mapped = {
+        title: initialValues.title ?? "",
+        content: initialValues.content ?? "",
+        imageRef: initialValues.imageRef ?? "",
+        category: initialValues.category ?? "",
+        description: initialValues.description ?? initialValues.desccription ?? ""
+      }
+      form.reset(mapped)
     }
   }, [initialValues])
 
@@ -69,6 +78,19 @@ export default function BlogForm({ onSuccess, onCancel, initialValues, mode = "c
                 <FormLabel>Content</FormLabel>
                 <FormControl>
                   <textarea className="w-full min-h-[100px] border rounded-md p-2 bg-background" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Short Description</FormLabel>
+                <FormControl>
+                  <textarea className="w-full min-h-[80px] border rounded-md p-2 bg-background" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

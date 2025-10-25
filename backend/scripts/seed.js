@@ -60,6 +60,7 @@ async function seedBlogs(admin) {
       content: 'Discover our platform offering courses, tests, videos, and more to enhance your learning journey.',
       imageRef: 'https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop',
       category: 'Announcements',
+      description: 'Overview of what Tutelage Academics offers and how to explore it.',
       createdBy: admin.id
     },
     {
@@ -67,6 +68,7 @@ async function seedBlogs(admin) {
       content: 'Sign in, explore the catalog, and enroll in courses that match your goals.',
       imageRef: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1200&auto=format&fit=crop',
       category: 'Guides',
+      description: 'Step-by-step guide to begin using the platform effectively.',
       createdBy: admin.id
     }
   ]);
