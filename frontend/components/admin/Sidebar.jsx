@@ -16,6 +16,7 @@ const menuItems = [
   { icon: Video, name: "Videos", href: "/admin-dashboard/videos" },
   { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
   { icon: CircleQuestionMark, name: "Faqs", href: "/admin-dashboard/faqs" },
+  { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
 
 export default function Sidebar() {
