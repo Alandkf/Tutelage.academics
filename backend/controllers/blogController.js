@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createBlog = async (req, res) => {
   try {
-    const { title, content, imageRef, category } = req.body;
+    const { title, content, imageRef, category, description, desccription } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -31,6 +31,7 @@ const createBlog = async (req, res) => {
       content,
       imageRef,
       category,
+      description: description ?? desccription ?? null,
       createdBy
     });
 
@@ -84,7 +85,8 @@ const getAllBlogs = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { content: { [Op.like]: `%${search}%` } }
+        { content: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } }
       ];
     }
     // Add cursor condition for infinite scroll
@@ -179,7 +181,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, imageRef, category } = req.body;
+    const { title, content, imageRef, category, description, desccription } = req.body;
 
     const blog = await Blog.findByPk(id);
 
@@ -202,7 +204,8 @@ const updateBlog = async (req, res) => {
       title: title || blog.title,
       content: content || blog.content,
       imageRef: imageRef || blog.imageRef,
-      category: category || blog.category
+      category: category || blog.category,
+      description: (description ?? desccription ?? blog.description)
     });
 
     // Fetch updated blog with author information
@@ -302,7 +305,8 @@ const getPaginatedBlogs = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { content: { [Op.like]: `%${search}%` } }
+        { content: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } }
       ];
     }
 

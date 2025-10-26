@@ -1,5 +1,3 @@
-'use client'
-
 import GlobalTestMastery from '@/components/landing/GlobalTestMastery '
 import HeroSection from '@/components/landing/Hero'
 import ImproveYourEnglishSkills from '@/components/landing/ImproveYourEnglishSkills'
@@ -9,21 +7,38 @@ import Resources from '@/components/landing/Resources '
 import Tests from '@/components/landing/Tests'
 import TutelageAi from '@/components/landing/TutelageAi'
 
-const Home = () => {
-  return (
-   <>
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 
-  {/* HERO SECTION */}
-  <HeroSection />
-  <TutelageAi />
-  <Resources />
-  <OnlineCourses />
-  <Tests />
-  <GlobalTestMastery />
-  <Practice />
-  <ImproveYourEnglishSkills />
-   </>
-  )
+async function getLatestLandingSection() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/landing-sections/latest`, { cache: 'no-store' })
+    const data = await res.json()
+    if (data?.success && data?.landingSection) {
+      return data.landingSection
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
-export default Home
+export default async function Home() {
+  const landing = await getLatestLandingSection()
+  return (
+    <>
+      {/* HERO SECTION */}
+      <HeroSection
+        title={landing?.title}
+        subtitle={landing?.subtitle}
+        imageUrl={landing?.imageUrl}
+      />
+      <TutelageAi />
+      <Resources />
+      <OnlineCourses />
+      <Tests />
+      <GlobalTestMastery />
+      <Practice />
+      <ImproveYourEnglishSkills />
+    </>
+  )
+}

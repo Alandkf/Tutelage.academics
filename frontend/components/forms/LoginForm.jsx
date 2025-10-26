@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
 import BASE_URL from "@/app/config/url"
+import { useAuth } from "@/components/AuthContext"
 console.log('BASE_URL:', BASE_URL);
 
 // Define form schema with Zod
@@ -23,6 +24,7 @@ const LoginForm = () => {
   const [error, setError] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const { refresh } = useAuth()
 
   // Initialize form with react-hook-form and zod resolver
   const form = useForm({
@@ -60,6 +62,8 @@ const LoginForm = () => {
 
       // Handle successful login
       console.log('Login successful:', data)
+      // Refresh auth context so user and role are available immediately
+      try { await refresh() } catch {}
       router.push('/admin-dashboard')
     }catch (error) {
       console.error("Login failed:", error)

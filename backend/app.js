@@ -31,6 +31,7 @@ const appointmentRoutes = require('./routes/appointments');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const enrollmentRoutes = require('./routes/enrollment');
+const landingSectionRoutes = require('./routes/landingSections');
 
 
 // ============================================================================
@@ -109,6 +110,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/enrollment', enrollmentRoutes);
+app.use('/api/landing-sections', landingSectionRoutes);
 
 
 // ============================================================================

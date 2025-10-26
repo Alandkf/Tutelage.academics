@@ -54,6 +54,12 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Category classification for the blog post'
       },
       
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Short description of the blog post'
+      },
+      
       // Author relationship field
       createdBy: { 
         type: DataTypes.INTEGER.UNSIGNED, 
