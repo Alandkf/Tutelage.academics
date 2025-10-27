@@ -12,7 +12,8 @@ export default function NavbarWrapper({ children }) {
   const absoluteRoutes = [
     '/',
     '/skills',
-    '/courses'
+    '/courses',
+    '/esl-resources',
   ]
 
   // Check if current pathname starts with any route in noNavbarRoutes

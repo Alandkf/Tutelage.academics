@@ -46,12 +46,12 @@ export default function Navbar (){
     },
     {
       name: "ESL resources",
-      href: "/eslresources",
+      href: "/esl-resources",
       dropdown: [
-        { name: "Story Library", href: "/eslresources/storys" },
-        { name: "Blog Library", href: "/eslresources/blogs" },
-        { name: "Video Library", href: "/eslresources/video" },
-        { name: "Audio Library", href: "/eslresources/audio" },
+        { name: "Story Library", href: "/esl-resources/storys" },
+        { name: "Blog Library", href: "/esl-resources/blogs" },
+        { name: "Video Library", href: "/esl-resources/video" },
+        { name: "Audio Library", href: "/esl-resources/audio" },
       ],
     },
      {

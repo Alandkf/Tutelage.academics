@@ -64,7 +64,7 @@ const Resources = () => {
                 </ul>
 
                 {/* Explore More Button */}
-                <Link href="/eslresources">
+                <Link href="/esl-resources">
                   <Button
                     size="lg"
                     className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"

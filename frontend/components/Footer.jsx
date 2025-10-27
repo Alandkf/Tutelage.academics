@@ -35,10 +35,10 @@ export const Footer = () => {
 
   // ESL Resources links
   const eslResourcesLinks = [
-    { name: "Story Library", href: "/eslresources/storys" },
-    { name: "Blog Library", href: "/eslresources/blogs" },
-    { name: "Video Library", href: "/eslresources/video" },
-    { name: "Audio Library", href: "/eslresources/audio" },
+    { name: "Story Library", href: "/esl-resources/storys" },
+    { name: "Blog Library", href: "/esl-resources/blogs" },
+    { name: "Video Library", href: "/esl-resources/video" },
+    { name: "Audio Library", href: "/esl-resources/audio" },
   ]
 
   // Levels links
@@ -130,7 +130,7 @@ export const Footer = () => {
 
                 {/* ESL Resources Links */}
                 <div className="space-y-4">
-                  <Link href="/eslresources">
+                  <Link href="/esl-resources">
                     <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">ESL Resources</h4>
                   </Link>
                   <ul className="space-y-2">

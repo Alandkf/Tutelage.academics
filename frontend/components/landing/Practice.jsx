@@ -222,7 +222,7 @@ const Practice = () => {
 
 				{/* All Resources Button */}
 				<div className="flex justify-center mt-12">
-					<Link href="/eslresources">
+					<Link href="/esl-resources">
 						<Button
 							size="lg"
 							className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
