@@ -275,6 +275,41 @@ const deleteBlog = async (req, res) => {
 };
 
 /**
+ * Delete ALL blog posts (USE WITH CAUTION - DEVELOPMENT ONLY)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const deleteAllBlogs = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only administrators can delete all blogs'
+      });
+    }
+
+    const deletedCount = await Blog.destroy({
+      where: {},
+      truncate: false
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully deleted ${deletedCount} blog posts`,
+      deletedCount
+    });
+  } catch (error) {
+    console.error('Error deleting all blogs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+/**
  * Get blogs by category with pagination
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
@@ -402,5 +437,6 @@ module.exports = {
   getBlogById,
   updateBlog,
   deleteBlog,
+  deleteAllBlogs,
   getBlogsByCategory
 };

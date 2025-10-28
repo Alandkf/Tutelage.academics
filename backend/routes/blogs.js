@@ -15,7 +15,7 @@ const {
   getBlogById,
   updateBlog,
   deleteBlog,
-  getBlogsByCategory
+  getBlogsByCategory,
 } = require('../controllers/blogController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
