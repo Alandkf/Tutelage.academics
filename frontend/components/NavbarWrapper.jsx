@@ -14,6 +14,10 @@ export default function NavbarWrapper({ children }) {
     '/skills',
     '/courses',
     '/esl-resources',
+    '/levels',
+    '/tutelagetests',
+    '/about-us',
+    '/contact-us',
   ]
 
   // Check if current pathname starts with any route in noNavbarRoutes

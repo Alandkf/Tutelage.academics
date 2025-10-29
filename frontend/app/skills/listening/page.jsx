@@ -9,31 +9,31 @@ export default function ListeningPage() {
     levels: [
       {
         code: "A1",
-        href: "/A1level/listening",
+        href: "/skills/listening/A1",
         image: "/hero.jpg",
         description: "Understand basic phrases, personal information, and simple conversations spoken slowly and clearly."
       },
       {
         code: "A2",
-        href: "/A2level/listening",
+        href: "/skills/listening/A2",
         image: "/hero.jpg",
         description: "Follow short conversations about familiar topics and understand simple announcements."
       },
       {
         code: "B1",
-        href: "/B1level/listening",
+        href: "/skills/listening/B1",
         image: "/hero.jpg",
         description: "Understand main points of discussions on familiar topics and follow longer conversations."
       },
       {
         code: "B2",
-        href: "/B2level/listening",
+        href: "/skills/listening/B2",
         image: "/hero.jpg",
         description: "Understand detailed information in various contexts and follow complex arguments."
       },
       {
         code: "C1",
-        href: "/C1level/listening",
+        href: "/skills/listening/C1",
         image: "/hero.jpg",
         description: "Understand a wide range of demanding audio texts and recognize implicit meanings."
       }

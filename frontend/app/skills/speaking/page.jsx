@@ -9,31 +9,31 @@ export default function SpeakingPage() {
     levels: [
       {
         code: "A1",
-        href: "/A1level/speaking",
+        href: "/skills/speaking/A1",
         image: "/hero.jpg",
         description: "Use basic phrases for personal information and simple everyday situations with slow, clear speech."
       },
       {
         code: "A2",
-        href: "/A2level/speaking",
+        href: "/skills/speaking/A2",
         image: "/hero.jpg",
         description: "Communicate in simple conversations about familiar topics and describe experiences briefly."
       },
       {
         code: "B1",
-        href: "/B1level/speaking",
+        href: "/skills/speaking/B1",
         image: "/hero.jpg",
         description: "Express opinions, describe experiences, and handle most travel situations with clear speech."
       },
       {
         code: "B2",
-        href: "/B2level/speaking",
+        href: "/skills/speaking/B2",
         image: "/hero.jpg",
         description: "Speak fluently on various topics, present arguments clearly, and interact naturally with native speakers."
       },
       {
         code: "C1",
-        href: "/C1level/speaking",
+        href: "/skills/speaking/C1",
         image: "/hero.jpg",
         description: "Express ideas fluently and spontaneously with precise language and appropriate style for different contexts."
       }
