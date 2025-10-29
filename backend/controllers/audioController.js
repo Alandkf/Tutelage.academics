@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createAudio = async (req, res) => {
   try {
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tag } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -44,7 +44,6 @@ const createAudio = async (req, res) => {
       audioRef,
       pdf: pdf ?? null,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      tag: tag ?? null,
       level: normalizedLevel,
       createdBy
     });
@@ -80,14 +79,7 @@ const createAudio = async (req, res) => {
  */
 const getAllAudios = async (req, res) => {
   try {
-    const { 
-      cursor, // For cursor-based pagination (ID of last item)
-      limit = 10, 
-      search,
-      level,
-      sortBy = 'createdAt',
-      sortOrder = 'DESC'
-    } = req.query;
+    const { cursor, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
 
     // Build where clause for filtering
     const whereClause = {};
@@ -281,7 +273,7 @@ const getAudioById = async (req, res) => {
 const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tag } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl } = req.body;
 
     const audio = await Audio.findByPk(id);
 
@@ -320,7 +312,6 @@ const updateAudio = async (req, res) => {
       audioRef: audioRef ?? audio.audioRef,
       pdf: pdf ?? audio.pdf,
       imageUrl: (imageUrl ?? imageurl ?? audio.imageUrl),
-      tag: tag ?? audio.tag,
       level: normalizedLevel ?? audio.level
     });
 

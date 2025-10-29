@@ -49,12 +49,6 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Short description or summary of the writing content'
       },
 
-      // Tag or category
-      tag: {
-        type: DataTypes.STRING(120),
-        allowNull: true,
-        comment: 'Tag or category label for this writing content'
-      },
 
       // Writing prompt
       prompt: {

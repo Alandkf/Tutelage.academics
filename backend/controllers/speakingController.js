@@ -12,7 +12,7 @@ const { Op } = require('sequelize');
  */
 const createSpeaking = async (req, res) => {
   try {
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tag } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title || !videoRef) {
@@ -41,7 +41,6 @@ const createSpeaking = async (req, res) => {
       videoRef,
       pdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      tag: tag ?? null,
       level: normalizedLevel,
       createdBy
     });
@@ -203,7 +202,7 @@ const getSpeakingById = async (req, res) => {
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tag } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
 
     const speaking = await Speaking.findByPk(id);
     if (!speaking) {
@@ -234,7 +233,6 @@ const updateSpeaking = async (req, res) => {
       videoRef: videoRef ?? speaking.videoRef,
       pdf: pdf ?? speaking.pdf,
       imageUrl: (imageUrl ?? imageurl ?? speaking.imageUrl),
-      tag: tag ?? speaking.tag,
       level: normalizedLevelUpdate ?? speaking.level
     });
 

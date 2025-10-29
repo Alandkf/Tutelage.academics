@@ -72,12 +72,6 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'URL or path to downloadable PDF for this audio content'
       },
 
-      // Tag or category
-      tag: {
-        type: DataTypes.STRING(120),
-        allowNull: true,
-        comment: 'Tag or category label for this audio content'
-      },
 
       // Language level field (CEFR-like levels)
       level: {

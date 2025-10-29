@@ -56,12 +56,6 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Optional guidance or descriptive content for the speaking content'
       },
 
-      // Tag or category
-      tag: {
-        type: DataTypes.STRING(120),
-        allowNull: true,
-        comment: 'Tag or category label for this speaking content'
-      },
 
       // Transcript field
       transcript: { 

@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createBlog = async (req, res) => {
   try {
-    const { title, content, imageRef, imageUrl, imageurl, category, tag, description, discription, desccription, level, pdf } = req.body;
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -43,6 +43,7 @@ const createBlog = async (req, res) => {
       imageRef: imageRef ?? imageUrl ?? imageurl ?? null,
       category: category ?? tag ?? null,
       description: description ?? discription ?? desccription ?? null,
+      tags: Array.isArray(tags) ? tags : undefined,
       level: normalizedLevel,
       pdf,
       createdBy
@@ -199,7 +200,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, imageRef, imageUrl, imageurl, category, tag, description, discription, desccription, level, pdf } = req.body;
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf } = req.body;
 
     const blog = await Blog.findByPk(id);
 
@@ -237,6 +238,7 @@ const updateBlog = async (req, res) => {
       imageRef: (imageRef ?? imageUrl ?? imageurl ?? blog.imageRef),
       category: (category ?? tag ?? blog.category),
       description: (description ?? discription ?? desccription ?? blog.description),
+      tags: Array.isArray(tags) ? tags : blog.tags,
       level: normalizedLevelUpdate,
       pdf: (typeof pdf !== 'undefined' ? pdf : blog.pdf)
     });

@@ -53,6 +53,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Category classification for the blog post'
       },
+
+      // Tags array for blog post
+      tags: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        comment: 'List of tags associated with the blog post'
+      },
       
       description: {
         type: DataTypes.TEXT,
