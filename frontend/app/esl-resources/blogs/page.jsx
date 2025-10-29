@@ -1,10 +1,9 @@
 'use client'
 
+import CallToAction from "@/components/CallToAction"
 import BlogGrid from "@/components/esl-resources/blogs/BlogGrid"
 import BlogLibraryDescription from "@/components/esl-resources/blogs/BlogLibraryDescription"
 import BlogLibraryHero from "@/components/esl-resources/blogs/BlogLibraryHero"
-
-
 
 const BlogLibraryPage = () => {
   return (
@@ -12,6 +11,7 @@ const BlogLibraryPage = () => {
       <BlogLibraryHero />
       <BlogLibraryDescription />
       <BlogGrid />
+      <CallToAction />
     </div>
   )
 }
