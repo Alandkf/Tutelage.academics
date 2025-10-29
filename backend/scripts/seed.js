@@ -5291,9 +5291,27 @@ Finally, remember that learning English is itself an achievement worthy of recog
     },
   ];
 
+  // Language levels to assign to blogs
+  const LEVELS = [
+    'A1 Beginner',
+    'A2 Pre-intermediate',
+    'B1 Intermediate',
+    'B2 Upper-Intermediate',
+    'C1 Advanced',
+    'C2 Proficient'
+  ];
+
+  const pickLevel = () => LEVELS[Math.floor(Math.random() * LEVELS.length)];
+  const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+
   const remaining = MIN - count;
   await Blog.bulkCreate(
-    blogs.slice(0, remaining).map(b => ({ ...b, createdBy: admin.id }))
+    blogs.slice(0, remaining).map(b => ({
+      ...b,
+      level: b.level || pickLevel(),
+      pdf: b.pdf || buildPdfUrl(b.title),
+      createdBy: admin.id
+    }))
   );
 }
 

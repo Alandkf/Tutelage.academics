@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createBlog = async (req, res) => {
   try {
-    const { title, content, imageRef, category, description, desccription } = req.body;
+    const { title, content, imageRef, category, description, desccription, level, pdf } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -32,6 +32,8 @@ const createBlog = async (req, res) => {
       imageRef,
       category,
       description: description ?? desccription ?? null,
+      level,
+      pdf,
       createdBy
     });
 
@@ -181,7 +183,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, imageRef, category, description, desccription } = req.body;
+    const { title, content, imageRef, category, description, desccription, level, pdf } = req.body;
 
     const blog = await Blog.findByPk(id);
 
@@ -205,7 +207,9 @@ const updateBlog = async (req, res) => {
       content: content || blog.content,
       imageRef: imageRef || blog.imageRef,
       category: category || blog.category,
-      description: (description ?? desccription ?? blog.description)
+      description: (description ?? desccription ?? blog.description),
+      level: (typeof level !== 'undefined' ? level : blog.level),
+      pdf: (typeof pdf !== 'undefined' ? pdf : blog.pdf)
     });
 
     // Fetch updated blog with author information
