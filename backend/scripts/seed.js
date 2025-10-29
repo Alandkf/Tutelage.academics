@@ -8,17 +8,19 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const bcrypt = require('bcrypt');
-const {
-  sequelize,
-  User,
-  Blog,
-  Video,
-  Audio,
-  Course,
-  Test,
-  Faq,
-  LandingSection
-} = require('../models');
+  const {
+    sequelize,
+    User,
+    Blog,
+    Video,
+    Audio,
+    Speaking,
+    Writing,
+    Course,
+    Test,
+    Faq,
+    LandingSection
+  } = require('../models');
 
 const BCRYPT_ROUNDS = 10;
 // CEFR-like level labels and sample PDF for seeded content
@@ -5364,6 +5366,47 @@ async function seedAudios(admin) {
   );
 }
 
+async function seedSpeakings(admin) {
+  const count = await Speaking.count();
+  const MIN = 10;
+  if (count >= MIN) return;
+
+  const speakings = Array.from({ length: 10 }).map((_, i) => ({
+    title: `Speaking Practice ${i + 1}`,
+    description: 'Short speaking activity with video prompt.',
+    transcript: null,
+    videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await Speaking.bulkCreate(
+    speakings.slice(0, remaining).map(s => ({ ...s, createdBy: admin.id }))
+  );
+}
+
+async function seedWritings(admin) {
+  const count = await Writing.count();
+  const MIN = 10;
+  if (count >= MIN) return;
+
+  const writings = Array.from({ length: 10 }).map((_, i) => ({
+    title: `Writing Task ${i + 1}`,
+    prompt: 'Write a short paragraph describing your daily routine.',
+    content: 'Focus on present simple tense and time expressions.',
+    sampleAnswer: 'I usually wake up at 7am. Then I have breakfast...',
+    rubric: 'Clarity, grammar accuracy, vocabulary range, coherence.',
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await Writing.bulkCreate(
+    writings.slice(0, remaining).map(w => ({ ...w, createdBy: admin.id }))
+  );
+}
+
 async function seedCourses(admin) {
   const count = await Course.count();
   const MIN = 10;
@@ -5449,6 +5492,24 @@ async function backfillLevelsAndPdfs() {
     const pdf = b.pdf ?? SAMPLE_PDF_URL;
     await b.update({ level, pdf });
   }
+
+  // Backfill Speaking: level and pdf when missing
+  const speakingsMissing = await Speaking.findAll({ where: { level: null } });
+  for (let i = 0; i < speakingsMissing.length; i++) {
+    const s = speakingsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = s.pdf ?? SAMPLE_PDF_URL;
+    await s.update({ level, pdf });
+  }
+
+  // Backfill Writing: level and pdf when missing
+  const writingsMissing = await Writing.findAll({ where: { level: null } });
+  for (let i = 0; i < writingsMissing.length; i++) {
+    const w = writingsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = w.pdf ?? SAMPLE_PDF_URL;
+    await w.update({ level, pdf });
+  }
 }
 
 async function main() {
@@ -5466,6 +5527,8 @@ async function main() {
     await seedBlogs(admin);
     await seedVideos(admin);
     await seedAudios(admin);
+    await seedSpeakings(admin);
+    await seedWritings(admin);
     await seedCourses(admin);
     await seedTests(admin);
     await seedFaqs();

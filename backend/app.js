@@ -24,6 +24,8 @@ const { sequelize } = require('./models');
 const videoRoutes = require('./routes/videos');
 const blogRoutes = require('./routes/blogs');
 const audioRoutes = require('./routes/audios');
+const speakingRoutes = require('./routes/speakings');
+const writingRoutes = require('./routes/writings');
 const courseRoutes = require('./routes/courses');
 const testRoutes = require('./routes/tests');
 const faqRoutes = require('./routes/faqs');
@@ -103,6 +105,8 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // URL-encode
 app.use('/api/videos', videoRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/audios', audioRoutes);
+app.use('/api/speakings', speakingRoutes);
+app.use('/api/writings', writingRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/faqs', faqRoutes);
