@@ -58,11 +58,11 @@ export default function Navbar (){
       name: "Levels",
       href: "/levels",
       dropdown: [
-        { name: "A1 Level", href: "/levels/A1level" },
-        { name: "A2 Level", href: "/levels/A2level" },
-        { name: "B1 Level", href: "/levels/B1level" },
-        { name: "B2 Level", href: "/levels/B2level" },
-        { name: "C1 Level", href: "/levels/C1level" },
+        { name: "A1 Level", href: "/levels/a1" },
+        { name: "A2 Level", href: "/levels/a2" },
+        { name: "B1 Level", href: "/levels/b1" },
+        { name: "B2 Level", href: "/levels/b2" },
+        { name: "C1 Level", href: "/levels/c1" },
       ],
     },
     {

@@ -9,31 +9,31 @@ export default function WritingPage() {
     levels: [
       {
         code: "A1",
-        href: "/skills/writing/A1",
+        href: "/skills/writing/a1",
         image: "/hero.jpg",
         description: "Learn basic writing skills including simple sentences, personal information, and short messages."
       },
       {
         code: "A2",
-        href: "/skills/writing/A2", 
+        href: "/skills/writing/a2", 
         image: "/hero.jpg",
         description: "Write short texts about familiar topics, basic emails, and simple descriptions."
       },
       {
         code: "B1",
-        href: "/skills/writing/B1",
+        href: "/skills/writing/b1",
         image: "/hero.jpg", 
         description: "Express opinions, write informal letters, and create coherent texts on familiar subjects."
       },
       {
         code: "B2",
-        href: "/skills/writing/B2",
+        href: "/skills/writing/b2",
         image: "/hero.jpg",
         description: "Write clear, detailed texts on various topics and express viewpoints with supporting arguments."
       },
       {
         code: "C1",
-        href: "/skills/writing/C1",
+        href: "/skills/writing/c1",
         image: "/hero.jpg",
         description: "Produce clear, well-structured texts on complex subjects with appropriate style and tone."
       }

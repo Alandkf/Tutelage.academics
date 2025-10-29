@@ -9,31 +9,31 @@ export default function ReadingPage() {
     levels: [
       {
         code: "A1",
-        href: "/skills/reading/A1",
+        href: "/skills/reading/a1",
         image: "/hero.jpg",
         description: "Read simple texts, signs, and basic information with familiar vocabulary and short sentences."
       },
       {
         code: "A2",
-        href: "/skills/reading/A2",
+        href: "/skills/reading/a2",
         image: "/hero.jpg",
         description: "Understand short texts about everyday topics and find specific information in simple materials."
       },
       {
         code: "B1",
-        href: "/skills/reading/B1",
+        href: "/skills/reading/b1",
         image: "/hero.jpg",
         description: "Read straightforward texts on familiar subjects and understand main points of clear texts."
       },
       {
         code: "B2",
-        href: "/skills/reading/B2",
+        href: "/skills/reading/b2",
         image: "/hero.jpg",
         description: "Read articles, reports, and literary texts, understanding different viewpoints and implicit meanings."
       },
       {
         code: "C1",
-        href: "/skills/reading/C1",
+        href: "/skills/reading/c1",
         image: "/hero.jpg",
         description: "Understand long, complex texts and recognize subtle distinctions of style and implicit meaning."
       }
