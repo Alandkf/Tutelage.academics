@@ -10,26 +10,25 @@ const A1Page = () => {
         title: 'A1 Listening',
         description: 'Here you can find listening exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-        link: '/levels/a1/listening'
+        link: '/skills/listening/a1'
       },
       {
         title: 'A1 Speaking',
         description: 'Here you can find speaking exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
-        // image: 'https://images.unsplash.com/photo-1543269664-56d93c1b41a6?w=800&q=80',
-        link: '/levels/a1/speaking'
+        link: '/skills/speaking/a1'
       },
       {
         title: 'A1 Reading',
         description: 'Here you can find reading exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80',
-        link: '/levels/a1/reading'
+        link: '/skills/reading/a1'
       },
       {
         title: 'A1 Writing',
         description: 'Here you can find writing exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80',
-        link: '/levels/a1/writing'
+        link: '/skills/writing/a1'
       }
     ]
   }

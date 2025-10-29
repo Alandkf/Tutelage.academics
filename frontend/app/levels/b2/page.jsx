@@ -10,25 +10,25 @@ const B2Page = () => {
         title: 'B2 Listening',
         description: 'Here you can find listening exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
-        link: '/levels/b2/listening'
+        link: '/skills/listening/b2'
       },
       {
         title: 'B2 Speaking',
         description: 'Here you can find speaking exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
-        link: '/levels/b2/speaking'
+        link: '/skills/speaking/b2'
       },
       {
         title: 'B2 Reading',
         description: 'Here you can find reading exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80',
-        link: '/levels/b2/reading'
+        link: '/skills/reading/b2'
       },
       {
         title: 'B2 Writing',
         description: 'Here you can find writing exercises that match your level, with a brief introduction to help you master each topic.',
         image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80',
-        link: '/levels/b2/writing'
+        link: '/skills/writing/b2'
       }
     ]
   }
