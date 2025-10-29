@@ -8,6 +8,34 @@
 const { Video, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Minimal skills controller: no tag or analytics helpers
+
+// Lightweight YouTube thumbnail derivation (no persistence, response-only)
+function getYouTubeThumbnail(url) {
+  try {
+    if (!url) return null;
+    const patterns = [
+      /v=([A-Za-z0-9_-]{6,})/,      // watch?v=ID
+      /youtu\.be\/(\w|-){6,}/,    // youtu.be/ID (capture later)
+      /\/embed\/([A-Za-z0-9_-]{6,})/ // /embed/ID
+    ];
+    for (const p of patterns) {
+      const m = String(url).match(p);
+      // For youtu.be, grab the last path segment if needed
+      let id = null;
+      if (m && m[1]) {
+        id = m[1];
+      } else if (p.source.includes('youtu') && url.includes('youtu.be/')) {
+        id = String(url).split('youtu.be/')[1]?.split(/[?&#]/)[0];
+      }
+      if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 /**
  * Create a new video content
  * @param {Object} req - Express request object
@@ -58,7 +86,7 @@ const createVideo = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Video content created successfully',
-      data: videoWithAuthor
+      data: { ...videoWithAuthor.toJSON(), thumbnailUrl: getYouTubeThumbnail(videoWithAuthor.videoRef) }
     });
   } catch (error) {
     console.error('Error creating video:', error);
@@ -101,6 +129,7 @@ const getAllVideos = async (req, res) => {
       whereClause.level = { [Op.like]: `${level}%` };
     }
 
+
     // Add cursor condition for infinite scroll
     if (cursor) {
       if (sortOrder.toUpperCase() === 'DESC') {
@@ -113,7 +142,7 @@ const getAllVideos = async (req, res) => {
     // Fetch one extra item to check if there are more items
     const fetchLimit = parseInt(limit) + 1;
 
-    const videos = await Video.findAll({
+    let videos = await Video.findAll({
       where: whereClause,
       include: [{
         model: User,
@@ -128,6 +157,7 @@ const getAllVideos = async (req, res) => {
       distinct: true
     });
 
+
     // Check if there are more items
     const hasMore = videos.length > parseInt(limit);
     
@@ -137,10 +167,12 @@ const getAllVideos = async (req, res) => {
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
 
+    const enriched = items.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
+
     res.status(200).json({
       success: true,
       data: {
-        videos: items,
+        videos: enriched,
         pagination: {
           nextCursor,
           hasMore,
@@ -191,7 +223,7 @@ const getPaginatedVideos = async (req, res) => {
       whereClause.level = { [Op.like]: `${level}%` };
     }
 
-    const { count, rows } = await Video.findAndCountAll({
+    let { count, rows } = await Video.findAndCountAll({
       where: whereClause,
       include: [{
         model: User,
@@ -204,12 +236,15 @@ const getPaginatedVideos = async (req, res) => {
       distinct: true
     });
 
+
     const totalPages = Math.ceil(count / limit);
+
+    const enriched = rows.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
 
     res.status(200).json({
       success: true,
       data: {
-        videos: rows,
+        videos: enriched,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -256,7 +291,7 @@ const getVideoById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: video
+      data: { ...video.toJSON(), thumbnailUrl: getYouTubeThumbnail(video.videoRef) }
     });
   } catch (error) {
     console.error('Error fetching video:', error);
@@ -315,6 +350,7 @@ const updateVideo = async (req, res) => {
       pdf: pdf ?? video.pdf,
       level: normalizedLevel ?? video.level
     });
+
 
     // Fetch updated video with author information
     const updatedVideo = await Video.findByPk(id, {

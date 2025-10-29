@@ -34,6 +34,11 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const enrollmentRoutes = require('./routes/enrollment');
 const landingSectionRoutes = require('./routes/landingSections');
+const storyRoutes = require('./routes/stories');
+const tagRoutes = require('./routes/tags');
+const analyticsRoutes = require('./routes/analytics');
+const eslVideoRoutes = require('./routes/eslVideos');
+const eslAudioRoutes = require('./routes/eslAudios');
 
 
 // ============================================================================
@@ -115,6 +120,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/enrollment', enrollmentRoutes);
 app.use('/api/landing-sections', landingSectionRoutes);
+app.use('/api/stories', storyRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/esl-videos', eslVideoRoutes);
+app.use('/api/esl-audios', eslAudioRoutes);
 
 
 // ============================================================================
