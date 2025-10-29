@@ -12,7 +12,7 @@ const { Op } = require('sequelize');
  */
 const createWriting = async (req, res) => {
   try {
-    const { title, prompt, content, sampleAnswer, rubric, pdf, level } = req.body;
+    const { title, prompt, content, description, discription, sampleAnswer, rubric, pdf, level, imageUrl, imageurl, tag } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title || !prompt) {
@@ -37,9 +37,12 @@ const createWriting = async (req, res) => {
       title,
       prompt,
       content,
+      description: (description ?? discription ?? null),
       sampleAnswer,
       rubric,
       pdf,
+      imageUrl: (imageUrl ?? imageurl ?? null),
+      tag: tag ?? null,
       level: normalizedLevel,
       createdBy
     });
@@ -195,7 +198,7 @@ const getWritingById = async (req, res) => {
 const updateWriting = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, prompt, content, sampleAnswer, rubric, pdf, level } = req.body;
+    const { title, prompt, content, description, discription, sampleAnswer, rubric, pdf, level, imageUrl, imageurl, tag } = req.body;
     const writing = await Writing.findByPk(id);
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
@@ -220,9 +223,12 @@ const updateWriting = async (req, res) => {
       title: title ?? writing.title,
       prompt: prompt ?? writing.prompt,
       content: content ?? writing.content,
+      description: (description ?? discription ?? writing.description),
       sampleAnswer: sampleAnswer ?? writing.sampleAnswer,
       rubric: rubric ?? writing.rubric,
       pdf: pdf ?? writing.pdf,
+      imageUrl: (imageUrl ?? imageurl ?? writing.imageUrl),
+      tag: tag ?? writing.tag,
       level: normalizedLevelUpdate ?? writing.level
     });
 

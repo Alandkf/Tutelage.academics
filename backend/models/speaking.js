@@ -35,11 +35,32 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Title of the speaking content'
       },
 
+      // Featured image URL
+      imageUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to the featured image for this speaking content'
+      },
+
       // Optional description field
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
         comment: 'Short description or summary of the speaking content'
+      },
+
+      // Optional content (guidance, notes)
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Optional guidance or descriptive content for the speaking content'
+      },
+
+      // Tag or category
+      tag: {
+        type: DataTypes.STRING(120),
+        allowNull: true,
+        comment: 'Tag or category label for this speaking content'
       },
 
       // Transcript field

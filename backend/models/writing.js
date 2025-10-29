@@ -32,28 +32,49 @@ module.exports = (sequelize, DataTypes) => {
       title: { 
         type: DataTypes.STRING(250), 
         allowNull: false,
-        comment: 'Title of the writing exercise'
+        comment: 'Title of the writing activity'
+      },
+
+      // Featured image URL
+      imageUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to the featured image for this writing content'
+      },
+
+      // Short description
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Short description or summary of the writing content'
+      },
+
+      // Tag or category
+      tag: {
+        type: DataTypes.STRING(120),
+        allowNull: true,
+        comment: 'Tag or category label for this writing content'
       },
 
       // Writing prompt
       prompt: {
         type: DataTypes.TEXT,
         allowNull: false,
-        comment: 'Prompt or task description for the writing exercise'
+        comment: 'Prompt or task description for the writing activity'
       },
 
       // Optional content (guidance, notes)
       content: {
         type: DataTypes.TEXT,
         allowNull: true,
-        comment: 'Optional guidance or descriptive content for the exercise'
+        comment: 'Optional guidance or descriptive content for the activity'
       },
 
       // Sample answer (model response)
       sampleAnswer: {
         type: DataTypes.TEXT,
         allowNull: true,
-        comment: 'Example answer for the writing exercise'
+        comment: 'Example answer for the writing activity'
       },
 
       // Rubric or grading criteria
@@ -96,7 +117,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: 'writings',
-      comment: 'Writing practice exercises and resources'
+      comment: 'Writing practice activities and resources'
     }
   );
 
