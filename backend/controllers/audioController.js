@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createAudio = async (req, res) => {
   try {
-    const { title, content, transcript, audioRef, pdfRef, level } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tag } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -39,10 +39,12 @@ const createAudio = async (req, res) => {
 
     const audio = await Audio.create({
       title,
-      content,
+      description: (description ?? discription ?? null),
       transcript,
       audioRef,
-      pdfRef,
+      pdf: pdf ?? null,
+      imageUrl: (imageUrl ?? imageurl ?? null),
+      tag: tag ?? null,
       level: normalizedLevel,
       createdBy
     });
@@ -93,7 +95,7 @@ const getAllAudios = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { content: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } },
         { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
@@ -184,7 +186,7 @@ const getPaginatedAudios = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { content: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } },
         { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
@@ -279,7 +281,7 @@ const getAudioById = async (req, res) => {
 const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, transcript, audioRef, pdfRef, level } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tag } = req.body;
 
     const audio = await Audio.findByPk(id);
 
@@ -313,10 +315,12 @@ const updateAudio = async (req, res) => {
 
     await audio.update({
       title: title ?? audio.title,
-      content: content ?? audio.content,
+      description: (description ?? discription ?? audio.description),
       transcript: transcript ?? audio.transcript,
       audioRef: audioRef ?? audio.audioRef,
-      pdfRef: pdfRef ?? audio.pdfRef,
+      pdf: pdf ?? audio.pdf,
+      imageUrl: (imageUrl ?? imageurl ?? audio.imageUrl),
+      tag: tag ?? audio.tag,
       level: normalizedLevel ?? audio.level
     });
 

@@ -34,12 +34,20 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         comment: 'Title of the audio content'
       },
-      
-      // Content description field
-      content: { 
-        type: DataTypes.TEXT, 
+
+      // Featured image URL
+      imageUrl: {
+        type: DataTypes.STRING(500),
         allowNull: true,
-        comment: 'Description or summary of the audio content'
+        comment: 'URL or path to the featured image for this audio content'
+      },
+      
+
+      // Short description (in addition to content)
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Short description of the audio content'
       },
       
       // Transcript field
@@ -56,10 +64,19 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Reference URL or path to the audio file'
       },
       
-      pdfRef: { 
-        type: DataTypes.STRING(500), 
+
+      // PDF reference (canonical)
+      pdf: {
+        type: DataTypes.STRING(500),
         allowNull: true,
-        comment: 'Reference URL or path to associated PDF document'
+        comment: 'URL or path to downloadable PDF for this audio content'
+      },
+
+      // Tag or category
+      tag: {
+        type: DataTypes.STRING(120),
+        allowNull: true,
+        comment: 'Tag or category label for this audio content'
       },
 
       // Language level field (CEFR-like levels)
