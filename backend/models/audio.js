@@ -61,6 +61,23 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Reference URL or path to associated PDF document'
       },
+
+      // Language level field (CEFR-like levels)
+      level: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        comment: 'Language level for this audio (e.g., B1 Intermediate)',
+        validate: {
+          isIn: [[
+            'A1 Beginner',
+            'A2 Pre-intermediate',
+            'B1 Intermediate',
+            'B2 Upper-Intermediate',
+            'C1 Advanced',
+            'C2 Proficient'
+          ]]
+        }
+      },
       
       // Author relationship field
       createdBy: { 

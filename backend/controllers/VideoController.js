@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createVideo = async (req, res) => {
   try {
-    const { title, videoRef, description } = req.body;
+    const { title, videoRef, description, pdf, level } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -26,10 +26,23 @@ const createVideo = async (req, res) => {
       });
     }
 
+    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+
     const video = await Video.create({
       title,
       videoRef,
       description,
+      pdf,
+      level: normalizedLevel,
       createdBy
     });
 
@@ -68,6 +81,7 @@ const getAllVideos = async (req, res) => {
       cursor, // For cursor-based pagination (ID of last item)
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -80,6 +94,11 @@ const getAllVideos = async (req, res) => {
         { title: { [Op.like]: `%${search}%` } },
         { description: { [Op.like]: `%${search}%` } }
       ];
+    }
+
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
     }
 
     // Add cursor condition for infinite scroll
@@ -151,6 +170,7 @@ const getPaginatedVideos = async (req, res) => {
       page = 1, 
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -164,6 +184,11 @@ const getPaginatedVideos = async (req, res) => {
         { title: { [Op.like]: `%${search}%` } },
         { description: { [Op.like]: `%${search}%` } }
       ];
+    }
+
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
     }
 
     const { count, rows } = await Video.findAndCountAll({
@@ -251,7 +276,7 @@ const getVideoById = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description } = req.body;
+    const { title, videoRef, description, pdf, level } = req.body;
 
     const video = await Video.findByPk(id);
 
@@ -270,10 +295,25 @@ const updateVideo = async (req, res) => {
       });
     }
 
+    // Normalize level codes if provided
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = level !== undefined
+      ? (levelMap[level?.toUpperCase?.()] || level)
+      : video.level;
+
     await video.update({
-      title: title || video.title,
-      videoRef: videoRef || video.videoRef,
-      description: description || video.description
+      title: title ?? video.title,
+      videoRef: videoRef ?? video.videoRef,
+      description: description ?? video.description,
+      pdf: pdf ?? video.pdf,
+      level: normalizedLevel ?? video.level
     });
 
     // Fetch updated video with author information

@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createAudio = async (req, res) => {
   try {
-    const { title, content, transcript, audioRef, pdfRef } = req.body;
+    const { title, content, transcript, audioRef, pdfRef, level } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -26,12 +26,24 @@ const createAudio = async (req, res) => {
       });
     }
 
+    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+
     const audio = await Audio.create({
       title,
       content,
       transcript,
       audioRef,
       pdfRef,
+      level: normalizedLevel,
       createdBy
     });
 
@@ -70,6 +82,7 @@ const getAllAudios = async (req, res) => {
       cursor, // For cursor-based pagination (ID of last item)
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -83,6 +96,11 @@ const getAllAudios = async (req, res) => {
         { content: { [Op.like]: `%${search}%` } },
         { transcript: { [Op.like]: `%${search}%` } }
       ];
+    }
+
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
     }
 
     // Add cursor condition for infinite scroll
@@ -154,6 +172,7 @@ const getPaginatedAudios = async (req, res) => {
       page = 1, 
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -168,6 +187,11 @@ const getPaginatedAudios = async (req, res) => {
         { content: { [Op.like]: `%${search}%` } },
         { transcript: { [Op.like]: `%${search}%` } }
       ];
+    }
+
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
     }
 
     const { count, rows } = await Audio.findAndCountAll({
@@ -255,7 +279,7 @@ const getAudioById = async (req, res) => {
 const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, transcript, audioRef, pdfRef } = req.body;
+    const { title, content, transcript, audioRef, pdfRef, level } = req.body;
 
     const audio = await Audio.findByPk(id);
 
@@ -274,12 +298,26 @@ const updateAudio = async (req, res) => {
       });
     }
 
+    // Normalize level codes if provided
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = level !== undefined
+      ? (levelMap[level?.toUpperCase?.()] || level)
+      : audio.level;
+
     await audio.update({
-      title: title || audio.title,
-      content: content || audio.content,
-      transcript: transcript || audio.transcript,
-      audioRef: audioRef || audio.audioRef,
-      pdfRef: pdfRef || audio.pdfRef
+      title: title ?? audio.title,
+      content: content ?? audio.content,
+      transcript: transcript ?? audio.transcript,
+      audioRef: audioRef ?? audio.audioRef,
+      pdfRef: pdfRef ?? audio.pdfRef,
+      level: normalizedLevel ?? audio.level
     });
 
     // Fetch updated audio with author information

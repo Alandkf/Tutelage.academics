@@ -175,7 +175,7 @@ const initializeServer = async () => {
         
         // Sync database models (create tables if they don't exist)
         console.log('🔄 Synchronizing database models...');
-        await sequelize.sync({ alter: false }); // Use alter: true only in development if you want to modify existing tables
+        await sequelize.sync({ alter: false }); // Keep alter disabled; use migration script for schema changes
         console.log('✅ Database models synchronized successfully');
         
         // Start the Express server

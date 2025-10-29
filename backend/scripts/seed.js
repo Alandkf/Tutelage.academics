@@ -21,6 +21,16 @@ const {
 } = require('../models');
 
 const BCRYPT_ROUNDS = 10;
+// CEFR-like level labels and sample PDF for seeded content
+const LEVELS = [
+  'A1 Beginner',
+  'A2 Pre-intermediate',
+  'B1 Intermediate',
+  'B2 Upper-Intermediate',
+  'C1 Advanced',
+  'C2 Proficient'
+];
+const SAMPLE_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
 async function ensureAdminUser() {
   const email = 'seed-admin@example.com';
@@ -5324,6 +5334,8 @@ async function seedVideos(admin) {
     title: `Platform Video ${i + 1}`,
     videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
     description: 'Short demo or tutorial segment.',
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
   }));
 
   const remaining = MIN - count;
@@ -5342,7 +5354,8 @@ async function seedAudios(admin) {
     content: 'Ambient audio to help focus during study sessions.',
     transcript: null,
     audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${i + 1}.mp3`,
-    pdfRef: null
+    pdfRef: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
   }));
 
   const remaining = MIN - count;
@@ -5408,6 +5421,36 @@ async function seedFaqs() {
   await Faq.bulkCreate(faqs.slice(0, remaining));
 }
 
+// Backfill NULL level/pdf fields for existing content to enable level filtering demos
+async function backfillLevelsAndPdfs() {
+  // Backfill Audio: level and pdfRef when missing
+  const audiosMissing = await Audio.findAll({ where: { level: null } });
+  for (let i = 0; i < audiosMissing.length; i++) {
+    const a = audiosMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdfRef = a.pdfRef ?? SAMPLE_PDF_URL;
+    await a.update({ level, pdfRef });
+  }
+
+  // Backfill Video: level and pdf when missing
+  const videosMissing = await Video.findAll({ where: { level: null } });
+  for (let i = 0; i < videosMissing.length; i++) {
+    const v = videosMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = v.pdf ?? SAMPLE_PDF_URL;
+    await v.update({ level, pdf });
+  }
+
+  // Backfill Blog: level and pdf when missing
+  const blogsMissing = await Blog.findAll({ where: { level: null } });
+  for (let i = 0; i < blogsMissing.length; i++) {
+    const b = blogsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = b.pdf ?? SAMPLE_PDF_URL;
+    await b.update({ level, pdf });
+  }
+}
+
 async function main() {
   try {
     console.log('🔗 Connecting to database...');
@@ -5426,6 +5469,9 @@ async function main() {
     await seedCourses(admin);
     await seedTests(admin);
     await seedFaqs();
+
+    // Ensure existing content has level/pdf values for filtering demonstrations
+    await backfillLevelsAndPdfs();
 
     console.log('🎉 Seeding complete.');
     process.exit(0);
