@@ -12,13 +12,13 @@ const { Op } = require('sequelize');
  */
 const createWriting = async (req, res) => {
   try {
-    const { title, prompt, content, description, discription, sampleAnswer, rubric, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, content, description, discription, pdf, level, imageUrl, imageurl } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
-    if (!title || !prompt) {
+    if (!title) {
       return res.status(400).json({
         success: false,
-        message: 'Title and prompt are required'
+        message: 'Title is required'
       });
     }
 
@@ -35,11 +35,8 @@ const createWriting = async (req, res) => {
 
     const writing = await Writing.create({
       title,
-      prompt,
       content,
       description: (description ?? discription ?? null),
-      sampleAnswer,
-      rubric,
       pdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
       level: normalizedLevel,
@@ -72,9 +69,8 @@ const getAllWritings = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { prompt: { [Op.like]: `%${search}%` } },
         { content: { [Op.like]: `%${search}%` } },
-        { sampleAnswer: { [Op.like]: `%${search}%` } }
+        { description: { [Op.like]: `%${search}%` } }
       ];
     }
     if (level) {
@@ -133,9 +129,8 @@ const getPaginatedWritings = async (req, res) => {
     if (search) {
       whereClause[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
-        { prompt: { [Op.like]: `%${search}%` } },
         { content: { [Op.like]: `%${search}%` } },
-        { sampleAnswer: { [Op.like]: `%${search}%` } }
+        { description: { [Op.like]: `%${search}%` } }
       ];
     }
     if (level) {
@@ -197,7 +192,7 @@ const getWritingById = async (req, res) => {
 const updateWriting = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, prompt, content, description, discription, sampleAnswer, rubric, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, content, description, discription, pdf, level, imageUrl, imageurl } = req.body;
     const writing = await Writing.findByPk(id);
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
@@ -220,11 +215,8 @@ const updateWriting = async (req, res) => {
 
     await writing.update({
       title: title ?? writing.title,
-      prompt: prompt ?? writing.prompt,
       content: content ?? writing.content,
       description: (description ?? discription ?? writing.description),
-      sampleAnswer: sampleAnswer ?? writing.sampleAnswer,
-      rubric: rubric ?? writing.rubric,
       pdf: pdf ?? writing.pdf,
       imageUrl: (imageUrl ?? imageurl ?? writing.imageUrl),
       level: normalizedLevelUpdate ?? writing.level
@@ -275,8 +267,8 @@ const searchWritings = async (req, res) => {
       where: {
         [Op.or]: [
           { title: { [Op.like]: `%${query}%` } },
-          { prompt: { [Op.like]: `%${query}%` } },
-          { content: { [Op.like]: `%${query}%` } }
+          { content: { [Op.like]: `%${query}%` } },
+          { description: { [Op.like]: `%${query}%` } }
         ]
       },
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],

@@ -50,32 +50,11 @@ module.exports = (sequelize, DataTypes) => {
       },
 
 
-      // Writing prompt
-      prompt: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        comment: 'Prompt or task description for the writing activity'
-      },
-
       // Optional content (guidance, notes)
       content: {
         type: DataTypes.TEXT,
         allowNull: true,
         comment: 'Optional guidance or descriptive content for the activity'
-      },
-
-      // Sample answer (model response)
-      sampleAnswer: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-        comment: 'Example answer for the writing activity'
-      },
-
-      // Rubric or grading criteria
-      rubric: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-        comment: 'Assessment rubric or scoring criteria'
       },
 
       // PDF reference for downloadable worksheet
