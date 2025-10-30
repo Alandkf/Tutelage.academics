@@ -8,6 +8,34 @@
 const { Video, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Minimal skills controller: no tag or analytics helpers
+
+// Lightweight YouTube thumbnail derivation (no persistence, response-only)
+function getYouTubeThumbnail(url) {
+  try {
+    if (!url) return null;
+    const patterns = [
+      /v=([A-Za-z0-9_-]{6,})/,      // watch?v=ID
+      /youtu\.be\/(\w|-){6,}/,    // youtu.be/ID (capture later)
+      /\/embed\/([A-Za-z0-9_-]{6,})/ // /embed/ID
+    ];
+    for (const p of patterns) {
+      const m = String(url).match(p);
+      // For youtu.be, grab the last path segment if needed
+      let id = null;
+      if (m && m[1]) {
+        id = m[1];
+      } else if (p.source.includes('youtu') && url.includes('youtu.be/')) {
+        id = String(url).split('youtu.be/')[1]?.split(/[?&#]/)[0];
+      }
+      if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 /**
  * Create a new video content
  * @param {Object} req - Express request object
@@ -15,7 +43,7 @@ const { Op } = require('sequelize');
  */
 const createVideo = async (req, res) => {
   try {
-    const { title, videoRef, description } = req.body;
+    const { title, videoRef, description, pdf, level } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -26,10 +54,23 @@ const createVideo = async (req, res) => {
       });
     }
 
+    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+
     const video = await Video.create({
       title,
       videoRef,
       description,
+      pdf,
+      level: normalizedLevel,
       createdBy
     });
 
@@ -45,7 +86,7 @@ const createVideo = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Video content created successfully',
-      data: videoWithAuthor
+      data: { ...videoWithAuthor.toJSON(), thumbnailUrl: getYouTubeThumbnail(videoWithAuthor.videoRef) }
     });
   } catch (error) {
     console.error('Error creating video:', error);
@@ -68,6 +109,7 @@ const getAllVideos = async (req, res) => {
       cursor, // For cursor-based pagination (ID of last item)
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -82,6 +124,12 @@ const getAllVideos = async (req, res) => {
       ];
     }
 
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
+    }
+
+
     // Add cursor condition for infinite scroll
     if (cursor) {
       if (sortOrder.toUpperCase() === 'DESC') {
@@ -94,7 +142,7 @@ const getAllVideos = async (req, res) => {
     // Fetch one extra item to check if there are more items
     const fetchLimit = parseInt(limit) + 1;
 
-    const videos = await Video.findAll({
+    let videos = await Video.findAll({
       where: whereClause,
       include: [{
         model: User,
@@ -109,6 +157,7 @@ const getAllVideos = async (req, res) => {
       distinct: true
     });
 
+
     // Check if there are more items
     const hasMore = videos.length > parseInt(limit);
     
@@ -118,10 +167,12 @@ const getAllVideos = async (req, res) => {
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
 
+    const enriched = items.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
+
     res.status(200).json({
       success: true,
       data: {
-        videos: items,
+        videos: enriched,
         pagination: {
           nextCursor,
           hasMore,
@@ -151,6 +202,7 @@ const getPaginatedVideos = async (req, res) => {
       page = 1, 
       limit = 10, 
       search,
+      level,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -166,7 +218,12 @@ const getPaginatedVideos = async (req, res) => {
       ];
     }
 
-    const { count, rows } = await Video.findAndCountAll({
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    if (level) {
+      whereClause.level = { [Op.like]: `${level}%` };
+    }
+
+    let { count, rows } = await Video.findAndCountAll({
       where: whereClause,
       include: [{
         model: User,
@@ -179,12 +236,15 @@ const getPaginatedVideos = async (req, res) => {
       distinct: true
     });
 
+
     const totalPages = Math.ceil(count / limit);
+
+    const enriched = rows.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
 
     res.status(200).json({
       success: true,
       data: {
-        videos: rows,
+        videos: enriched,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -231,7 +291,7 @@ const getVideoById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: video
+      data: { ...video.toJSON(), thumbnailUrl: getYouTubeThumbnail(video.videoRef) }
     });
   } catch (error) {
     console.error('Error fetching video:', error);
@@ -251,7 +311,7 @@ const getVideoById = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description } = req.body;
+    const { title, videoRef, description, pdf, level } = req.body;
 
     const video = await Video.findByPk(id);
 
@@ -270,11 +330,27 @@ const updateVideo = async (req, res) => {
       });
     }
 
+    // Normalize level codes if provided
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = level !== undefined
+      ? (levelMap[level?.toUpperCase?.()] || level)
+      : video.level;
+
     await video.update({
-      title: title || video.title,
-      videoRef: videoRef || video.videoRef,
-      description: description || video.description
+      title: title ?? video.title,
+      videoRef: videoRef ?? video.videoRef,
+      description: description ?? video.description,
+      pdf: pdf ?? video.pdf,
+      level: normalizedLevel ?? video.level
     });
+
 
     // Fetch updated video with author information
     const updatedVideo = await Video.findByPk(id, {

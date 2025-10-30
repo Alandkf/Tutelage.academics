@@ -53,11 +53,42 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Category classification for the blog post'
       },
+
+      // Tags array for blog post
+      tags: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        comment: 'List of tags associated with the blog post'
+      },
       
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
         comment: 'Short description of the blog post'
+      },
+
+      // Language level field (CEFR-like levels)
+      level: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        comment: 'Language level for the blog (e.g., B1 Intermediate)',
+        validate: {
+          isIn: [[
+            'A1 Beginner',
+            'A2 Pre-intermediate',
+            'B1 Intermediate',
+            'B2 Upper-Intermediate',
+            'C1 Advanced',
+            'C2 Proficient'
+          ]]
+        }
+      },
+
+      // PDF reference for downloadable blog file
+      pdf: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to downloadable PDF for this blog'
       },
       
       // Author relationship field

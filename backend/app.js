@@ -24,6 +24,8 @@ const { sequelize } = require('./models');
 const videoRoutes = require('./routes/videos');
 const blogRoutes = require('./routes/blogs');
 const audioRoutes = require('./routes/audios');
+const speakingRoutes = require('./routes/speakings');
+const writingRoutes = require('./routes/writings');
 const courseRoutes = require('./routes/courses');
 const testRoutes = require('./routes/tests');
 const faqRoutes = require('./routes/faqs');
@@ -32,6 +34,11 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const enrollmentRoutes = require('./routes/enrollment');
 const landingSectionRoutes = require('./routes/landingSections');
+const storyRoutes = require('./routes/stories');
+const tagRoutes = require('./routes/tags');
+const analyticsRoutes = require('./routes/analytics');
+const eslVideoRoutes = require('./routes/eslVideos');
+const eslAudioRoutes = require('./routes/eslAudios');
 
 
 // ============================================================================
@@ -103,6 +110,8 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // URL-encode
 app.use('/api/videos', videoRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/audios', audioRoutes);
+app.use('/api/speakings', speakingRoutes);
+app.use('/api/writings', writingRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/faqs', faqRoutes);
@@ -111,6 +120,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/enrollment', enrollmentRoutes);
 app.use('/api/landing-sections', landingSectionRoutes);
+app.use('/api/stories', storyRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/esl-videos', eslVideoRoutes);
+app.use('/api/esl-audios', eslAudioRoutes);
 
 
 // ============================================================================
@@ -175,7 +189,7 @@ const initializeServer = async () => {
         
         // Sync database models (create tables if they don't exist)
         console.log('🔄 Synchronizing database models...');
-        await sequelize.sync({ alter: false }); // Use alter: true only in development if you want to modify existing tables
+        await sequelize.sync({ alter: false }); // Keep alter disabled; use migration script for schema changes
         console.log('✅ Database models synchronized successfully');
         
         // Start the Express server

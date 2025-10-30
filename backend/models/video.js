@@ -48,6 +48,30 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         comment: 'Detailed description of the video content'
       },
+
+      // PDF reference for downloadable worksheet or resources
+      pdf: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to downloadable PDF for this video'
+      },
+
+      // Language level field (CEFR-like levels)
+      level: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        comment: 'Language level for the video (e.g., B1 Intermediate)',
+        validate: {
+          isIn: [[
+            'A1 Beginner',
+            'A2 Pre-intermediate',
+            'B1 Intermediate',
+            'B2 Upper-Intermediate',
+            'C1 Advanced',
+            'C2 Proficient'
+          ]]
+        }
+      },
       
       // Author relationship field
       createdBy: { 

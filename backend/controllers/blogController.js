@@ -15,7 +15,7 @@ const { Op } = require('sequelize');
  */
 const createBlog = async (req, res) => {
   try {
-    const { title, content, imageRef, category, description, desccription } = req.body;
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -26,12 +26,26 @@ const createBlog = async (req, res) => {
       });
     }
 
+    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
+    const levelMap = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+
     const blog = await Blog.create({
       title,
       content,
-      imageRef,
-      category,
-      description: description ?? desccription ?? null,
+      imageRef: imageRef ?? imageUrl ?? imageurl ?? null,
+      category: category ?? tag ?? null,
+      description: description ?? discription ?? desccription ?? null,
+      tags: Array.isArray(tags) ? tags : undefined,
+      level: normalizedLevel,
+      pdf,
       createdBy
     });
 
@@ -88,6 +102,11 @@ const getAllBlogs = async (req, res) => {
         { content: { [Op.like]: `%${search}%` } },
         { description: { [Op.like]: `%${search}%` } }
       ];
+    }
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    const levelParam = req.query.level;
+    if (levelParam) {
+      whereClause.level = { [Op.like]: `${levelParam}%` };
     }
     // Add cursor condition for infinite scroll
     if (cursor) {
@@ -181,7 +200,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, imageRef, category, description, desccription } = req.body;
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf } = req.body;
 
     const blog = await Blog.findByPk(id);
 
@@ -200,12 +219,28 @@ const updateBlog = async (req, res) => {
       });
     }
 
+    // Normalize level codes if provided
+    const levelMapUpdate = {
+      'A1': 'A1 Beginner',
+      'A2': 'A2 Pre-intermediate',
+      'B1': 'B1 Intermediate',
+      'B2': 'B2 Upper-Intermediate',
+      'C1': 'C1 Advanced',
+      'C2': 'C2 Proficient'
+    };
+    const normalizedLevelUpdate = level !== undefined
+      ? (levelMapUpdate[level?.toUpperCase?.()] || level)
+      : blog.level;
+
     await blog.update({
       title: title || blog.title,
       content: content || blog.content,
-      imageRef: imageRef || blog.imageRef,
-      category: category || blog.category,
-      description: (description ?? desccription ?? blog.description)
+      imageRef: (imageRef ?? imageUrl ?? imageurl ?? blog.imageRef),
+      category: (category ?? tag ?? blog.category),
+      description: (description ?? discription ?? desccription ?? blog.description),
+      tags: Array.isArray(tags) ? tags : blog.tags,
+      level: normalizedLevelUpdate,
+      pdf: (typeof pdf !== 'undefined' ? pdf : blog.pdf)
     });
 
     // Fetch updated blog with author information
@@ -344,6 +379,11 @@ const getPaginatedBlogs = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
+    // Optional level filter (supports 'A1', 'B2', or full labels)
+    const levelParam = req.query.level;
+    if (levelParam) {
+      whereClause.level = { [Op.like]: `${levelParam}%` };
+    }
 
     console.log('🔍 Starting getPaginatedBlogs query...');
     console.log('📊 Query parameters:', { page, limit, offset });
@@ -390,9 +430,14 @@ const getBlogsByCategory = async (req, res) => {
     const { category } = req.params;
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
+    const whereClause = { category };
+    const levelParam = req.query.level;
+    if (levelParam) {
+      whereClause.level = { [Op.like]: `${levelParam}%` };
+    }
 
     const { count, rows } = await Blog.findAndCountAll({
-      where: { category },
+      where: whereClause,
       include: [{
         model: User,
         as: 'author',

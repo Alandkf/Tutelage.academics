@@ -8,19 +8,31 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const bcrypt = require('bcrypt');
-const {
-  sequelize,
-  User,
-  Blog,
-  Video,
-  Audio,
-  Course,
-  Test,
-  Faq,
-  LandingSection
-} = require('../models');
+  const {
+    sequelize,
+    User,
+    Blog,
+    Video,
+    Audio,
+    Speaking,
+    Writing,
+    Course,
+    Test,
+    Faq,
+    LandingSection
+  } = require('../models');
 
 const BCRYPT_ROUNDS = 10;
+// CEFR-like level labels and sample PDF for seeded content
+const LEVELS = [
+  'A1 Beginner',
+  'A2 Pre-intermediate',
+  'B1 Intermediate',
+  'B2 Upper-Intermediate',
+  'C1 Advanced',
+  'C2 Proficient'
+];
+const SAMPLE_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
 async function ensureAdminUser() {
   const email = 'seed-admin@example.com';
@@ -5291,9 +5303,27 @@ Finally, remember that learning English is itself an achievement worthy of recog
     },
   ];
 
+  // Language levels to assign to blogs
+  const LEVELS = [
+    'A1 Beginner',
+    'A2 Pre-intermediate',
+    'B1 Intermediate',
+    'B2 Upper-Intermediate',
+    'C1 Advanced',
+    'C2 Proficient'
+  ];
+
+  const pickLevel = () => LEVELS[Math.floor(Math.random() * LEVELS.length)];
+  const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+
   const remaining = MIN - count;
   await Blog.bulkCreate(
-    blogs.slice(0, remaining).map(b => ({ ...b, createdBy: admin.id }))
+    blogs.slice(0, remaining).map(b => ({
+      ...b,
+      level: b.level || pickLevel(),
+      pdf: b.pdf || buildPdfUrl(b.title),
+      createdBy: admin.id
+    }))
   );
 }
 
@@ -5306,6 +5336,8 @@ async function seedVideos(admin) {
     title: `Platform Video ${i + 1}`,
     videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
     description: 'Short demo or tutorial segment.',
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
   }));
 
   const remaining = MIN - count;
@@ -5324,12 +5356,54 @@ async function seedAudios(admin) {
     content: 'Ambient audio to help focus during study sessions.',
     transcript: null,
     audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${i + 1}.mp3`,
-    pdfRef: null
+    pdfRef: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
   }));
 
   const remaining = MIN - count;
   await Audio.bulkCreate(
     audios.slice(0, remaining).map(a => ({ ...a, createdBy: admin.id }))
+  );
+}
+
+async function seedSpeakings(admin) {
+  const count = await Speaking.count();
+  const MIN = 10;
+  if (count >= MIN) return;
+
+  const speakings = Array.from({ length: 10 }).map((_, i) => ({
+    title: `Speaking Practice ${i + 1}`,
+    description: 'Short speaking activity with video prompt.',
+    transcript: null,
+    videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await Speaking.bulkCreate(
+    speakings.slice(0, remaining).map(s => ({ ...s, createdBy: admin.id }))
+  );
+}
+
+async function seedWritings(admin) {
+  const count = await Writing.count();
+  const MIN = 10;
+  if (count >= MIN) return;
+
+  const writings = Array.from({ length: 10 }).map((_, i) => ({
+    title: `Writing Task ${i + 1}`,
+    prompt: 'Write a short paragraph describing your daily routine.',
+    content: 'Focus on present simple tense and time expressions.',
+    sampleAnswer: 'I usually wake up at 7am. Then I have breakfast...',
+    rubric: 'Clarity, grammar accuracy, vocabulary range, coherence.',
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await Writing.bulkCreate(
+    writings.slice(0, remaining).map(w => ({ ...w, createdBy: admin.id }))
   );
 }
 
@@ -5390,6 +5464,54 @@ async function seedFaqs() {
   await Faq.bulkCreate(faqs.slice(0, remaining));
 }
 
+// Backfill NULL level/pdf fields for existing content to enable level filtering demos
+async function backfillLevelsAndPdfs() {
+  // Backfill Audio: level and pdfRef when missing
+  const audiosMissing = await Audio.findAll({ where: { level: null } });
+  for (let i = 0; i < audiosMissing.length; i++) {
+    const a = audiosMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdfRef = a.pdfRef ?? SAMPLE_PDF_URL;
+    await a.update({ level, pdfRef });
+  }
+
+  // Backfill Video: level and pdf when missing
+  const videosMissing = await Video.findAll({ where: { level: null } });
+  for (let i = 0; i < videosMissing.length; i++) {
+    const v = videosMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = v.pdf ?? SAMPLE_PDF_URL;
+    await v.update({ level, pdf });
+  }
+
+  // Backfill Blog: level and pdf when missing
+  const blogsMissing = await Blog.findAll({ where: { level: null } });
+  for (let i = 0; i < blogsMissing.length; i++) {
+    const b = blogsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = b.pdf ?? SAMPLE_PDF_URL;
+    await b.update({ level, pdf });
+  }
+
+  // Backfill Speaking: level and pdf when missing
+  const speakingsMissing = await Speaking.findAll({ where: { level: null } });
+  for (let i = 0; i < speakingsMissing.length; i++) {
+    const s = speakingsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = s.pdf ?? SAMPLE_PDF_URL;
+    await s.update({ level, pdf });
+  }
+
+  // Backfill Writing: level and pdf when missing
+  const writingsMissing = await Writing.findAll({ where: { level: null } });
+  for (let i = 0; i < writingsMissing.length; i++) {
+    const w = writingsMissing[i];
+    const level = LEVELS[i % LEVELS.length];
+    const pdf = w.pdf ?? SAMPLE_PDF_URL;
+    await w.update({ level, pdf });
+  }
+}
+
 async function main() {
   try {
     console.log('🔗 Connecting to database...');
@@ -5405,9 +5527,14 @@ async function main() {
     await seedBlogs(admin);
     await seedVideos(admin);
     await seedAudios(admin);
+    await seedSpeakings(admin);
+    await seedWritings(admin);
     await seedCourses(admin);
     await seedTests(admin);
     await seedFaqs();
+
+    // Ensure existing content has level/pdf values for filtering demonstrations
+    await backfillLevelsAndPdfs();
 
     console.log('🎉 Seeding complete.');
     process.exit(0);
