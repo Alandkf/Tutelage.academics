@@ -2,43 +2,21 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 const SkillPageTemplate = ({ skillData }) => {
-  const { title, heroImage, description, levels, coursesButtonText } = skillData
+  const { title, heroImage, description, levels, coursesButtonText, whyUseSection } = skillData
 
   return (
     <div className="relative min-h-screen bg-background pt-4">
       {/* Header Section */}
-      <div className="bg-background ">
+      <div className="bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            {/* Title */}
+          <div className="flex flex-row items-center justify-between gap-6">
             <div className="flex-1">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2">
                 {title}
               </h1>
-            </div>
-            
-            {/* Levels Navigation */}
-            <div className="flex-shrink-0">
-              <div className="p-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {levels.map((level, index) => (
-                    <React.Fragment key={level.code}>
-                      <Link
-                        href={level.href}
-                        className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-black dark:text-white font-medium text-sm rounded-md transition-colors duration-200 border border-primary/20"
-                      >
-                        {level.code} Level
-                      </Link>
-                      {index < levels.length - 1 && (
-                        <ChevronRight className="w-4 h-4 text-muted-foreground hidden sm:block" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -49,7 +27,7 @@ const SkillPageTemplate = ({ skillData }) => {
         <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
           <Image
             src={heroImage}
-            alt={`${title} practice`}
+            alt={title}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
@@ -61,141 +39,103 @@ const SkillPageTemplate = ({ skillData }) => {
 
       {/* Description Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="max-w-4xl">
+        <div className="max-w-5xl">
           <p className="text-lg text-muted-foreground leading-relaxed">
             {description}
           </p>
         </div>
       </div>
 
-      {/* Choose Your Level Section */}
-      <div className="bg-muted/20 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Choose your level to practise your {title.toLowerCase()}
+      {/* Levels Section */}
+      <div className="py-16 md:py-20 px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Choose Your Level
             </h2>
           </div>
+        </div>
 
-          <div className="space-y-20">
-            {levels.map((level, index) => {
-              const isEven = index % 2 === 0
-              return (
-                <div
-                  key={level.code}
-                  className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-20`}
-                >
-                  {/* Image */}
-                  <div className="w-full lg:w-1/2">
-                    <div className="relative w-full h-72 sm:h-80 lg:h-[26rem] rounded-sm overflow-hidden shadow-lg">
-                      <Image
-                        src={level.image}
-                        alt={`${level.code} level`}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 50vw"
-                      />
-                      {/* <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" /> */}
-                    </div>
-                  </div>
+        <div className="max-w-7xl mx-auto space-y-16">
+          {levels.map((level, index) => {
+            const isEven = index % 2 === 0
 
-                  {/* Content */}
-                  <div className="w-full lg:w-1/2 text-left space-y-4">
-                    <h3 className="text-3xl sm:text-4xl font-bold text-foreground">
-                      {level.code} Level
-                    </h3>
-                    
-                    <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                      {level.description} Master essential communication skills through carefully designed exercises that build your confidence step by step. Our comprehensive approach ensures you develop both accuracy and fluency in real-world contexts.
-                    </p>
-                    
-                    <div className="pt-4">
-                      <Link href={level.href} className="inline-block">
+            return (
+              <div 
+                key={index}
+                className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg lg:rounded-tr-[4rem] lg:rounded-bl-[4rem] max-lg:rounded-tl-[2rem] max-lg:rounded-br-[2rem]"
+              >
+                <div className={`flex ${isEven ? 'flex-col-reverse lg:flex-row' : 'flex-col lg:flex-row-reverse'} items-stretch gap-0`}>
+                  {/* Content Side */}
+                  <div className="w-full lg:w-1/2 flex items-center px-4 sm:px-6 lg:ml-10">
+                    <div className="w-full py-10 lg:py-0 lg:pr-12">                      
+                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+                        {level.title || `${level.code} Level`}
+                      </h3>
+                      
+                      <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed mb-6">
+                        {level.description}
+                      </p>
+
+                      <Link href={level.href}>
                         <Button 
                           size="lg" 
-                          className="px-10 cursor-pointer py-4 text-lg group hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+                          className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                         >
-                          Start {level.code} Level
-                          <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+                          Explore {level.code}
+                          <ChevronRight className="w-5 h-5 ml-2" />
                         </Button>
                       </Link>
                     </div>
                   </div>
+
+                  {/* Image Side */}
+                  <div className="w-full lg:w-1/2">
+                    <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
+                      <Image
+                        src={level.image}
+                        alt={level.title || `${level.code} Level`}
+                        fill
+                        className={`object-cover ${
+                          isEven 
+                            ? 'lg:rounded-tr-[4rem] max-lg:rounded-tl-[2rem]' 
+                            : 'lg:rounded-bl-[4rem] max-lg:rounded-tl-[2rem]'
+                        }`}
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                      />
+                    </div>
+                  </div>
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      {/* Level Assessment Section */}
-      <div className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6">
-              Unsure About Your Current Level?
-            </h2>
-            
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Discover your English proficiency level with our comprehensive assessment. 
-              Take our free language placement test to get personalized recommendations 
-              and find the perfect starting point for your {title.toLowerCase()} journey.
-            </p>
-
-            {/* Benefits Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-              <div className="text-center p-4">
-                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
-                <p className="text-sm font-medium text-foreground">Free Assessment</p>
-              </div>
-              <div className="text-center p-4">
-                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
-                <p className="text-sm font-medium text-foreground">Instant Results</p>
-              </div>
-              <div className="text-center p-4">
-                <div className="w-4 h-4 bg-primary rounded-full mx-auto mb-3"></div>
-                <p className="text-sm font-medium text-foreground">Personalized Guidance</p>
-              </div>
+      {/* Why Use These Materials Section */}
+      {whyUseSection && (
+        <div className="py-16 bg-primary/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6">
+                {whyUseSection.title}
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                {whyUseSection.content}
+              </p>
+              <Link href="/courses">
+                <Button 
+                  size="lg" 
+                  className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                >
+                  {coursesButtonText}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </div>
-
-            <Link href="/tutelagetests/languageplacement">
-              <Button 
-                size="lg" 
-                className="px-10 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-              >
-                Take Language Placement Test
-                <ChevronRight className="ml-3 w-6 h-6" />
-              </Button>
-            </Link>
-
-            <p className="text-sm text-muted-foreground mt-4">
-              No registration required • Results in 15-20 minutes • Completely free
-            </p>
           </div>
         </div>
-      </div>
-
-      {/* Learn Confidently Section */}
-      <div className="py-20 bg-muted/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-8">
-              Learn to {title.toLowerCase()} confidently
-            </h2>
-            
-            <p className="text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed">
-              Build your confidence with our comprehensive {title.toLowerCase()} courses. 
-              Our structured approach helps you develop essential skills through 
-              interactive exercises, real-world practice, and expert guidance that adapts to your learning pace.
-            </p>
-            
-            <Button size="lg" className="px-10 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
-              {coursesButtonText}
-              <ChevronRight className="ml-3 w-6 h-6" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

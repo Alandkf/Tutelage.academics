@@ -3,16 +3,16 @@ import React from 'react'
 const SkillsTimeline = () => {
   const timelineSteps = [
     {
-      title: "Assess Your Level",
-      content: "Begin your journey by understanding your current English proficiency. Take our placement test to identify your strengths and areas for improvement across all four skills."
+      title: "How to Get Better",
+      content: "The secret to making progress is consistent practice and reviewing new words and phrases. By working through these activities regularly, you can quickly build your understanding and use of English. Set aside dedicated time each day, track your improvements, and celebrate small victories along the way to stay motivated and engaged."
     },
     {
-      title: "Choose Your Focus",
-      content: "Select the specific skills you want to develop. Whether it's listening for better comprehension, speaking for confidence, reading for knowledge, or writing for expression."
+      title: "Organized by Proficiency Levels",
+      content: "All materials are organized by English level according to the CEFR framework, so you can be sure you're practicing at the right level. From A1 beginners to C1 advanced learners, our structured approach ensures you're always challenged appropriately. This systematic organization helps you progress smoothly through each stage of language acquisition."
     },
     {
-      title: "Practice & Progress",
-      content: "Engage with targeted exercises, interactive content, and real-world applications. Track your progress and build competency through consistent practice."
+      title: "Choose Your Skill",
+      content: "Pick the skill you want to focus on today and learn at your own pace with our free resources! Whether you want to improve your listening comprehension, develop speaking confidence, enhance reading fluency, or refine writing skills, you'll find comprehensive exercises and activities. Each skill area offers diverse content designed to keep you engaged while building real-world language proficiency."
     }
   ]
 
@@ -21,10 +21,10 @@ const SkillsTimeline = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-            Your English Learning Journey
+            Your Path to English Mastery
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Follow a structured approach to master English skills effectively and efficiently
+            Follow our proven approach to develop your English skills effectively
           </p>
         </div>
 

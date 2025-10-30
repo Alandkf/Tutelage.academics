@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
+import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 
 const SingleStoryPage = () => {
   const params = useParams()
@@ -108,6 +109,9 @@ const SingleStoryPage = () => {
           </div>
         </div>
       </div>
+
+      {/* CTA Section */}
+      <SingleSourceCTA />
     </div>
   )
 }

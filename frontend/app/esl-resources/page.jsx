@@ -3,8 +3,7 @@
 import ESLResourcesHero from "@/components/esl-resources/ESLResourcesHero"
 import FourEasySteps from "@/components/esl-resources/FourEasySteps"
 import Resources from "@/components/esl-resources/Resources"
-
-
+import AICallToAction from "@/components/esl-resources/AICallToAction"
 
 const ESLResourcesPage = () => {
   return (
@@ -12,6 +11,7 @@ const ESLResourcesPage = () => {
       <ESLResourcesHero />
       <FourEasySteps />
       <Resources />
+      <AICallToAction />
     </div>
   )
 }

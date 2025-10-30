@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 
 const CallToAction = () => {
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-primary/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
             Ready to take your English further?
           </h2>
           <p className="text-lg text-foreground leading-relaxed mb-8 max-w-3xl">
@@ -18,7 +18,7 @@ const CallToAction = () => {
             next level!
           </p>
           <Link href="/courses">
-            <Button size="lg" className="text-lg px-8 py-6">
+            <Button size="lg" variant={'secondary'} className="text-lg px-8 py-6">
               Explore Courses
             </Button>
           </Link>

@@ -7,32 +7,32 @@ import { ArrowRight } from 'lucide-react'
 const SkillsShowcase = () => {
   const skills = [
     {
-      title: "Listening",
-      description: "Enhance your ability to understand spoken English through interactive audio exercises, podcasts, and conversation practice.",
-      image: "/hero.jpg", 
+      title: "Listening Skill",
+      description: "Our listening materials help learners practice listening independently to understand spoken English step by step from simple everyday expressions to complex conversations and ideas.",
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80", 
       href: "/skills/listening",
-      features: ["Audio Comprehension", "Pronunciation Training", "Interactive Dialogues"]
+      features: ["Simple Everyday Expressions", "Complex Conversations", "Understanding Ideas"]
     },
     {
-      title: "Speaking",
-      description: "Build confidence in verbal communication with speaking exercises, pronunciation guides, and conversation simulations.",
-      image: "/hero.jpg",
+      title: "Speaking Skill",
+      description: "Our speaking materials help learners practice speaking independently and improve confidence step by step from simple sentences to fluent conversations.",
+      image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80",
       href: "/skills/speaking",
-      features: ["Pronunciation Practice", "Conversation Skills", "Fluency Building"]
+      features: ["Simple Sentences", "Confidence Building", "Fluent Conversations"]
     },
     {
-      title: "Reading",
-      description: "Improve reading comprehension and vocabulary through diverse texts, articles, and interactive reading materials.",
-      image: "/hero.jpg",
+      title: "Reading Skill",
+      description: "Our reading materials help learners practice reading independently, improving comprehension and vocabulary step by step from simple sentences to understanding longer texts and complex ideas.",
+      image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
       href: "/skills/reading",
-      features: ["Comprehension Exercises", "Vocabulary Building", "Speed Reading"]
+      features: ["Simple Sentences", "Vocabulary Building", "Complex Texts"]
     },
     {
-      title: "Writing",
-      description: "Develop strong writing skills through structured lessons, grammar practice, and creative writing exercises.",
-      image: "/hero.jpg",
+      title: "Writing Skill",
+      description: "Our writing materials help learners practice writing independently, developing accuracy, clarity, and the ability to express ideas step by step from simple sentences to complex texts.",
+      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
       href: "/skills/writing",
-      features: ["Grammar Mastery", "Essay Writing", "Creative Expression"]
+      features: ["Accuracy & Clarity", "Expressing Ideas", "Complex Texts"]
     }
   ]
 
@@ -58,7 +58,7 @@ const SkillsShowcase = () => {
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
                   src={skill.image}
-                  alt={`${skill.title} skill development`}
+                  alt={`${skill.title} development`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"

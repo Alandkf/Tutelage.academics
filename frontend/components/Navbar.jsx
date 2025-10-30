@@ -76,7 +76,7 @@ export default function Navbar (){
     },
     {
       name: "About Us",
-      href: "/aboutus",
+      href: "/about-us",
       dropdown: null,
     },
     {
@@ -92,10 +92,10 @@ export default function Navbar (){
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 bg-background">
         <div className="max-w-6xl w-full flex items-center justify-between mx-auto">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link href={"/"} className="flex items-center gap-3">
             <Image src={'/only-logo-black-border-yellow-bg.svg'} className='w-[35px] h-[35px] md:w-[40px] md:h-[40px]' alt='logo' width={40} height={40} />
             <h3 className="font-bold text-foreground text-lg md:text-xl">Tutelage</h3>
-          </div>
+          </Link>
           {/* Search + ThemeToggle */}
           <div className="flex items-center gap-2 ml-auto">
             {/* Desktop search */}
