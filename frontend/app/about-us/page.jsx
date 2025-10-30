@@ -2,6 +2,7 @@ import AboutUsContent from '@/components/aboutus/AboutUsContent';
 import AboutUsHero from '@/components/aboutus/AboutUsHero';
 import AchievementsSection from '@/components/aboutus/AchievementsSection';
 import { Foundation } from '@/components/aboutus/Foundation';
+import PartnershipsSection from '@/components/aboutus/PartnershipsSection';
 
 const AboutUs = () => {
   return (
@@ -10,6 +11,7 @@ const AboutUs = () => {
       <AboutUsContent />
       <Foundation />
       <AchievementsSection />
+      <PartnershipsSection />
     </div>
   )
 }
