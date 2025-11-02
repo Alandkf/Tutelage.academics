@@ -25,7 +25,7 @@ const Resources = () => {
       title: "Video Library",
       description: "Watch and learn! Enjoy fun videos on travel, science, lifestyle, and more. Videos are perfect for boosting listening skills, learning vocabulary, and hearing real English in action.",
       image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80", // Person watching laptop/video
-      href: "/esl-resources/video",
+      href: "/esl-resources/videos",
       buttonText: "Watch Videos"
     },
     {

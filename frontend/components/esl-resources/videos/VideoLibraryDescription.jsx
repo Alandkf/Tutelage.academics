@@ -1,20 +1,20 @@
 'use client'
 
-const BlogLibraryDescription = () => {
-  const description = "Are you looking for interesting blogs to practice your English? Explore our blog Library and get access to a wide range of blogs on topics like language tips, culture, Lifestyle, and learning strategies. Each blog helps you improve reading, vocabulary, and grammar, practice writing and expression, and develop critical thinking by reflecting on ideas and opinions."
+const VideoLibraryDescription = () => {
+  const description = "Do you want to learn English while watching videos? Dive into our Video Library, featuring a variety of fun and fascinating videos on topics like science, technology, psychology, culture, nature, sports, entertainment, travel, and everyday life. Perfect for learners of all levels, each video helps you improve listening skills, expand vocabulary, and understand real English in action."
 
   const steps = [
     {
       title: "Start with a Warm-Up Exercise",
-      description: "Prepare your skills before reading."
+      description: "Get ready before watching."
     },
     {
-      title: "Read the Blog",
-      description: "Explore the content at your own pace."
+      title: "Watch the Video",
+      description: "Enjoy and follow along at your own pace."
     },
     {
-      title: "Test Your Understanding",
-      description: "Complete a short activity after the blog."
+      title: "Complete the Post-Exercise",
+      description: "Test your understanding afterward.."
     },
     {
       title: "Check the Answers",
@@ -32,7 +32,7 @@ const BlogLibraryDescription = () => {
         {/* How to enjoy section */}
         <div className="bg-muted/20 rounded-lg p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">
-            How to enjoy the Blog Library:
+            How to use the Video Library:
           </h2>
           
           <ul className="space-y-4">
@@ -52,4 +52,4 @@ const BlogLibraryDescription = () => {
   )
 }
 
-export default BlogLibraryDescription
+export default VideoLibraryDescription

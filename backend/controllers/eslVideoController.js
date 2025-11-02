@@ -30,23 +30,29 @@ const getYouTubeThumbnail = (url) => {
   return null;
 };
 
+// Use a DB-safe resource type that matches the enum in resource_tags/resource_analytics
+const DB_RESOURCE_TYPE = 'video'; // maps ESL videos to the generic 'video' enum in the DB
+const RESOURCE_KEY = 'esl_video'; // logical name used within this controller (optional)
+
 const attachTags = async (resourceId, tagNames = []) => {
   if (!Array.isArray(tagNames) || !tagNames.length) return;
   const trimmed = tagNames.map(t => String(t).trim()).filter(Boolean);
   const existing = await Tag.findAll({ where: { name: { [Op.in]: trimmed } } });
   const existingMap = new Map(existing.map(t => [t.name, t.id]));
-  const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n }));
+  const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n }));  
   if (toCreate.length) {
     const created = await Tag.bulkCreate(toCreate, { returning: true });
     created.forEach(t => existingMap.set(t.name, t.id));
   }
   const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
-  await ResourceTag.destroy({ where: { resourceType: 'esl_video', resourceId } });
-  await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'esl_video', resourceId, tagId })));
+  // use DB_RESOURCE_TYPE (enum-compliant) for DB operations
+  await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId } });
+  await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: DB_RESOURCE_TYPE, resourceId, tagId })));
 };
 
 const includeTagsFor = async (resourceId) => {
-  const rts = await ResourceTag.findAll({ where: { resourceType: 'esl_video', resourceId } });
+  // use DB_RESOURCE_TYPE (enum-compliant)
+  const rts = await ResourceTag.findAll({ where: { resourceType: DB_RESOURCE_TYPE, resourceId } });
   if (!rts.length) return [];
   const tagIds = rts.map(rt => rt.tagId);
   const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
@@ -55,8 +61,8 @@ const includeTagsFor = async (resourceId) => {
 
 const bumpAnalytics = async (resourceId, field = 'views', amount = 1) => {
   const [row, created] = await ResourceAnalytics.findOrCreate({
-    where: { resourceType: 'esl_video', resourceId },
-    defaults: { resourceType: 'esl_video', resourceId, views: 0, plays: 0, downloads: 0 }
+    where: { resourceType: DB_RESOURCE_TYPE, resourceId },
+    defaults: { resourceType: DB_RESOURCE_TYPE, resourceId, views: 0, plays: 0, downloads: 0 }
   });
   row[field] = (row[field] || 0) + amount;
   await row.save();
@@ -81,7 +87,7 @@ exports.createEslVideo = async (req, res) => {
 
 exports.getAllEslVideos = async (req, res) => {
   try {
-    const { search, level, tags, sortBy = 'date', sortOrder = 'desc', limit = 20, offset = 0 } = req.query;
+    const { search, level, tags, sortBy = 'date', sortOrder = 'desc', limit = 6, offset = 0 } = req.query;
     const where = {};
     if (search) where.title = { [Op.like]: `%${search}%` };
     if (level) where.level = normalizeLevel(level);
@@ -93,7 +99,8 @@ exports.getAllEslVideos = async (req, res) => {
       const tagRows = await Tag.findAll({ where: { name: { [Op.in]: tagNames } } });
       const tagIds = tagRows.map(t => t.id);
       if (tagIds.length) {
-        const rtRows = await ResourceTag.findAll({ where: { resourceType: 'esl_video', tagId: { [Op.in]: tagIds } } });
+        // use DB_RESOURCE_TYPE for filtering
+        const rtRows = await ResourceTag.findAll({ where: { resourceType: DB_RESOURCE_TYPE, tagId: { [Op.in]: tagIds } } });
         const matchedIds = [...new Set(rtRows.map(r => r.resourceId))];
         idFilter = matchedIds.length ? matchedIds : [-1];
       }
@@ -113,8 +120,8 @@ exports.getAllEslVideos = async (req, res) => {
 
     // Attach tags and analytics summary
     const enriched = await Promise.all(rows.map(async (row) => {
-      const tags = await includeTagsFor(row.id);
-      const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'esl_video', resourceId: row.id } });
+      const tags = await includeTagsFor(row.id); // includeTagsFor uses DB_RESOURCE_TYPE
+      const metrics = await ResourceAnalytics.findOne({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: row.id } });
       return { ...row.toJSON(), tags, metrics };
     }));
 
@@ -162,8 +169,9 @@ exports.deleteEslVideo = async (req, res) => {
     const { id } = req.params;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
-    await ResourceTag.destroy({ where: { resourceType: 'esl_video', resourceId: id } });
-    await ResourceAnalytics.destroy({ where: { resourceType: 'esl_video', resourceId: id } });
+    // use DB_RESOURCE_TYPE for cleanup
+    await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
+    await ResourceAnalytics.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
     await video.destroy();
     res.status(200).json({ success: true, message: 'Video deleted' });
   } catch (err) {

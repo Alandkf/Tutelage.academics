@@ -50,7 +50,7 @@ export default function Navbar (){
       dropdown: [
         { name: "Story Library", href: "/esl-resources/storys" },
         { name: "Blog Library", href: "/esl-resources/blogs" },
-        { name: "Video Library", href: "/esl-resources/video" },
+        { name: "Video Library", href: "/esl-resources/videos" },
         { name: "Audio Library", href: "/esl-resources/audio" },
       ],
     },

@@ -19,8 +19,10 @@ const bcrypt = require('bcrypt');
     Course,
     Test,
     Faq,
-    LandingSection
+    LandingSection,
+    EslVideo
   } = require('../models');
+
 
 const BCRYPT_ROUNDS = 10;
 // CEFR-like level labels and sample PDF for seeded content
@@ -5329,12 +5331,12 @@ Finally, remember that learning English is itself an achievement worthy of recog
 
 async function seedVideos(admin) {
   const count = await Video.count();
-  const MIN = 10;
+  const MIN = 30;
   if (count >= MIN) return;
 
-  const videos = Array.from({ length: 10 }).map((_, i) => ({
+  const videos = Array.from({ length: 30 }).map((_, i) => ({
     title: `Platform Video ${i + 1}`,
-    videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
+    videoRef: `https://youtu.be/lwI4UNWOHkU?si=PaKVF2lZx4I03UpD`,
     description: 'Short demo or tutorial segment.',
     pdf: SAMPLE_PDF_URL,
     level: LEVELS[i % LEVELS.length]
@@ -5342,6 +5344,27 @@ async function seedVideos(admin) {
 
   const remaining = MIN - count;
   await Video.bulkCreate(
+    videos.slice(0, remaining).map(v => ({ ...v, createdBy: admin.id }))
+  );
+}
+
+async function seedEslVideos(admin) {
+  const count = await Video.count();
+
+  
+  const MIN = 160;
+  if (count >= MIN) return;
+
+  const videos = Array.from({ length: 160 }).map((_, i) => ({
+    title: `Platform Video ${i + 1}`,
+    videoRef: `https://youtu.be/lwI4UNWOHkU?si=PaKVF2lZx4I03UpD`,
+    description: 'Short demo or tutorial segment, hhiuhiuweju jehy eifheh hhf 78y7n8.',
+    pdf: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await EslVideo.bulkCreate(
     videos.slice(0, remaining).map(v => ({ ...v, createdBy: admin.id }))
   );
 }
@@ -5526,6 +5549,7 @@ async function main() {
     await seedLandingSection(admin);
     await seedBlogs(admin);
     await seedVideos(admin);
+    await seedEslVideos(admin);
     await seedAudios(admin);
     await seedSpeakings(admin);
     await seedWritings(admin);
