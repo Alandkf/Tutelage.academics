@@ -31,7 +31,7 @@ const getYouTubeThumbnail = (url, preferMax = false) => {
 };
 
 const VideoGrid = () => {
-  const [blogs, setBlogs] = useState([])
+  const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -40,7 +40,7 @@ const VideoGrid = () => {
 
   const itemsPerPage = 6
 
-  const fetchBlogs = async (page) => {
+  const fetchVideos = async (page) => {
     setLoading(true)
     try {
       // fetch ESL videos instead of blogs; preserve pagination parameters
@@ -55,7 +55,7 @@ const VideoGrid = () => {
         // handle both paginated blog-style responses and simple array responses
         if (data.data && Array.isArray(data.data)) {
           // endpoint returned an array of videos
-          setBlogs(data.data)
+          setVideos(data.data)
           const hasNext = data.data.length === itemsPerPage
           setHasNextPage(hasNext)
           setHasPrevPage(page > 1)
@@ -64,26 +64,26 @@ const VideoGrid = () => {
           setTotalPages(hasNext ? page + 10 : page)
         } else if (data.data && data.data.blogs) {
           // fallback: response in original paginated shape
-          setBlogs(data.data.blogs)
+          setVideos(data.data.blogs)
           setTotalPages(data.data.pagination.totalPages)
           setHasNextPage(data.data.pagination.hasNextPage)
           setHasPrevPage(data.data.pagination.hasPrevPage)
         } else {
-          setBlogs([])
+          setVideos([])
           setHasNextPage(false)
           setHasPrevPage(false)
           setTotalPages(1)
         }
       }
     } catch (error) {
-      console.error('Error fetching blogs:', error)
+      console.error('Error fetching videos:', error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchBlogs(currentPage)
+    fetchVideos(currentPage)
   }, [currentPage])
 
   const handleNextPage = () => {
@@ -149,7 +149,7 @@ const VideoGrid = () => {
         {/* Section Title */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Our Best Blogs
+            Our Best Videos
           </h2>
         </div>
 
@@ -160,12 +160,12 @@ const VideoGrid = () => {
             Array.from({ length: itemsPerPage }).map((_, index) => (
               <StoryCardSkeleton key={index} />
             ))
-          ) : blogs.length > 0 ? (
-            // Show actual blogs (now videos)
-            blogs.map((blog) => (
+          ) : videos.length > 0 ? (
+            // Show actual videos
+            videos.map((video) => (
               <Link
-                key={blog.id}
-                href={`/esl-resources/videos/${blog.id}`}
+                key={video.id}
+                href={`/esl-resources/videos/${video.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -173,12 +173,12 @@ const VideoGrid = () => {
                   <div className="relative h-48 w-full overflow-hidden">
                     <Image
                       src={
-                        blog.thumbnailUrl
-                          || getYouTubeThumbnail(blog.videoRef) // try building thumbnail from the YouTube URL
-                          || blog.imageRef
+                        video.thumbnailUrl
+                          || getYouTubeThumbnail(video.videoRef) // try building thumbnail from the YouTube URL
+                          || video.imageRef
                           || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'
                       }
-                      alt={blog.title}
+                      alt={video.title}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -192,11 +192,11 @@ const VideoGrid = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <h3 className="text-xl font-bold text-foreground mb-3 pb-2 truncate cursor-help">
-                            {blog.title}
+                            {video.title}
                           </h3>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p className="text-sm">{blog.title}</p>
+                          <p className="text-sm">{video.title}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -206,12 +206,12 @@ const VideoGrid = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 cursor-help">
-                            {truncateText(blog.description)}
+                            {truncateText(video.description)}
                           </p>
                         </TooltipTrigger>
-                        {blog.description && blog.description.length > 120 && (
+                        {video.description && video.description.length > 120 && (
                           <TooltipContent className="max-w-md">
-                            <p className="text-sm">{blog.description}</p>
+                            <p className="text-sm">{video.description}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -224,14 +224,14 @@ const VideoGrid = () => {
             // Empty State
             <div className="col-span-full text-center py-20">
               <p className="text-lg text-muted-foreground">
-                No Blogs available at the moment. Check back soon!
+                No videos available at the moment. Check back soon!
               </p>
             </div>
           )}
         </div>
 
         {/* Pagination Controls - Always visible */}
-        {(blogs.length > 0 || loading) && (
+        {(videos.length > 0 || loading) && (
           <div className="flex items-center justify-between">
             {/* Previous Button - Left */}
             <Button
