@@ -5402,7 +5402,7 @@ async function seedEslAudios(admin) {
     transcript: "hshahdnkjdbweuihdeu nfuhnjkn uifhnuihu fjnuiu this is a music",
     imageUrl : "https://images.unsplash.com/photo-1526662092594-e98c1e356d6a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2071",
     audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`,
-    pdfRef: SAMPLE_PDF_URL,
+    pdf: SAMPLE_PDF_URL,
     level: LEVELS[i % LEVELS.length]
   }));
 

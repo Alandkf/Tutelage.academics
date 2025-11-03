@@ -139,6 +139,10 @@ exports.updateEslAudio = async (req, res) => {
     await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevel(level) });
     if (Array.isArray(tags)) await attachTags(audio.id, tags);
     const tagNames = await includeTagsFor(audio.id);
+    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    console.log(audio.toJSON());
+    
+    
     res.status(200).json({ success: true, data: { ...audio.toJSON(), tags: tagNames } });
   } catch (err) {
     console.error('Error updating ESL audio:', err);
