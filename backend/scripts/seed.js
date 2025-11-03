@@ -8,6 +8,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const bcrypt = require('bcrypt');
+const { Op } = require('sequelize');
   const {
     sequelize,
     User,
@@ -16,12 +17,15 @@ const bcrypt = require('bcrypt');
     Audio,
     Speaking,
     Writing,
+    Reading,
     Course,
     Test,
     Faq,
     LandingSection,
     EslVideo,
     EslAudio,
+    Tag,
+    ResourceTag,
   } = require('../models');
 
 
@@ -36,6 +40,32 @@ const LEVELS = [
   'C2 Proficient'
 ];
 const SAMPLE_PDF_URL = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+// Helper: pick a single level wrapped as array for ARRAY columns
+const pickLevel = () => [LEVELS[Math.floor(Math.random() * LEVELS.length)]];
+
+// Ensure tags exist and associate them via join table
+async function attachTags(resourceType, resourceId, tagNames = []) {
+  try {
+    if (!Array.isArray(tagNames) || !tagNames.length) return;
+    const trimmed = tagNames.map(t => String(t).trim()).filter(Boolean);
+    if (!trimmed.length) return;
+
+    const existing = await Tag.findAll({ where: { name: { [Op.in]: trimmed } } });
+    const existingMap = new Map(existing.map(t => [t.name, t.id]));
+    const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n, namespace: resourceType }));
+    if (toCreate.length) {
+      const created = await Tag.bulkCreate(toCreate, { returning: true });
+      created.forEach(t => existingMap.set(t.name, t.id));
+    }
+    const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
+    await ResourceTag.destroy({ where: { resourceType, resourceId } });
+    if (tagIds.length) {
+      await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType, resourceId, tagId })));
+    }
+  } catch (err) {
+    console.error(`Error attaching tags for ${resourceType} ${resourceId}:`, err.message);
+  }
+}
 
 async function ensureAdminUser() {
   const email = 'seed-admin@example.com';
@@ -5316,7 +5346,8 @@ Finally, remember that learning English is itself an achievement worthy of recog
     'C2 Proficient'
   ];
 
-  const pickLevel = () => LEVELS[Math.floor(Math.random() * LEVELS.length)];
+  // Use the top-level pickLevel that returns an array (defined near file start)
+  // Removed duplicate local definition to avoid mismatched return type
   const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
   const remaining = MIN - count;
@@ -5340,7 +5371,7 @@ async function seedVideos(admin) {
     videoRef: `https://youtu.be/lwI4UNWOHkU?si=PaKVF2lZx4I03UpD`,
     description: 'Short demo or tutorial segment.',
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: pickLevel()
   }));
 
   const remaining = MIN - count;
@@ -5350,7 +5381,7 @@ async function seedVideos(admin) {
 }
 
 async function seedEslVideos(admin) {
-  const count = await Video.count();
+  const count = await EslVideo.count();
 
   
   const MIN = 160;
@@ -5361,7 +5392,7 @@ async function seedEslVideos(admin) {
     videoRef: `https://youtu.be/lwI4UNWOHkU?si=PaKVF2lZx4I03UpD`,
     description: 'Short demo or tutorial segment, hhiuhiuweju jehy eifheh hhf 78y7n8.',
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: pickLevel()
   }));
 
   const remaining = MIN - count;
@@ -5383,7 +5414,7 @@ async function seedAudios(admin) {
     transcript: "this is the transcript",
     audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`,
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: pickLevel()
   }));
 
   const remaining = MIN - count;
@@ -5405,7 +5436,7 @@ async function seedEslAudios(admin) {
     imageUrl : "https://images.unsplash.com/photo-1526662092594-e98c1e356d6a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2071",
     audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`,
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: pickLevel()
   }));
 
   const remaining = MIN - count;
@@ -5419,25 +5450,59 @@ async function seedSpeakings(admin) {
   const MIN = 10;
   if (count >= MIN) return;
 
+  const tagSets = [
+    ['IELTS', 'Task 1', 'Cue Cards'],
+    ['IELTS', 'Task 2', 'Fluency'],
+    ['Pronunciation', 'Intonation'],
+    ['Part 1', 'Personal'],
+    ['Part 2', 'Long Turn'],
+    ['Part 3', 'Discussion'],
+    ['Interview', 'Practice'],
+    ['Describing', 'Places'],
+    ['Opinions', 'Agree/Disagree'],
+    ['Storytelling']
+  ];
+
   const speakings = Array.from({ length: 10 }).map((_, i) => ({
     title: `Speaking Practice ${i + 1}`,
     description: 'Short speaking activity with video prompt.',
     transcript: null,
     videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: [LEVELS[i % LEVELS.length]],
+    tags: tagSets[i % tagSets.length]
   }));
 
   const remaining = MIN - count;
-  await Speaking.bulkCreate(
-    speakings.slice(0, remaining).map(s => ({ ...s, createdBy: admin.id }))
+  const created = await Speaking.bulkCreate(
+    speakings.slice(0, remaining).map(s => ({ ...s, createdBy: admin.id })),
+    { returning: true }
   );
+
+  // Attach join-table tags for consistency with controllers
+  for (const s of created) {
+    const tagNames = Array.isArray(s.tags) ? s.tags : [];
+    await attachTags('speaking', s.id, tagNames);
+  }
 }
 
 async function seedWritings(admin) {
   const count = await Writing.count();
   const MIN = 10;
   if (count >= MIN) return;
+
+  const tagSets = [
+    ['IELTS', 'Task 2', 'Essay'],
+    ['IELTS', 'Task 1', 'Report'],
+    ['Coherence', 'Cohesion'],
+    ['Opinion', 'Argumentative'],
+    ['Narrative', 'Structure'],
+    ['Descriptive', 'Vocabulary'],
+    ['Formal', 'Academic'],
+    ['Informal', 'Email'],
+    ['Outlines', 'Planning'],
+    ['Editing', 'Proofreading']
+  ];
 
   const writings = Array.from({ length: 10 }).map((_, i) => ({
     title: `Writing Task ${i + 1}`,
@@ -5446,13 +5511,62 @@ async function seedWritings(admin) {
     sampleAnswer: 'I usually wake up at 7am. Then I have breakfast...',
     rubric: 'Clarity, grammar accuracy, vocabulary range, coherence.',
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    level: [LEVELS[i % LEVELS.length]],
+    tags: tagSets[i % tagSets.length]
   }));
 
   const remaining = MIN - count;
-  await Writing.bulkCreate(
-    writings.slice(0, remaining).map(w => ({ ...w, createdBy: admin.id }))
+  const created = await Writing.bulkCreate(
+    writings.slice(0, remaining).map(w => ({ ...w, createdBy: admin.id })),
+    { returning: true }
   );
+
+  // Attach join-table tags for consistency with controllers
+  for (const w of created) {
+    const tagNames = Array.isArray(w.tags) ? w.tags : [];
+    await attachTags('writing', w.id, tagNames);
+  }
+}
+
+// Seed Reading resources similar to Speaking/Writing
+async function seedReadings(admin) {
+  const count = await Reading.count();
+  const MIN = 10;
+  if (count >= MIN) return;
+
+  const tagSets = [
+    ['Comprehension', 'Vocabulary'],
+    ['Skimming', 'Scanning'],
+    ['Inference', 'Details'],
+    ['Main Idea', 'Supporting Points'],
+    ['True/False', 'Not Given'],
+    ['Matching', 'Headings'],
+    ['IELTS', 'Reading'],
+    ['Academic', 'Passage'],
+    ['General', 'Practice'],
+    ['Summarizing', 'Paraphrasing']
+  ];
+
+  const readings = Array.from({ length: 10 }).map((_, i) => ({
+    title: `Reading Practice ${i + 1}`,
+    description: 'Short reading passage with comprehension focus.',
+    content: 'Sample passage content for reading practice. Focus on comprehension and vocabulary.',
+    pdf: SAMPLE_PDF_URL,
+    level: [LEVELS[i % LEVELS.length]],
+    tags: tagSets[i % tagSets.length]
+  }));
+
+  const remaining = MIN - count;
+  const created = await Reading.bulkCreate(
+    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
+    { returning: true }
+  );
+
+  // Attach join-table tags for consistency with controllers
+  for (const r of created) {
+    const tagNames = Array.isArray(r.tags) ? r.tags : [];
+    await attachTags('reading', r.id, tagNames);
+  }
 }
 
 async function seedCourses(admin) {
@@ -5518,16 +5632,16 @@ async function backfillLevelsAndPdfs() {
   const audiosMissing = await Audio.findAll({ where: { level: null } });
   for (let i = 0; i < audiosMissing.length; i++) {
     const a = audiosMissing[i];
-    const level = LEVELS[i % LEVELS.length];
-    const pdfRef = a.pdfRef ?? SAMPLE_PDF_URL;
-    await a.update({ level, pdfRef });
+    const level = [LEVELS[i % LEVELS.length]];
+    const pdf = a.pdf ?? SAMPLE_PDF_URL;
+    await a.update({ level, pdf });
   }
 
   // Backfill Video: level and pdf when missing
   const videosMissing = await Video.findAll({ where: { level: null } });
   for (let i = 0; i < videosMissing.length; i++) {
     const v = videosMissing[i];
-    const level = LEVELS[i % LEVELS.length];
+    const level = [LEVELS[i % LEVELS.length]];
     const pdf = v.pdf ?? SAMPLE_PDF_URL;
     await v.update({ level, pdf });
   }
@@ -5536,7 +5650,7 @@ async function backfillLevelsAndPdfs() {
   const blogsMissing = await Blog.findAll({ where: { level: null } });
   for (let i = 0; i < blogsMissing.length; i++) {
     const b = blogsMissing[i];
-    const level = LEVELS[i % LEVELS.length];
+    const level = [LEVELS[i % LEVELS.length]];
     const pdf = b.pdf ?? SAMPLE_PDF_URL;
     await b.update({ level, pdf });
   }
@@ -5545,18 +5659,90 @@ async function backfillLevelsAndPdfs() {
   const speakingsMissing = await Speaking.findAll({ where: { level: null } });
   for (let i = 0; i < speakingsMissing.length; i++) {
     const s = speakingsMissing[i];
-    const level = LEVELS[i % LEVELS.length];
+    const level = [LEVELS[i % LEVELS.length]];
     const pdf = s.pdf ?? SAMPLE_PDF_URL;
     await s.update({ level, pdf });
+  }
+
+  // Backfill Speaking: tags when missing and sync join-table
+  const speakingsMissingTags = await Speaking.findAll({ where: { tags: null } });
+  const speakingTagSets = [
+    ['IELTS', 'Task 1', 'Cue Cards'],
+    ['IELTS', 'Task 2', 'Fluency'],
+    ['Pronunciation', 'Intonation'],
+    ['Part 1', 'Personal'],
+    ['Part 2', 'Long Turn'],
+    ['Part 3', 'Discussion'],
+    ['Interview', 'Practice'],
+    ['Describing', 'Places'],
+    ['Opinions', 'Agree/Disagree'],
+    ['Storytelling']
+  ];
+  for (let i = 0; i < speakingsMissingTags.length; i++) {
+    const s = speakingsMissingTags[i];
+    const tags = speakingTagSets[i % speakingTagSets.length];
+    await s.update({ tags });
+    await attachTags('speaking', s.id, tags);
   }
 
   // Backfill Writing: level and pdf when missing
   const writingsMissing = await Writing.findAll({ where: { level: null } });
   for (let i = 0; i < writingsMissing.length; i++) {
     const w = writingsMissing[i];
-    const level = LEVELS[i % LEVELS.length];
+    const level = [LEVELS[i % LEVELS.length]];
     const pdf = w.pdf ?? SAMPLE_PDF_URL;
     await w.update({ level, pdf });
+  }
+
+  // Backfill Writing: tags when missing and sync join-table
+  const writingsMissingTags = await Writing.findAll({ where: { tags: null } });
+  const writingTagSets = [
+    ['IELTS', 'Task 2', 'Essay'],
+    ['IELTS', 'Task 1', 'Report'],
+    ['Coherence', 'Cohesion'],
+    ['Opinion', 'Argumentative'],
+    ['Narrative', 'Structure'],
+    ['Descriptive', 'Vocabulary'],
+    ['Formal', 'Academic'],
+    ['Informal', 'Email'],
+    ['Outlines', 'Planning'],
+    ['Editing', 'Proofreading']
+  ];
+  for (let i = 0; i < writingsMissingTags.length; i++) {
+    const w = writingsMissingTags[i];
+    const tags = writingTagSets[i % writingTagSets.length];
+    await w.update({ tags });
+    await attachTags('writing', w.id, tags);
+  }
+
+  // Backfill Reading: level and pdf when missing
+  const readingsMissing = await Reading.findAll({ where: { level: null } });
+  for (let i = 0; i < readingsMissing.length; i++) {
+    const r = readingsMissing[i];
+    const level = [LEVELS[i % LEVELS.length]];
+    const pdf = r.pdf ?? SAMPLE_PDF_URL;
+    await r.update({ level, pdf });
+  }
+
+  // Backfill Reading: tags when missing and sync join-table
+  const readingsMissingTags = await Reading.findAll({ where: { tags: null } });
+  const readingTagSets = [
+    ['Comprehension', 'Vocabulary'],
+    ['Skimming', 'Scanning'],
+    ['Inference', 'Details'],
+    ['Main Idea', 'Supporting Points'],
+    ['True/False', 'Not Given'],
+    ['Matching', 'Headings'],
+    ['IELTS', 'Reading'],
+    ['Academic', 'Passage'],
+    ['General', 'Practice'],
+    ['Summarizing', 'Paraphrasing']
+  ];
+  for (let i = 0; i < readingsMissingTags.length; i++) {
+    const r = readingsMissingTags[i];
+    const tags = readingTagSets[i % readingTagSets.length];
+    await r.update({ tags });
+    await attachTags('reading', r.id, tags);
   }
 }
 
@@ -5579,6 +5765,7 @@ async function main() {
     await seedEslAudios(admin);
     await seedSpeakings(admin);
     await seedWritings(admin);
+    await seedReadings(admin);
     await seedCourses(admin);
     await seedTests(admin);
     await seedFaqs();
@@ -5594,4 +5781,8 @@ async function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { main };

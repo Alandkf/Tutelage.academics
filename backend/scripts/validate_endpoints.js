@@ -77,6 +77,16 @@ function printTags(items, getItem) {
     console.log('Writings response:', writings);
   }
 
+  const readings = await fetchJson('/api/readings?limit=5&level=a1,b1');
+  console.log('\nReadings (level=a1,b1): status', readings.statusCode);
+  if (readings.json && readings.json.success) {
+    console.log('Count:', (readings.json.data?.readings || []).length);
+    console.log('Sample levels:', printLevels(readings.json.data, (d) => d.readings));
+    console.log('Sample tags:', printTags(readings.json.data, (d) => d.readings));
+  } else {
+    console.log('Readings response:', readings);
+  }
+
   // Also fetch single items if available (first id)
   try {
     const firstWriting = writings.json?.data?.writings?.[0];
@@ -88,6 +98,11 @@ function printTags(items, getItem) {
     if (firstSpeaking?.id) {
       const sById = await fetchJson(`/api/speakings/${firstSpeaking.id}`);
       console.log(`\nSpeaking by ID ${firstSpeaking.id}:`, sById);
+    }
+    const firstReading = readings.json?.data?.readings?.[0];
+    if (firstReading?.id) {
+      const rById = await fetchJson(`/api/readings/${firstReading.id}`);
+      console.log(`\nReading by ID ${firstReading.id}:`, rById);
     }
   } catch (e) {
     console.log('Error fetching by ID:', e.message);
