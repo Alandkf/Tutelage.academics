@@ -8,6 +8,26 @@
 const { Video, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
 // Minimal skills controller: no tag or analytics helpers
 
 // Lightweight YouTube thumbnail derivation (no persistence, response-only)
@@ -54,23 +74,15 @@ const createVideo = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    // Normalize level(s) to an array
+    const normalizedLevels = normalizeLevels(level);
 
     const video = await Video.create({
       title,
       videoRef,
       description,
       pdf,
-      level: normalizedLevel,
+      level: normalizedLevels,
       createdBy
     });
 
@@ -124,9 +136,10 @@ const getAllVideos = async (req, res) => {
       ];
     }
 
-    // Optional level filter (supports 'A1', 'B2', or full labels)
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    // Optional level filter: supports comma-separated or repeated query params
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
 
@@ -218,9 +231,9 @@ const getPaginatedVideos = async (req, res) => {
       ];
     }
 
-    // Optional level filter (supports 'A1', 'B2', or full labels)
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     let { count, rows } = await Video.findAndCountAll({
@@ -330,17 +343,8 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    // Normalize level codes if provided
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
     const normalizedLevel = level !== undefined
-      ? (levelMap[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : video.level;
 
     await video.update({

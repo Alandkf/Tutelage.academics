@@ -6,16 +6,23 @@
 const { Story, User, ResourceTag, Tag, ResourceAnalytics, Sequelize } = require('../models');
 const { Op } = require('sequelize');
 
-function normalizeLevel(level) {
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
   const map = {
-    'A1': 'A1 Beginner',
-    'A2': 'A2 Pre-intermediate',
-    'B1': 'B1 Intermediate',
-    'B2': 'B2 Upper-Intermediate',
-    'C1': 'C1 Advanced',
-    'C2': 'C2 Proficient'
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
   };
-  return map[level?.toUpperCase?.()] || level || null;
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
 }
 
 async function attachTags(resourceId, tagNames = []) {
@@ -62,7 +69,7 @@ exports.createStory = async (req, res) => {
     if (!title) {
       return res.status(400).json({ success: false, message: 'Title is required' });
     }
-    const normalizedLevel = normalizeLevel(level);
+    const normalizedLevel = normalizeLevels(level);
     const wc = wordCount ?? (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : null);
     const story = await Story.create({
       title, imageUrl, description, contentText, audioRef, pdf, wordCount: wc, level: normalizedLevel, createdBy
@@ -89,7 +96,8 @@ exports.getAllStories = async (req, res) => {
         { contentText: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) where.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
 
     let idFilter = null;
     if (tags) idFilter = await getTagFilterIds(tags);
@@ -150,7 +158,7 @@ exports.updateStory = async (req, res) => {
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
     if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
-    const normalizedLevel = level !== undefined ? normalizeLevel(level) : story.level;
+    const normalizedLevel = level !== undefined ? normalizeLevels(level) : story.level;
     const wc = wordCount !== undefined ? wordCount : (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : story.wordCount);
     await story.update({
       title: title ?? story.title,

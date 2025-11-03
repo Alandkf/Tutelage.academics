@@ -7,12 +7,32 @@
 const { Speaking, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
 /**
  * Create a new speaking content
  */
 const createSpeaking = async (req, res) => {
   try {
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title || !videoRef) {
@@ -22,16 +42,8 @@ const createSpeaking = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    // Normalize level(s)
+    const normalizedLevels = normalizeLevels(level);
 
     const speaking = await Speaking.create({
       title,
@@ -41,7 +53,8 @@ const createSpeaking = async (req, res) => {
       videoRef,
       pdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      level: normalizedLevel,
+      level: normalizedLevels,
+      tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
       createdBy
     });
 
@@ -77,8 +90,9 @@ const getAllSpeakings = async (req, res) => {
       ];
     }
 
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     if (cursor) {
@@ -140,8 +154,9 @@ const getPaginatedSpeakings = async (req, res) => {
         { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     const { count, rows } = await Speaking.findAndCountAll({
@@ -202,7 +217,7 @@ const getSpeakingById = async (req, res) => {
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
 
     const speaking = await Speaking.findByPk(id);
     if (!speaking) {
@@ -213,16 +228,8 @@ const updateSpeaking = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You can only update your own speaking content' });
     }
 
-    const levelMapUpdate = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
     const normalizedLevelUpdate = level !== undefined
-      ? (levelMapUpdate[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : speaking.level;
 
     await speaking.update({
@@ -233,7 +240,10 @@ const updateSpeaking = async (req, res) => {
       videoRef: videoRef ?? speaking.videoRef,
       pdf: pdf ?? speaking.pdf,
       imageUrl: (imageUrl ?? imageurl ?? speaking.imageUrl),
-      level: normalizedLevelUpdate ?? speaking.level
+      level: normalizedLevelUpdate ?? speaking.level,
+      tags: Array.isArray(tags)
+        ? tags
+        : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : speaking.tags)
     });
 
     const updatedSpeaking = await Speaking.findByPk(id, {

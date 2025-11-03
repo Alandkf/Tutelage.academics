@@ -58,19 +58,9 @@ module.exports = (sequelize, DataTypes) => {
       },
 
       level: {
-        type: DataTypes.STRING(32),
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
-        comment: 'Language level (e.g., B1 Intermediate)',
-        validate: {
-          isIn: [[
-            'A1 Beginner',
-            'A2 Pre-intermediate',
-            'B1 Intermediate',
-            'B2 Upper-Intermediate',
-            'C1 Advanced',
-            'C2 Proficient'
-          ]]
-        }
+        comment: 'Language levels (e.g., ["B1 Intermediate"])'
       },
 
       createdBy: {

@@ -7,12 +7,32 @@
 const { Writing, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
 /**
  * Create a new writing content
  */
 const createWriting = async (req, res) => {
   try {
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title) {
@@ -22,16 +42,7 @@ const createWriting = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    const normalizedLevels = normalizeLevels(level);
 
     const writing = await Writing.create({
       title,
@@ -39,7 +50,8 @@ const createWriting = async (req, res) => {
       description: (description ?? discription ?? null),
       pdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      level: normalizedLevel,
+      level: normalizedLevels,
+      tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
       createdBy
     });
 
@@ -73,8 +85,9 @@ const getAllWritings = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
     if (cursor) {
       if (sortOrder.toUpperCase() === 'DESC') {
@@ -133,8 +146,9 @@ const getPaginatedWritings = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     const { count, rows } = await Writing.findAndCountAll({
@@ -192,7 +206,7 @@ const getWritingById = async (req, res) => {
 const updateWriting = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
     const writing = await Writing.findByPk(id);
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
@@ -201,16 +215,8 @@ const updateWriting = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You can only update your own writing content' });
     }
 
-    const levelMapUpdate = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
     const normalizedLevelUpdate = level !== undefined
-      ? (levelMapUpdate[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : writing.level;
 
     await writing.update({
@@ -219,7 +225,10 @@ const updateWriting = async (req, res) => {
       description: (description ?? discription ?? writing.description),
       pdf: pdf ?? writing.pdf,
       imageUrl: (imageUrl ?? imageurl ?? writing.imageUrl),
-      level: normalizedLevelUpdate ?? writing.level
+      level: normalizedLevelUpdate ?? writing.level,
+      tags: Array.isArray(tags)
+        ? tags
+        : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : writing.tags)
     });
 
     const updatedWriting = await Writing.findByPk(id, {

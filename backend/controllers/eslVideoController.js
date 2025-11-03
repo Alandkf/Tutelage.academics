@@ -7,8 +7,8 @@ const { EslVideo, Tag, ResourceTag, ResourceAnalytics } = require('../models');
 const { Op } = require('sequelize');
 
 // Helpers
-const normalizeLevel = (level) => {
-  if (!level) return null;
+const normalizeLevels = (input) => {
+  if (input === undefined || input === null) return null;
   const map = {
     'a1': 'A1 Beginner',
     'a2': 'A2 Pre-intermediate',
@@ -17,8 +17,13 @@ const normalizeLevel = (level) => {
     'c1': 'C1 Advanced',
     'c2': 'C2 Proficient'
   };
-  const key = String(level).toLowerCase().trim();
-  return map[key] || level;
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
 };
 
 const getYouTubeThumbnail = (url) => {
@@ -72,7 +77,7 @@ const bumpAnalytics = async (resourceId, field = 'views', amount = 1) => {
 exports.createEslVideo = async (req, res) => {
   try {
     const { title, videoRef, description, pdf, level, tags } = req.body;
-    const normalizedLevel = normalizeLevel(level);
+    const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
     const createdBy = req.user?.id || 1; // default for admin scripts/tests
     const video = await EslVideo.create({ title, videoRef, description, pdf, level: normalizedLevel, thumbnailUrl, createdBy });
@@ -90,7 +95,8 @@ exports.getAllEslVideos = async (req, res) => {
     const { search, level, tags, sortBy = 'date', sortOrder = 'desc', limit = 6, offset = 0 } = req.query;
     const where = {};
     if (search) where.title = { [Op.like]: `%${search}%` };
-    if (level) where.level = normalizeLevel(level);
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
 
     // Tag filtering
     let idFilter = null;
@@ -108,7 +114,6 @@ exports.getAllEslVideos = async (req, res) => {
 
     const order = [];
     if (sortBy === 'popularity') order.push(['id', sortOrder.toUpperCase()]); // fallback
-    else if (sortBy === 'difficulty') order.push(['level', sortOrder.toUpperCase()]);
     else order.push(['createdAt', sortOrder.toUpperCase()]);
 
     const rows = await EslVideo.findAll({
@@ -152,7 +157,7 @@ exports.updateEslVideo = async (req, res) => {
     const { title, videoRef, description, pdf, level, tags } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
-    const payload = { title, videoRef, description, pdf, level: normalizeLevel(level) };
+    const payload = { title, videoRef, description, pdf, level: normalizeLevels(level) };
     if (videoRef) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
     await video.update(payload);
     if (Array.isArray(tags)) await attachTags(video.id, tags);
