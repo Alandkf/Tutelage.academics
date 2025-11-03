@@ -5320,14 +5320,14 @@ Finally, remember that learning English is itself an achievement worthy of recog
   const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
   const remaining = MIN - count;
-  await Blog.bulkCreate(
-    blogs.slice(0, remaining).map((b, i) => ({
-      ...b,
-      level: LEVELS[i % LEVELS.length],
-      pdf: b.pdf || buildPdfUrl(b.title),
-      createdBy: admin.id
-    }))
-  );
+  // await Blog.bulkCreate(
+  //   blogs.slice(0, remaining).map((b, i) => ({
+  //     ...b,
+  //     level: LEVELS[i % LEVELS.length],
+  //     pdf: b.pdf || buildPdfUrl(b.title),
+  //     createdBy: admin.id
+  //   }))
+  // );
 }
 
 async function seedVideos(admin) {
