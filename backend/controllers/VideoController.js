@@ -5,7 +5,7 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Video, User } = require('../models');
+const { Video, User, Tag, ResourceTag } = require('../models');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -28,7 +28,42 @@ function normalizeLevels(input) {
   return unique.length ? unique : null;
 }
 
-// Minimal skills controller: no tag or analytics helpers
+// Tag helpers for skills videos (using ResourceTag join table)
+async function attachTags(resourceId, tagNames = []) {
+  if (!Array.isArray(tagNames) || !tagNames.length) return;
+  const trimmed = tagNames.map(t => String(t).trim()).filter(Boolean);
+  const existing = await Tag.findAll({ where: { name: { [Op.in]: trimmed } } });
+  const existingMap = new Map(existing.map(t => [t.name, t.id]));
+  const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n, namespace: 'video' }));
+  if (toCreate.length) {
+    const created = await Tag.bulkCreate(toCreate, { returning: true });
+    created.forEach(t => existingMap.set(t.name, t.id));
+  }
+  const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
+  await ResourceTag.destroy({ where: { resourceType: 'video', resourceId } });
+  if (tagIds.length) {
+    await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'video', resourceId, tagId })));
+  }
+}
+
+async function includeTagsFor(resourceId) {
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'video', resourceId } });
+  if (!rts.length) return [];
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name);
+}
+
+async function getTagFilterIds(tagQuery) {
+  if (!tagQuery) return null;
+  const names = Array.isArray(tagQuery) ? tagQuery : String(tagQuery).split(',').map(s => s.trim()).filter(Boolean);
+  if (!names.length) return null;
+  const tags = await Tag.findAll({ where: { name: { [Op.in]: names } } });
+  if (!tags.length) return [];
+  const tagIds = tags.map(t => t.id);
+  const mappings = await ResourceTag.findAll({ where: { resourceType: 'video', tagId: { [Op.in]: tagIds } } });
+  return [...new Set(mappings.map(m => m.resourceId))];
+}
 
 // Lightweight YouTube thumbnail derivation (no persistence, response-only)
 function getYouTubeThumbnail(url) {
@@ -63,7 +98,7 @@ function getYouTubeThumbnail(url) {
  */
 const createVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, level } = req.body;
+    const { title, videoRef, description, pdf, level, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -95,10 +130,16 @@ const createVideo = async (req, res) => {
       }]
     });
 
+    const tagNames = Array.isArray(tags)
+      ? tags
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    if (tagNames.length) await attachTags(video.id, tagNames);
+    const tagList = await includeTagsFor(video.id);
+
     res.status(201).json({
       success: true,
       message: 'Video content created successfully',
-      data: { ...videoWithAuthor.toJSON(), thumbnailUrl: getYouTubeThumbnail(videoWithAuthor.videoRef) }
+      data: { ...videoWithAuthor.toJSON(), thumbnailUrl: getYouTubeThumbnail(videoWithAuthor.videoRef), tags: tagList }
     });
   } catch (error) {
     console.error('Error creating video:', error);
@@ -122,6 +163,7 @@ const getAllVideos = async (req, res) => {
       limit = 10, 
       search,
       level,
+      tags,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -140,6 +182,15 @@ const getAllVideos = async (req, res) => {
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) {
       whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    // Optional tag filtering via join table
+    let idFilter = null;
+    if (tags) {
+      idFilter = await getTagFilterIds(tags);
+      if (Array.isArray(idFilter)) {
+        whereClause.id = { ...(whereClause.id || {}), [Op.in]: idFilter };
+      }
     }
 
 
@@ -180,7 +231,10 @@ const getAllVideos = async (req, res) => {
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
 
-    const enriched = items.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
+    const enriched = await Promise.all(items.map(async (v) => {
+      const tagList = await includeTagsFor(v.id);
+      return { ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef), tags: tagList };
+    }));
 
     res.status(200).json({
       success: true,
@@ -216,6 +270,7 @@ const getPaginatedVideos = async (req, res) => {
       limit = 10, 
       search,
       level,
+      tags,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -236,6 +291,15 @@ const getPaginatedVideos = async (req, res) => {
       whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
+    // Optional tag filter
+    let idFilter = null;
+    if (tags) {
+      idFilter = await getTagFilterIds(tags);
+      if (Array.isArray(idFilter)) {
+        whereClause.id = { [Op.in]: idFilter };
+      }
+    }
+
     let { count, rows } = await Video.findAndCountAll({
       where: whereClause,
       include: [{
@@ -252,7 +316,10 @@ const getPaginatedVideos = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit);
 
-    const enriched = rows.map(v => ({ ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef) }));
+    const enriched = await Promise.all(rows.map(async (v) => {
+      const tagList = await includeTagsFor(v.id);
+      return { ...v.toJSON(), thumbnailUrl: getYouTubeThumbnail(v.videoRef), tags: tagList };
+    }));
 
     res.status(200).json({
       success: true,
@@ -302,9 +369,10 @@ const getVideoById = async (req, res) => {
       });
     }
 
+    const tagList = await includeTagsFor(video.id);
     res.status(200).json({
       success: true,
-      data: { ...video.toJSON(), thumbnailUrl: getYouTubeThumbnail(video.videoRef) }
+      data: { ...video.toJSON(), thumbnailUrl: getYouTubeThumbnail(video.videoRef), tags: tagList }
     });
   } catch (error) {
     console.error('Error fetching video:', error);
@@ -324,7 +392,7 @@ const getVideoById = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, level } = req.body;
+    const { title, videoRef, description, pdf, level, tags } = req.body;
 
     const video = await Video.findByPk(id);
 
@@ -355,6 +423,11 @@ const updateVideo = async (req, res) => {
       level: normalizedLevel ?? video.level
     });
 
+    if (tags !== undefined) {
+      const tagNames = Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean);
+      await attachTags(video.id, tagNames);
+    }
+
 
     // Fetch updated video with author information
     const updatedVideo = await Video.findByPk(id, {
@@ -364,11 +437,12 @@ const updateVideo = async (req, res) => {
         attributes: ['id', 'name', 'email']
       }]
     });
+    const tagList = await includeTagsFor(video.id);
 
     res.status(200).json({
       success: true,
       message: 'Video content updated successfully',
-      data: updatedVideo
+      data: { ...updatedVideo.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error updating video:', error);
@@ -406,6 +480,7 @@ const deleteVideo = async (req, res) => {
       });
     }
 
+    await ResourceTag.destroy({ where: { resourceType: 'video', resourceId: id } });
     await video.destroy();
 
     res.status(200).json({
