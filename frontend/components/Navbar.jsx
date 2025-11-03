@@ -15,7 +15,13 @@ import Language from './Language'
 export default function Navbar (){
   const [activeDropdown, setActiveDropdown] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  // track which top-level mobile dropdowns are open (by name)
+  const [mobileOpenDropdowns, setMobileOpenDropdowns] = useState({})
   const pathname = usePathname()
+
+  const toggleMobileDropdown = (name) => {
+    setMobileOpenDropdowns(prev => ({ ...prev, [name]: !prev[name] }))
+  }
 
   const navItems = [
     {
@@ -217,30 +223,54 @@ export default function Navbar (){
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-background border-t border-border overflow-y-auto"
+            className="lg:hidden bg-background border-t border-b border-border overflow-y-auto"
             style={{ maxHeight: 'calc(88dvh - 4rem)' }}
           >
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navItems.map((item, index) => (
                 <div key={item.name}>
-                  <Link
-                    href={item.href}
-                    className={`block px-3 py-2 text-base font-medium transition-colors duration-200 ${pathname === item.href.trim() ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
-                  >
-                    {item.name}
-                  </Link>
-                  {item.dropdown && (
-                    <div className="ml-4 space-y-1">
-                      {item.dropdown.map((dropdownItem) => (
-                        <Link
-                          key={dropdownItem.name}
-                          href={dropdownItem.href}
-                          className={`block px-3 py-2 text-sm transition-colors duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'}`}
-                        >
-                          {dropdownItem.name}
-                        </Link>
-                      ))}
-                    </div>
+                  {item.dropdown ? (
+                    // Render parent as toggle when it has dropdown on mobile
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleMobileDropdown(item.name)}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-base font-medium transition-colors duration-200 ${mobileOpenDropdowns[item.name] ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
+                      >
+                        <span>{item.name}</span>
+                        <ChevronDown className={`w-5 h-5 transform transition-transform ${mobileOpenDropdowns[item.name] ? 'rotate-180' : ''}`} />
+                      </button>
+                      <AnimatePresence>
+                        {mobileOpenDropdowns[item.name] && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.22 }}
+                            className="ml-4 space-y-1"
+                          >
+                            {item.dropdown.map((dropdownItem) => (
+                              <Link
+                                key={dropdownItem.name}
+                                href={dropdownItem.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={`block px-3 py-2 text-sm transition-colors duration-200 ${pathname === dropdownItem.href.trim() ? 'text-primary font-bold' : 'text-muted-foreground hover:text-primary'}`}
+                              >
+                                {dropdownItem.name}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-3 py-2 text-base font-medium transition-colors duration-200 ${pathname === item.href.trim() ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
+                    >
+                      {item.name}
+                    </Link>
                   )}
                 </div>
               ))}
