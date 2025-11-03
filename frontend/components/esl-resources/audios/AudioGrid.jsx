@@ -14,24 +14,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const getYouTubeThumbnail = (url, preferMax = false) => {
-  if (!url) return null;
-  try {
-    // match common YouTube URL forms: v=ID, youtu.be/ID, embed/ID
-    const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
-    const id = match && match[1];
-    if (!id) return null;
-    // prefer max resolution when available (may 404 for some videos)
-    return preferMax
-      ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg`
-      : `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-  } catch (e) {
-    return null;
-  }
-};
-
 const AudioGrid = () => {
-  const [videos, setVideos] = useState([])
+  const [audios, setAudios] = useState([])
+  
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -40,62 +25,63 @@ const AudioGrid = () => {
 
   const itemsPerPage = 6
 
-  const fetchVideos = async (page) => {
+  const fetchAudios = async (page) => {
     setLoading(true)
     try {
-      // fetch ESL videos instead of blogs; preserve pagination parameters
       const offset = (page - 1) * itemsPerPage
       const response = await fetch(
-        `${BASE_URL}/api/esl-videos?limit=${itemsPerPage}&offset=${offset}`,
+        `${BASE_URL}/api/esl-audios?limit=${itemsPerPage}&offset=${offset}`,
         { credentials: 'include' }
       )
       const data = await response.json()
 
       if (data.success) {
-        // handle both paginated blog-style responses and simple array responses
-        if (data.data && Array.isArray(data.data)) {
-          // endpoint returned an array of videos
-          setVideos(data.data)
+        if (Array.isArray(data.data)) {
+          setAudios(data.data)
           const hasNext = data.data.length === itemsPerPage
           setHasNextPage(hasNext)
           setHasPrevPage(page > 1)
-          // If there are more pages, expose a "+10" jump so the UI can show page+10.
-          // We don't know the real total from this endpoint, so show a window up to +10 pages.
           setTotalPages(hasNext ? page + 10 : page)
-        } else if (data.data && data.data.blogs) {
-          // fallback: response in original paginated shape
-          setVideos(data.data.blogs)
-          setTotalPages(data.data.pagination.totalPages)
-          setHasNextPage(data.data.pagination.hasNextPage)
-          setHasPrevPage(data.data.pagination.hasPrevPage)
         } else {
-          setVideos([])
-          setHasNextPage(false)
-          setHasPrevPage(false)
-          setTotalPages(1)
+          // If API returns an object shape, try to find array
+          const list = data.data && (data.data.audios || data.data.items || data.data)
+          if (Array.isArray(list)) {
+            setAudios(list)
+            const hasNext = list.length === itemsPerPage
+            setHasNextPage(hasNext)
+            setHasPrevPage(page > 1)
+            setTotalPages(hasNext ? page + 10 : page)
+          } else {
+            setAudios([])
+            setHasNextPage(false)
+            setHasPrevPage(false)
+            setTotalPages(1)
+          }
         }
+      } else {
+        setAudios([])
+        setHasNextPage(false)
+        setHasPrevPage(false)
+        setTotalPages(1)
       }
     } catch (error) {
-      console.error('Error fetching videos:', error)
+      console.error('Error fetching audios:', error)
+      setAudios([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchVideos(currentPage)
+    fetchAudios(currentPage)
   }, [currentPage])
 
   const handleNextPage = () => {
-    if (hasNextPage) {
-      setCurrentPage(prev => prev + 1)
-    }
+    if (hasNextPage) setCurrentPage(prev => prev + 1)
   }
 
   const handlePrevPage = () => {
-    if (hasPrevPage) {
-      setCurrentPage(prev => prev - 1)
-    }
+    if (hasPrevPage) setCurrentPage(prev => prev - 1)
   }
 
   const truncateText = (text, maxLength = 120) => {
@@ -104,43 +90,24 @@ const AudioGrid = () => {
     return text.slice(0, maxLength) + '...'
   }
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = []
-    
-    // Show previous page if exists
-    if (currentPage > 1) {
-      pages.push(currentPage - 1)
-    }
-    
-    // Always show current page
+    if (currentPage > 1) pages.push(currentPage - 1)
     pages.push(currentPage)
-    
-    // Show next page if exists
-    if (currentPage + 1 <= totalPages) {
-      pages.push(currentPage + 1)
-    }
-    
-    // Check if we can show a page +10 ahead OR the last page if less than +10
+    if (currentPage + 1 <= totalPages) pages.push(currentPage + 1)
     const pagePlusTen = currentPage + 10
-    
     if (pagePlusTen <= totalPages) {
-      // We can show page +10
       pages.push('...')
       pages.push(pagePlusTen)
     } else if (totalPages > currentPage + 1) {
-      // Can't show +10, but show the last page if it's beyond current+1
       pages.push('...')
       pages.push(totalPages)
     }
-    
     return pages
   }
 
   const handlePageClick = (page) => {
-    if (page !== '...' && page !== currentPage) {
-      setCurrentPage(page)
-    }
+    if (page !== '...' && page !== currentPage) setCurrentPage(page)
   }
 
   return (
@@ -149,7 +116,7 @@ const AudioGrid = () => {
         {/* Section Title */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Our Best Videos
+            Our Audio Library
           </h2>
         </div>
 
@@ -160,25 +127,20 @@ const AudioGrid = () => {
             Array.from({ length: itemsPerPage }).map((_, index) => (
               <StoryCardSkeleton key={index} />
             ))
-          ) : videos.length > 0 ? (
-            // Show actual videos
-            videos.map((video) => (
+          ) : audios.length > 0 ? (
+            // Show actual audios
+            audios.map((audio) => (
               <Link
-                key={video.id}
-                href={`/esl-resources/videos/${video.id}`}
+                key={audio?.id}
+                href={`/esl-resources/audios/${audio?.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                   {/* Image */}
                   <div className="relative h-48 w-full overflow-hidden">
                     <Image
-                      src={
-                        video.thumbnailUrl
-                          || getYouTubeThumbnail(video.videoRef) // try building thumbnail from the YouTube URL
-                          || video.imageRef
-                          || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'
-                      }
-                      alt={video.title}
+                      src={audio?.imageUrl}
+                      alt={audio?.title}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -192,11 +154,11 @@ const AudioGrid = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <h3 className="text-xl font-bold text-foreground mb-3 pb-2 truncate cursor-help">
-                            {video.title}
+                            {audio?.title}
                           </h3>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p className="text-sm">{video.title}</p>
+                          <p className="text-sm">{audio?.title}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -206,12 +168,12 @@ const AudioGrid = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 cursor-help">
-                            {truncateText(video.description)}
+                            {truncateText(audio?.description)}
                           </p>
                         </TooltipTrigger>
-                        {video.description && video.description.length > 120 && (
+                        {audio?.description && audio?.description.length > 120 && (
                           <TooltipContent className="max-w-md">
-                            <p className="text-sm">{video.description}</p>
+                            <p className="text-sm">{audio?.description}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -224,14 +186,14 @@ const AudioGrid = () => {
             // Empty State
             <div className="col-span-full text-center py-20">
               <p className="text-lg text-muted-foreground">
-                No videos available at the moment. Check back soon!
+                No audios available at the moment. Check back soon!
               </p>
             </div>
           )}
         </div>
 
         {/* Pagination Controls - Always visible */}
-        {(videos.length > 0 || loading) && (
+        {(audios.length > 0 || loading) && (
           <div className="flex items-center justify-between">
             {/* Previous Button - Left */}
             <Button

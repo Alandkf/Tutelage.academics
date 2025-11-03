@@ -1,4 +1,5 @@
 import CallToAction from "@/components/CallToAction"
+import AudioGrid from "@/components/esl-resources/audios/AudioGrid"
 import AudioLibraryDescription from "@/components/esl-resources/audios/AudioLibraryDescription"
 import AudioLibraryHero from "@/components/esl-resources/audios/AudioLibraryHero"
 
@@ -9,7 +10,7 @@ const Page = () => {
     <div className="relative min-h-screen bg-background pt-4">
         <AudioLibraryHero />
         <AudioLibraryDescription />
-        {/* <AudioGrid /> */}
+        <AudioGrid />
         <CallToAction />
     </div>
   )
