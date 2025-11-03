@@ -150,18 +150,68 @@ const getAllSpeakings = async (req, res) => {
       }
     }
 
+    // Fetch one extra item to check if there are more items
     const fetchLimit = parseInt(limit) + 1;
 
-    const speakings = await Speaking.findAll({
-      where: whereClause,
-      include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
-      limit: fetchLimit,
-      order: [
-        [sortBy, sortOrder.toUpperCase()],
-        ['id', sortOrder.toUpperCase()]
-      ],
-      distinct: true
-    });
+    let speakings;
+    try {
+      // Try the standard query (works when level column is a string)
+      speakings = await Speaking.findAll({
+        where: whereClause,
+        include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+        limit: fetchLimit,
+        order: [
+          [sortBy, sortOrder.toUpperCase()],
+          ['id', sortOrder.toUpperCase()]
+        ],
+        distinct: true
+      });
+    } catch (err) {
+      // If the DB column is an array type, LIKE will fail with operator not found (Postgres 42883).
+      // Detect that and retry using an array-ANY check which works for varchar[] / text[].
+      if (err?.parent?.code === '42883' || /operator does not exist/i.test(String(err))) {
+        const levelParam = level;
+        const levelMap = {
+          'A1': 'A1 Beginner',
+          'A2': 'A2 Pre-intermediate',
+          'B1': 'B1 Intermediate',
+          'B2': 'B2 Upper-Intermediate',
+          'C1': 'C1 Advanced',
+          'C2': 'C2 Proficient'
+        };
+        const normLevel = levelMap[levelParam?.toUpperCase?.()] || levelParam;
+
+        // Remove any existing level condition from whereClause and build an ANY() literal
+        const baseWhere = { ...whereClause };
+        delete baseWhere.level;
+
+        // Use model's sequelize to safely escape and create a literal " '<normLevel>' = ANY(level) "
+        const sequelizeInstance = Speaking.sequelize;
+        const escapedVal = sequelizeInstance.escape(normLevel);
+        const anyLiteral = sequelizeInstance.literal(`${escapedVal} = ANY("level")`);
+
+        // Combine baseWhere and literal using Op.and
+        const combinedWhere = {
+          [Op.and]: [
+            baseWhere,
+            anyLiteral
+          ]
+        };
+
+        speakings = await Speaking.findAll({
+          where: combinedWhere,
+          include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+          limit: fetchLimit,
+          order: [
+            [sortBy, sortOrder.toUpperCase()],
+            ['id', sortOrder.toUpperCase()]
+          ],
+          distinct: true
+        });
+      } else {
+        throw err;
+      }
+    }
 
     const hasMore = speakings.length > parseInt(limit);
     const items = hasMore ? speakings.slice(0, parseInt(limit)) : speakings;

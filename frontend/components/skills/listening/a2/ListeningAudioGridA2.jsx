@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const ListeningAudioGrid = () => {
+const ListeningAudioGridA2 = () => {
   const [audios, setAudios] = useState([])
   
   const [loading, setLoading] = useState(true)
@@ -29,8 +29,10 @@ const ListeningAudioGrid = () => {
     setLoading(true)
     try {
       const offset = (page - 1) * itemsPerPage
+      // filter for A1 level only (controller does a LIKE `${level}%`)
+      const levelParam = 'A2'
       const response = await fetch(
-        `${BASE_URL}/api/audios?limit=${itemsPerPage}&offset=${offset}`,
+        `${BASE_URL}/api/audios?limit=${itemsPerPage}&offset=${offset}&level=${encodeURIComponent(levelParam)}`,
         { credentials: 'include' }
       )
       const data = await response.json()
@@ -249,4 +251,4 @@ const ListeningAudioGrid = () => {
   )
 }
 
-export default ListeningAudioGrid
+export default ListeningAudioGridA2

@@ -1,8 +1,10 @@
-import ListeningAudioGridA1 from "@/components/skills/listening/a1/ListeningAudioGridA1"
+
+
+import ListeningAudioGridB2 from "@/components/skills/listening/b2/ListeningAudioGridB2"
 import Image from "next/image"
 
 
-const A1 = () => {
+const B2 = () => {
   return (
     <div className="relative min-h-screen bg-background pt-4">
          {/* Header Section */}
@@ -11,7 +13,7 @@ const A1 = () => {
                   <div className="flex flex-row items-center justify-between gap-6">
                     <div className="flex-1">
                       <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2">
-                        A1 Listening
+                        B2 Listening
                       </h1>
                     </div>
                   </div>
@@ -22,8 +24,8 @@ const A1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
                   <Image
-                    src={"https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"}
-                    alt={"A1 Listening"}
+                    src={"https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=800&q=80"}
+                    alt={"B2 Listening"}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
@@ -37,14 +39,14 @@ const A1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
                 <div className="max-w-5xl">
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    Listening practices designed to help learners understand familiar everyday expressions, very simple sentences, and basic words related to people or their family. Activities include matching words to pictures, filling in missing words, and answering simple questions.
+                      Listening practices designed to help learners understand extended speech, TV programs, films, podcasts, and interviews on concrete or abstract topics. Exercises include recognizing cause–effect relationships, following arguments and opinions, and identifying supporting examples."
                   </p>
                 </div>
               </div>
 
-              <ListeningAudioGridA1 />
+              <ListeningAudioGridB2 />
     </div>
   )
 }
 
-export default A1
+export default B2
