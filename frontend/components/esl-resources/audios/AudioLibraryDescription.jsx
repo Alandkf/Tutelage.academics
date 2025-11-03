@@ -1,7 +1,7 @@
 'use client'
 
-const VideoLibraryDescription = () => {
-  const description = "Do you want to learn English while watching videos? Dive into our Video Library, featuring a variety of fun and fascinating videos on topics like science, technology, psychology, culture, nature, sports, entertainment, travel, and everyday life. Perfect for learners of all levels, each video helps you improve listening skills, expand vocabulary, and understand real English in action."
+const AudioLibraryDescription = () => {
+  const description = "Do you want to practice your English by listening to real conversations and audios? Stop learning boring grammar rules and start hearing real English. Our audio library is packed with practical, engaging content including interviews, podcasts, short stories, life experiences and everyday conversations. This diverse resource is perfect for learners of all levels, providing the vocabulary and contextual understanding needed to use English naturally. Enhance your fluency on the go."
 
   const steps = [
     {
@@ -9,16 +9,16 @@ const VideoLibraryDescription = () => {
       description: "Get ready before watching."
     },
     {
-      title: "Watch the Video",
-      description: "Enjoy and follow along at your own pace."
+      title: "Listen to the Audio",
+      description: "Follow along at your own pace."
     },
     {
       title: "Complete the Post-Exercise",
-      description: "Test your understanding afterward.."
+      description: "Test your understanding after listening."
     },
     {
       title: "Check the Answers",
-      description: "Review your results and learn from any mistakes."
+      description: " Review your results and improve your comprehension."
     }
   ]
 
@@ -32,7 +32,7 @@ const VideoLibraryDescription = () => {
         {/* How to enjoy section */}
         <div className="bg-muted/20 rounded-lg p-6 sm:p-8">
           <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">
-            How to use the Video Library
+            How to use the Audio Library
           </h2>
           
           <ul className="space-y-4">
@@ -52,4 +52,4 @@ const VideoLibraryDescription = () => {
   )
 }
 
-export default VideoLibraryDescription
+export default AudioLibraryDescription

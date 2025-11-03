@@ -57,7 +57,7 @@ export default function Navbar (){
         { name: "Story Library", href: "/esl-resources/storys" },
         { name: "Blog Library", href: "/esl-resources/blogs" },
         { name: "Video Library", href: "/esl-resources/videos" },
-        { name: "Audio Library", href: "/esl-resources/audio" },
+        { name: "Audio Library", href: "/esl-resources/audios" },
       ],
     },
      {

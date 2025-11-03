@@ -32,7 +32,7 @@ const Resources = () => {
       title: "Audio Library",
       description: "Hear real English! Listen to interviews, podcasts, and everyday conversations. Audio helps you become fluent, understand natural speech, and use English confidently anywhere.",
       image: "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&q=80", // Person with headphones
-      href: "/esl-resources/audio",
+      href: "/esl-resources/audios",
       buttonText: "Listen Now"
     }
   ]

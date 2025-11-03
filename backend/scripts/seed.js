@@ -20,7 +20,8 @@ const bcrypt = require('bcrypt');
     Test,
     Faq,
     LandingSection,
-    EslVideo
+    EslVideo,
+    EslAudio,
   } = require('../models');
 
 
@@ -5389,6 +5390,27 @@ async function seedAudios(admin) {
   );
 }
 
+
+async function seedEslAudios(admin) {
+  const count = await EslAudio.count();
+  const MIN = 160;
+  if (count >= MIN) return;
+
+  const audios = Array.from({ length: 160 }).map((_, i) => ({
+    title: `Focus Track ${i + 1}`,
+    content: 'Ambient audio to help focus during study sessions. try to listen and learn witht this audiotrack.',
+    transcript: "hshahdnkjdbweuihdeu nfuhnjkn uifhnuihu fjnuiu this is a music",
+    audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`,
+    pdfRef: SAMPLE_PDF_URL,
+    level: LEVELS[i % LEVELS.length]
+  }));
+
+  const remaining = MIN - count;
+  await EslAudio.bulkCreate(
+    audios.slice(0, remaining).map(a => ({ ...a, createdBy: admin.id }))
+  );
+}
+
 async function seedSpeakings(admin) {
   const count = await Speaking.count();
   const MIN = 10;
@@ -5551,6 +5573,7 @@ async function main() {
     await seedVideos(admin);
     await seedEslVideos(admin);
     await seedAudios(admin);
+    await seedEslAudios(admin);
     await seedSpeakings(admin);
     await seedWritings(admin);
     await seedCourses(admin);

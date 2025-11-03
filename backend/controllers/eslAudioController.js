@@ -31,12 +31,12 @@ const attachTags = async (resourceId, tagNames = []) => {
     created.forEach(t => existingMap.set(t.name, t.id));
   }
   const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
-  await ResourceTag.destroy({ where: { resourceType: 'esl_audio', resourceId } });
-  await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'esl_audio', resourceId, tagId })));
+  await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId } });
+  await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'audio', resourceId, tagId })));
 };
 
 const includeTagsFor = async (resourceId) => {
-  const rts = await ResourceTag.findAll({ where: { resourceType: 'esl_audio', resourceId } });
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'audio', resourceId } });
   if (!rts.length) return [];
   const tagIds = rts.map(rt => rt.tagId);
   const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
@@ -45,8 +45,8 @@ const includeTagsFor = async (resourceId) => {
 
 const bumpAnalytics = async (resourceId, field = 'plays', amount = 1) => {
   const [row] = await ResourceAnalytics.findOrCreate({
-    where: { resourceType: 'esl_audio', resourceId },
-    defaults: { resourceType: 'esl_audio', resourceId, views: 0, plays: 0, downloads: 0 }
+    where: { resourceType: 'audio', resourceId },
+    defaults: { resourceType: 'audio', resourceId, views: 0, plays: 0, downloads: 0 }
   });
   row[field] = (row[field] || 0) + amount;
   await row.save();
@@ -86,7 +86,7 @@ exports.getAllEslAudios = async (req, res) => {
       const tagRows = await Tag.findAll({ where: { name: { [Op.in]: tagNames } } });
       const tagIds = tagRows.map(t => t.id);
       if (tagIds.length) {
-        const rtRows = await ResourceTag.findAll({ where: { resourceType: 'esl_audio', tagId: { [Op.in]: tagIds } } });
+        const rtRows = await ResourceTag.findAll({ where: { resourceType: 'audio', tagId: { [Op.in]: tagIds } } });
         const matchedIds = [...new Set(rtRows.map(r => r.resourceId))];
         idFilter = matchedIds.length ? matchedIds : [-1];
       }
@@ -105,7 +105,7 @@ exports.getAllEslAudios = async (req, res) => {
 
     const enriched = await Promise.all(rows.map(async (row) => {
       const tags = await includeTagsFor(row.id);
-      const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'esl_audio', resourceId: row.id } });
+      const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'audio', resourceId: row.id } });
       return { ...row.toJSON(), tags, metrics };
     }));
 
@@ -151,8 +151,8 @@ exports.deleteEslAudio = async (req, res) => {
     const { id } = req.params;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
-    await ResourceTag.destroy({ where: { resourceType: 'esl_audio', resourceId: id } });
-    await ResourceAnalytics.destroy({ where: { resourceType: 'esl_audio', resourceId: id } });
+    await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: id } });
+    await ResourceAnalytics.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await audio.destroy();
     res.status(200).json({ success: true, message: 'Audio deleted' });
   } catch (err) {
