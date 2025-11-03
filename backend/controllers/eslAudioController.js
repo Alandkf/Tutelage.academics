@@ -6,8 +6,8 @@
 const { EslAudio, Tag, ResourceTag, ResourceAnalytics } = require('../models');
 const { Op } = require('sequelize');
 
-const normalizeLevel = (level) => {
-  if (!level) return null;
+const normalizeLevels = (input) => {
+  if (input === undefined || input === null) return null;
   const map = {
     'a1': 'A1 Beginner',
     'a2': 'A2 Pre-intermediate',
@@ -16,8 +16,13 @@ const normalizeLevel = (level) => {
     'c1': 'C1 Advanced',
     'c2': 'C2 Proficient'
   };
-  const key = String(level).toLowerCase().trim();
-  return map[key] || level;
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
 };
 
 const attachTags = async (resourceId, tagNames = []) => {
@@ -57,7 +62,7 @@ exports.createEslAudio = async (req, res) => {
   try {
     const { title, imageUrl, description, transcript, audioRef, pdf, level, tags } = req.body;
     const createdBy = req.user?.id || 1;
-    const audio = await EslAudio.create({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevel(level), createdBy });
+    const audio = await EslAudio.create({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevels(level), createdBy });
     if (Array.isArray(tags)) await attachTags(audio.id, tags);
     const tagNames = await includeTagsFor(audio.id);
     res.status(201).json({ success: true, data: { ...audio.toJSON(), tags: tagNames } });
@@ -78,7 +83,8 @@ exports.getAllEslAudios = async (req, res) => {
         { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) where.level = normalizeLevel(level);
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
 
     let idFilter = null;
     if (tags) {
@@ -93,8 +99,8 @@ exports.getAllEslAudios = async (req, res) => {
     }
 
     const order = [];
-    if (sortBy === 'difficulty') order.push(['level', sortOrder.toUpperCase()]);
-    else order.push(['createdAt', sortOrder.toUpperCase()]);
+    // Sorting by difficulty is ambiguous for array levels; default to createdAt
+    order.push(['createdAt', sortOrder.toUpperCase()]);
 
     const rows = await EslAudio.findAll({
       where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
@@ -136,7 +142,7 @@ exports.updateEslAudio = async (req, res) => {
     const { title, imageUrl, description, transcript, audioRef, pdf, level, tags } = req.body;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
-    await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevel(level) });
+    await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevels(level) });
     if (Array.isArray(tags)) await attachTags(audio.id, tags);
     const tagNames = await includeTagsFor(audio.id);
     console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");

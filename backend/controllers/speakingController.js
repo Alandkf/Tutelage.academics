@@ -4,15 +4,71 @@
 // Handles CRUD operations for Speaking content with pagination and filtering.
 // ============================================================================
 
-const { Speaking, User } = require('../models');
+const { Speaking, User, Tag, ResourceTag } = require('../models');
 const { Op } = require('sequelize');
+
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
+function normalizeTags(input) {
+  if (input === undefined || input === null) return null;
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
+// Join-table tag helpers for Speaking resources
+async function attachTags(resourceId, tagNames = []) {
+  if (!Array.isArray(tagNames) || !tagNames.length) return;
+  const trimmed = tagNames.map(t => String(t).trim()).filter(Boolean);
+  const existing = await Tag.findAll({ where: { name: { [Op.in]: trimmed } } });
+  const existingMap = new Map(existing.map(t => [t.name, t.id]));
+  const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n, namespace: 'speaking' }));
+  if (toCreate.length) {
+    const created = await Tag.bulkCreate(toCreate, { returning: true });
+    created.forEach(t => existingMap.set(t.name, t.id));
+  }
+  const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
+  await ResourceTag.destroy({ where: { resourceType: 'speaking', resourceId } });
+  if (tagIds.length) {
+    await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'speaking', resourceId, tagId })));
+  }
+}
+
+async function includeTagsFor(resourceId) {
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'speaking', resourceId } });
+  if (!rts.length) return [];
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name);
+}
 
 /**
  * Create a new speaking content
  */
 const createSpeaking = async (req, res) => {
   try {
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title || !videoRef) {
@@ -22,18 +78,10 @@ const createSpeaking = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    // Normalize level(s)
+    const normalizedLevels = normalizeLevels(level);
 
-    const speaking = await Speaking.create({
+  const speaking = await Speaking.create({
       title,
       description: (description ?? discription ?? null),
       content,
@@ -41,9 +89,16 @@ const createSpeaking = async (req, res) => {
       videoRef,
       pdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      level: normalizedLevel,
+      level: normalizedLevels,
+      tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
       createdBy
     });
+
+    // Sync tags to join table while preserving array column for compatibility
+    const tagNames = Array.isArray(tags)
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : [];
+    if (tagNames.length) await attachTags(speaking.id, tagNames);
 
     const speakingWithAuthor = await Speaking.findByPk(speaking.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
@@ -52,7 +107,7 @@ const createSpeaking = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Speaking content created successfully',
-      data: speakingWithAuthor
+      data: { ...speakingWithAuthor.toJSON(), tags: await includeTagsFor(speaking.id) }
     });
   } catch (error) {
     console.error('Error creating speaking:', error);
@@ -65,7 +120,7 @@ const createSpeaking = async (req, res) => {
  */
 const getAllSpeakings = async (req, res) => {
   try {
-    const { cursor, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
 
     const whereClause = {};
 
@@ -77,8 +132,14 @@ const getAllSpeakings = async (req, res) => {
       ];
     }
 
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    const tagsFilter = normalizeTags(tags);
+    if (tagsFilter) {
+      whereClause.tags = { [Op.overlap]: tagsFilter };
     }
 
     if (cursor) {
@@ -179,7 +240,7 @@ const getAllSpeakings = async (req, res) => {
  */
 const getPaginatedSpeakings = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { page = 1, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const offset = (page - 1) * limit;
 
     const whereClause = {};
@@ -190,8 +251,14 @@ const getPaginatedSpeakings = async (req, res) => {
         { transcript: { [Op.like]: `%${search}%` } }
       ];
     }
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    const tagsFilter = normalizeTags(tags);
+    if (tagsFilter) {
+      whereClause.tags = { [Op.overlap]: tagsFilter };
     }
 
     const { count, rows } = await Speaking.findAndCountAll({
@@ -239,7 +306,8 @@ const getSpeakingById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Speaking content not found' });
     }
 
-    res.status(200).json({ success: true, data: speaking });
+    const tagNames = await includeTagsFor(speaking.id);
+    res.status(200).json({ success: true, data: { ...speaking.toJSON(), tags: tagNames } });
   } catch (error) {
     console.error('Error fetching speaking:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -252,7 +320,7 @@ const getSpeakingById = async (req, res) => {
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
 
     const speaking = await Speaking.findByPk(id);
     if (!speaking) {
@@ -263,16 +331,8 @@ const updateSpeaking = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You can only update your own speaking content' });
     }
 
-    const levelMapUpdate = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
     const normalizedLevelUpdate = level !== undefined
-      ? (levelMapUpdate[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : speaking.level;
 
     await speaking.update({
@@ -283,14 +343,23 @@ const updateSpeaking = async (req, res) => {
       videoRef: videoRef ?? speaking.videoRef,
       pdf: pdf ?? speaking.pdf,
       imageUrl: (imageUrl ?? imageurl ?? speaking.imageUrl),
-      level: normalizedLevelUpdate ?? speaking.level
+      level: normalizedLevelUpdate ?? speaking.level,
+      tags: Array.isArray(tags)
+        ? tags
+        : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : speaking.tags)
     });
+
+    // Sync join-table tags
+    const tagNames = Array.isArray(tags)
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : [];
+    if (tagNames.length) await attachTags(speaking.id, tagNames);
 
     const updatedSpeaking = await Speaking.findByPk(id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
 
-    res.status(200).json({ success: true, message: 'Speaking content updated successfully', data: updatedSpeaking });
+    res.status(200).json({ success: true, message: 'Speaking content updated successfully', data: { ...updatedSpeaking.toJSON(), tags: await includeTagsFor(speaking.id) } });
   } catch (error) {
     console.error('Error updating speaking:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -313,6 +382,8 @@ const deleteSpeaking = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You can only delete your own speaking content' });
     }
 
+    // Clean up join-table tag mappings
+    await ResourceTag.destroy({ where: { resourceType: 'speaking', resourceId: id } });
     await speaking.destroy();
     res.status(200).json({ success: true, message: 'Speaking content deleted successfully' });
   } catch (error) {

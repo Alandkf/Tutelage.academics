@@ -8,6 +8,26 @@
 const { Blog, User } = require('../models');
 const { Op } = require('sequelize');
 
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
 /**
  * Create a new blog post
  * @param {Object} req - Express request object
@@ -26,16 +46,8 @@ const createBlog = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    // Normalize level(s) to an array of CEFR labels
+    const normalizedLevels = normalizeLevels(level);
 
     const blog = await Blog.create({
       title,
@@ -44,7 +56,7 @@ const createBlog = async (req, res) => {
       category: category ?? tag ?? null,
       description: description ?? discription ?? desccription ?? null,
       tags: Array.isArray(tags) ? tags : undefined,
-      level: normalizedLevel,
+      level: normalizedLevels,
       pdf,
       createdBy
     });
@@ -103,10 +115,11 @@ const getAllBlogs = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
-    // Optional level filter (supports 'A1', 'B2', or full labels)
+    // Optional level filter: supports comma-separated string or repeated query params
     const levelParam = req.query.level;
-    if (levelParam) {
-      whereClause.level = { [Op.like]: `${levelParam}%` };
+    const levelsFilter = normalizeLevels(levelParam);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
     // Add cursor condition for infinite scroll
     if (cursor) {
@@ -219,17 +232,9 @@ const updateBlog = async (req, res) => {
       });
     }
 
-    // Normalize level codes if provided
-    const levelMapUpdate = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
+    // Normalize level(s) if provided
     const normalizedLevelUpdate = level !== undefined
-      ? (levelMapUpdate[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : blog.level;
 
     await blog.update({
@@ -379,10 +384,11 @@ const getPaginatedBlogs = async (req, res) => {
         { description: { [Op.like]: `%${search}%` } }
       ];
     }
-    // Optional level filter (supports 'A1', 'B2', or full labels)
+    // Optional level filter: supports comma-separated string or repeated query params
     const levelParam = req.query.level;
-    if (levelParam) {
-      whereClause.level = { [Op.like]: `${levelParam}%` };
+    const levelsFilter = normalizeLevels(levelParam);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     console.log('🔍 Starting getPaginatedBlogs query...');
@@ -432,8 +438,9 @@ const getBlogsByCategory = async (req, res) => {
     const offset = (page - 1) * limit;
     const whereClause = { category };
     const levelParam = req.query.level;
-    if (levelParam) {
-      whereClause.level = { [Op.like]: `${levelParam}%` };
+    const levelsFilter = normalizeLevels(levelParam);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
     const { count, rows } = await Blog.findAndCountAll({

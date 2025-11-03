@@ -56,21 +56,11 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'URL or path to downloadable PDF for this video'
       },
 
-      // Language level field (CEFR-like levels)
+      // Language levels field (supports single or multiple CEFR-like levels)
       level: {
-        type: DataTypes.STRING(32),
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: true,
-        comment: 'Language level for the video (e.g., B1 Intermediate)',
-        validate: {
-          isIn: [[
-            'A1 Beginner',
-            'A2 Pre-intermediate',
-            'B1 Intermediate',
-            'B2 Upper-Intermediate',
-            'C1 Advanced',
-            'C2 Proficient'
-          ]]
-        }
+        comment: 'Language levels for the video (e.g., ["B1 Intermediate"])'
       },
       
       // Author relationship field

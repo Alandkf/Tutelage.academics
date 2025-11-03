@@ -5,8 +5,28 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Audio, User } = require('../models');
+const { Audio, User, Tag, ResourceTag, ResourceAnalytics } = require('../models');
 const { Op } = require('sequelize');
+
+// Convert incoming level(s) to CEFR labels as an array
+function normalizeLevels(input) {
+  if (input === undefined || input === null) return null;
+  const map = {
+    'a1': 'A1 Beginner',
+    'a2': 'A2 Pre-intermediate',
+    'b1': 'B1 Intermediate',
+    'b2': 'B2 Upper-Intermediate',
+    'c1': 'C1 Advanced',
+    'c2': 'C2 Proficient'
+  };
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean)
+    .map(v => map[v.toLowerCase()] || v);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
 
 async function attachTags(resourceId, tagNames = []) {
   if (!tagNames?.length) return;
@@ -41,6 +61,14 @@ async function ensureAnalytics(resourceId) {
   return row;
 }
 
+async function includeTagsFor(resourceId) {
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'audio', resourceId } });
+  if (!rts.length) return [];
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name);
+}
+
 /**
  * Create a new audio content
  * @param {Object} req - Express request object
@@ -48,7 +76,7 @@ async function ensureAnalytics(resourceId) {
  */
 const createAudio = async (req, res) => {
   try {
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -59,16 +87,8 @@ const createAudio = async (req, res) => {
       });
     }
 
-    // Normalize level codes (e.g., 'A1' -> 'A1 Beginner')
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
-    const normalizedLevel = levelMap[level?.toUpperCase?.()] || level || null;
+    // Normalize level(s) to an array
+    const normalizedLevels = normalizeLevels(level);
 
     const audio = await Audio.create({
       title,
@@ -77,7 +97,7 @@ const createAudio = async (req, res) => {
       audioRef,
       pdf: pdf ?? null,
       imageUrl: (imageUrl ?? imageurl ?? null),
-      level: normalizedLevel,
+      level: normalizedLevels,
       createdBy
     });
 
@@ -90,10 +110,16 @@ const createAudio = async (req, res) => {
       }]
     });
 
+    const tagNames = Array.isArray(tags)
+      ? tags
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    if (tagNames.length) await attachTags(audio.id, tagNames);
+    const tagList = await includeTagsFor(audio.id);
+
     res.status(201).json({
       success: true,
       message: 'Audio content created successfully',
-      data: audioWithAuthor
+      data: { ...audioWithAuthor.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error creating audio:', error);
@@ -112,7 +138,7 @@ const createAudio = async (req, res) => {
  */
 const getAllAudios = async (req, res) => {
   try {
-    const { cursor, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
 
     // Build where clause for filtering
     const whereClause = {};
@@ -125,12 +151,19 @@ const getAllAudios = async (req, res) => {
       ];
     }
 
-    // Optional level filter (supports 'A1', 'B2', or full labels)
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    // Optional level filter supports comma-separated or repeated query params
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
     }
 
-    // Skills endpoint minimal: no tag filtering
+    // Optional tag filtering via join table
+    if (tags) {
+      const idFilter = await getTagFilterIds(tags);
+      if (Array.isArray(idFilter)) {
+        whereClause.id = { ...(whereClause.id || {}), [Op.in]: idFilter };
+      }
+    }
 
     // Add cursor condition for infinite scroll
     if (cursor) {
@@ -170,15 +203,20 @@ const getAllAudios = async (req, res) => {
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
 
+    const enriched = await Promise.all(items.map(async (a) => {
+      const tagList = await includeTagsFor(a.id);
+      return { ...a.toJSON(), tags: tagList };
+    }));
+
     res.status(200).json({
       success: true,
       data: {
-        audios: items,
+        audios: enriched,
         pagination: {
           nextCursor,
           hasMore,
           itemsPerPage: parseInt(limit),
-          totalItemsReturned: items.length
+          totalItemsReturned: enriched.length
         }
       }
     });
@@ -204,6 +242,7 @@ const getPaginatedAudios = async (req, res) => {
       limit = 10, 
       search,
       level,
+      tags,
       sortBy = 'createdAt',
       sortOrder = 'DESC'
     } = req.query;
@@ -220,9 +259,17 @@ const getPaginatedAudios = async (req, res) => {
       ];
     }
 
-    // Optional level filter (supports 'A1', 'B2', or full labels)
-    if (level) {
-      whereClause.level = { [Op.like]: `${level}%` };
+    const levelsFilter = normalizeLevels(level);
+    if (levelsFilter) {
+      whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    // Optional tag filter
+    if (tags) {
+      const idFilter = await getTagFilterIds(tags);
+      if (Array.isArray(idFilter)) {
+        whereClause.id = { [Op.in]: idFilter };
+      }
     }
 
     let { count, rows } = await Audio.findAndCountAll({
@@ -238,14 +285,17 @@ const getPaginatedAudios = async (req, res) => {
       distinct: true
     });
 
-    // Skills endpoint minimal: no tag-based filtering in pagination
+    const enriched = await Promise.all(rows.map(async (a) => {
+      const tagList = await includeTagsFor(a.id);
+      return { ...a.toJSON(), tags: tagList };
+    }));
 
     const totalPages = Math.ceil(count / limit);
 
     res.status(200).json({
       success: true,
       data: {
-        audios: rows,
+        audios: enriched,
         pagination: {
           currentPage: parseInt(page),
           totalPages,
@@ -290,11 +340,12 @@ const getAudioById = async (req, res) => {
       });
     }
 
-    // Skills endpoint minimal: no analytics view counting
+    // Include tag names in detail response
+    const tagList = await includeTagsFor(audio.id);
 
     res.status(200).json({
       success: true,
-      data: audio
+      data: { ...audio.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error fetching audio:', error);
@@ -314,7 +365,7 @@ const getAudioById = async (req, res) => {
 const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tags } = req.body;
 
     const audio = await Audio.findByPk(id);
 
@@ -333,17 +384,8 @@ const updateAudio = async (req, res) => {
       });
     }
 
-    // Normalize level codes if provided
-    const levelMap = {
-      'A1': 'A1 Beginner',
-      'A2': 'A2 Pre-intermediate',
-      'B1': 'B1 Intermediate',
-      'B2': 'B2 Upper-Intermediate',
-      'C1': 'C1 Advanced',
-      'C2': 'C2 Proficient'
-    };
     const normalizedLevel = level !== undefined
-      ? (levelMap[level?.toUpperCase?.()] || level)
+      ? normalizeLevels(level)
       : audio.level;
 
     await audio.update({
@@ -356,7 +398,11 @@ const updateAudio = async (req, res) => {
       level: normalizedLevel ?? audio.level
     });
 
-    // Skills endpoint minimal: no tag management on update
+    if (tags !== undefined) {
+      const tagNames = Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean);
+      await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: audio.id } });
+      if (tagNames.length) await attachTags(audio.id, tagNames);
+    }
 
     // Fetch updated audio with author information
     const updatedAudio = await Audio.findByPk(id, {
@@ -370,7 +416,7 @@ const updateAudio = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Audio content updated successfully',
-      data: updatedAudio
+      data: { ...updatedAudio.toJSON(), tags: await includeTagsFor(audio.id) }
     });
   } catch (error) {
     console.error('Error updating audio:', error);
@@ -408,7 +454,8 @@ const deleteAudio = async (req, res) => {
       });
     }
 
-    // Skills endpoint minimal: no tag or analytics cleanup
+    await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: id } });
+    await ResourceAnalytics.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await audio.destroy();
 
     res.status(200).json({
