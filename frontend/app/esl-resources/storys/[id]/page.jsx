@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react'
+import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon, ChevronDown , ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 
@@ -14,6 +17,18 @@ const SingleStoryPage = () => {
   const [story, setStory] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // PDF modal for story resources
+  const [pdfModalOpen, setPdfModalOpen] = useState(false)
+  const [pdfModalUrl, setPdfModalUrl] = useState(null)
+  const ANIM_DURATION = 0.3
+  const openPdfModal = (url) => { setPdfModalUrl(url); setPdfModalOpen(true) }
+  const closePdfModal = () => setPdfModalOpen(false)
+
+  // Prep & Tasks state for story page
+  const [prepOpen, setPrepOpen] = useState(false)
+  const [openTasks, setOpenTasks] = useState({})
+  const toggleTask = (idx) => setOpenTasks(prev => ({ ...prev, [idx]: !prev[idx] }))
+
   useEffect(() => {
     const fetchStory = async () => {
       try {
@@ -22,7 +37,7 @@ const SingleStoryPage = () => {
           { credentials: 'include' }
         )
         const data = await response.json()
-
+        
         if (data.success) {
           setStory(data.data)
         }
@@ -98,20 +113,194 @@ const SingleStoryPage = () => {
         </div>
       )}
 
-      {/* Reading Content Section */}
+      {/* Preparation Exercise block BEFORE Reading Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border rounded-md overflow-hidden mb-6">
+          <button onClick={() => setPrepOpen(p => !p)} className="w-full flex items-center justify-between px-6 py-4 bg-card">
+            <span className="font-semibold text-foreground">Preparation exercise</span>
+            <span className="text-muted-foreground">{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+          </button>
+
+          <AnimatePresence initial={false}>
+            {prepOpen && (
+              <motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
+                <div className="px-6 py-4">
+                  {story?.pdf ? (
+                    <div className="w-fit">
+                      <div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
+                        <div className="flex items-center gap-3">
+                          <FileTextIcon className="w-6 h-6 text-primary" />
+                          <div>
+                            <div className="font-semibold text-foreground">Preparation PDF</div>
+                            <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                          <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : <p className="text-sm text-muted-foreground">No preparation PDF available.</p>}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Reading Content Section - boxed, always open (use contentText) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
-        <div className="prose prose-lg max-w-none">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6">
-            Reading Text
-          </h2>
-          <div className="text-foreground leading-relaxed whitespace-pre-wrap">
-            {story.content || 'No content available.'}
+        <div className="border rounded-md overflow-hidden bg-background">
+          <div className="px-6 py-4 border-b bg-card">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Reading Text</h2>
+          </div>
+
+          <div className="px-6 py-6">
+            <div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">
+              {story.content || 'No content available.'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tasks (inserted after reading content) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="grid grid-cols-1 gap-4">
+          {Array.isArray(story?.tasks) && story.tasks.length > 0 ? (
+            story.tasks.map((task, idx) => (
+              <div key={idx} className="border rounded-md overflow-hidden">
+                <button onClick={() => toggleTask(idx)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
+                  <span className="font-medium text-foreground">Task {idx + 1}</span>
+                  <span className="text-muted-foreground">{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {openTasks[idx] && (
+                    <motion.div key={`task-${idx}`} initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
+                      <div className="px-4 py-3">
+                        <div className="text-sm text-foreground leading-relaxed">{task.content || 'Task details will be added here.'}</div>
+                        {story?.pdf && (
+                          <div className="mt-3 mx-auto max-w-3xl">
+                            <div className="flex items-center justify-between gap-4 p-3 border rounded-md bg-card">
+                              <div className="flex items-center gap-3">
+                                <FileTextIcon className="w-5 h-5 text-primary" />
+                                <div>
+                                  <div className="font-medium">Task PDF</div>
+                                  <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                                <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))
+          ) : (
+            <div className="border rounded-md overflow-hidden">
+              <button onClick={() => toggleTask(0)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
+                <span className="font-medium text-foreground">Task 1</span>
+                <span className="text-muted-foreground">{openTasks[0] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+              </button>
+              <AnimatePresence initial={false}>
+                {openTasks[0] && (
+                  <motion.div key="task-0" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
+                    <div className="px-4 py-3">
+                      {story?.pdf && (
+                        <div className="mt-3 w-fit">
+                          <div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
+                            <div className="flex items-center gap-3">
+                              <FileTextIcon className="w-5 h-5 text-primary" />
+                              <div>
+                                <div className="font-medium">Task PDF</div>
+                                <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                              <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tags section if story has tags (story model may not have tags) */}
+      {Array.isArray(story?.tags) && story.tags.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+          <h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
+          <div className="flex flex-wrap gap-3">
+            {story.tags.map((t, i) => (
+              <div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">{t}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Language Level - clickable pills */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+        <div className="p-6 rounded-md">
+          <div className="flex flex-wrap gap-3">
+            {(() => {
+              const levels = Array.isArray(story?.level) ? story.level : (story?.level ? [story.level] : []);
+              if (!levels.length) {
+                return <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">Not specified</div>
+              }
+              const mapToSlug = (lvl) => {
+                if (!lvl) return '/levels';
+                const key = String(lvl).toLowerCase();
+                if (key.includes('a1')) return '/levels/a1';
+                if (key.includes('a2')) return '/levels/a2';
+                if (key.includes('b1')) return '/levels/b1';
+                if (key.includes('b2')) return '/levels/b2';
+                if (key.includes('c1')) return '/levels/c1';
+                if (key.includes('c2')) return '/levels/c2';
+                return '/levels';
+              };
+              return levels.map((lvl, i) => (
+                <Link key={i} href={mapToSlug(lvl)} 
+                      className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+                    {lvl}
+                </Link>
+              ));
+            })()}
           </div>
         </div>
       </div>
 
       {/* CTA Section */}
       <SingleSourceCTA />
+
+      {/* PDF Modal (same as blog) */}
+      <AnimatePresence>
+        {pdfModalOpen && pdfModalUrl && (
+          <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden" initial={{ y: 20, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.98, opacity: 0 }} transition={{ duration: ANIM_DURATION }}>
+              <div className="flex items-center justify-between p-3 border-b">
+                <div className="flex items-center gap-3"><FileTextIcon className="w-6 h-6 text-primary" /><div className="font-semibold">{(() => { try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' } })()}</div></div>
+                <div className="flex items-center gap-2"><a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a><button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button></div>
+              </div>
+              <div className="px-6 py-3 text-sm text-muted-foreground border-b">Note: if the PDF does not load, open it in a new tab.</div>
+              <div className="w-full h-[70vh]"><iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" /></div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   )
 }

@@ -49,7 +49,7 @@ const SingleVideo = () => {
   const [pdfModalUrl, setPdfModalUrl] = useState(null)
 
   // animation duration (slower)
-  const ANIM_DURATION = 0.48
+  const ANIM_DURATION = 0.3
 
   // Re-add collapsible UI state (was removed accidentally)
   const [prepOpen, setPrepOpen] = useState(false)
