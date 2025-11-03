@@ -32,8 +32,6 @@ const getYouTubeThumbnail = (url, preferMax = false) => {
 
 const SpeakingVideoGridA1 = () => {
   const [videos, setVideos] = useState([])  
-  console.log('video', videos);
-  
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -53,7 +51,6 @@ const SpeakingVideoGridA1 = () => {
         { credentials: 'include' }
       )
       const data = await response.json()
-      console.log('data', data);
       
       if (data.success) {
         // Normalize common response shapes:
