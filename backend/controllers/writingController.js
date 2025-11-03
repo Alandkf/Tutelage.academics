@@ -4,7 +4,7 @@
 // Handles CRUD operations for Writing content with pagination and filtering.
 // ============================================================================
 
-const { Writing, User } = require('../models');
+const { Writing, User, Tag, ResourceTag } = require('../models');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -37,6 +37,32 @@ function normalizeTags(input) {
   return unique.length ? unique : null;
 }
 
+// Join-table tag helpers for Writing resources
+async function attachTags(resourceId, tagNames = []) {
+  if (!Array.isArray(tagNames) || !tagNames.length) return;
+  const trimmed = tagNames.map(t => String(t).trim()).filter(Boolean);
+  const existing = await Tag.findAll({ where: { name: { [Op.in]: trimmed } } });
+  const existingMap = new Map(existing.map(t => [t.name, t.id]));
+  const toCreate = trimmed.filter(n => !existingMap.has(n)).map(n => ({ name: n, namespace: 'writing' }));
+  if (toCreate.length) {
+    const created = await Tag.bulkCreate(toCreate, { returning: true });
+    created.forEach(t => existingMap.set(t.name, t.id));
+  }
+  const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
+  await ResourceTag.destroy({ where: { resourceType: 'writing', resourceId } });
+  if (tagIds.length) {
+    await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: 'writing', resourceId, tagId })));
+  }
+}
+
+async function includeTagsFor(resourceId) {
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'writing', resourceId } });
+  if (!rts.length) return [];
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name);
+}
+
 /**
  * Create a new writing content
  */
@@ -65,6 +91,12 @@ const createWriting = async (req, res) => {
       createdBy
     });
 
+    // Sync tags to join table while preserving array column for compatibility
+    const tagNames = Array.isArray(tags)
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : [];
+    if (tagNames.length) await attachTags(writing.id, tagNames);
+
     const writingWithAuthor = await Writing.findByPk(writing.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
@@ -72,7 +104,7 @@ const createWriting = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Writing content created successfully',
-      data: writingWithAuthor
+      data: { ...writingWithAuthor.toJSON(), tags: await includeTagsFor(writing.id) }
     });
   } catch (error) {
     console.error('Error creating writing:', error);
@@ -211,7 +243,8 @@ const getWritingById = async (req, res) => {
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
     }
-    res.status(200).json({ success: true, data: writing });
+    const tagNames = await includeTagsFor(writing.id);
+    res.status(200).json({ success: true, data: { ...writing.toJSON(), tags: tagNames } });
   } catch (error) {
     console.error('Error fetching writing:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -249,10 +282,16 @@ const updateWriting = async (req, res) => {
         : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : writing.tags)
     });
 
+    // Sync join-table tags
+    const tagNamesUpdate = Array.isArray(tags)
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : [];
+    if (tagNamesUpdate.length) await attachTags(writing.id, tagNamesUpdate);
+
     const updatedWriting = await Writing.findByPk(id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
-    res.status(200).json({ success: true, message: 'Writing content updated successfully', data: updatedWriting });
+    res.status(200).json({ success: true, message: 'Writing content updated successfully', data: { ...updatedWriting.toJSON(), tags: await includeTagsFor(writing.id) } });
   } catch (error) {
     console.error('Error updating writing:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -272,6 +311,8 @@ const deleteWriting = async (req, res) => {
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only delete your own writing content' });
     }
+    // Clean up join-table tag mappings
+    await ResourceTag.destroy({ where: { resourceType: 'writing', resourceId: id } });
     await writing.destroy();
     res.status(200).json({ success: true, message: 'Writing content deleted successfully' });
   } catch (error) {
