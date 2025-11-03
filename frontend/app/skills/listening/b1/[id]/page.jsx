@@ -11,7 +11,7 @@ import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const SingleAudioA1 = () => {
+const SingleAudioB1 = () => {
   const params = useParams()
   const router = useRouter()
   const [audio, setAudio] = useState(null)
@@ -410,4 +410,4 @@ const SingleAudioA1 = () => {
  )
 }
 
-export default SingleAudioA1
+export default SingleAudioB1

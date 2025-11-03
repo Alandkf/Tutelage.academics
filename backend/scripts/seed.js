@@ -8,21 +8,21 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const bcrypt = require('bcrypt');
-  const {
-    sequelize,
-    User,
-    Blog,
-    Video,
-    Audio,
-    Speaking,
-    Writing,
-    Course,
-    Test,
-    Faq,
-    LandingSection,
-    EslVideo,
-    EslAudio,
-  } = require('../models');
+    const {
+      sequelize,
+      User,
+      Blog,
+      Video,
+      Audio,
+      Speaking,
+      Writing,
+      Course,
+      Test,
+      Faq,
+      LandingSection,
+      EslVideo,
+      EslAudio,
+    } = require('../models');
 
 
 const BCRYPT_ROUNDS = 10;
@@ -5321,9 +5321,9 @@ Finally, remember that learning English is itself an achievement worthy of recog
 
   const remaining = MIN - count;
   await Blog.bulkCreate(
-    blogs.slice(0, remaining).map(b => ({
+    blogs.slice(0, remaining).map((b, i) => ({
       ...b,
-      level: b.level || pickLevel(),
+      level: LEVELS[i % LEVELS.length],
       pdf: b.pdf || buildPdfUrl(b.title),
       createdBy: admin.id
     }))
@@ -5416,16 +5416,18 @@ async function seedEslAudios(admin) {
 
 async function seedSpeakings(admin) {
   const count = await Speaking.count();
-  const MIN = 10;
+  const MIN = 160;
   if (count >= MIN) return;
 
-  const speakings = Array.from({ length: 10 }).map((_, i) => ({
+  const speakings = Array.from({ length: 160 }).map((_, i) => ({
     title: `Speaking Practice ${i + 1}`,
     description: 'Short speaking activity with video prompt.',
-    transcript: null,
-    videoRef: `https://www.youtube.com/watch?v=ysz5S6PUM-U&t=${i + 1}`,
+    transcript: "this is trans",
+    imageUrl : "https://plus.unsplash.com/premium_photo-1670884442051-263f5ae2d6ed?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    videoRef: `https://youtu.be/Qq1eP-wqoWw?si=MmDszgnEE9szS43d`,
     pdf: SAMPLE_PDF_URL,
-    level: LEVELS[i % LEVELS.length]
+    content: "this is the content",
+    // level: LEVELS[i % LEVELS.length]
   }));
 
   const remaining = MIN - count;
