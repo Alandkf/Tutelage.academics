@@ -5372,15 +5372,17 @@ async function seedEslVideos(admin) {
 
 async function seedAudios(admin) {
   const count = await Audio.count();
-  const MIN = 10;
+  const MIN = 160;
   if (count >= MIN) return;
 
-  const audios = Array.from({ length: 10 }).map((_, i) => ({
+  const audios = Array.from({ length: 160 }).map((_, i) => ({
     title: `Focus Track ${i + 1}`,
     content: 'Ambient audio to help focus during study sessions.',
-    transcript: null,
-    audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${i + 1}.mp3`,
-    pdfRef: SAMPLE_PDF_URL,
+    imageUrl : "https://plus.unsplash.com/premium_photo-1661603896375-c837c4c54132?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1332",
+    description : 'try to listen and learn witht this audiotrack.',
+    transcript: "this is the transcript",
+    audioRef: `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3`,
+    pdf: SAMPLE_PDF_URL,
     level: LEVELS[i % LEVELS.length]
   }));
 
