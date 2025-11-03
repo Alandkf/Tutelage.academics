@@ -23,7 +23,7 @@ const A1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
                   <Image
-                    src={"https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80"}
+                    src={"https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"}
                     alt={"A1 Speaking"}
                     fill
                     className="object-cover"
@@ -38,7 +38,7 @@ const A1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
                 <div className="max-w-5xl">
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    Our speaking materials help learners practice speaking independently and improve confidence step by step from simple sentences to fluent conversations.",
+                    Speaking practices to help learners introduce themselves, talk about family, daily routines, and hobbies. Activities include using simple phrases, guided role-plays, and picture prompts."
                   </p>
                 </div>
               </div>
