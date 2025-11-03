@@ -27,6 +27,16 @@ function normalizeLevels(input) {
   return unique.length ? unique : null;
 }
 
+function normalizeTags(input) {
+  if (input === undefined || input === null) return null;
+  const values = Array.isArray(input) ? input : String(input).split(',');
+  const normalized = values
+    .map(v => String(v).trim())
+    .filter(Boolean);
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : null;
+}
+
 /**
  * Create a new speaking content
  */
@@ -78,7 +88,7 @@ const createSpeaking = async (req, res) => {
  */
 const getAllSpeakings = async (req, res) => {
   try {
-    const { cursor, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
 
     const whereClause = {};
 
@@ -93,6 +103,11 @@ const getAllSpeakings = async (req, res) => {
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) {
       whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    const tagsFilter = normalizeTags(tags);
+    if (tagsFilter) {
+      whereClause.tags = { [Op.overlap]: tagsFilter };
     }
 
     if (cursor) {
@@ -143,7 +158,7 @@ const getAllSpeakings = async (req, res) => {
  */
 const getPaginatedSpeakings = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, level, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { page = 1, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const offset = (page - 1) * limit;
 
     const whereClause = {};
@@ -157,6 +172,11 @@ const getPaginatedSpeakings = async (req, res) => {
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) {
       whereClause.level = { [Op.overlap]: levelsFilter };
+    }
+
+    const tagsFilter = normalizeTags(tags);
+    if (tagsFilter) {
+      whereClause.tags = { [Op.overlap]: tagsFilter };
     }
 
     const { count, rows } = await Speaking.findAndCountAll({
