@@ -73,11 +73,11 @@ export default function Navbar (){
     },
     {
       name: "Tutelage Tests",
-      href: "/tutelagetests",
+      href: "/tutelage-tests",
       dropdown: [
-        { name: "Free Practice Tests", href: "/tutelagetests/practicetests" },
-        { name: "Language placement test", href: "/tutelagetests/languageplacement" },
-        { name: "International/ mock test", href: "/tutelagetests/mockexams" },
+        { name: "Free Practice Tests", href: "/tutelage-tests/practicetests" },
+        { name: "Language placement test", href: "/tutelage-tests/languageplacement" },
+        { name: "International/ mock test", href: "/tutelage-tests/mockexams" },
       ],
     },
     {

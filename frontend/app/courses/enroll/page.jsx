@@ -490,7 +490,7 @@ const EnrollPage = () => {
                 <p className={`text-sm text-muted-foreground mb-4 ${isRTL ? 'text-right' : ''}`}>
                   {t('enroll.sidebar.levelContent')}
                 </p>
-                <Link href="/tutelagetests/languageplacement">
+                <Link href="/tutelage-tests/languageplacement">
                   <Button variant="outline" className="w-full mb-3">
                     {t('enroll.sidebar.takePlacementTest')}
                   </Button>
@@ -510,12 +510,12 @@ const EnrollPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Link href="/tutelagetests/practicetests">
+                <Link href="/tutelage-tests/practicetests">
                   <Button variant="ghost" className={`w-full text-sm ${isRTL ? 'justify-start' : 'justify-start'}`}>
                     {t('enroll.sidebar.freePracticeTests')}
                   </Button>
                 </Link>
-                <Link href="/tutelagetests/mockexams">
+                <Link href="/tutelage-tests/mockexams">
                   <Button variant="ghost" className={`w-full text-sm ${isRTL ? 'justify-start' : 'justify-start'}`}>
                     {t('enroll.sidebar.mockTests')}
                   </Button>

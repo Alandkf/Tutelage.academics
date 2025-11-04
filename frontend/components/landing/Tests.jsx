@@ -8,21 +8,21 @@ const Tests = () => {
       icon: Target,
       title: "Level Check",
       description: "Take our comprehensive language placement test to determine your current English level and get personalized recommendations.",
-      href: "/tutelagetests/languageplacement",
+      href: "/tutelage-tests/languageplacement",
       buttonText: "Discover My Level"
     },
     {
       icon: BookOpen,
       title: "Skill Building Courses", 
       description: "Access our free practice tests designed to help you improve your English skills across all language areas.",
-      href: "/tutelagetests/practicetests",
+      href: "/tutelage-tests/practicetests",
       buttonText: "Start Practicing"
     },
     {
       icon: Globe,
       title: "Global Test Success",
       description: "Prepare for international English proficiency exams with our comprehensive mock tests and practice materials.",
-      href: "/tutelagetests/mockexams",
+      href: "/tutelage-tests/mockexams",
       buttonText: "Ace My Exam"
     }
   ]

@@ -52,9 +52,9 @@ export const Footer = () => {
 
   // Tutelage Tests links
   const tutelageTestsLinks = [
-    { name: "Free Practice Tests", href: "/tutelagetests/practicetests" },
-    { name: "Language Placement Test", href: "/tutelagetests/languageplacement" },
-    { name: "International/Mock Tests", href: "/tutelagetests/mockexams" },
+    { name: "Free Practice Tests", href: "/tutelage-tests/practicetests" },
+    { name: "Language Placement Test", href: "/tutelage-tests/languageplacement" },
+    { name: "International/Mock Tests", href: "/tutelage-tests/mockexams" },
   ]
 
   const socialLinks = [
@@ -168,7 +168,7 @@ export const Footer = () => {
 
                 {/* Tutelage Tests Links */}
                 <div className="space-y-4">
-                  <Link href="/tutelagetests">
+                  <Link href="/tutelage-tests">
                     <h4 className="text-lg font-bold text-white hover:text-primary transition-colors duration-200 mb-4 cursor-pointer">Tutelage Tests</h4>
                   </Link>
                   <ul className="space-y-2">

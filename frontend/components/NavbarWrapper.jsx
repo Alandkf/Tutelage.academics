@@ -15,7 +15,7 @@ export default function NavbarWrapper({ children }) {
     '/courses',
     '/esl-resources',
     '/levels',
-    '/tutelagetests',
+    '/tutelage-tests',
     '/about-us',
     '/contact',
   ]
