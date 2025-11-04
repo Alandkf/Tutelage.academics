@@ -1,4 +1,5 @@
 
+import CallToAction from "@/components/CallToAction"
 import SpeakingVideoGridA1 from "@/components/skills/speaking/a1/SpeakingVideoGridA1"
 import Image from "next/image"
 
@@ -44,6 +45,7 @@ const A1 = () => {
               </div>
 
               <SpeakingVideoGridA1 />
+              <CallToAction />
     </div>
   )
 }

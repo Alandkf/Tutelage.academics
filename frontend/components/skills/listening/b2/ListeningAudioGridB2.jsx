@@ -134,7 +134,7 @@ const ListeningAudioGridB2 = () => {
             audios.map((audio) => (
               <Link
                 key={audio?.id}
-                href={`/skills/listening/a1/${audio?.id}`}
+                href={`/skills/listening/b2/${audio?.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">

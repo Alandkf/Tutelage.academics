@@ -1,11 +1,10 @@
 
-
 import CallToAction from "@/components/CallToAction"
-import ListeningAudioGridC1 from "@/components/skills/listening/c1/ListeningAudioGridC1"
+import SpeakingVideoGridB1 from "@/components/skills/speaking/b1/SpeakingVideoGridB1"
 import Image from "next/image"
 
 
-const C1 = () => {
+const B1 = () => {
   return (
     <div className="relative min-h-screen bg-background pt-4">
          {/* Header Section */}
@@ -14,7 +13,7 @@ const C1 = () => {
                   <div className="flex flex-row items-center justify-between gap-6">
                     <div className="flex-1">
                       <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2">
-                        C1 Listening
+                        B1 Speaking
                       </h1>
                     </div>
                   </div>
@@ -25,8 +24,8 @@ const C1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
                   <Image
-                    src={"https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80"}
-                    alt={"C1 Listening"}
+                    src={"https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&q=80"}
+                    alt={"B1 Speaking"}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
@@ -40,15 +39,15 @@ const C1 = () => {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
                 <div className="max-w-5xl">
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                      Listening practices for learners to understand extended, complex speech even when it is not clearly structured and when ideas are implied. Activities include recognizing sarcasm, subtle opinions, implied meanings, tone, humor, and culture-based references in debates, lectures, podcasts, and films."
+                    Speaking practices to help learners describe experiences, events, and plans, and share opinions. Activities include storytelling prompts, discussion questions, and role-plays on familiar topics like travel, work, and leisure."
                   </p>
                 </div>
               </div>
 
-              <ListeningAudioGridC1 />
+              <SpeakingVideoGridB1 />
               <CallToAction />
     </div>
   )
 }
 
-export default C1
+export default B1

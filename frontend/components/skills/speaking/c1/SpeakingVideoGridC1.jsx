@@ -14,9 +14,24 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const ListeningAudioGridB1 = () => {
-  const [audios, setAudios] = useState([])
-  
+const getYouTubeThumbnail = (url, preferMax = false) => {
+  if (!url) return null;
+  try {
+    // match common YouTube URL forms: v=ID, youtu.be/ID, embed/ID
+    const match = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/);
+    const id = match && match[1];
+    if (!id) return null;
+    // prefer max resolution when available (may 404 for some videos)
+    return preferMax
+      ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg`
+      : `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+  } catch (e) {
+    return null;
+  }
+};
+
+const SpeakingVideoGridC1 = () => {
+  const [videos, setVideos] = useState([])  
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
@@ -25,65 +40,73 @@ const ListeningAudioGridB1 = () => {
 
   const itemsPerPage = 6
 
-  const fetchAudios = async (page) => {
+  const fetchVideos = async (page) => {
     setLoading(true)
     try {
+      // fetch ESL videos instead of blogs; preserve pagination parameters
+      const levelParam = 'C1'
       const offset = (page - 1) * itemsPerPage
-      // filter for A1 level only (controller does a LIKE `${level}%`)
-      const levelParam = 'B1'
       const response = await fetch(
-        `${BASE_URL}/api/audios?limit=${itemsPerPage}&offset=${offset}&level=${encodeURIComponent(levelParam)}`,
+        `${BASE_URL}/api/speakings?limit=${itemsPerPage}&offset=${offset}&level=${encodeURIComponent(levelParam)}`,
         { credentials: 'include' }
       )
       const data = await response.json()
-
+      
       if (data.success) {
-        if (Array.isArray(data.data)) {
-          setAudios(data.data)
-          const hasNext = data.data.length === itemsPerPage
-          setHasNextPage(hasNext)
-          setHasPrevPage(page > 1)
-          setTotalPages(hasNext ? page + 10 : page)
+        // Normalize common response shapes:
+        // - { success:true, data: { speakings: [...], pagination: {...} } }
+        // - { success:true, data: [...] } (legacy)
+        // - { success:true, speakings: [...] } (alternate)
+        const items = data?.data?.speakings
+          || data?.speakings
+          || (Array.isArray(data?.data) ? data.data : null)
+          || [];
+
+        const pagination = data?.data?.pagination || data?.pagination || {};
+
+        setVideos(Array.isArray(items) ? items : []);
+
+        // Prefer server-provided pagination flags when available
+        const hasMore = typeof pagination.hasMore !== 'undefined'
+          ? !!pagination.hasMore
+          : (Array.isArray(items) ? items.length === itemsPerPage : false);
+
+        setHasNextPage(hasMore);
+        setHasPrevPage(page > 1);
+
+        // derive a sensible totalPages for UI display
+        if (pagination.totalPages) {
+          setTotalPages(pagination.totalPages);
         } else {
-          // If API returns an object shape, try to find array
-          const list = data.data && (data.data.audios || data.data.items || data.data)
-          if (Array.isArray(list)) {
-            setAudios(list)
-            const hasNext = list.length === itemsPerPage
-            setHasNextPage(hasNext)
-            setHasPrevPage(page > 1)
-            setTotalPages(hasNext ? page + 10 : page)
-          } else {
-            setAudios([])
-            setHasNextPage(false)
-            setHasPrevPage(false)
-            setTotalPages(1)
-          }
+          setTotalPages(hasMore ? page + 10 : page);
         }
       } else {
-        setAudios([])
-        setHasNextPage(false)
-        setHasPrevPage(false)
-        setTotalPages(1)
+        setVideos([]);
+        setHasNextPage(false);
+        setHasPrevPage(false);
+        setTotalPages(1);
       }
     } catch (error) {
-      console.error('Error fetching audios:', error)
-      setAudios([])
+      console.error('Error fetching videos:', error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchAudios(currentPage)
+    fetchVideos(currentPage)
   }, [currentPage])
 
   const handleNextPage = () => {
-    if (hasNextPage) setCurrentPage(prev => prev + 1)
+    if (hasNextPage) {
+      setCurrentPage(prev => prev + 1)
+    }
   }
 
   const handlePrevPage = () => {
-    if (hasPrevPage) setCurrentPage(prev => prev - 1)
+    if (hasPrevPage) {
+      setCurrentPage(prev => prev - 1)
+    }
   }
 
   const truncateText = (text, maxLength = 120) => {
@@ -92,24 +115,43 @@ const ListeningAudioGridB1 = () => {
     return text.slice(0, maxLength) + '...'
   }
 
+  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = []
-    if (currentPage > 1) pages.push(currentPage - 1)
+    
+    // Show previous page if exists
+    if (currentPage > 1) {
+      pages.push(currentPage - 1)
+    }
+    
+    // Always show current page
     pages.push(currentPage)
-    if (currentPage + 1 <= totalPages) pages.push(currentPage + 1)
+    
+    // Show next page if exists
+    if (currentPage + 1 <= totalPages) {
+      pages.push(currentPage + 1)
+    }
+    
+    // Check if we can show a page +10 ahead OR the last page if less than +10
     const pagePlusTen = currentPage + 10
+    
     if (pagePlusTen <= totalPages) {
+      // We can show page +10
       pages.push('...')
       pages.push(pagePlusTen)
     } else if (totalPages > currentPage + 1) {
+      // Can't show +10, but show the last page if it's beyond current+1
       pages.push('...')
       pages.push(totalPages)
     }
+    
     return pages
   }
 
   const handlePageClick = (page) => {
-    if (page !== '...' && page !== currentPage) setCurrentPage(page)
+    if (page !== '...' && page !== currentPage) {
+      setCurrentPage(page)
+    }
   }
 
   return (
@@ -118,7 +160,7 @@ const ListeningAudioGridB1 = () => {
         {/* Section Title */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Choose a listening lesson
+            Our Best Videos
           </h2>
         </div>
 
@@ -129,20 +171,23 @@ const ListeningAudioGridB1 = () => {
             Array.from({ length: itemsPerPage }).map((_, index) => (
               <StoryCardSkeleton key={index} />
             ))
-          ) : audios.length > 0 ? (
-            // Show actual audios
-            audios.map((audio) => (
+          ) : videos.length > 0 ? (
+            // Show actual videos
+            videos.map((video) => (
               <Link
-                key={audio?.id}
-                href={`/skills/listening/b1/${audio?.id}`}
+                key={video.id}
+                href={`/skills/speaking/c1/${video.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                   {/* Image */}
                   <div className="relative h-48 w-full overflow-hidden">
                     <Image
-                      src={audio?.imageUrl}
-                      alt={audio?.title}
+                      src={
+                        video.thumbnailUrl
+                          || getYouTubeThumbnail(video.videoRef) // try building thumbnail from the YouTube URL
+                      }
+                      alt={video.title}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -156,11 +201,11 @@ const ListeningAudioGridB1 = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <h3 className="text-xl font-bold text-foreground mb-3 pb-2 truncate cursor-help">
-                            {audio?.title}
+                            {video.title}
                           </h3>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p className="text-sm">{audio?.title}</p>
+                          <p className="text-sm">{video.title}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -170,12 +215,12 @@ const ListeningAudioGridB1 = () => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 cursor-help">
-                            {truncateText(audio?.description)}
+                            {truncateText(video.description)}
                           </p>
                         </TooltipTrigger>
-                        {audio?.description && audio?.description.length > 120 && (
+                        {video.description && video.description.length > 120 && (
                           <TooltipContent className="max-w-md">
-                            <p className="text-sm">{audio?.description}</p>
+                            <p className="text-sm">{video.description}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -188,14 +233,14 @@ const ListeningAudioGridB1 = () => {
             // Empty State
             <div className="col-span-full text-center py-20">
               <p className="text-lg text-muted-foreground">
-                No audios available at the moment. Check back soon!
+                No videos available at the moment. Check back soon!
               </p>
             </div>
           )}
         </div>
 
         {/* Pagination Controls - Always visible */}
-        {(audios.length > 0 || loading) && (
+        {(videos.length > 0 || loading) && (
           <div className="flex items-center justify-between">
             {/* Previous Button - Left */}
             <Button
@@ -251,4 +296,4 @@ const ListeningAudioGridB1 = () => {
   )
 }
 
-export default ListeningAudioGridB1
+export default SpeakingVideoGridC1

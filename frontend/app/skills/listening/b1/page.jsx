@@ -1,5 +1,6 @@
 
 
+import CallToAction from "@/components/CallToAction"
 import ListeningAudioGridB1 from "@/components/skills/listening/b1/ListeningAudioGridB1"
 import Image from "next/image"
 
@@ -45,6 +46,7 @@ const B1 = () => {
               </div>
 
               <ListeningAudioGridB1 />
+              <CallToAction />
     </div>
   )
 }
