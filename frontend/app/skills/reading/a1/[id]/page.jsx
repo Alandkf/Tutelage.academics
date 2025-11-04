@@ -11,12 +11,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 
-const SingleBlogPage = () => {
+const SingleArticleA1 = () => {
 	const params = useParams()
 	const router = useRouter()
-	const [blog, setBlog] = useState(null)
-	console.log('blog, ', blog);
-	
+	const [article, setArticle] = useState(null)
 	const [loading, setLoading] = useState(true)
 
 	// PDF modal state (same pattern as videos)
@@ -32,26 +30,26 @@ const SingleBlogPage = () => {
 	const toggleTask = (idx) => setOpenTasks(prev => ({ ...prev, [idx]: !prev[idx] }))
 
 	useEffect(() => {
-		const fetchBlog = async () => {
+		const fetchArticle = async () => {
 			try {
 				const response = await fetch(
-					`${BASE_URL}/api/blogs/${params.id}`,
+					`${BASE_URL}/api/readings/${params.id}`,
 					{ credentials: 'include' }
 				)
 				const data = await response.json()
 
 				if (data.success) {
-					setBlog(data.data)
+					setArticle(data.data)
 				}
 			} catch (error) {
-				console.error('Error fetching blog:', error)
+				console.error('Error fetching article:', error)
 			} finally {
 				setLoading(false)
 			}
 		}
 
 		if (params.id) {
-			fetchBlog()
+			fetchArticle()
 		}
 	}, [params.id])
 
@@ -63,10 +61,10 @@ const SingleBlogPage = () => {
 		)
 	}
 
-	if (!blog) {
+	if (!article) {
 		return (
 			<div className="min-h-screen flex items-center justify-center">
-				<p className="text-lg text-muted-foreground">Blog not found</p>
+				<p className="text-lg text-muted-foreground">Article not found</p>
 			</div>
 		)
 	}
@@ -77,7 +75,7 @@ const SingleBlogPage = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 				<div className="flex flex-row items-center justify-between gap-6">
 					<h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-						{blog.title}
+						{article.title}
 					</h1>
 					<Button
 						variant="outline"
@@ -95,8 +93,8 @@ const SingleBlogPage = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 				<div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
 					<Image
-						src={blog.imageRef || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'}
-						alt={blog.title}
+						src={article.imageUrl}
+                        alt={article.title}
 						fill
 						className="object-cover"
 						sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
@@ -107,88 +105,78 @@ const SingleBlogPage = () => {
 			</div>
 
 			{/* Description Section */}
-			{blog.description && (
+			{article.description && (
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 					<p className="text-lg text-muted-foreground leading-relaxed">
-						{blog.description}
+						{article.description}
 					</p>
 				</div>
 			)}
 
 			{/* Preparation Exercise (collapsible) */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="border rounded-md overflow-hidden mb-6">
-					<button
-						onClick={() => setPrepOpen(p => !p)}
-						className="w-full flex items-center justify-between px-6 py-4 bg-card"
-					>
-						<span className="font-semibold text-foreground">Preparation exercise</span>
-						<span className="text-muted-foreground">
-							{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-						</span>
-					</button>
+			{article?.pdf && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+					<div className="border rounded-md overflow-hidden mb-6">
+						<button onClick={() => setPrepOpen(p => !p)} className="w-full flex items-center justify-between px-6 py-4 bg-card">
+							<span className="font-semibold text-foreground">Preparation exercise</span>
+							<span className="text-muted-foreground">
+								{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+							</span>
+						</button>
 
-					<AnimatePresence initial={false}>
-						{prepOpen && (
-							<motion.div
-								key="prep"
-								initial={{ height: 0, opacity: 0 }}
-								animate={{ height: 'auto', opacity: 1 }}
-								exit={{ height: 0, opacity: 0 }}
-								transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
-								className="overflow-hidden border-t bg-background"
-							>
-								<div className="px-6 py-4">
-									{blog?.pdf ? (
-										<div className="w-fit">
-											<div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
+						<AnimatePresence initial={false}>
+							{prepOpen && (
+								<motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
+									<div className="px-6 py-4">
+										<div className="mx-auto max-w-3xl">
+											<div className="flex items-center justify-between gap-4 p-4 border rounded-md bg-card">
 												<div className="flex items-center gap-3">
 													<FileTextIcon className="w-6 h-6 text-primary" />
 													<div>
 														<div className="font-semibold text-foreground">Preparation PDF</div>
 														<div className="text-sm text-muted-foreground">
-															{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}
+															{(() => { try { return decodeURIComponent(new URL(article.pdf).pathname.split('/').pop()) } catch { return 'file.pdf' } })()}
 														</div>
 													</div>
 												</div>
 												<div className="flex items-center gap-2">
-													<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
+													<Button onClick={() => openPdfModal(article.pdf)} className="cursor-pointer">
 														<ExternalLinkIcon className="w-4 h-4" /> Open
 													</Button>
-													<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+													<a href={article.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
 												</div>
 											</div>
 										</div>
-									) : (
-										<p className="text-sm text-muted-foreground">No preparation PDF available.</p>
-									)}
-								</div>
-							</motion.div>
-						)}
-					</AnimatePresence>
-				</div>
-			</div>
-
-			{/* Reading Content Section - always open (unchanged design but placed after Prep) */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
-				<div className="border rounded-md overflow-hidden bg-background">
-					<div className="px-6 py-4 border-b bg-card">
-						<h2 className="text-2xl sm:text-3xl font-bold text-foreground">Reading Text</h2>
+									</div>
+								</motion.div>
+							)}
+						</AnimatePresence>
 					</div>
+				</div>
+			)}
 
-					<div className="px-6 py-6">
-						<div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">
-							{blog.content || 'No content available.'}
+			{/* Reading Content Section - render only when content exists */}
+			{article?.content && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
+					<div className="border rounded-md overflow-hidden bg-background">
+						<div className="px-6 py-4 border-b bg-card">
+							<h2 className="text-2xl sm:text-3xl font-bold text-foreground">Reading Text</h2>
+						</div>
+
+						<div className="px-6 py-6">
+							<div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">
+								{article.content}
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Tasks section - placed directly after Reading Text */}
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
 				<div className="grid grid-cols-1 gap-4">
-					{Array.isArray(blog?.tasks) && blog.tasks.length > 0 ? (
-						blog.tasks.map((task, idx) => (
+					{Array.isArray(article?.tasks) && article.tasks.length > 0 ? (
+						article.tasks.map((task, idx) => (
 							<div key={idx} className="border rounded-md overflow-hidden">
 								<button
 									onClick={() => toggleTask(idx)}
@@ -214,21 +202,21 @@ const SingleBlogPage = () => {
 												<div className="text-sm text-foreground leading-relaxed">
 													{task.content || 'Task details will be added here.'}
 												</div>
-												{blog?.pdf && (
+												{article?.pdf && (
 													<div className="mt-3 w-fit">
 														<div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
 															<div className="flex items-center gap-3">
 																<FileTextIcon className="w-5 h-5 text-primary" />
 																<div>
 																	<div className="font-medium">Task PDF</div>
-																	<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
+																	<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(article.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
 																</div>
 															</div>
 															<div className="flex items-center gap-2">
-																<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
+																<Button onClick={() => openPdfModal(article.pdf)} className="cursor-pointer">
 																	<ExternalLinkIcon className="w-4 h-4" /> Open
 																</Button>
-																<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
+																<a href={article.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
 															</div>
 														</div>
 													</div>
@@ -250,19 +238,19 @@ const SingleBlogPage = () => {
 								{openTasks[0] && (
 									<motion.div key="task-0" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
 										<div className="px-4 py-3">
-											{blog?.pdf && (
+											{article?.pdf && (
 												<div className="mt-3 w-fit">
 													<div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
 														<div className="flex items-center gap-3">
 															<FileTextIcon className="w-5 h-5 text-primary" />
 															<div>
 																<div className="font-medium">Task PDF</div>
-																<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
+																<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(article.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
 															</div>
 														</div>
 														<div className="flex items-center gap-2">
-															<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-															<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+															<Button onClick={() => openPdfModal(article.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+															<a href={article.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
 														</div>
 													</div>
 												</div>
@@ -277,11 +265,11 @@ const SingleBlogPage = () => {
 			</div>
 
 			{/* Tags Section (unchanged placement moved after Tasks) */}
-			{Array.isArray(blog?.tags) && blog.tags.length > 0 && (
+			{Array.isArray(article?.tags) && article.tags.length > 0 && (
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 					<h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
 					<div className="flex flex-wrap gap-3">
-						{blog.tags.map((t, i) => (
+						{article.tags.map((t, i) => (
 							<div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">
 								{t}
 							</div>
@@ -290,36 +278,21 @@ const SingleBlogPage = () => {
 				</div>
 			)}
 
-			{/* Language Level — clickable pills */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-				<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
-				<div className="p-6 rounded-md">
-					<div className="flex flex-wrap gap-3">
-						{(() => {
-							const levels = Array.isArray(blog?.level) ? blog.level : (blog?.level ? [blog.level] : []);
-							if (!levels.length) {
-								return <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">Not specified</div>
-							}
-							const mapToSlug = (lvl) => {
-								if (!lvl) return '/levels';
-								const key = String(lvl).toLowerCase();
-								if (key.includes('a1')) return '/levels/a1';
-								if (key.includes('a2')) return '/levels/a2';
-								if (key.includes('b1')) return '/levels/b1';
-								if (key.includes('b2')) return '/levels/b2';
-								if (key.includes('c1')) return '/levels/c1';
-								if (key.includes('c2')) return '/levels/c2';
-								return '/levels';
-							};
-							return levels.map((lvl, i) => (
-								<Link key={i} href={mapToSlug(lvl)} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
-										{lvl}
+			{/* Language Level — clickable pills (render only when levels exist) */}
+			{Array.isArray(article?.level) && article.level.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{article.level.map((lvl, i) => (
+								<Link key={i} href={`/levels/${String(lvl).toLowerCase().split(' ')[0]}`} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+									{lvl}
 								</Link>
-							));
-						})()}
+							))}
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 
 			{/* CTA Section */}
 			<SingleSourceCTA />
@@ -351,4 +324,4 @@ const SingleBlogPage = () => {
 	)
 }
 
-export default SingleBlogPage
+export default SingleArticleA1

@@ -5351,14 +5351,14 @@ Finally, remember that learning English is itself an achievement worthy of recog
   const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
 
   const remaining = MIN - count;
-  // await Blog.bulkCreate(
-  //   blogs.slice(0, remaining).map((b, i) => ({
-  //     ...b,
-  //     level: LEVELS[i % LEVELS.length],
-  //     pdf: b.pdf || buildPdfUrl(b.title),
-  //     createdBy: admin.id
-  //   }))
-  // );
+  await Blog.bulkCreate(
+    blogs.slice(0, remaining).map((b, i) => ({
+      ...b,
+      // level: LEVELS[i % LEVELS.length],
+      pdf: b.pdf || buildPdfUrl(b.title),
+      createdBy: admin.id
+    }))
+  );
 }
 
 async function seedVideos(admin) {
@@ -5533,7 +5533,7 @@ async function seedWritings(admin) {
 // Seed Reading resources similar to Speaking/Writing
 async function seedReadings(admin) {
   const count = await Reading.count();
-  const MIN = 10;
+  const MIN = 160;
   if (count >= MIN) return;
 
   const tagSets = [
@@ -5549,8 +5549,9 @@ async function seedReadings(admin) {
     ['Summarizing', 'Paraphrasing']
   ];
 
-  const readings = Array.from({ length: 10 }).map((_, i) => ({
+  const readings = Array.from({ length: 160 }).map((_, i) => ({
     title: `Reading Practice ${i + 1}`,
+    imageUrl : "https://plus.unsplash.com/premium_photo-1683135216954-ab7130031b44?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
     description: 'Short reading passage with comprehension focus.',
     content: 'Sample passage content for reading practice. Focus on comprehension and vocabulary.',
     pdf: SAMPLE_PDF_URL,
