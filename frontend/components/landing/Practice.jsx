@@ -3,52 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-
-// English learning practice resources
-const practiceCards = [
-	{
-		id: 1,
-		image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80',
-		title: 'English Grammar Fundamentals',
-		description:
-			'Master essential grammar rules including tenses, articles, and sentence structure. Build a strong foundation for confident English communication.',
-	},
-	{
-		id: 2,
-		image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80',
-		title: 'Vocabulary Building Techniques',
-		description:
-			'Learn effective strategies to expand your vocabulary with context-based learning, word families, and practical usage examples.',
-	},
-	{
-		id: 3,
-		image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80',
-		title: 'English Pronunciation Guide',
-		description:
-			'Improve your speaking skills with phonetics, stress patterns, and intonation practice for clear and natural English pronunciation.',
-	},
-	{
-		id: 4,
-		image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80',
-		title: 'Reading Comprehension Skills',
-		description:
-			'Enhance your reading abilities through diverse texts, skimming techniques, and strategies to understand complex passages.',
-	},
-	{
-		id: 5,
-		image: 'https://images.unsplash.com/photo-1432821596592-e2c18b78144f?w=800&q=80',
-		title: 'Business English Essentials',
-		description:
-			'Learn professional English for workplace communication, emails, presentations, and meetings in international business settings.',
-	},
-	{
-		id: 6,
-		image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80',
-		title: 'IELTS & TOEFL Preparation',
-		description:
-			'Comprehensive test preparation strategies, practice exercises, and tips for achieving high scores in international English exams.',
-	},
-];
+import BASE_URL from '@/app/config/url' // added import for fetching
 
 const Practice = () => {
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -59,9 +14,13 @@ const Practice = () => {
 	const [cardsPerView, setCardsPerView] = useState(3.5);
 	const sliderRef = useRef(null);
 
-	// Create infinite loop by duplicating cards
-	const extendedCards = [...practiceCards, ...practiceCards, ...practiceCards];
-	const totalCards = practiceCards.length;
+	// dynamic articles fetched from backend
+	const [articles, setArticles] = useState([]);
+	const [loading, setLoading] = useState(true); // reuse loading for fetch state
+
+	// Create infinite loop by duplicating fetched articles
+	const extendedCards = [...articles, ...articles, ...articles];
+	const totalCards = articles.length;
 
 	// Handle responsive cards per view
 	useEffect(() => {
@@ -78,9 +37,36 @@ const Practice = () => {
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
-	// Start from middle set to enable infinite scrolling
+	// Start from middle set to enable infinite scrolling once articles loaded
 	useEffect(() => {
-		setCurrentIndex(totalCards);
+		if (totalCards > 0) setCurrentIndex(totalCards);
+	}, [totalCards]);
+
+	// fetch first page of blogs with limit=10
+	useEffect(() => {
+		let mounted = true;
+		const fetchArticles = async () => {
+			setLoading(true);
+			try {
+				const res = await fetch(`${BASE_URL}/api/blogs/paginated?page=1&limit=10`, { credentials: 'include' });
+				if (!res.ok) {
+					console.error('Failed to fetch articles', res.status);
+					if (mounted) setArticles([]);
+					return;
+				}
+				const data = await res.json();
+				// Expect data.success && data.data.blogs
+				const items = data?.data?.blogs || (Array.isArray(data?.blogs) ? data.blogs : []);
+				if (mounted) setArticles(Array.isArray(items) ? items : []);
+			} catch (err) {
+				console.error('Error fetching articles:', err);
+				if (mounted) setArticles([]);
+			} finally {
+				if (mounted) setLoading(false);
+			}
+		};
+		fetchArticles();
+		return () => { mounted = false; };
 	}, []);
 
 	const handleNext = () => {
@@ -171,42 +157,47 @@ const Practice = () => {
 						onTouchEnd={handleDragEnd}
 					>
 						<div
-							className={`flex ${
-								isTransitioning ? 'transition-transform duration-300 ease-out' : ''
-							}`}
+							className={`flex ${isTransitioning ? 'transition-transform duration-300 ease-out' : ''}`}
 							style={{
 								transform: `translateX(calc(-${currentIndex * (100 / cardsPerView)}% + ${translateX}px))`,
 							}}
 						>
-							{extendedCards.map((card, index) => (
-								<div
-									key={`${card.id}-${index}`}
-									className="flex-shrink-0 px-2 sm:px-3"
-									style={{ width: `${100 / cardsPerView}%` }}
-								>
-									<div className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-border">
-										{/* Image */}
-										<div className="aspect-video overflow-hidden">
-											<img
-												src={card.image}
-												alt={card.title}
-												className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-												draggable="false"
-											/>
-										</div>
-
-										{/* Content */}
-										<div className="p-4 sm:p-5">
-											<h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground line-clamp-2">
-												{card.title}
-											</h3>
-											<p className="text-sm sm:text-base text-muted-foreground">
-												{truncateText(card.description, 80)}
-											</p>
-										</div>
+							{loading ? (
+								// show skeleton placeholders same count as desired fetch limit
+								Array.from({ length: 6 }).map((_, idx) => (
+									<div key={`skel-${idx}`} className="flex-shrink-0 px-2 sm:px-3" style={{ width: `${100 / cardsPerView}%` }}>
+										<div className="bg-card rounded-lg overflow-hidden shadow-md h-full border border-border animate-pulse" style={{height: '220px'}} />
 									</div>
-								</div>
-							))}
+								))
+							) : (
+								extendedCards.map((item, index) => (
+									<div key={`${item.id}-${index}`} className="flex-shrink-0 px-2 sm:px-3" style={{ width: `${100 / cardsPerView}%` }}>
+										<Link href={`/esl-resources/blogs/${item.id}`}>
+											<div className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-border">
+												{/* Image */}
+												<div className="aspect-video overflow-hidden">
+													<img
+														src={item.imageRef || item.imageUrl || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80'}
+														alt={item.title}
+														className="w-full h-full object-cover"
+														draggable="false"
+													/>
+												</div>
+
+												{/* Content */}
+												<div className="p-4 sm:p-5">
+													<h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground line-clamp-2">
+														{item.title}
+													</h3>
+													<p className="text-sm sm:text-base text-muted-foreground">
+														{truncateText(item.description || item.description, 80)}
+													</p>
+												</div>
+											</div>
+										</Link>
+									</div>
+								))
+							)}
 						</div>
 					</div>
 
