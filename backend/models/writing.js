@@ -42,6 +42,13 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'URL or path to the featured image for this writing content'
       },
 
+ // content image URL
+      contentImageUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to the featured image for this writing content'
+      },
+
       // Short description
       description: {
         type: DataTypes.TEXT,

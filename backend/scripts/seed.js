@@ -5490,7 +5490,7 @@ async function seedSpeakings(admin) {
 
 async function seedWritings(admin) {
   const count = await Writing.count();
-  const MIN = 10;
+  const MIN = 160;
   if (count >= MIN) return;
 
   const tagSets = [
@@ -5506,12 +5506,12 @@ async function seedWritings(admin) {
     ['Editing', 'Proofreading']
   ];
 
-  const writings = Array.from({ length: 10 }).map((_, i) => ({
+  const writings = Array.from({ length: 160 }).map((_, i) => ({
     title: `Writing Task ${i + 1}`,
-    prompt: 'Write a short paragraph describing your daily routine.',
+    imageUrl : "https://images.unsplash.com/photo-1602016736566-7ed6a58894bd?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    contentImageUrl : "https://images.unsplash.com/photo-1499914485622-a88fac536970?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
     content: 'Focus on present simple tense and time expressions.',
-    sampleAnswer: 'I usually wake up at 7am. Then I have breakfast...',
-    rubric: 'Clarity, grammar accuracy, vocabulary range, coherence.',
+    description: 'I usually wake up at 7am. Then I have breakfast... hwenf89weh fue89u uwejh9 fuwe jhf9u',
     pdf: SAMPLE_PDF_URL,
     level: [LEVELS[i % LEVELS.length]],
     tags: tagSets[i % tagSets.length]
