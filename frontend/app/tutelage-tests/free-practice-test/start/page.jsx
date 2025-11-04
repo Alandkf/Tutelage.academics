@@ -164,7 +164,7 @@ const Start = () => {
   // INSTRUCTIONS STAGE
   if (stage === 'instructions') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen md:min-h-[80vh] bg-background flex items-center justify-center p-4">
         <div className="max-w-2xl w-full bg-card border border-border rounded-lg p-8 shadow-lg">
           <h1 className="text-3xl font-bold text-foreground mb-6">Test Instructions</h1>
           <div className="space-y-4 text-muted-foreground mb-8">
@@ -189,7 +189,7 @@ const Start = () => {
     const userAnswer = answers[currentQuestion]
 
     return (
-      <div className="min-h-screen bg-background p-4">
+      <div className="min-h-screen md:min-h-[80vh] bg-background p-4">
         <div className="max-w-2xl mx-auto">
           {/* Top bar: Progress + Timer */}
           <div className="mb-6 flex items-center justify-between gap-4">
@@ -360,7 +360,7 @@ const Start = () => {
   // RESULTS STAGE
   if (stage === 'results') {
     return (
-      <div className="min-h-screen bg-background p-4 py-12">
+      <div className="min-h-screen md:min-h-[80vh] bg-background p-4 py-12">
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Title */}
           <div className="text-center">
