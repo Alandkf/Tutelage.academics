@@ -24,9 +24,6 @@ const FreePracticeTest = () => {
 export default FreePracticeTest
 
 
-
-
-
 const FreeTestHero = () => {
   const title = "Free Practice Test"
   const heroImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400"
@@ -38,8 +35,13 @@ const FreeTestHero = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-row items-center justify-between gap-6 py-6">
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl flex items-center justify-between font-bold text-foreground mb-2">
                 {title}
+                <Link href="/tutelage-tests/free-practice-test/start">
+                    <Button size="lg" className="bg-primary text-primary-foreground px-6 py-3 cursor-pointer">
+                         Start the test
+                    </Button>
+                </Link>
               </h1>
             </div>
           </div>
@@ -111,8 +113,8 @@ function DiscoverSection() {
               {desc}
             </p>
             <div>
-              <Link href="/tutelage-tests/practicetests">
-                <Button size="lg" className="bg-primary text-primary-foreground px-6 py-3">
+              <Link href="/tutelage-tests/free-practice-test/start">
+                <Button size="lg" className="bg-primary text-primary-foreground px-6 py-3 cursor-pointer">
                   Start the test
                 </Button>
               </Link>
@@ -202,8 +204,8 @@ function TestInstructions() {
 
             {/* CTA button */}
             <div className="mt-4">
-              <Link href="/tutelage-tests/practicetests">
-                <Button size="lg" className="w-fit sm:w-auto px-6 py-2 text-base font-semibold">
+              <Link href="/tutelage-tests/free-practice-test/start">
+                <Button size="lg" className="w-fit sm:w-auto px-6 py-2 text-base font-semibold cursor-pointer">
                   Start the test
                 </Button>
               </Link>
