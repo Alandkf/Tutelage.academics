@@ -3,6 +3,9 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
+import { CreditCard, HelpCircle, Zap, Clock, ChevronDown } from 'lucide-react' 
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 
 const FreePracticeTest = () => {
@@ -10,12 +13,16 @@ const FreePracticeTest = () => {
   <div className="relative min-h-screen bg-background pt-4"> 
         <FreeTestHero />
         <DiscoverSection />
+        <TestInstructions />
+        <FAQSection />
+        <CallToAction />
   </div>
     
      )
 }
 
 export default FreePracticeTest
+
 
 
 
@@ -132,6 +139,211 @@ function DiscoverSection() {
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TestInstructions() {
+  const instructions = [
+    {
+      title: 'Complete every question',
+      desc: 'The test contains 36 multiple-choice questions. Make sure you answer each one.'
+    },
+    {
+      title: 'Answer honestly',
+      desc: "To get the most accurate result, answer truthfully — there's no judgment!"
+    },
+    {
+      title: 'Complete within 20 minutes',
+      desc: "The test is designed to be completed in roughly 20 minutes. Read each question carefully before answering."
+    },
+    {
+      title: 'Review your outcome',
+      desc: "After completing the test, you'll receive an estimate of your current English level."
+    },
+    {
+      title: 'Check your results 📊',
+      desc: "Once you finish, you'll receive an approximate assessment of your current English level."
+    }
+  ]
+
+  const features = [
+    { Icon: CreditCard, title: 'No fees' },
+    { Icon: HelpCircle, title: '36 questions' },
+    { Icon: Zap, title: 'Immediate result' },
+    { Icon: Clock, title: '20 minutes' }
+  ]
+
+  return (
+    <section className="py-12 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Two-column layout: left = test overview, right = instructions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left side */}
+          <div className="flex flex-col">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+              How does Preply's English placement test work?
+            </h2>
+            <p className="text-base text-muted-foreground mb-6">
+              Test your English grammar with this Preply placement test
+            </p>
+
+            {/* Four feature icons */}
+            <div className="grid grid-cols-2 gap-6 mb-2">
+              {features.map((feat, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <feat.Icon className="w-8 h-8 sm:w-10 sm:h-10 text-foreground flex-shrink-0" />
+                  <div className="text-base sm:text-lg font-semibold text-foreground">{feat.title}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA button */}
+            <div className="mt-4">
+              <Link href="/tutelage-tests/practicetests">
+                <Button size="lg" className="w-fit sm:w-auto px-6 py-2 text-base font-semibold">
+                  Start the test
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right side */}
+          <div className="bg-card border border-border rounded-lg p-4 sm:p-6 shadow-md">
+            <h3 className="text-xl font-bold text-foreground mb-4">Test Instructions</h3>
+            <ol className="space-y-3">
+              {instructions.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                    {idx + 1}
+                  </span>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-foreground mb-1">{item.title}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FAQSection() {
+  return (
+    <div className="py-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Title */}
+        <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Frequently Asked Questions (FAQ)
+          </h2>
+        </div>
+
+        {/* FAQ Items */}
+        <div className="space-y-4">
+          {[
+            {
+              question: 'How long does the test take?',
+              answer: 'The test takes approximately 24 minutes to complete.'
+            },
+            {
+              question: 'How many questions are there?',
+              answer: 'There are 30 multiple-choice questions covering grammar, vocabulary, and comprehension.'
+            },
+            {
+              question: 'Is the test free?',
+              answer: 'Yes! The placement test is completely free.'
+            },
+            {
+              question: 'Do I need to register or create an account?',
+              answer: 'No registration is required — you can start the test immediately.'
+            },
+            {
+              question: 'How will I get my results?',
+              answer: "After completing the test, you'll receive an approximate evaluation of your English level and insights into areas to improve."
+            },
+            {
+              question: 'Can I take the test more than once?',
+              answer: 'Yes! You can retake the test whenever you like to track your progress.'
+            }
+          ].map((faq, index) => {
+            const [open, setOpen] = useState(false)
+            return (
+              <div
+                key={index}
+                className="bg-card border border-border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-md"
+              >
+                {/* Question Bar */}
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="w-full flex items-center justify-between p-5 text-left transition-colors duration-200 hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <HelpCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-base font-semibold text-foreground pr-4">
+                      {faq.question}
+                    </span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  >
+                    <ChevronDown className="w-5 h-5 text-primary flex-shrink-0" />
+                  </motion.div>
+                </button>
+
+                {/* Answer */}
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div className="px-5 pb-5 pt-2">
+                        <p className="text-muted-foreground leading-relaxed pl-9">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+const CallToAction = () => {
+  return (
+    <section className="py-16 bg-primary/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-left">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+             Ready to boost your English skills?
+          </h2>
+          <p className="text-lg text-foreground leading-relaxed mb-8 max-w-3xl">
+            Enroll in our online courses today and enjoy
+            interactive lessons, practical exercises, and continuous support from experienced
+            teachers. Build your confidence in speaking, reading, and writing English while
+            learning at your own pace, anytime and anywhere.
+          </p>
+          <Link href="/courses">
+            <Button size="lg" variant={'secondary'} className="text-lg px-8 py-6">
+              Explore Courses
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

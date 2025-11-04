@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail,  } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { Separator } from './ui/separator'
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -263,15 +264,21 @@ export const Footer = () => {
           <div className="flex flex-row items-start md:items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
-              <h3 className="text-xl hidden sm:block font-bold text-white">Tutelage</h3>
-            </div>
+              <div className='flex items-center justify-center gap-3'>
+                <Image src={'/only-logo-black-border-yellow-bg.svg'} alt='logo' width={30} height={30} />
+                <h3 className="text-xl hidden sm:block font-bold text-white">Tutelage</h3>
+              </div>
+                    
+              <div className='h-5'>
+                <Separator orientation="vertical" />
+              </div>
 
-            {/* Copyright */}
-            <div className="text-center">
-              <p className="text-white text-sm">
-                © {currentYear} Tutelage. All rights reserved.
-              </p>
+              {/* Copyright */}
+              <div className="text-center">
+                 <p className="text-white text-sm">
+                    © {currentYear} Tutelage. All rights reserved.
+                 </p>
+              </div>
             </div>
 
             {/* Social Media Links */}
