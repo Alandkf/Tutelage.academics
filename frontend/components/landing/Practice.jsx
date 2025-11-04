@@ -161,7 +161,7 @@ const Practice = () => {
 					{/* Cards Container */}
 					<div
 						ref={sliderRef}
-						className="overflow-hidden cursor-grab active:cursor-grabbing"
+						className="overflow-hidden  active:cursor-grabbing"
 						onMouseDown={handleDragStart}
 						onMouseMove={handleDragMove}
 						onMouseUp={handleDragEnd}
