@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const ReadingArticleGridA1 = () => {
+const ReadingArticleGridC1 = () => {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -23,7 +23,7 @@ const ReadingArticleGridA1 = () => {
   const [hasPrevPage, setHasPrevPage] = useState(false)
 
   const itemsPerPage = 6
-  const levelParam = 'A1'
+  const levelParam = 'C1'
 
   const fetchArticles = async (page) => {
     setLoading(true)
@@ -130,7 +130,7 @@ const ReadingArticleGridA1 = () => {
             articles?.map((article) => (
               <Link
                 key={article.id}
-                href={`/skills/reading/a1/${article.id}`}
+                href={`/skills/reading/c1/${article.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -247,4 +247,4 @@ const ReadingArticleGridA1 = () => {
   )
 }
 
-export default ReadingArticleGridA1
+export default ReadingArticleGridC1

@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 
-const SingleArticleA1 = () => {
+const SingleArticleB1 = () => {
 	const params = useParams()
 	const router = useRouter()
 	const [article, setArticle] = useState(null)
@@ -143,7 +143,7 @@ const SingleArticleA1 = () => {
 													<Button onClick={() => openPdfModal(article.pdf)} className="cursor-pointer">
 														<ExternalLinkIcon className="w-4 h-4" /> Open
 													</Button>
-													<a href={article.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+													<a href={article.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /> </a>
 												</div>
 											</div>
 										</div>
@@ -324,4 +324,4 @@ const SingleArticleA1 = () => {
 	)
 }
 
-export default SingleArticleA1
+export default SingleArticleB1
