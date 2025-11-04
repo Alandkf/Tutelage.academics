@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -179,7 +179,77 @@ const processPricingRequest = async (req, res) => {
   }
 };
 
+/**
+ * Process test result submission and send email
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const processTestResult = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      country,
+      yearOfBirth,
+      score,
+      level,
+      totalQuestions,
+      correctAnswers
+    } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || score === undefined || !level) {
+      return res.status(400).json({
+        success: false,
+        message: 'First name, last name, email, score, and level are required'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
+
+    // Prepare result data for email
+    const resultData = {
+      firstName,
+      lastName,
+      email,
+      phone: phone || 'Not provided',
+      country: country || 'Not provided',
+      yearOfBirth: yearOfBirth || 'Not provided',
+      score,
+      level,
+      totalQuestions: totalQuestions || 10,
+      correctAnswers: correctAnswers || Math.round((score / 100) * (totalQuestions || 10))
+    };
+
+    // Send test result email to student
+    await sendTestResultEmail(resultData);
+
+    res.status(200).json({
+      success: true,
+      message: 'Test result email sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Error processing test result:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send test result email. Please try again later.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   processEnrollment,
   processPricingRequest,
+  processTestResult
 };

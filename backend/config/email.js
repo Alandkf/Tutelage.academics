@@ -393,9 +393,254 @@ async function sendPricingRequestEmail(pricingData) {
   });
 }
 
+/**
+ * Send test result email to the student
+ * @param {Object} resultData - The test result data
+ */
+async function sendTestResultEmail(resultData) {
+  const {
+    firstName,
+    lastName,
+    email,
+    score,
+    level,
+    totalQuestions,
+    correctAnswers
+  } = resultData;
+  
+  const currentDate = new Date().toLocaleDateString();
+  const currentTime = new Date().toLocaleTimeString();
+  
+  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
+  let logoBase64 = '';
+  try {
+    const logoBuffer = fs.readFileSync(logoPath);
+    logoBase64 = `data:image/svg+xml;base64,${logoBuffer.toString('base64')}`;
+  } catch (err) {
+    console.error('Error reading logo for test result email:', err);
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: `Your English Placement Test Results - ${level}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+          }
+          .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          }
+          .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #fec016;
+            margin-bottom: 30px;
+          }
+          .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+          }
+          .title {
+            color: #111111;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          .subtitle {
+            color: #666;
+            font-size: 16px;
+          }
+          .result-box {
+            background: linear-gradient(135deg, #fec016 0%, #f59e0b 100%);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            margin: 25px 0;
+            color: white;
+          }
+          .score-circle {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          .level-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+          }
+          .details-section {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+          }
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .detail-row:last-child {
+            border-bottom: none;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #555;
+          }
+          .detail-value {
+            color: #333;
+          }
+          .level-explanation {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #fff8e1;
+            border-left: 4px solid #fec016;
+            border-radius: 5px;
+          }
+          .level-explanation h3 {
+            color: #f59e0b;
+            margin-top: 0;
+          }
+          .cta-button {
+            display: inline-block;
+            background-color: #fec016;
+            color: #111111;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #777;
+            font-size: 14px;
+          }
+          .footer a {
+            color: #f59e0b;
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            ${logoBase64 ? `<img src="${logoBase64}" alt="Tutelage Logo" class="logo">` : ''}
+            <div class="title">Your Test Results</div>
+            <div class="subtitle">English Placement Test - ${currentDate}</div>
+          </div>
+
+          <p>Dear ${firstName} ${lastName},</p>
+          
+          <p>Thank you for completing the Tutelage English Placement Test! We're pleased to share your results with you.</p>
+
+          <div class="result-box">
+            <div>Your Score</div>
+            <div class="score-circle">${score}%</div>
+            <div class="level-badge">${level}</div>
+          </div>
+
+          <div class="details-section">
+            <h3 style="margin-top: 0; color: #111;">Test Summary</h3>
+            <div class="detail-row">
+              <span class="detail-label">Total Questions:</span>
+              <span class="detail-value">${totalQuestions}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Correct Answers:</span>
+              <span class="detail-value">${correctAnswers}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Score Percentage:</span>
+              <span class="detail-value">${score}%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Assessed Level:</span>
+              <span class="detail-value"><strong>${level}</strong></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Test Date:</span>
+              <span class="detail-value">${currentDate} at ${currentTime}</span>
+            </div>
+          </div>
+
+          <div class="level-explanation">
+            <h3>What does this mean?</h3>
+            <p>Based on your performance, you have been assessed at the <strong>${level}</strong> level. This means you have ${score < 40 ? 'basic' : score < 60 ? 'intermediate' : 'advanced'} proficiency in English.</p>
+            <p>Continue practicing to improve your skills and reach the next level!</p>
+          </div>
+
+          <div style="text-align: center;">
+            <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}/courses" class="cta-button">
+              Explore Our Courses
+            </a>
+          </div>
+
+          <p style="margin-top: 30px;">We recommend reviewing the following areas to continue your English learning journey:</p>
+          <ul>
+            <li>Grammar fundamentals and sentence structure</li>
+            <li>Vocabulary expansion through context-based learning</li>
+            <li>Reading comprehension practice</li>
+            <li>Speaking and listening skills development</li>
+          </ul>
+
+          <p>If you have any questions about your results or would like to discuss personalized learning options, please don't hesitate to contact us.</p>
+
+          <div class="footer">
+            <p><strong>Tutelage - Your Partner in English Learning</strong></p>
+            <p>
+              <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}">Visit Our Website</a> | 
+              <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}/contact">Contact Us</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 12px;">
+              This email was sent to ${email} because you completed an English placement test on our platform.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Test result email sent successfully:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending test result email:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
   sendEnrollmentConfirmationEmail,
-  sendPricingRequestEmail
+  sendPricingRequestEmail,
+  sendTestResultEmail
 };

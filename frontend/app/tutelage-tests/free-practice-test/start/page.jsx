@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { quizQuestions } from '@/data/quizQuestions'
 import { Clock, CheckCircle2 } from 'lucide-react'
+import BASE_URL from '@/app/config/url'
+import { toast } from 'sonner'
 
 const TOTAL_TIME = 20 * 60 // 20 minutes in seconds
 
@@ -67,27 +69,63 @@ const Start = () => {
     setStage('form')
   }
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault()
-    calculateScore()
-    setStage('results')
-  }
-
-  const calculateScore = () => {
+    
+    // Calculate score first
     let correct = 0
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
     })
     const percentage = Math.round((correct / quizQuestions.length) * 100)
-    setScore(percentage)
-
+    
     // Map score to CEFR level
-    if (percentage < 20) setLevel('A1 Beginner')
-    else if (percentage < 40) setLevel('A2 Pre-intermediate')
-    else if (percentage < 60) setLevel('B1 Intermediate')
-    else if (percentage < 75) setLevel('B2 Upper-Intermediate')
-    else if (percentage < 90) setLevel('C1 Advanced')
-    else setLevel('C2 Proficient')
+    let calculatedLevel = ''
+    if (percentage < 20) calculatedLevel = 'A1 Beginner'
+    else if (percentage < 40) calculatedLevel = 'A2 Pre-intermediate'
+    else if (percentage < 60) calculatedLevel = 'B1 Intermediate'
+    else if (percentage < 75) calculatedLevel = 'B2 Upper-Intermediate'
+    else if (percentage < 90) calculatedLevel = 'C1 Advanced'
+    else calculatedLevel = 'C2 Proficient'
+    
+    setScore(percentage)
+    setLevel(calculatedLevel)
+    
+    // Send email with results
+    try {
+      const response = await fetch(`${BASE_URL}/api/enrollment/testresult`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          country: formData.country,
+          yearOfBirth: formData.yearOfBirth,
+          score: percentage,
+          level: calculatedLevel,
+          totalQuestions: quizQuestions.length,
+          correctAnswers: correct
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok) {
+        toast.success('Results sent to your email!')
+      } else {
+        toast.error('Could not send email, but you can still view your results.')
+      }
+    } catch (error) {
+      console.error('Error sending test result email:', error)
+      toast.error('Could not send email, but you can still view your results.')
+    }
+    
+    // Show results page
+    setStage('results')
   }
 
   const formatTime = (seconds) => {
