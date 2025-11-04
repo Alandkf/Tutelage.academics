@@ -60,9 +60,9 @@ const bumpAnalytics = async (resourceId, field = 'plays', amount = 1) => {
 
 exports.createEslAudio = async (req, res) => {
   try {
-    const { title, imageUrl, description, transcript, audioRef, pdf, level, tags } = req.body;
+    const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const createdBy = req.user?.id || 1;
-    const audio = await EslAudio.create({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevels(level), createdBy });
+    const audio = await EslAudio.create({ title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level: normalizeLevels(level), createdBy });
     if (Array.isArray(tags)) await attachTags(audio.id, tags);
     const tagNames = await includeTagsFor(audio.id);
     res.status(201).json({ success: true, data: { ...audio.toJSON(), tags: tagNames } });
@@ -139,10 +139,10 @@ exports.getEslAudioById = async (req, res) => {
 exports.updateEslAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, imageUrl, description, transcript, audioRef, pdf, level, tags } = req.body;
+    const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
-    await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, level: normalizeLevels(level) });
+    await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level: normalizeLevels(level) });
     if (Array.isArray(tags)) await attachTags(audio.id, tags);
     const tagNames = await includeTagsFor(audio.id);
     console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");

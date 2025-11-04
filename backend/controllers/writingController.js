@@ -68,7 +68,7 @@ async function includeTagsFor(resourceId) {
  */
 const createWriting = async (req, res) => {
   try {
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, content, description, discription, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title) {
@@ -85,6 +85,7 @@ const createWriting = async (req, res) => {
       content,
       description: (description ?? discription ?? null),
       pdf,
+      taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
       level: normalizedLevels,
       tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
@@ -257,7 +258,7 @@ const getWritingById = async (req, res) => {
 const updateWriting = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, content, description, discription, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const writing = await Writing.findByPk(id);
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
@@ -275,6 +276,7 @@ const updateWriting = async (req, res) => {
       content: content ?? writing.content,
       description: (description ?? discription ?? writing.description),
       pdf: pdf ?? writing.pdf,
+      taskPdf: taskPdf ?? writing.taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? writing.imageUrl),
       level: normalizedLevelUpdate ?? writing.level,
       tags: Array.isArray(tags)

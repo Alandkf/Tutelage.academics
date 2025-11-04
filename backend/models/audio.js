@@ -72,6 +72,13 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'URL or path to downloadable PDF for this audio content'
       },
 
+      // Task-specific PDF reference (secondary)
+      taskPdf: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        comment: 'URL or path to task-specific downloadable PDF for this audio content'
+      },
+
 
       // Language levels field (supports single or multiple CEFR-like levels)
       level: {

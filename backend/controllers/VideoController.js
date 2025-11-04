@@ -98,7 +98,7 @@ function getYouTubeThumbnail(url) {
  */
 const createVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -117,6 +117,7 @@ const createVideo = async (req, res) => {
       videoRef,
       description,
       pdf,
+      taskPdf,
       level: normalizedLevels,
       createdBy
     });
@@ -392,7 +393,7 @@ const getVideoById = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
 
     const video = await Video.findByPk(id);
 
@@ -420,6 +421,7 @@ const updateVideo = async (req, res) => {
       videoRef: videoRef ?? video.videoRef,
       description: description ?? video.description,
       pdf: pdf ?? video.pdf,
+      taskPdf: taskPdf ?? video.taskPdf,
       level: normalizedLevel ?? video.level
     });
 

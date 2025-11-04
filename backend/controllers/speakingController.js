@@ -68,7 +68,7 @@ async function includeTagsFor(resourceId) {
  */
 const createSpeaking = async (req, res) => {
   try {
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title || !videoRef) {
@@ -88,6 +88,7 @@ const createSpeaking = async (req, res) => {
       transcript,
       videoRef,
       pdf,
+      taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
       level: normalizedLevels,
       tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
@@ -320,7 +321,7 @@ const getSpeakingById = async (req, res) => {
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
 
     const speaking = await Speaking.findByPk(id);
     if (!speaking) {
@@ -342,6 +343,7 @@ const updateSpeaking = async (req, res) => {
       transcript: transcript ?? speaking.transcript,
       videoRef: videoRef ?? speaking.videoRef,
       pdf: pdf ?? speaking.pdf,
+      taskPdf: taskPdf ?? speaking.taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? speaking.imageUrl),
       level: normalizedLevelUpdate ?? speaking.level,
       tags: Array.isArray(tags)

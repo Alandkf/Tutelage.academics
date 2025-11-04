@@ -76,7 +76,7 @@ async function includeTagsFor(resourceId) {
  */
 const createAudio = async (req, res) => {
   try {
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     // Validate required fields
@@ -96,6 +96,7 @@ const createAudio = async (req, res) => {
       transcript,
       audioRef,
       pdf: pdf ?? null,
+      taskPdf: taskPdf ?? null,
       imageUrl: (imageUrl ?? imageurl ?? null),
       level: normalizedLevels,
       createdBy
@@ -365,7 +366,7 @@ const getAudioById = async (req, res) => {
 const updateAudio = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, transcript, audioRef, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, description, discription, transcript, audioRef, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
 
     const audio = await Audio.findByPk(id);
 
@@ -394,6 +395,7 @@ const updateAudio = async (req, res) => {
       transcript: transcript ?? audio.transcript,
       audioRef: audioRef ?? audio.audioRef,
       pdf: pdf ?? audio.pdf,
+      taskPdf: taskPdf ?? audio.taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? audio.imageUrl),
       level: normalizedLevel ?? audio.level
     });

@@ -76,11 +76,11 @@ const bumpAnalytics = async (resourceId, field = 'views', amount = 1) => {
 
 exports.createEslVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
     const createdBy = req.user?.id || 1; // default for admin scripts/tests
-    const video = await EslVideo.create({ title, videoRef, description, pdf, level: normalizedLevel, thumbnailUrl, createdBy });
+    const video = await EslVideo.create({ title, videoRef, description, pdf, taskPdf, level: normalizedLevel, thumbnailUrl, createdBy });
     if (Array.isArray(tags)) await attachTags(video.id, tags);
     const tagNames = await includeTagsFor(video.id);
     res.status(201).json({ success: true, data: { ...video.toJSON(), tags: tagNames } });
@@ -154,10 +154,10 @@ exports.getEslVideoById = async (req, res) => {
 exports.updateEslVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
-    const payload = { title, videoRef, description, pdf, level: normalizeLevels(level) };
+    const payload = { title, videoRef, description, pdf, taskPdf, level: normalizeLevels(level) };
     if (videoRef) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
     await video.update(payload);
     if (Array.isArray(tags)) await attachTags(video.id, tags);

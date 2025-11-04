@@ -69,7 +69,7 @@ async function includeTagsFor(resourceId) {
  */
 const createReading = async (req, res) => {
   try {
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, content, description, discription, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
 
     if (!title) {
@@ -83,6 +83,7 @@ const createReading = async (req, res) => {
       content,
       description: (description ?? discription ?? null),
       pdf,
+      taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? null),
       level: normalizedLevels,
       tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined),
@@ -258,7 +259,7 @@ const getReadingById = async (req, res) => {
 const updateReading = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, description, discription, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, content, description, discription, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
 
     const reading = await Reading.findByPk(id);
     if (!reading) {
@@ -276,6 +277,7 @@ const updateReading = async (req, res) => {
       content: content ?? reading.content,
       description: (description ?? discription ?? reading.description),
       pdf: pdf ?? reading.pdf,
+      taskPdf: taskPdf ?? reading.taskPdf,
       imageUrl: (imageUrl ?? imageurl ?? reading.imageUrl),
       level: normalizedLevelUpdate ?? reading.level,
       tags: Array.isArray(tags)

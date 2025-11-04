@@ -64,7 +64,7 @@ async function ensureAnalytics(resourceId) {
 
 exports.createStory = async (req, res) => {
   try {
-    const { title, imageUrl, description, contentText, audioRef, pdf, wordCount, level, tags } = req.body;
+    const { title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount, level, tags } = req.body;
     const createdBy = req.user.id;
     if (!title) {
       return res.status(400).json({ success: false, message: 'Title is required' });
@@ -72,7 +72,7 @@ exports.createStory = async (req, res) => {
     const normalizedLevel = normalizeLevels(level);
     const wc = wordCount ?? (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : null);
     const story = await Story.create({
-      title, imageUrl, description, contentText, audioRef, pdf, wordCount: wc, level: normalizedLevel, createdBy
+      title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount: wc, level: normalizedLevel, createdBy
     });
     await attachTags(story.id, tags);
     const storyWithAuthor = await Story.findByPk(story.id, {
@@ -154,7 +154,7 @@ exports.getStoryById = async (req, res) => {
 exports.updateStory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, imageUrl, description, contentText, audioRef, pdf, wordCount, level, tags } = req.body;
+    const { title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount, level, tags } = req.body;
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
     if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
@@ -167,6 +167,7 @@ exports.updateStory = async (req, res) => {
       contentText: contentText ?? story.contentText,
       audioRef: audioRef ?? story.audioRef,
       pdf: pdf ?? story.pdf,
+      taskPdf: (typeof taskPdf !== 'undefined' ? taskPdf : story.taskPdf),
       wordCount: wc,
       level: normalizedLevel
     });
