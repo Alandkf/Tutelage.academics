@@ -33,6 +33,12 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 0,
       comment: 'Order in which sections appear (lower = first)'
     },
+    questionCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 10,
+      comment: 'Number of questions this section should contain (admin-controlled)'
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

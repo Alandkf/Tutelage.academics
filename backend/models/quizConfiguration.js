@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 30,
-      comment: 'Total number of questions allowed across all sections'
+      comment: 'Global limit: total number of questions allowed across all sections (sum of all section questionCounts should not exceed this)'
     },
     timeLimitMinutes: {
       type: DataTypes.INTEGER,

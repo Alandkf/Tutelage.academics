@@ -5671,21 +5671,7 @@ async function seedCourses(admin) {
   );
 }
 
-async function seedTests(admin) {
-  const count = await Test.count();
-  const MIN = 10;
-  if (count >= MIN) return;
 
-  const tests = Array.from({ length: 10 }).map((_, i) => ({
-    title: `Assessment ${i + 1}`,
-    description: 'A short test to gauge your level and recommend courses.'
-  }));
-
-  const remaining = MIN - count;
-  await Test.bulkCreate(
-    tests.slice(0, remaining).map(t => ({ ...t, createdBy: admin.id }))
-  );
-}
 
 async function seedFaqs() {
   const count = await Faq.count();
@@ -5850,7 +5836,6 @@ async function main() {
     await seedWritings(admin);
     await seedReadings(admin);
     await seedCourses(admin);
-    await seedTests(admin);
     await seedFaqs(admin);
     await seedQuizconf(admin)
     await seedQuizQuestions(admin)

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     sectionId: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
-      comment: 'Foreign key to QuizSection'
+      comment: 'Foreign key to QuizSection (each question belongs to exactly one section)'
     },
     level: {
       type: DataTypes.ENUM('A1', 'A2', 'B1', 'B2', 'C1', 'C2'),
