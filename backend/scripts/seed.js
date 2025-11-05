@@ -26,6 +26,9 @@ const { Op } = require('sequelize');
     EslAudio,
     Tag,
     ResourceTag,
+    QuizConfiguration,
+    QuizSection,
+    QuizQuestion,
   } = require('../models');
 
 
@@ -5572,6 +5575,83 @@ async function seedReadings(admin) {
   }
 }
 
+async function seedQuizSections(admin) {
+  const count = await QuizSection.count();
+  const MIN = 3;
+  if (count >= MIN) return;
+
+
+  const readings = Array.from({ length: 3 }).map((_, i) => ({
+    name : "Grammer",
+    slug: "grammer",
+    description : "This section contains grammar related questions.",
+    displayOrder : i + 1,
+    isActive : true,
+  }));
+
+  const remaining = MIN - count;
+  await QuizConfiguration.bulkCreate(
+    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
+    { returning: true }
+  );
+}
+
+async function seedQuizconf(admin) {
+  const count = await QuizConfiguration.count();
+  const MIN = 1;
+  if (count >= MIN) return;
+
+
+  const readings = Array.from({ length: 1 }).map((_, i) => ({
+    totalQuestions : 30,
+    timeLimitMinutes : 30,
+    isActive : true,
+  }));
+
+  const remaining = MIN - count;
+  await QuizConfiguration.bulkCreate(
+    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
+    { returning: true }
+  );
+}
+
+
+async function seedQuizQuestions(admin) {
+  const count = await QuizConfiguration.count();
+  const MIN = 70;
+  if (count >= MIN) return;
+
+  const SECTION = await QuizConfiguration.count();
+  const LEVELS = [
+  'A1',
+  'A2',
+  'B1',
+  'B2',
+  'C1',
+  'C2'
+];
+
+  const readings = Array.from({ length: 70 }).map((_, i) => ({
+    sectionId : [SECTION[i % SECTION.length]],
+    level : [LEVELS[i % LEVELS.length]],
+    text: "She _____ to the store",
+    optionA : "go",
+    optionB : "goes",
+    optionC : "going",
+    optionD : "gone",
+    correctAnswer: 1,
+    isActive : true,
+  }));
+
+  const remaining = MIN - count;
+  await QuizConfiguration.bulkCreate(
+    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
+    { returning: true }
+  );
+}
+
+
+
 async function seedCourses(admin) {
   const count = await Course.count();
   const MIN = 10;
@@ -5771,7 +5851,10 @@ async function main() {
     await seedReadings(admin);
     await seedCourses(admin);
     await seedTests(admin);
-    await seedFaqs();
+    await seedFaqs(admin);
+    await seedQuizconf(admin)
+    await seedQuizQuestions(admin)
+    await seedQuizSections(admin)
 
     // Ensure existing content has level/pdf values for filtering demonstrations
     await backfillLevelsAndPdfs();

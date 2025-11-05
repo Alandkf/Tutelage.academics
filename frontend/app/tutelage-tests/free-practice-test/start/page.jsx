@@ -137,7 +137,6 @@ const Start = () => {
         })
       })
       
-      const result = await response.json()
       
       if (response.ok) {
         toast.success('Results sent to your email!')
