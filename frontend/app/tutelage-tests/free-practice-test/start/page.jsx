@@ -10,6 +10,8 @@ import { Progress } from '@/components/ui/progress'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
+import { motion, AnimatePresence } from 'framer-motion'
+
 
 const TOTAL_TIME = 30 * 60 // 30 minutes in seconds
 
@@ -61,10 +63,16 @@ const Start = () => {
   const [quizQuestions, setQuizQuestions] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Section tracking state
+  const [sections, setSections] = useState([])
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
+  const [sectionProgress, setSectionProgress] = useState({})
+
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
         setLoading(true)
+        
         // Fetch config (total questions + time limit)
         const configRes = await fetch(`${BASE_URL}/api/quiz/config`)
         const configData = await configRes.json()
@@ -81,6 +89,35 @@ const Start = () => {
         const questionsData = await questionsRes.json()
         if (questionsData.success) {
           setQuizQuestions(questionsData.data)
+          
+          // Group questions by section
+          const sectionMap = {}
+          questionsData.data.forEach((q, idx) => {
+            const sectionName = q.sectionName || 'General'
+            if (!sectionMap[sectionName]) {
+              sectionMap[sectionName] = []
+            }
+            sectionMap[sectionName].push(idx)
+          })
+          
+          // Create section array with numbers
+          const sectionArray = Object.keys(sectionMap).map((name, idx) => ({
+            number: idx + 1,
+            name,
+            questionIndices: sectionMap[name],
+            startIndex: sectionMap[name][0],
+            endIndex: sectionMap[name][sectionMap[name].length - 1],
+            isCompleted: false
+          }))
+          
+          setSections(sectionArray)
+          
+          // Initialize section progress
+          const initialProgress = {}
+          sectionArray.forEach((s, idx) => {
+            initialProgress[idx] = { completed: false }
+          })
+          setSectionProgress(initialProgress)
         } else {
           toast.error('Failed to load quiz questions.')
         }
@@ -109,6 +146,35 @@ const Start = () => {
     }, 1000)
     return () => clearInterval(interval)
   }, [stage])
+
+  useEffect(() => {
+    if (sections.length === 0) return
+    
+    const currentSection = sections[currentSectionIndex]
+    if (!currentSection) return
+    
+    // Check if all questions in current section are answered
+    const allAnswered = currentSection.questionIndices.every(idx => answers[idx] !== undefined)
+    
+    if (allAnswered && !sectionProgress[currentSectionIndex]?.completed) {
+      setSectionProgress(prev => ({
+        ...prev,
+        [currentSectionIndex]: { completed: true }
+      }))
+    }
+  }, [answers, currentQuestion, sections, currentSectionIndex, sectionProgress])
+
+  // Update current section index when question changes
+  useEffect(() => {
+    if (sections.length === 0) return
+    
+    const nextSectionIndex = sections.findIndex(s => 
+      currentQuestion >= s.startIndex && currentQuestion <= s.endIndex
+    )
+    if (nextSectionIndex !== -1 && nextSectionIndex !== currentSectionIndex) {
+      setCurrentSectionIndex(nextSectionIndex)
+    }
+  }, [currentQuestion, sections, currentSectionIndex])
 
   const handleStartQuiz = () => {
     setStage('quiz')
@@ -274,6 +340,49 @@ const Start = () => {
               <Clock className="w-5 h-5 text-primary" />
               <span className="font-mono font-bold text-foreground">{formatTime(timeLeft)}</span>
             </div>
+          </div>
+
+          {/* Section Progress Circles - No Card Wrapper */}
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+            {sections.map((section, idx) => {
+              const isActive = idx === currentSectionIndex
+              const isCompleted = sectionProgress[idx]?.completed
+              
+              return (
+                <div key={idx} className="flex flex-col items-center gap-2">
+                  {/* Circle */}
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                      isCompleted
+                        ? 'bg-green-500 border-green-600'
+                        : isActive
+                        ? 'bg-primary border-primary'
+                        : 'bg-background border-border'
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    ) : (
+                      <span className={`text-lg sm:text-xl font-bold ${
+                        isActive ? 'text-white' : 'text-muted-foreground'
+                      }`}>
+                        {section.number}
+                      </span>
+                    )}
+                  </motion.div>
+                  
+                  {/* Section Name Below Circle */}
+                  <span className={`text-xs sm:text-sm font-medium text-center max-w-[80px] ${
+                    isActive ? 'text-primary font-bold' : 'text-muted-foreground'
+                  }`}>
+                    {section.name}
+                  </span>
+                </div>
+              )
+            })}
           </div>
 
           {/* Instruction text */}
