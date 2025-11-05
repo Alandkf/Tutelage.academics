@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Progress } from '@/components/ui/progress'
-import { Clock, CheckCircle2 } from 'lucide-react'
-import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
-import { motion, AnimatePresence } from 'framer-motion'
+import BASE_URL from '@/app/config/url'
+import { Loader2, Clock, CheckCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 
 const TOTAL_TIME = 30 * 60 // 30 minutes in seconds
@@ -44,7 +42,7 @@ const Start = () => {
   
   // Quiz flow state
   const [stage, setStage] = useState('instructions') // 'instructions' | 'quiz' | 'form' | 'results'
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({}) // { questionIndex: selectedOptionIndex }
   const [timeLeft, setTimeLeft] = useState(0)
   const [formData, setFormData] = useState({
@@ -84,40 +82,48 @@ const Start = () => {
           return
         }
 
+        // Fetch sections to get questionCount limits
+        const sectionsRes = await fetch(`${BASE_URL}/api/admin/quiz/sections`, {
+          credentials: 'include'
+        })
+        const sectionsData = await sectionsRes.json()
+
         // Fetch questions (30 random questions distributed by level)
         const questionsRes = await fetch(`${BASE_URL}/api/quiz/questions`)
         const questionsData = await questionsRes.json()
         if (questionsData.success) {
           setQuizQuestions(questionsData.data)
           
-          // Group questions by section
-          const sectionMap = {}
-          questionsData.data.forEach((q, idx) => {
-            const sectionName = q.sectionName || 'General'
-            if (!sectionMap[sectionName]) {
-              sectionMap[sectionName] = []
-            }
-            sectionMap[sectionName].push(idx)
-          })
-          
-          // Create section array with numbers
-          const sectionArray = Object.keys(sectionMap).map((name, idx) => ({
-            number: idx + 1,
-            name,
-            questionIndices: sectionMap[name],
-            startIndex: sectionMap[name][0],
-            endIndex: sectionMap[name][sectionMap[name].length - 1],
-            isCompleted: false
-          }))
-          
-          setSections(sectionArray)
-          
-          // Initialize section progress
-          const initialProgress = {}
-          sectionArray.forEach((s, idx) => {
-            initialProgress[idx] = { completed: false }
-          })
-          setSectionProgress(initialProgress)
+          // Build section structure based on fetched sections and their questionCount limits
+          if (sectionsData.success && Array.isArray(sectionsData.data)) {
+            let questionOffset = 0
+            const sectionArray = sectionsData.data
+              .filter(s => s.isActive) // Only active sections
+              .sort((a, b) => a.displayOrder - b.displayOrder) // Sort by display order
+              .map((s, idx) => {
+                const limit = s.questionCount || 0
+                const section = {
+                  number: idx + 1,
+                  name: s.name,
+                  slug: s.slug,
+                  questionCount: limit, // How many questions to show in quiz
+                  startIndex: questionOffset,
+                  endIndex: questionOffset + limit - 1,
+                  isCompleted: false
+                }
+                questionOffset += limit
+                return section
+              })
+            
+            setSections(sectionArray)
+            
+            // Initialize section progress
+            const initialProgress = {}
+            sectionArray.forEach((s, idx) => {
+              initialProgress[idx] = { completed: false }
+            })
+            setSectionProgress(initialProgress)
+          }
         } else {
           toast.error('Failed to load quiz questions.')
         }
@@ -153,28 +159,34 @@ const Start = () => {
     const currentSection = sections[currentSectionIndex]
     if (!currentSection) return
     
-    // Check if all questions in current section are answered
-    const allAnswered = currentSection.questionIndices.every(idx => answers[idx] !== undefined)
+    // Check if all questions in current section (based on startIndex -> endIndex) are answered
+    let allAnsweredInSection = true
+    for (let i = currentSection.startIndex; i <= currentSection.endIndex; i++) {
+      if (answers[i] === undefined) {
+        allAnsweredInSection = false
+        break
+      }
+    }
     
-    if (allAnswered && !sectionProgress[currentSectionIndex]?.completed) {
+    if (allAnsweredInSection && !sectionProgress[currentSectionIndex]?.completed) {
       setSectionProgress(prev => ({
         ...prev,
         [currentSectionIndex]: { completed: true }
       }))
     }
-  }, [answers, currentQuestion, sections, currentSectionIndex, sectionProgress])
+  }, [answers, currentQuestionIndex, sections, currentSectionIndex, sectionProgress])
 
   // Update current section index when question changes
   useEffect(() => {
     if (sections.length === 0) return
     
     const nextSectionIndex = sections.findIndex(s => 
-      currentQuestion >= s.startIndex && currentQuestion <= s.endIndex
+      currentQuestionIndex >= s.startIndex && currentQuestionIndex <= s.endIndex
     )
     if (nextSectionIndex !== -1 && nextSectionIndex !== currentSectionIndex) {
       setCurrentSectionIndex(nextSectionIndex)
     }
-  }, [currentQuestion, sections, currentSectionIndex])
+  }, [currentQuestionIndex, sections, currentSectionIndex])
 
   const handleStartQuiz = () => {
     setStage('quiz')
@@ -182,12 +194,12 @@ const Start = () => {
   }
 
   const handleSelectAnswer = (optionIndex) => {
-    setAnswers(prev => ({ ...prev, [currentQuestion]: optionIndex }))
+    setAnswers(prev => ({ ...prev, [currentQuestionIndex]: optionIndex }))
   }
 
   const handleNext = () => {
-    if (currentQuestion < quizQuestions.length - 1) {
-      setCurrentQuestion(prev => prev + 1)
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1)
     } else {
       handleFinishQuiz()
     }
@@ -280,8 +292,6 @@ const Start = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const progressPercentage = ((currentQuestion + 1) / quizQuestions.length) * 100
-
   // Show loading state while fetching quiz data
   if (loading) {
     return (
@@ -318,18 +328,28 @@ const Start = () => {
 
   // QUIZ STAGE
   if (stage === 'quiz') {
-    const question = quizQuestions[currentQuestion]
-    const userAnswer = answers[currentQuestion]
+    const question = quizQuestions[currentQuestionIndex]
+    const userAnswer = answers[currentQuestionIndex]
+
+    const currentQuestion = quizQuestions[currentQuestionIndex]
+    const currentSection = sections[currentSectionIndex]
+    const isLastQuestionInSection = currentSection && currentQuestionIndex === currentSection.endIndex
+    const isSectionCompleted = sectionProgress[currentSectionIndex]?.completed
+    
+    // Calculate progress percentage
+    const progressPercentage = quizQuestions.length > 0 
+      ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100 
+      : 0
 
     return (
-      <div className="min-h-screen md:min-h-[80vh] bg-background p-4">
+      <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-2xl mx-auto">
           {/* Top bar: Progress + Timer */}
           <div className="mb-6 flex items-center justify-between gap-4">
             {/* Progress */}
             <div className="flex-1">
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                <span>{currentQuestion + 1}/{quizQuestions.length}</span>
+                <span>{currentQuestionIndex + 1}/{quizQuestions.length}</span>
                 <span>{Math.round(progressPercentage)}%</span>
               </div>
               <Progress value={progressPercentage} className="h-2" />
@@ -436,7 +456,7 @@ const Start = () => {
               size="lg"
               className="px-8 cursor-pointer"
             >
-              {currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+              {currentQuestionIndex === quizQuestions.length - 1 ? 'Finish' : 'Next'}
             </Button>
           </div>
         </div>
