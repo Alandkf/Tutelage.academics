@@ -5586,6 +5586,7 @@ async function seedQuizSections(admin) {
     slug: "grammer",
     description : "This section contains grammar related questions.",
     displayOrder : i + 1,
+    questionCount : 10,
     isActive : true,
   }));
 
