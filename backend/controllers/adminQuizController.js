@@ -201,14 +201,14 @@ exports.updateSection = async (req, res) => {
         });
       }
 
-      // Also check: current question count in this section must not exceed new questionCount
-      const currentQuestionCount = await QuizQuestion.count({ where: { sectionId: id, isActive: true } });
-      if (currentQuestionCount > questionCount) {
-        return res.status(400).json({
-          success: false,
-          message: `Section currently has ${currentQuestionCount} active questions. Cannot reduce limit to ${questionCount}. Please delete or deactivate questions first.`
-        });
-      }
+      // // Also check: current question count in this section must not exceed new questionCount
+      // const currentQuestionCount = await QuizQuestion.count({ where: { sectionId: id, isActive: true } });
+      // if (currentQuestionCount > questionCount) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: `Section currently has ${currentQuestionCount} active questions. Cannot reduce limit to ${questionCount}. Please delete or deactivate questions first.`
+      //   });
+      // }
     }
 
     await section.update({ name, slug, description, displayOrder, questionCount, isActive });

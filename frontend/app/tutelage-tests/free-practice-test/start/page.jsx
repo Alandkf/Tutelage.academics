@@ -214,26 +214,25 @@ const Start = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault()
     
-    // ✅ Calculate score on frontend using correctAnswer from fetched questions
     let correct = 0
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
     })
     const percentage = Math.round((correct / quizQuestions.length) * 100)
     
-    // Map score to CEFR level
+    // ✅ NEW LOGIC: Based on number of correct answers (out of 30)
     let calculatedLevel = ''
-    if (percentage < 20) calculatedLevel = 'A1 Beginner'
-    else if (percentage < 40) calculatedLevel = 'A2 Pre-intermediate'
-    else if (percentage < 60) calculatedLevel = 'B1 Intermediate'
-    else if (percentage < 75) calculatedLevel = 'B2 Upper-Intermediate'
-    else if (percentage < 90) calculatedLevel = 'C1 Advanced'
-    else calculatedLevel = 'C2 Proficient'
+    if (correct >= 0 && correct <= 3) calculatedLevel = 'A1 Beginner'
+    else if (correct >= 4 && correct <= 9) calculatedLevel = 'A2 Pre-intermediate'
+    else if (correct >= 10 && correct <= 16) calculatedLevel = 'B1 Intermediate'
+    else if (correct >= 17 && correct <= 23) calculatedLevel = 'B2 Upper-Intermediate'
+    else if (correct >= 24 && correct <= 27) calculatedLevel = 'C1 Advanced'
+    else if (correct >= 28 && correct <= 30) calculatedLevel = 'C2 Proficient'
+    else calculatedLevel = 'A1 Beginner' // Fallback
     
     setScore(percentage)
     setLevel(calculatedLevel)
     
-    // Send email with results (optional)
     try {
       const response = await fetch(`${BASE_URL}/api/enrollment/testresult`, {
         method: 'POST',
@@ -266,21 +265,21 @@ const Start = () => {
   }
 
   const handleSkipForm = async () => {
-    // Calculate score on frontend
     let correct = 0
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
     })
     const percentage = Math.round((correct / quizQuestions.length) * 100)
     
-    // Map score to CEFR level
+    // ✅ NEW LOGIC: Based on number of correct answers (out of 30)
     let calculatedLevel = ''
-    if (percentage < 20) calculatedLevel = 'A1 Beginner'
-    else if (percentage < 40) calculatedLevel = 'A2 Pre-intermediate'
-    else if (percentage < 60) calculatedLevel = 'B1 Intermediate'
-    else if (percentage < 75) calculatedLevel = 'B2 Upper-Intermediate'
-    else if (percentage < 90) calculatedLevel = 'C1 Advanced'
-    else calculatedLevel = 'C2 Proficient'
+    if (correct >= 0 && correct <= 3) calculatedLevel = 'A1 Beginner'
+    else if (correct >= 4 && correct <= 9) calculatedLevel = 'A2 Pre-intermediate'
+    else if (correct >= 10 && correct <= 16) calculatedLevel = 'B1 Intermediate'
+    else if (correct >= 17 && correct <= 23) calculatedLevel = 'B2 Upper-Intermediate'
+    else if (correct >= 24 && correct <= 27) calculatedLevel = 'C1 Advanced'
+    else if (correct >= 28 && correct <= 30) calculatedLevel = 'C2 Proficient'
+    else calculatedLevel = 'A1 Beginner' // Fallback
     
     setScore(percentage)
     setLevel(calculatedLevel)
@@ -314,14 +313,14 @@ const Start = () => {
           <h1 className="text-3xl font-bold text-foreground mb-6">Test Instructions</h1>
           <div className="space-y-4 text-muted-foreground mb-8">
             <p>• Find a quiet place to take the test without distractions</p>
-            <p>• You will have <strong className="text-foreground">{quizConfig?.timeLimitMinutes || 30} minutes</strong> to complete {quizQuestions.length} questions</p>
+            <p>• You will have <strong className="text-foreground">{quizConfig?.timeLimitMinutes || 30} minutes</strong> to complete {quizQuestions?.length} questions</p>
             <p>• Each question has 4 options (A, B, C, D) — choose the best answer</p>
             <p>• You cannot go back to previous questions</p>
             <p>• Answer honestly to get an accurate assessment of your level</p>
             <p>• After finishing, you'll fill out a short form and see your results</p>
           </div>
           <Button onClick={handleStartQuiz} size="lg" className="w-full">
-            Start Test
+            Start The Test
           </Button>
         </div>
       </div>
@@ -631,27 +630,27 @@ const Start = () => {
                 <tbody>
                   <tr className="border-b border-border">
                     <td className="py-3 px-4 text-muted-foreground">A1 Beginner</td>
-                    <td className="py-3 px-4 text-muted-foreground">0-20%</td>
+                    <td className="py-3 px-4 text-muted-foreground">0-13%</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-3 px-4 text-muted-foreground">A2 Pre-intermediate</td>
-                    <td className="py-3 px-4 text-muted-foreground">21-40%</td>
+                    <td className="py-3 px-4 text-muted-foreground">14-29%</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-3 px-4 text-muted-foreground">B1 Intermediate</td>
-                    <td className="py-3 px-4 text-muted-foreground">41-60%</td>
+                    <td className="py-3 px-4 text-muted-foreground">30-46%</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-3 px-4 text-muted-foreground">B2 Upper-Intermediate</td>
-                    <td className="py-3 px-4 text-muted-foreground">61-75%</td>
+                    <td className="py-3 px-4 text-muted-foreground">47-63%</td>
                   </tr>
                   <tr className="border-b border-border">
                     <td className="py-3 px-4 text-muted-foreground">C1 Advanced</td>
-                    <td className="py-3 px-4 text-muted-foreground">76-90%</td>
+                    <td className="py-3 px-4 text-muted-foreground">64-80%</td>
                   </tr>
                   <tr>
                     <td className="py-3 px-4 text-muted-foreground">C2 Proficient</td>
-                    <td className="py-3 px-4 text-muted-foreground">91-100%</td>
+                    <td className="py-3 px-4 text-muted-foreground">81-100%</td>
                   </tr>
                 </tbody>
               </table>
@@ -663,8 +662,8 @@ const Start = () => {
             <Button className={"cursor-pointer"} onClick={() => router.push('/tutelage-tests/free-practice-test')} variant="outline" size="lg">
               Back to Test Page
             </Button>
-            <Button className={"cursor-pointer"} onClick={() => router.push('/courses')} size="lg">
-              Explore Courses
+            <Button className={"cursor-pointer"} onClick={() => window.location.reload()} size="lg">
+              Retake Quiz
             </Button>
           </div>
         </div>
