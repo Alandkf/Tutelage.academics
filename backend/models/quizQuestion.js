@@ -55,7 +55,6 @@ module.exports = (sequelize, DataTypes) => {
     displayOrder: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: 0,
       comment: 'Order within section'
     },
     isActive: {

@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { quizQuestions } from '@/data/quizQuestions'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
@@ -45,7 +44,7 @@ const Start = () => {
   const [stage, setStage] = useState('instructions') // 'instructions' | 'quiz' | 'form' | 'results'
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState({}) // { questionIndex: selectedOptionIndex }
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME)
+  const [timeLeft, setTimeLeft] = useState(0)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -56,6 +55,39 @@ const Start = () => {
   })
   const [score, setScore] = useState(0)
   const [level, setLevel] = useState('')
+
+  // Fetch quiz config and questions from API
+  const [quizConfig, setQuizConfig] = useState(null)
+  const [quizQuestions, setQuizQuestions] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        setLoading(true)
+        // Fetch config (total questions + time limit)
+        const configRes = await fetch(`${BASE_URL}/api/quiz/config`)
+        const configData = await configRes.json()
+        if (configData.success) {
+          setQuizConfig(configData.data)
+          setTimeLeft(configData.data.timeLimitMinutes * 60) // convert to seconds
+        }
+
+        // Fetch questions (30 random questions distributed by level)
+        const questionsRes = await fetch(`${BASE_URL}/api/quiz/questions`)
+        const questionsData = await questionsRes.json()
+        if (questionsData.success) {
+          setQuizQuestions(questionsData.data)
+        }
+      } catch (error) {
+        console.error('Error fetching quiz data:', error)
+        toast.error('Failed to load quiz. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchQuizData()
+  }, [])
 
   // Timer countdown
   useEffect(() => {
@@ -75,7 +107,7 @@ const Start = () => {
 
   const handleStartQuiz = () => {
     setStage('quiz')
-    setTimeLeft(TOTAL_TIME)
+    setTimeLeft(quizConfig?.timeLimitMinutes * 60 || 30 * 60) // reset timer from config
   }
 
   const handleSelectAnswer = (optionIndex) => {
@@ -97,7 +129,7 @@ const Start = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault()
     
-    // Calculate score first
+    // ✅ Calculate score on frontend using correctAnswer from fetched questions
     let correct = 0
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
@@ -116,13 +148,11 @@ const Start = () => {
     setScore(percentage)
     setLevel(calculatedLevel)
     
-    // Send email with results
+    // Send email with results (optional)
     try {
       const response = await fetch(`${BASE_URL}/api/enrollment/testresult`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -136,8 +166,7 @@ const Start = () => {
           correctAnswers: correct
         })
       })
-      
-      
+
       if (response.ok) {
         toast.success('Results sent to your email!')
       } else {
@@ -147,14 +176,12 @@ const Start = () => {
       console.error('Error sending test result email:', error)
       toast.error('Could not send email, but you can still view your results.')
     }
-    
-    // Show results page
+
     setStage('results')
   }
 
-  // Handle skip form (go directly to results without sending email)
-  const handleSkipForm = () => {
-    // Calculate score
+  const handleSkipForm = async () => {
+    // Calculate score on frontend
     let correct = 0
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
@@ -172,8 +199,7 @@ const Start = () => {
     
     setScore(percentage)
     setLevel(calculatedLevel)
-    
-    // Go directly to results without sending email
+
     setStage('results')
   }
 
@@ -185,6 +211,18 @@ const Start = () => {
 
   const progressPercentage = ((currentQuestion + 1) / quizQuestions.length) * 100
 
+  // Show loading state while fetching quiz data
+  if (loading) {
+    return (
+      <div className="min-h-screen md:min-h-[80vh] bg-background flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading quiz...</p>
+        </div>
+      </div>
+    )
+  }
+
   // INSTRUCTIONS STAGE
   if (stage === 'instructions') {
     return (
@@ -193,7 +231,7 @@ const Start = () => {
           <h1 className="text-3xl font-bold text-foreground mb-6">Test Instructions</h1>
           <div className="space-y-4 text-muted-foreground mb-8">
             <p>• Find a quiet place to take the test without distractions</p>
-            <p>• You will have <strong className="text-foreground">30 minutes</strong> to complete {quizQuestions.length} questions</p>
+            <p>• You will have <strong className="text-foreground">{quizConfig?.timeLimitMinutes || 30} minutes</strong> to complete {quizQuestions.length} questions</p>
             <p>• Each question has 4 options (A, B, C, D) — choose the best answer</p>
             <p>• You cannot go back to previous questions</p>
             <p>• Answer honestly to get an accurate assessment of your level</p>

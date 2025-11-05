@@ -4,7 +4,7 @@ import LoginForm from "@/components/forms/LoginForm"
 
 const LoginPage = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 space-y-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 space-y-6">
       <LoginForm />
       <div className="w-full max-w-md rounded-md bg-amber-50 p-4 border border-amber-300 text-center shadow-sm">
         <p className="text-amber-800 font-medium">

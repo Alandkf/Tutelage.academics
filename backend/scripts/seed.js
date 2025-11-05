@@ -5591,7 +5591,7 @@ async function seedQuizSections(admin) {
   }));
 
   const remaining = MIN - count;
-  await QuizConfiguration.bulkCreate(
+  await QuizSection.bulkCreate(
     readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
     { returning: true }
   );
@@ -5618,11 +5618,10 @@ async function seedQuizconf(admin) {
 
 
 async function seedQuizQuestions(admin) {
-  const count = await QuizConfiguration.count();
+  const count = await QuizQuestion.count();
   const MIN = 70;
   if (count >= MIN) return;
 
-  const SECTION = await QuizConfiguration.count();
   const LEVELS = [
   'A1',
   'A2',
@@ -5633,8 +5632,8 @@ async function seedQuizQuestions(admin) {
 ];
 
   const readings = Array.from({ length: 70 }).map((_, i) => ({
-    sectionId : [SECTION[i % SECTION.length]],
-    level : [LEVELS[i % LEVELS.length]],
+    sectionId : 1,
+    level : LEVELS[i % LEVELS.length],
     text: "She _____ to the store",
     optionA : "go",
     optionB : "goes",
@@ -5645,7 +5644,7 @@ async function seedQuizQuestions(admin) {
   }));
 
   const remaining = MIN - count;
-  await QuizConfiguration.bulkCreate(
+  await QuizQuestion.bulkCreate(
     readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
     { returning: true }
   );

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import ThemeToggle from "../ThemeToggle"
 
 export default function Header() {
   return (
@@ -11,6 +12,7 @@ export default function Header() {
           <h2 className="text-lg font-semibold ml-10 md:ml-0">Admin</h2>
         </div>        
         <div className="flex items-center gap-1">
+              <ThemeToggle />
               <Link href="/">
                 <Button variant={"secondary"} size="sm">
                     Back to Main Page
