@@ -8,10 +8,10 @@ export default function TestsSection() {
     {
       id: 'free',
       title: 'Free Practice Test',
-      desc: `Our free 24-minute English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development.`,
+      desc: `Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development.`,
       bullets: [
         'The test includes 36 multiple-choice questions.',
-        'It takes approximately 24 minutes to complete.',
+        'It takes approximately 30 minutes to complete.',
         'No registration is required to begin.',
         'The test can be retaken at any time to monitor progress.'
       ],
@@ -24,10 +24,10 @@ export default function TestsSection() {
     {
       id: 'placement',
       title: 'Language Placement Test',
-      desc: `Online placement with a live instructor. A 15–20 minute speaking & comprehension session that measures practical speaking and listening skills in real time.`,
+      desc: `Online placement with a live instructor. A 15–30 minute speaking & comprehension session that measures practical speaking and listening skills in real time.`,
       bullets: [
         'Live speaking & comprehension with an instructor',
-        '15–20 minutes, real-time evaluation',
+        '15–30 minutes, real-time evaluation',
         'Measures practical communication'
       ],
       ReadMoreHref: '/tutelage-tests/language-placement',

@@ -12,7 +12,7 @@ import { Clock, CheckCircle2 } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
 import { toast } from 'sonner'
 
-const TOTAL_TIME = 20 * 60 // 20 minutes in seconds
+const TOTAL_TIME = 30 * 60 // 30 minutes in seconds
 
 // Comprehensive list of world countries
 const COUNTRIES = [
@@ -153,6 +153,31 @@ const Start = () => {
     setStage('results')
   }
 
+  // Handle skip form (go directly to results without sending email)
+  const handleSkipForm = () => {
+    // Calculate score
+    let correct = 0
+    quizQuestions.forEach((q, idx) => {
+      if (answers[idx] === q.correctAnswer) correct++
+    })
+    const percentage = Math.round((correct / quizQuestions.length) * 100)
+    
+    // Map score to CEFR level
+    let calculatedLevel = ''
+    if (percentage < 20) calculatedLevel = 'A1 Beginner'
+    else if (percentage < 40) calculatedLevel = 'A2 Pre-intermediate'
+    else if (percentage < 60) calculatedLevel = 'B1 Intermediate'
+    else if (percentage < 75) calculatedLevel = 'B2 Upper-Intermediate'
+    else if (percentage < 90) calculatedLevel = 'C1 Advanced'
+    else calculatedLevel = 'C2 Proficient'
+    
+    setScore(percentage)
+    setLevel(calculatedLevel)
+    
+    // Go directly to results without sending email
+    setStage('results')
+  }
+
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -169,7 +194,7 @@ const Start = () => {
           <h1 className="text-3xl font-bold text-foreground mb-6">Test Instructions</h1>
           <div className="space-y-4 text-muted-foreground mb-8">
             <p>• Find a quiet place to take the test without distractions</p>
-            <p>• You will have <strong className="text-foreground">20 minutes</strong> to complete {quizQuestions.length} questions</p>
+            <p>• You will have <strong className="text-foreground">30 minutes</strong> to complete {quizQuestions.length} questions</p>
             <p>• Each question has 4 options (A, B, C, D) — choose the best answer</p>
             <p>• You cannot go back to previous questions</p>
             <p>• Answer honestly to get an accurate assessment of your level</p>
@@ -274,13 +299,21 @@ const Start = () => {
       <div className="p-10 bg-background flex items-center justify-center">
         <div className="max-w-2xl w-full bg-card border border-border rounded-lg p-8 shadow-lg">
           <h1 className="text-3xl font-bold text-foreground mb-6">Your Information</h1>
+          
+          {/* Explanatory message */}
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <p className="text-sm text-foreground">
+              📧 <strong>Optional:</strong> Fill out this form to receive your detailed test results via email. 
+              You can also skip this step and view your results immediately.
+            </p>
+          </div>
+
           <form onSubmit={handleFormSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name *</Label>
                 <Input
                   id="firstName"
-                  required
                   value={formData.firstName}
                   onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                 />
@@ -289,7 +322,6 @@ const Start = () => {
                 <Label htmlFor="lastName">Last Name *</Label>
                 <Input
                   id="lastName"
-                  required
                   value={formData.lastName}
                   onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                 />
@@ -301,7 +333,6 @@ const Start = () => {
               <Input
                 id="email"
                 type="email"
-                required
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               />
@@ -348,9 +379,26 @@ const Start = () => {
               </Select>
             </div>
 
-            <Button type="submit" size="lg" className="w-full">
-              View Results
-            </Button>
+            {/* Two buttons: Submit form OR Skip */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="flex-1 cursor-pointer"
+                disabled={!formData.firstName || !formData.lastName || !formData.email}
+              >
+                📧 Send Results & View
+              </Button>
+              <Button 
+                type="button"
+                onClick={handleSkipForm}
+                variant="outline" 
+                size="lg" 
+                className="flex-1 cursor-pointer"
+              >
+                Skip & View Results
+              </Button>
+            </div>
           </form>
         </div>
       </div>

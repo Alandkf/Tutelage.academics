@@ -27,7 +27,7 @@ export default FreePracticeTest
 const FreeTestHero = () => {
   const title = "Free Practice Test"
   const heroImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400"
-  const description = "Our free 24-minute English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development."
+  const description = "Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development."
   return (
     <>
       {/* Header Section */}
@@ -75,7 +75,7 @@ const FreeTestHero = () => {
 
 function DiscoverSection() {
   const title = 'Discover Your English Level Online – Free Test'
-  const desc = `Our 24-minute free placement test provides an accurate assessment of your
+  const desc = `Our 30-minutes free placement test provides an accurate assessment of your
                 English proficiency. Analyze your grammar knowledge, highlight areas for
                 improvement, and gain a clear understanding of your language level.`
 
@@ -158,8 +158,8 @@ function TestInstructions() {
       desc: "To get the most accurate result, answer truthfully — there's no judgment!"
     },
     {
-      title: 'Complete within 20 minutes',
-      desc: "The test is designed to be completed in roughly 20 minutes. Read each question carefully before answering."
+      title: 'Complete within 30 minutes',
+      desc: "The test is designed to be completed in roughly 30 minutes. Read each question carefully before answering."
     },
     {
       title: 'Review your outcome',
@@ -175,7 +175,7 @@ function TestInstructions() {
     { Icon: CreditCard, title: 'No fees' },
     { Icon: HelpCircle, title: '36 questions' },
     { Icon: Zap, title: 'Immediate result' },
-    { Icon: Clock, title: '20 minutes' }
+    { Icon: Clock, title: '30 minutes' }
   ]
 
   return (
@@ -251,7 +251,7 @@ function FAQSection() {
           {[
             {
               question: 'How long does the test take?',
-              answer: 'The test takes approximately 24 minutes to complete.'
+              answer: 'The test takes approximately 30 minutes to complete.'
             },
             {
               question: 'How many questions are there?',
