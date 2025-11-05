@@ -71,6 +71,9 @@ const Start = () => {
         if (configData.success) {
           setQuizConfig(configData.data)
           setTimeLeft(configData.data.timeLimitMinutes * 60) // convert to seconds
+        } else {
+          toast.error('Quiz is currently unavailable. Please try again later.')
+          return
         }
 
         // Fetch questions (30 random questions distributed by level)
@@ -78,6 +81,8 @@ const Start = () => {
         const questionsData = await questionsRes.json()
         if (questionsData.success) {
           setQuizQuestions(questionsData.data)
+        } else {
+          toast.error('Failed to load quiz questions.')
         }
       } catch (error) {
         console.error('Error fetching quiz data:', error)
@@ -320,7 +325,7 @@ const Start = () => {
               onClick={handleNext}
               disabled={userAnswer === undefined}
               size="lg"
-              className="px-8"
+              className="px-8 cursor-pointer"
             >
               {currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
             </Button>

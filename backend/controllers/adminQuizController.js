@@ -33,7 +33,7 @@ exports.getQuizConfig = async (req, res) => {
  */
 exports.updateQuizConfig = async (req, res) => {
   try {
-    const { totalQuestions, timeLimitMinutes } = req.body;
+    const { totalQuestions, timeLimitMinutes, isActive } = req.body;
 
     if (totalQuestions !== undefined && totalQuestions < 1) {
       return res.status(400).json({ success: false, message: 'Total questions must be at least 1' });
@@ -44,7 +44,7 @@ exports.updateQuizConfig = async (req, res) => {
 
     let config = await QuizConfiguration.findOne();
     if (!config) {
-      config = await QuizConfiguration.create({ totalQuestions: 30, timeLimitMinutes: 20 });
+      config = await QuizConfiguration.create({ totalQuestions: 30, timeLimitMinutes: 20, isActive: true });
     }
 
     // Validate: sum of section questionCounts must not exceed new totalQuestions
@@ -59,7 +59,12 @@ exports.updateQuizConfig = async (req, res) => {
       }
     }
 
-    await config.update({ totalQuestions, timeLimitMinutes });
+    await config.update({ 
+      totalQuestions: totalQuestions !== undefined ? totalQuestions : config.totalQuestions,
+      timeLimitMinutes: timeLimitMinutes !== undefined ? timeLimitMinutes : config.timeLimitMinutes,
+      isActive: isActive !== undefined ? isActive : config.isActive
+    });
+    
     res.status(200).json({ success: true, message: 'Quiz configuration updated', data: config });
   } catch (error) {
     console.error('Error updating quiz config:', error);
@@ -323,19 +328,22 @@ exports.getQuestionById = async (req, res) => {
 
 /**
  * POST /api/admin/quiz/questions
- * Create a new question (validates section and global limits)
+ * Create a new question
+ * NO STORAGE LIMIT - questionCount is only for quiz sampling
  */
 exports.createQuestion = async (req, res) => {
   try {
     const { sectionId, level, text, optionA, optionB, optionC, optionD, correctAnswer, displayOrder } = req.body;
     const createdBy = req.user.id;
 
+    // Validate required fields
     if (!sectionId || !level || !text || !optionA || !optionB || !optionC || !optionD || correctAnswer === undefined) {
       return res.status(400).json({ success: false, message: 'All question fields are required' });
     }
 
+    // Validate correct answer is 0-3
     if (correctAnswer < 0 || correctAnswer > 3) {
-      return res.status(400).json({ success: false, message: 'correctAnswer must be 0-3' });
+      return res.status(400).json({ success: false, message: 'correctAnswer must be 0 (A), 1 (B), 2 (C), or 3 (D)' });
     }
 
     // Validate section exists
@@ -344,24 +352,10 @@ exports.createQuestion = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Section not found' });
     }
 
-    // Validate section limit
-    const sectionQuestionCount = await QuizQuestion.count({ where: { sectionId, isActive: true } });
-    if (sectionQuestionCount >= section.questionCount) {
-      return res.status(400).json({
-        success: false,
-        message: `Section "${section.name}" is full (${sectionQuestionCount}/${section.questionCount} questions). Increase section limit or deactivate existing questions.`
-      });
-    }
-
-    // Validate global limit
-    const config = await QuizConfiguration.findOne();
-    const globalQuestionCount = await QuizQuestion.count({ where: { isActive: true } });
-    if (globalQuestionCount >= config.totalQuestions) {
-      return res.status(400).json({
-        success: false,
-        message: `Global question limit (${config.totalQuestions}) reached. Current: ${globalQuestionCount}. Increase global limit in configuration.`
-      });
-    }
+    // ✅ NO STORAGE LIMIT CHECK
+    // The questionCount field in QuizSection is ONLY used to determine
+    // how many questions to randomly sample for the quiz.
+    // Admins can add unlimited questions to any section.
 
     const question = await QuizQuestion.create({
       sectionId,
@@ -376,14 +370,7 @@ exports.createQuestion = async (req, res) => {
       createdBy
     });
 
-    const questionWithRefs = await QuizQuestion.findByPk(question.id, {
-      include: [
-        { model: QuizSection, as: 'section', attributes: ['id', 'name', 'slug'] },
-        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] }
-      ]
-    });
-
-    res.status(201).json({ success: true, message: 'Question created', data: questionWithRefs });
+    res.status(201).json({ success: true, message: 'Question created successfully', data: question });
   } catch (error) {
     console.error('Error creating question:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -414,13 +401,6 @@ exports.updateQuestion = async (req, res) => {
       const newSection = await QuizSection.findByPk(sectionId);
       if (!newSection) {
         return res.status(404).json({ success: false, message: 'New section not found' });
-      }
-      const newSectionCount = await QuizQuestion.count({ where: { sectionId, isActive: true } });
-      if (newSectionCount >= newSection.questionCount) {
-        return res.status(400).json({
-          success: false,
-          message: `Target section "${newSection.name}" is full (${newSectionCount}/${newSection.questionCount}). Increase section limit first.`
-        });
       }
     }
 

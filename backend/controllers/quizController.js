@@ -9,19 +9,20 @@ const { sendTestResultEmail } = require('../config/email');
 /**
  * GET /api/quiz/config
  * Fetch quiz configuration (totalQuestions, timeLimitMinutes)
+ * Only returns active configuration
  */
 exports.getPublicQuizConfig = async (req, res) => {
   try {
-    let config = await QuizConfiguration.findOne();    
+    let config = await QuizConfiguration.findOne({ where: { isActive: true } });
     if (!config) {
-      config = await QuizConfiguration.create({ totalQuestions: 30, timeLimitMinutes: 20 });
+      // Fallback: if no active config, create default one
+      config = await QuizConfiguration.create({ totalQuestions: 30, timeLimitMinutes: 20, isActive: true });
     }
     res.status(200).json({
       success: true,
       data: {
         totalQuestions: config.totalQuestions,
-        timeLimitMinutes: config.timeLimitMinutes,
-        isActive: config.isActive
+        timeLimitMinutes: config.timeLimitMinutes
       }
     });
   } catch (error) {
@@ -50,8 +51,16 @@ exports.getPublicSections = async (req, res) => {
 
 /**
  * GET /api/quiz/questions
- * Fetch exactly 30 random active questions distributed by CEFR level
+ * Fetch exactly 30 random active questions distributed by CEFR level:
+ * - 3 × A1 (Q1-3)
+ * - 6 × A2 (Q4-9)
+ * - 7 × B1 (Q10-16)
+ * - 7 × B2 (Q17-23)
+ * - 4 × C1 (Q24-27)
+ * - 3 × C2 (Q28-30)
+ * 
  * Returns questions WITH correctAnswer (frontend scoring)
+ * Questions are RANDOMIZED within each level for variety
  */
 exports.getPublicQuestions = async (req, res) => {
   try {
@@ -76,7 +85,7 @@ exports.getPublicQuestions = async (req, res) => {
         order: [
           [QuizQuestion.sequelize.fn('RANDOM')] // ✅ Randomizes questions within this level
         ],
-        limit: count
+        limit: count // ✅ Only take the required count for this level
       });
 
       // If not enough questions for this level, log warning but continue
@@ -95,7 +104,7 @@ exports.getPublicQuestions = async (req, res) => {
       level: q.level,
       text: q.text,
       options: [q.optionA, q.optionB, q.optionC, q.optionD],
-      correctAnswer: q.correctAnswer
+      correctAnswer: q.correctAnswer // ✅ Now included for frontend scoring
     }));
 
     res.status(200).json({ success: true, data: formatted });

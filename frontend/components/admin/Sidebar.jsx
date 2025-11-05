@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 import { useAuth } from "@/components/AuthContext"
@@ -15,6 +15,7 @@ const menuItems = [
   { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
   { icon: Video, name: "Videos", href: "/admin-dashboard/videos" },
   { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
+  { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
   { icon: CircleQuestionMark, name: "Faqs", href: "/admin-dashboard/faqs" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
