@@ -105,11 +105,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     });
     
-    User.hasMany(models.Test, { 
-      foreignKey: 'createdBy', 
-      as: 'tests',
-      onDelete: 'CASCADE'
-    });
+  
     
     if (models.QuizSection) {
       User.hasMany(models.QuizSection, {
