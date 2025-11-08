@@ -44,17 +44,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
   
-  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
-  
   await transporter.sendMail({
-    attachments: [
-      {
-        filename: 'tutelage-logo.svg',
-        path: logoPath,
-        cid: 'tutelage-logo',
-        contentDisposition: 'inline'
-      }
-    ],
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_USER,
     subject: `New Course Enrollment Application: ${course}`,
@@ -153,17 +143,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
 async function sendEnrollmentConfirmationEmail(enrollmentData) {
   const { name, email, course } = enrollmentData;
   
-  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
-  
   await transporter.sendMail({
-    attachments: [
-      {
-        filename: 'tutelage-logo.svg',
-        path: logoPath,
-        cid: 'tutelage-logo',
-        contentDisposition: 'inline'
-      }
-    ],
     from: process.env.EMAIL_USER,
     to: email,
     subject: 'Enrollment Application Received - Welcome to Tutelage!',
@@ -254,17 +234,7 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
 async function sendPricingRequestEmail(pricingData) {
   const { firstName, lastName, email, course } = pricingData;
   
-  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
-  
   await transporter.sendMail({
-    attachments: [
-      {
-        filename: 'tutelage-logo.svg',
-        path: logoPath,
-        cid: 'tutelage-logo',
-        contentDisposition: 'inline'
-      }
-    ],
     from: process.env.EMAIL_USER,
     to: email,
     subject: `${course} - Course Information & Pricing`,
@@ -414,15 +384,6 @@ async function sendTestResultEmail(resultData) {
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
   
-  const logoPath = path.join(__dirname, '..', 'assets', 'only-logo-black-border-yellow-bg.svg');
-  let logoBase64 = '';
-  try {
-    const logoBuffer = fs.readFileSync(logoPath);
-    logoBase64 = `data:image/svg+xml;base64,${logoBuffer.toString('base64')}`;
-  } catch (err) {
-    console.error('Error reading logo for test result email:', err);
-  }
-
   // ✅ Calculate dynamic level ranges based on totalQuestions
   const ranges = [
     { level: 'A1 Beginner', min: 0, max: Math.floor(totalQuestions * 0.10), scoreMin: '0%', scoreMax: '10%' },
@@ -464,11 +425,6 @@ async function sendTestResultEmail(resultData) {
             padding-bottom: 20px;
             border-bottom: 3px solid #fec016;
             margin-bottom: 30px;
-          }
-          .logo {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 15px;
           }
           .title {
             color: #111111;
@@ -581,7 +537,6 @@ async function sendTestResultEmail(resultData) {
       <body>
         <div class="container">
           <div class="header">
-            ${logoBase64 ? `<img src="${logoBase64}" alt="Tutelage Logo" class="logo">` : ''}
             <div class="title">Your Test Results</div>
             <div class="subtitle">English Placement Test - ${currentDate}</div>
           </div>
@@ -691,10 +646,336 @@ async function sendTestResultEmail(resultData) {
   }
 }
 
+/**
+ * Send placement test booking notification to admin
+ */
+const sendPlacementTestBookingEmail = async (bookingData) => {
+  const {
+    firstName,
+    lastName,
+    name,
+    email,
+    phone,
+    country,
+    city,
+    referralSource
+  } = bookingData;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background-color: #ffffff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+          border-bottom: 3px solid #fec016;
+          margin-bottom: 30px;
+        }
+        .title {
+          color: #1f2937;
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .info-section {
+          background-color: #f9fafb;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+        }
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-label {
+          font-weight: 600;
+          color: #6b7280;
+        }
+        .info-value {
+          color: #1f2937;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          color: #6b7280;
+          font-size: 14px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">🎯 New Placement Test Booking</div>
+          <p style="color: #6b7280; margin: 5px 0;">A new student has requested a placement test</p>
+        </div>
+
+        <div class="info-section">
+          <h3 style="margin-top: 0; color: #1f2937;">Student Information</h3>
+          <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-value">${name}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">${email}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">${phone}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Location:</span>
+            <span class="info-value">${city}, ${country}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Referral Source:</span>
+            <span class="info-value">${referralSource}</span>
+          </div>
+        </div>
+
+        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #fec016;">
+          <p style="margin: 0; color: #92400e;">
+            <strong>⏰ Action Required:</strong> Please contact this student to schedule their placement test.
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Tutelage Language Center</strong></p>
+          <p>📧 Email: info@tutelage.com | 📱 Phone: +964 750 153 4240</p>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+            © ${new Date().getFullYear()} Tutelage. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Bookings" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_USER, // Send to admin
+    subject: `🎯 New Placement Test Booking - ${name}`,
+    html: htmlContent
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Placement test booking notification sent to admin:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending placement test booking email:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send placement test booking confirmation to student
+ */
+const sendPlacementTestConfirmationEmail = async (bookingData) => {
+  const {
+    firstName,
+    lastName,
+    name,
+    email,
+    phone,
+    country,
+    city
+  } = bookingData;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background-color: #ffffff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+          border-bottom: 3px solid #fec016;
+          margin-bottom: 30px;
+        }
+        .title {
+          color: #1f2937;
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .success-box {
+          background: linear-gradient(135deg, #fec016 0%, #f59e0b 100%);
+          color: white;
+          padding: 30px;
+          border-radius: 10px;
+          text-align: center;
+          margin: 20px 0;
+        }
+        .info-section {
+          background-color: #f9fafb;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+        }
+        .next-steps {
+          background-color: #fef3c7;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+          border-left: 4px solid #fec016;
+        }
+        .next-steps h3 {
+          color: #92400e;
+          margin-top: 0;
+        }
+        .next-steps ul {
+          color: #78350f;
+          padding-left: 20px;
+        }
+        .next-steps li {
+          margin: 10px 0;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          color: #6b7280;
+          font-size: 14px;
+        }
+        .social-links {
+          margin: 15px 0;
+        }
+        .social-links a {
+          color: #fec016;
+          text-decoration: none;
+          margin: 0 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">📝 Placement Test Booking Confirmed</div>
+        </div>
+
+        <p>Dear ${firstName} ${lastName},</p>
+        <p>Thank you for booking your English placement test with Tutelage Language Center!</p>
+
+        <div class="success-box">
+          <div style="font-size: 48px; margin-bottom: 10px;">✓</div>
+          <div style="font-size: 20px; font-weight: 600;">Booking Received!</div>
+          <p style="margin: 10px 0; font-size: 14px;">
+            We have received your placement test booking request
+          </p>
+        </div>
+
+        <div class="info-section">
+          <h3 style="margin-top: 0; color: #1f2937;">Your Booking Details</h3>
+          <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
+          <p style="margin: 5px 0;"><strong>Location:</strong> ${city}, ${country}</p>
+        </div>
+
+        <div class="next-steps">
+          <h3>What Happens Next?</h3>
+          <ul>
+            <li>Our team will review your booking request</li>
+            <li>We will contact you within 24-48 hours to schedule your test</li>
+            <li>You will receive test instructions and access details via email</li>
+            <li>The placement test takes approximately 30 minutes</li>
+            <li>After completion, you'll receive your results and course recommendations</li>
+          </ul>
+        </div>
+
+        <div style="background-color: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; color: #1e40af;">
+            <strong>💡 Need Help?</strong> If you have any questions or need to reschedule, please contact us at info@tutelage.com or call +964 750 153 4240
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Tutelage Language Center</strong></p>
+          <p>📧 Email: info@tutelage.com | 📱 Phone: +964 750 153 4240</p>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+            This email was sent because you requested a placement test booking.
+            <br>© ${new Date().getFullYear()} Tutelage. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Language Center" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `✓ Your Placement Test Booking Confirmed - Tutelage`,
+    html: htmlContent
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Placement test confirmation sent to student:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending placement test confirmation:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
   sendEnrollmentConfirmationEmail,
   sendPricingRequestEmail,
-  sendTestResultEmail
+  sendTestResultEmail,
+  sendPlacementTestBookingEmail,
+  sendPlacementTestConfirmationEmail
 };
+
+
+// <div class="social-links">
+//             <a href="https://facebook.com/tutelage">Facebook</a> |
+//             <a href="https://instagram.com/tutelage">Instagram</a> |
+//             <a href="https://tutelage.com">Website</a>
+//           </div>
