@@ -328,7 +328,7 @@ const EnglishForAdultsPage = () => {
           <div className={`flex flex-col-reverse items-stretch gap-0 ${isRTL ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
             {/* Content */}
             <div className={`w-full lg:w-1/2 flex items-center px-4 sm:px-6 ${isRTL ? 'lg:mr-10' : 'lg:ml-10'}`}>
-              <div className={`w-full py-10 lg:py-24 ${isRTL ? 'lg:pl-12' : 'lg:pr-12'}`}>
+              <div className={`w-full py-10 ${isRTL ? 'lg:pl-12' : 'lg:pr-12'}`}>
                 <h2 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6 ${isRTL ? 'text-right' : ''}`}>
                   {t('inglishForAdults.interactiveWay.title')}
                 </h2>
@@ -339,11 +339,11 @@ const EnglishForAdultsPage = () => {
               </div>
             </div>
 
-            {/* Image - Interactive learning for adults */}
+            {/* Right Image */}
             <div className="w-full lg:w-1/2">
               <div className="relative w-full h-96 sm:h-[28rem] lg:h-[32rem] xl:h-[36rem]">
                 <Image
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&q=80"
                   alt="Interactive English learning for adults"
                   fill
                   className="object-cover"

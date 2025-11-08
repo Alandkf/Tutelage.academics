@@ -105,11 +105,13 @@ export default function TestsSection() {
                             {card.btn}
                           </Button>
                         </Link>
-                        <Link href={card.TakeHref}>
-                          <Button variant={"secondary"} size="lg" className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
-                            {card.btn2}
-                          </Button>
-                        </Link>
+                        { card.id === "free" &&
+                          <Link href={card.TakeHref}>
+                            <Button variant={"secondary"} size="lg" className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
+                              {card.btn2}
+                            </Button>
+                          </Link>
+                        }
                       </div>
                     </div>
                   </div>

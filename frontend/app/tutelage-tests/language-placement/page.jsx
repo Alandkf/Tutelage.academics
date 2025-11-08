@@ -1,17 +1,19 @@
+'use client'
 
+import Image from "next/image"
+import Link from "next/link"
+import { Button } from '@/components/ui/button'
 
-const LanguagePlacement = () => {
+const LanguagePlacementPage = () => {
   return (
     <div className="relative min-h-screen bg-background pt-4"> 
-        <LanguagePlacementHero />
+      <LanguagePlacementHero />
+      <MoreAboutLanguagePlacement />
     </div>
   )
 }
 
-export default LanguagePlacement
-
-
-
+export default LanguagePlacementPage
 
 const LanguagePlacementHero = () => {
   const title = "Free Practice Test"
@@ -26,11 +28,6 @@ const LanguagePlacementHero = () => {
             <div className="flex-1">
               <h1 className="text-2xl sm:text-4xl lg:text-5xl flex items-center justify-between font-bold text-foreground mb-2">
                 {title}
-                <Link href="/tutelage-tests/free-practice-test/start">
-                    <Button size="lg" className="bg-primary text-primary-foreground px-6 py-3 cursor-pointer">
-                         Start the test
-                    </Button>
-                </Link>
               </h1>
             </div>
           </div>
@@ -59,5 +56,60 @@ const LanguagePlacementHero = () => {
         </div>
       </div>
     </>
+  )
+}
+
+
+const MoreAboutLanguagePlacement = () => {
+  return (
+    <div className="py-16 md:py-20 px-4">
+      <div className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg">
+        <div className="flex flex-col-reverse lg:flex-row items-stretch gap-0">
+          {/* Left Content */}
+          <div className="w-full lg:w-1/2 flex items-center px-4 sm:px-6 lg:ml-10">
+            <div className="w-full py-10 lg:py-0 lg:pr-12">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+                Language Placement Test
+              </h2>
+              
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed mb-4">
+                Tutelage offers online English placement tests designed to give you a clear understanding of your language proficiency. The <span className="font-semibold text-foreground">Live Speaking & Comprehension Test</span> is conducted online with a live instructor and evaluates your ability to understand spoken English and communicate effectively in real-time. This test takes approximately 15–20 minutes and helps measure your practical speaking and listening skills.
+              </p>
+
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed mb-4">
+                In addition, the <span className="font-semibold text-foreground">Detailed Listening, Reading & Writing Test</span> is a self-paced online assessment focused on your reading comprehension and writing abilities. It includes interactive exercises and short writing tasks, taking 15 minutes to complete.
+              </p>
+
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground leading-relaxed mb-8">
+                Taking both tests provides a comprehensive evaluation of your English level, helping you choose the most suitable course to improve your skills efficiently. Registration is required, and a fee applies for each test. Book your placement tests today and take the first step toward advancing your English!
+              </p>
+
+              {/* Book Your Test Button */}
+              <Link href="/contact">
+                <Button 
+                  size="" 
+                  className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                >
+                  Book Your Test
+                </Button>
+              </Link>
+            </div>
+          </div>
+  
+          {/* Right Image - Increased height */}
+          <div className="w-full lg:w-1/2">
+            <div className="relative w-full h-[32rem] sm:h-[36rem] md:h-[40rem] lg:h-[44rem] xl:h-[48rem]">
+              <Image
+                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80"
+                alt="Language placement test - professional assessment"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
