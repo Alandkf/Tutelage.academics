@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { processEnrollment, processPricingRequest, processTestResult, processPlacementTestBooking } = require('../controllers/enrollmentController');
+const { processEnrollment, processPricingRequest, processTestResult, processPlacementTestBooking, processMockTestBooking } = require('../controllers/enrollmentController');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required for enrollment)
@@ -39,6 +39,13 @@ router.post('/testresult', processTestResult);
  * Body: { firstName, lastName, email, phone, country, city, referralSource }
  */
 router.post('/placement-test', processPlacementTestBooking);
+
+/**
+ * POST /api/enrollment/mock-test
+ * Submit mock test booking request
+ * Body: { firstName, lastName, email, phone, country, city, testType, referralSource }
+ */
+router.post('/mock-test', processMockTestBooking);
 
 
 module.exports = router;

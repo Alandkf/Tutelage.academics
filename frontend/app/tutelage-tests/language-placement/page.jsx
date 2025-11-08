@@ -31,12 +31,6 @@ const LanguagePlacementHero = () => {
   const heroImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400"
   const description = "Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development."
   
-  const scrollToForm = () => {
-    const formSection = document.getElementById('booking-form')
-    if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }
 
   return (
     <>
@@ -47,13 +41,6 @@ const LanguagePlacementHero = () => {
             <div className="flex-1">
               <h1 className="text-2xl sm:text-4xl lg:text-5xl flex items-center justify-between font-bold text-foreground mb-2">
                 {title}
-                <Button 
-                  size="lg" 
-                  onClick={scrollToForm}
-                  className="px-6 py-2 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-                >
-                  Take the Test
-                </Button>
               </h1>
             </div>
           </div>
@@ -87,6 +74,14 @@ const LanguagePlacementHero = () => {
 
 
 const MoreAboutLanguagePlacement = () => {
+
+  const scrollToForm = () => {
+    const formSection = document.getElementById('booking-form')
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <div className="py-16 md:py-20 px-4">
       <div className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg">
@@ -111,14 +106,13 @@ const MoreAboutLanguagePlacement = () => {
               </p>
 
               {/* Book Your Test Button */}
-              <Link href="/contact">
                 <Button 
                   size="" 
+                  onClick={scrollToForm}
                   className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                 >
                   Book Your Test
                 </Button>
-              </Link>
             </div>
           </div>
   

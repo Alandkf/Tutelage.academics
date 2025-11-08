@@ -963,6 +963,371 @@ const sendPlacementTestConfirmationEmail = async (bookingData) => {
   }
 };
 
+/**
+ * Send mock test booking notification to admin
+ */
+const sendMockTestBookingEmail = async (bookingData) => {
+  const {
+    firstName,
+    lastName,
+    name,
+    email,
+    phone,
+    country,
+    city,
+    testType,
+    referralSource
+  } = bookingData;
+
+  const currentDate = new Date().toLocaleDateString();
+  const currentTime = new Date().toLocaleTimeString();
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background-color: #ffffff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+          border-bottom: 3px solid #fec016;
+          margin-bottom: 30px;
+        }
+        .title {
+          color: #1f2937;
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .info-section {
+          background-color: #f9fafb;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+        }
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        .info-row:last-child {
+          border-bottom: none;
+        }
+        .info-label {
+          font-weight: 600;
+          color: #6b7280;
+        }
+        .info-value {
+          color: #1f2937;
+        }
+        .highlight {
+          background-color: #fef3c7;
+          color: #92400e;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: 600;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          color: #6b7280;
+          font-size: 14px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">🎯 New Mock Test Booking Application</div>
+          <p style="color: #6b7280; margin: 5px 0;">A new student has applied for a mock test</p>
+        </div>
+
+        <div class="info-section">
+          <h3 style="margin-top: 0; color: #1f2937;">Student Information</h3>
+          <div class="info-row">
+            <span class="info-label">Date Submitted:</span>
+            <span class="info-value">${currentDate} at ${currentTime}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-value">${name}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">${email}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">${phone}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Location:</span>
+            <span class="info-value">${city}, ${country}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Test Type:</span>
+            <span class="info-value"><span class="highlight">${testType}</span></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Referral Source:</span>
+            <span class="info-value">${referralSource}</span>
+          </div>
+        </div>
+
+        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #fec016;">
+          <p style="margin: 0; color: #92400e;">
+            <strong>⏰ Action Required:</strong> Please contact this student to schedule their ${testType} session.
+          </p>
+        </div>
+
+        <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; color: #666; font-size: 14px;">
+            <strong>Quick Contact:</strong> You can reply directly to this email to reach ${name} at ${email}
+          </p>
+        </div>
+
+        <div class="footer">
+          <p><strong>Tutelage Language Center</strong></p>
+          <p>📧 Email: info@tutelage.com | 📱 Phone: +964 750 153 4240</p>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+            © ${new Date().getFullYear()} Tutelage. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Mock Test Bookings" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_USER,
+    subject: `🎯 New ${testType} Booking - ${name}`,
+    html: htmlContent,
+    replyTo: email
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Mock test booking notification sent to admin:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending mock test booking email:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send mock test booking confirmation to student
+ */
+const sendMockTestConfirmationEmail = async (bookingData) => {
+  const {
+    firstName,
+    lastName,
+    name,
+    email,
+    phone,
+    country,
+    city,
+    testType
+  } = bookingData;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background-color: #ffffff;
+          border-radius: 10px;
+          padding: 30px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+          text-align: center;
+          padding-bottom: 20px;
+          border-bottom: 3px solid #fec016;
+          margin-bottom: 30px;
+        }
+        .title {
+          color: #1f2937;
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .success-box {
+          background: linear-gradient(135deg, #fec016 0%, #f59e0b 100%);
+          color: white;
+          padding: 30px;
+          border-radius: 10px;
+          text-align: center;
+          margin: 20px 0;
+        }
+        .info-section {
+          background-color: #f9fafb;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+        }
+        .next-steps {
+          background-color: #fef3c7;
+          padding: 20px;
+          border-radius: 8px;
+          margin: 20px 0;
+          border-left: 4px solid #fec016;
+        }
+        .next-steps h3 {
+          color: #92400e;
+          margin-top: 0;
+        }
+        .next-steps ul {
+          color: #78350f;
+          padding-left: 20px;
+        }
+        .next-steps li {
+          margin: 10px 0;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          color: #6b7280;
+          font-size: 14px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">🎉 ${testType} Booking Confirmed!</div>
+        </div>
+
+        <p>Dear ${firstName} ${lastName},</p>
+        <p>Thank you for booking your <strong>${testType}</strong> with Tutelage Language Center! We're excited to help you prepare for your English speaking assessment.</p>
+
+        <div class="success-box">
+          <div style="font-size: 48px; margin-bottom: 10px;">✓</div>
+          <div style="font-size: 20px; font-weight: 600;">Booking Received!</div>
+          <p style="margin: 10px 0; font-size: 14px;">
+            We have received your ${testType} booking request
+          </p>
+        </div>
+
+        <div class="info-section">
+          <h3 style="margin-top: 0; color: #1f2937;">Your Booking Details</h3>
+          <p style="margin: 5px 0;"><strong>Name:</strong> ${name}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
+          <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
+          <p style="margin: 5px 0;"><strong>Location:</strong> ${city}, ${country}</p>
+          <p style="margin: 5px 0;"><strong>Test Type:</strong> <span style="color: #f59e0b; font-weight: 600;">${testType}</span></p>
+        </div>
+
+        <div class="next-steps">
+          <h3>What Happens Next?</h3>
+          <ul>
+            <li>Our team will review your booking request</li>
+            <li>We will contact you within 24-48 hours to schedule your test session</li>
+            <li>You will receive detailed test instructions and access information</li>
+            <li>The ${testType} session takes approximately 15-20 minutes</li>
+            <li>After completion, you'll receive detailed feedback on your performance</li>
+          </ul>
+        </div>
+
+        ${testType === 'Mock Test' ? `
+        <div style="background-color: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; color: #1e40af;">
+            <strong>💡 Mock Test Tips:</strong>
+          </p>
+          <ul style="color: #1e40af; margin: 10px 0; padding-left: 20px;">
+            <li>Ensure you have a quiet environment</li>
+            <li>Test your microphone and camera beforehand</li>
+            <li>Have a stable internet connection</li>
+            <li>Be ready 5 minutes before your scheduled time</li>
+          </ul>
+        </div>
+        ` : `
+        <div style="background-color: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; color: #1e40af;">
+            <strong>💡 Test Preparation:</strong>
+          </p>
+          <ul style="color: #1e40af; margin: 10px 0; padding-left: 20px;">
+            <li>No preparation needed - we assess your current level</li>
+            <li>Ensure you have a quiet environment</li>
+            <li>Test your microphone and camera beforehand</li>
+            <li>Have a stable internet connection</li>
+          </ul>
+        </div>
+        `}
+
+        <div style="background-color: #dcfce7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+          <p style="margin: 0; color: #166534;">
+            <strong>📞 Need Help?</strong> If you have any questions or need to reschedule, please contact us at info@tutelage.com or call +964 750 153 4240
+          </p>
+        </div>
+
+        <p>We look forward to working with you and helping you achieve your English learning goals!</p>
+
+        <div class="footer">
+          <p><strong>Tutelage Language Center</strong></p>
+          <p>📧 Email: info@tutelage.com | 📱 Phone: +964 750 153 4240</p>
+          <p style="font-size: 12px; color: #9ca3af; margin-top: 20px;">
+            This email was sent because you requested a ${testType} booking.
+            <br>© ${new Date().getFullYear()} Tutelage. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Language Center" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: `✓ Your ${testType} Booking Confirmed - Tutelage`,
+    html: htmlContent
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Mock test confirmation sent to student:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending mock test confirmation:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
@@ -970,7 +1335,9 @@ module.exports = {
   sendPricingRequestEmail,
   sendTestResultEmail,
   sendPlacementTestBookingEmail,
-  sendPlacementTestConfirmationEmail
+  sendPlacementTestConfirmationEmail,
+  sendMockTestBookingEmail,
+  sendMockTestConfirmationEmail
 };
 
 
