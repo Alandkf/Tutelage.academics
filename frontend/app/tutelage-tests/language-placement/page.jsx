@@ -8,9 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HelpCircle, ChevronDown } from 'lucide-react'
+import { HelpCircle, ChevronDown, ClipboardList, CreditCard, Video, BarChart3 } from 'lucide-react'
 import { toast } from 'sonner'
 import BASE_URL from '@/app/config/url'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 
 const LanguagePlacementPage = () => {
   return (
@@ -18,6 +21,7 @@ const LanguagePlacementPage = () => {
       <LanguagePlacementHero />
       <MoreAboutLanguagePlacement />
       <HowOurTestWorks />
+      <HowToTakeTest /> 
       <LanguagePlacementFAQ />
       <BookingFormSection />
     </div>
@@ -203,6 +207,73 @@ const HowOurTestWorks = () => {
   )
 }
 
+const HowToTakeTest = () => {
+  const steps = [
+    {
+      icon: ClipboardList,
+      title: "Fill the Registration Form",
+      description: "Complete our online registration form with your details to book your test"
+    },
+    {
+      icon: CreditCard,
+      title: "Complete Payment",
+      description: "Pay the test fee securely online to confirm your booking and reserve your spot."
+    },
+    {
+      icon: Video,
+      title: "Take the Test",
+      description: "Live speaking & comprehension test (with a ive instructor), includes detailed Listening, Reading, & Writing test (self-paced)."
+    },
+    {
+      icon: BarChart3,
+      title: "Get Your Results",
+      description: "Receive a detailed evaluation of your speaking performance, highlighting strengths and areas for improvement."
+    }
+  ]
+
+  return (
+    <div className="py-16 md:py-24 px-4 bg-muted/30">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-center mb-12 sm:mb-16">
+          How to Take the Speaking Mock Test
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+          {steps.map((step, index) => {
+            const IconComponent = step.icon
+            return (
+              <div 
+                key={index}
+                className="flex flex-col items-center text-center"
+              >
+                {/* Icon */}
+                <div className="mb-4">
+                  <IconComponent className="w-12 h-12 sm:w-14 sm:h-14 text-primary" strokeWidth={1.5} />
+                </div>
+
+                {/* Step Number */}
+                <div className="text-sm font-semibold text-primary mb-3">
+                  Step {index + 1}
+                </div>
+
+                {/* Title */}
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">
+                  {step.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const LanguagePlacementFAQ = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState(null)
 
@@ -298,17 +369,31 @@ const LanguagePlacementFAQ = () => {
   )
 }
 
+const placementTestSchema = z.object({
+  firstName: z.string().min(1, "First name is required").min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(1, "Last name is required").min(2, "Last name must be at least 2 characters"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").max(15, "Phone number must not exceed 15 digits"),
+  country: z.string().min(1, "Please select a country"),
+  city: z.string().min(1, "City is required").min(2, "City must be at least 2 characters"),
+  referralSource: z.string().min(1, "Please select how you heard about us")
+})
+
 const BookingFormSection = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    country: '',
-    city: '',
-    referralSource: ''
-  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
+    resolver: zodResolver(placementTestSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      country: '',
+      city: '',
+      referralSource: ''
+    }
+  })
 
   const COUNTRIES = [
     'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
@@ -343,32 +428,23 @@ const BookingFormSection = () => {
     'Other'
   ]
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const onSubmit = async (data) => {
     setIsSubmitting(true)
 
     try {
       const response = await fetch(`${BASE_URL}/api/enrollment/placement-test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
       })
 
-      const data = await response.json()
+      const result = await response.json()
 
-      if (data.success) {
+      if (result.success) {
         toast.success('Booking submitted successfully! We will contact you soon.')
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          country: '',
-          city: '',
-          referralSource: ''
-        })
+        reset()
       } else {
-        toast.error(data.message || 'Failed to submit booking. Please try again.')
+        toast.error(result.message || 'Failed to submit booking. Please try again.')
       }
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -393,30 +469,30 @@ const BookingFormSection = () => {
 
         {/* Booking Form */}
         <div className="max-w-3xl mx-auto bg-card border border-border rounded-lg p-8 shadow-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="firstName">First Name *</Label>
                 <Input
                   id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))
-                  }
-                  required
+                  {...register("firstName")}
                   className="mt-2"
                 />
+                {errors.firstName && (
+                  <p className="text-sm text-red-500 mt-1">{errors.firstName.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="lastName">Last Name *</Label>
                 <Input
                   id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))
-                  }
-                  required
+                  {...register("lastName")}
                   className="mt-2"
                 />
+                {errors.lastName && (
+                  <p className="text-sm text-red-500 mt-1">{errors.lastName.message}</p>
+                )}
               </div>
             </div>
 
@@ -426,12 +502,12 @@ const BookingFormSection = () => {
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))
-                }
-                required
+                {...register("email")}
                 className="mt-2"
               />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Phone */}
@@ -440,69 +516,77 @@ const BookingFormSection = () => {
               <Input
                 id="phone"
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))
-                }
-                required
+                {...register("phone")}
                 className="mt-2"
               />
+              {errors.phone && (
+                <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+              )}
             </div>
 
             {/* Country and City */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={formData.country} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))
-                  }
-                  required
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select your country" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select your country" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.country && (
+                  <p className="text-sm text-red-500 mt-1">{errors.country.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="city">City *</Label>
                 <Input
                   id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))
-                  }
-                  required
+                  {...register("city")}
                   className="mt-2"
                 />
+                {errors.city && (
+                  <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>
+                )}
               </div>
             </div>
 
             {/* Referral Source */}
             <div>
               <Label htmlFor="referralSource">How did you hear about us? *</Label>
-              <Select 
-                value={formData.referralSource} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))
-                }
-                required
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REFERRAL_SOURCES.map((source) => (
-                    <SelectItem key={source} value={source}>
-                      {source}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="referralSource"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REFERRAL_SOURCES.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.referralSource && (
+                <p className="text-sm text-red-500 mt-1">{errors.referralSource.message}</p>
+              )}
             </div>
 
             {/* Submit Button */}

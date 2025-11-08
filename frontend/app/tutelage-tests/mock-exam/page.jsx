@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import BASE_URL from "@/app/config/url"
 import { toast } from "sonner"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 
 
 const MockExam = () => {
@@ -378,18 +381,33 @@ const MockFAQ = () => {
   )
 }
 
+const mockTestSchema = z.object({
+  firstName: z.string().min(1, "First name is required").min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(1, "Last name is required").min(2, "Last name must be at least 2 characters"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").max(15, "Phone number must not exceed 15 digits"),
+  country: z.string().min(1, "Please select a country"),
+  city: z.string().min(1, "City is required").min(2, "City must be at least 2 characters"),
+  testType: z.string().min(1, "Please select a test type"),
+  referralSource: z.string().min(1, "Please select how you heard about us")
+})
+
 const BookingFormSection = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    country: '',
-    city: '',
-    testType: '',
-    referralSource: ''
-  })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { register, handleSubmit, control, formState: { errors }, reset } = useForm({
+    resolver: zodResolver(mockTestSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      country: '',
+      city: '',
+      testType: '',
+      referralSource: ''
+    }
+  })
 
   const COUNTRIES = [
     'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
@@ -429,33 +447,23 @@ const BookingFormSection = () => {
     'Other'
   ]
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const onSubmit = async (data) => {
     setIsSubmitting(true)
 
     try {
       const response = await fetch(`${BASE_URL}/api/enrollment/mock-test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
       })
 
-      const data = await response.json()
+      const result = await response.json()
 
-      if (data.success) {
+      if (result.success) {
         toast.success('Booking submitted successfully! Check your email for confirmation.')
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          country: '',
-          city: '',
-          testType: '',
-          referralSource: ''
-        })
+        reset()
       } else {
-        toast.error(data.message || 'Failed to submit booking. Please try again.')
+        toast.error(result.message || 'Failed to submit booking. Please try again.')
       }
     } catch (error) {
       toast.error('Failed to submit booking. Please try again.')
@@ -479,30 +487,30 @@ const BookingFormSection = () => {
 
         {/* Booking Form */}
         <div className="max-w-3xl mx-auto bg-card border border-border rounded-lg p-8 shadow-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="firstName">First Name *</Label>
                 <Input
                   id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))
-                  }
-                  required
+                  {...register("firstName")}
                   className="mt-2"
                 />
+                {errors.firstName && (
+                  <p className="text-sm text-red-500 mt-1">{errors.firstName.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="lastName">Last Name *</Label>
                 <Input
                   id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))
-                  }
-                  required
+                  {...register("lastName")}
                   className="mt-2"
                 />
+                {errors.lastName && (
+                  <p className="text-sm text-red-500 mt-1">{errors.lastName.message}</p>
+                )}
               </div>
             </div>
 
@@ -512,12 +520,12 @@ const BookingFormSection = () => {
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))
-                }
-                required
+                {...register("email")}
                 className="mt-2"
               />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Phone */}
@@ -526,89 +534,101 @@ const BookingFormSection = () => {
               <Input
                 id="phone"
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))
-                }
-                required
+                {...register("phone")}
                 className="mt-2"
               />
+              {errors.phone && (
+                <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
+              )}
             </div>
 
             {/* Country, City, and Test Type in one row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={formData.country} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))
-                  }
-                  required
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select your country" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="country"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select your country" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.country && (
+                  <p className="text-sm text-red-500 mt-1">{errors.country.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="city">City *</Label>
                 <Input
                   id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))
-                  }
-                  required
+                  {...register("city")}
                   className="mt-2"
                 />
+                {errors.city && (
+                  <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="testType">Type of Test *</Label>
-                <Select 
-                  value={formData.testType} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, testType: value }))
-                  }
-                  required
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select test type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TEST_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="testType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select test type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEST_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.testType && (
+                  <p className="text-sm text-red-500 mt-1">{errors.testType.message}</p>
+                )}
               </div>
             </div>
 
             {/* Referral Source */}
             <div>
               <Label htmlFor="referralSource">How did you hear about us? *</Label>
-              <Select 
-                value={formData.referralSource} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))
-                }
-                required
-              >
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REFERRAL_SOURCES.map((source) => (
-                    <SelectItem key={source} value={source}>
-                      {source}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="referralSource"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {REFERRAL_SOURCES.map((source) => (
+                        <SelectItem key={source} value={source}>
+                          {source}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.referralSource && (
+                <p className="text-sm text-red-500 mt-1">{errors.referralSource.message}</p>
+              )}
             </div>
 
             {/* Submit Button */}
