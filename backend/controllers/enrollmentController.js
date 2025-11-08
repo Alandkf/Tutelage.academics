@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -248,8 +248,102 @@ const processTestResult = async (req, res) => {
   }
 };
 
+/**
+ * Process placement test booking form submission
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const processPlacementTestBooking = async (req, res) => {
+  try {
+    console.log('📝 Processing placement test booking');
+    
+    const { firstName, lastName, email, phone, country, city, referralSource } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !country || !city || !referralSource) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+    
+    // Validate phone number (basic validation)
+    if (phone.length < 10 || phone.length > 15) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid phone number'
+      });
+    }
+    
+    const bookingData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      country: country.trim(),
+      city: city.trim(),
+      referralSource: referralSource.trim()
+    };
+    
+    console.log('📧 Sending placement test booking emails...');
+    
+    // Send emails concurrently with better error handling
+    try {
+      await Promise.all([
+        sendPlacementTestBookingEmail(bookingData),
+        sendPlacementTestConfirmationEmail(bookingData)
+      ]);
+      
+      console.log('✅ Placement test booking emails sent successfully');
+      console.log(`📋 New booking: ${bookingData.name} from ${city}, ${country}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Booking submitted successfully! However, there was an issue sending confirmation emails. Our team will contact you directly.',
+        data: {
+          name: bookingData.name,
+          email: bookingData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Placement test booking submitted successfully! Check your email for confirmation.',
+      data: {
+        name: bookingData.name,
+        email: bookingData.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Placement test booking processing error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process booking. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   processEnrollment,
   processPricingRequest,
-  processTestResult
+  processTestResult,
+  processPlacementTestBooking
 };

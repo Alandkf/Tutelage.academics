@@ -1,14 +1,25 @@
 'use client'
 
+import { useState } from 'react'
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { motion, AnimatePresence } from 'framer-motion'
+import { HelpCircle, ChevronDown } from 'lucide-react'
+import { toast } from 'sonner'
+import BASE_URL from '@/app/config/url'
 
 const LanguagePlacementPage = () => {
   return (
     <div className="relative min-h-screen bg-background pt-4"> 
       <LanguagePlacementHero />
       <MoreAboutLanguagePlacement />
+      <HowOurTestWorks />
+      <LanguagePlacementFAQ />
+      <BookingFormSection />
     </div>
   )
 }
@@ -19,6 +30,14 @@ const LanguagePlacementHero = () => {
   const title = "Free Practice Test"
   const heroImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400"
   const description = "Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development."
+  
+  const scrollToForm = () => {
+    const formSection = document.getElementById('booking-form')
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <>
       {/* Header Section */}
@@ -28,6 +47,13 @@ const LanguagePlacementHero = () => {
             <div className="flex-1">
               <h1 className="text-2xl sm:text-4xl lg:text-5xl flex items-center justify-between font-bold text-foreground mb-2">
                 {title}
+                <Button 
+                  size="lg" 
+                  onClick={scrollToForm}
+                  className="px-6 py-2 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                >
+                  Take the Test
+                </Button>
               </h1>
             </div>
           </div>
@@ -108,6 +134,395 @@ const MoreAboutLanguagePlacement = () => {
               />
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const HowOurTestWorks = () => {
+  const scrollToForm = () => {
+    const formSection = document.getElementById('booking-form')
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  return (
+    <div className="py-16 md:py-20 px-4 bg-muted/30">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Title */}
+        <div className="mb-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            How Our English Level Test Works
+          </h2>
+          
+          <div className="max-w-4xl text-muted-foreground text-base sm:text-lg leading-relaxed space-y-4">
+            <p>
+              <span className="font-semibold text-foreground">No preparation is needed</span> for our online English test — it's designed to evaluate your current level of proficiency as it is today.
+            </p>
+            <p>
+              Before you begin, make sure you are in a <span className="font-semibold text-foreground">quiet environment</span> where you can focus uninterrupted for approximately <span className="font-semibold text-foreground">30 minutes</span>.
+            </p>
+            
+            <p className="font-semibold text-foreground pt-4">
+              It assesses key areas of English language skills:
+            </p>
+            
+            <ul className="space-y-2 pl-0">
+              <li className="flex items-start">
+                <span className="text-foreground mr-3">•</span>
+                <span><span className="font-semibold text-foreground">Vocabulary</span> – Measures your familiarity with a broad range of English words.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-foreground mr-3">•</span>
+                <span><span className="font-semibold text-foreground">Listening</span> – Using audio technology, you will listen to questions in English and respond under time constraints, showing how well you understand spoken English.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-foreground mr-3">•</span>
+                <span><span className="font-semibold text-foreground">Reading</span> – You will read passages and questions in English, interpreting and selecting the correct answers to demonstrate comprehension.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-foreground mr-3">•</span>
+                <span><span className="font-semibold text-foreground">Writing</span> – You will complete short writing tasks to show how well you can construct sentences, use correct grammar, and express your ideas in written English.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-foreground mr-3">•</span>
+                <span><span className="font-semibold text-foreground">Grammar</span> – Tests your knowledge of English grammar rules and your ability to apply them accurately.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="text-start mt-12">
+          <Button 
+            onClick={scrollToForm}
+            size="lg" 
+            className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+          >
+            Book Your Test Today
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const LanguagePlacementFAQ = () => {
+  const [openFaqIndex, setOpenFaqIndex] = useState(null)
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index)
+  }
+
+  const faqs = [
+    {
+      question: "Do I need to prepare?",
+      answer: "No preparation is required — the test evaluates your current English level."
+    },
+    {
+      question: "How long does it take?",
+      answer: "The live speaking test takes 15–20 minutes, and the listening, reading & writing test takes 15 minutes."
+    },
+    {
+      question: "Where and what do I need?",
+      answer: "Both tests are online. You need a quiet environment, stable internet, and a device with audio (and a camera for the live test)."
+    },
+    {
+      question: "What skills are tested?",
+      answer: "Vocabulary, listening, reading, writing, and grammar."
+    },
+    {
+      question: "How do I register and get results?",
+      answer: "Register online to book your test, and receive a detailed evaluation of your English level afterward."
+    }
+  ]
+
+  return (
+    <div className="py-16 md:py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Section Title */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            Frequently Asked Questions (FAQ)
+          </h2>
+          <p className="text-base sm:text-lg text-muted-foreground">
+            Find answers to common questions about our language placement tests
+          </p>
+        </div>
+        
+        {/* FAQ Accordion */}
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="bg-card border border-border rounded-lg overflow-hidden transition-all duration-300 hover:shadow-md"
+            >
+              {/* Question Button */}
+              <button
+                onClick={() => toggleFaq(index)}
+                className="w-full flex items-center justify-between p-5 text-left transition-colors duration-200 hover:bg-muted/50"
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <HelpCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                  <span className="text-base font-semibold text-foreground pr-4">
+                    {faq.question}
+                  </span>
+                </div>
+                <motion.div
+                  animate={{ rotate: openFaqIndex === index ? 180 : 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <ChevronDown className="w-5 h-5 text-primary flex-shrink-0" />
+                </motion.div>
+              </button>
+
+              {/* Answer (Collapsible) */}
+              <AnimatePresence initial={false}>
+                {openFaqIndex === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <div className="px-5 pb-5 pt-2">
+                      <p className="text-muted-foreground leading-relaxed pl-9">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const BookingFormSection = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: '',
+    city: '',
+    referralSource: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const COUNTRIES = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+    'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+    'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+    'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+    'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+    'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+    'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait', 'Kyrgyzstan',
+    'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar',
+    'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia',
+    'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal',
+    'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan',
+    'Palau', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar',
+    'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia',
+    'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+    'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan',
+    'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
+    'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City',
+    'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+  ]
+
+  const REFERRAL_SOURCES = [
+    'Google Search',
+    'Social Media (Facebook, Instagram, etc.)',
+    'Friend or Family Recommendation',
+    'Advertisement',
+    'School or University',
+    'Previous Student',
+    'Other'
+  ]
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/enrollment/placement-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('Booking submitted successfully! We will contact you soon.')
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          country: '',
+          city: '',
+          referralSource: ''
+        })
+      } else {
+        toast.error(data.message || 'Failed to submit booking. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      toast.error('Failed to submit booking. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div id="booking-form" className="py-16 md:py-20 px-4 bg-background">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Title */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+            Book Your Placement Test
+          </h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">
+            Fill out the form below to schedule your English placement test. Our team will contact you to confirm your booking.
+          </p>
+        </div>
+
+        {/* Booking Form */}
+        <div className="max-w-3xl mx-auto bg-card border border-border rounded-lg p-8 shadow-lg">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))
+                  }
+                  required
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))
+                  }
+                  required
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))
+                }
+                required
+                className="mt-2"
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))
+                }
+                required
+                className="mt-2"
+              />
+            </div>
+
+            {/* Country and City */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="country">Country *</Label>
+                <Select 
+                  value={formData.country} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))
+                  }
+                  required
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select your country" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {COUNTRIES.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))
+                  }
+                  required
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            {/* Referral Source */}
+            <div>
+              <Label htmlFor="referralSource">How did you hear about us? *</Label>
+              <Select 
+                value={formData.referralSource} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, referralSource: value }))
+                }
+                required
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent>
+                  {REFERRAL_SOURCES.map((source) => (
+                    <SelectItem key={source} value={source}>
+                      {source}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full cursor-pointer"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
