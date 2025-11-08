@@ -110,10 +110,6 @@ export default function SectionTable({ sections, onEdit, onDelete }) {
               This will permanently delete the section <strong>"{sectionToDelete?.name}"</strong>.
               <br />
               <br />
-              <span className="text-destructive font-semibold">
-                ⚠️ All questions in this section ({sectionToDelete?.currentQuestionCount || 0}) will also be deleted.
-              </span>
-              <br />
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

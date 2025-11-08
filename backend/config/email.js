@@ -423,6 +423,16 @@ async function sendTestResultEmail(resultData) {
     console.error('Error reading logo for test result email:', err);
   }
 
+  // ✅ Calculate dynamic level ranges based on totalQuestions
+  const ranges = [
+    { level: 'A1 Beginner', min: 0, max: Math.floor(totalQuestions * 0.10), scoreMin: '0%', scoreMax: '10%' },
+    { level: 'A2 Pre-intermediate', min: Math.floor(totalQuestions * 0.10) + 1, max: Math.floor(totalQuestions * 0.30), scoreMin: '13%', scoreMax: '30%' },
+    { level: 'B1 Intermediate', min: Math.floor(totalQuestions * 0.30) + 1, max: Math.floor(totalQuestions * 0.53), scoreMin: '33%', scoreMax: '53%' },
+    { level: 'B2 Upper-Intermediate', min: Math.floor(totalQuestions * 0.53) + 1, max: Math.floor(totalQuestions * 0.77), scoreMin: '57%', scoreMax: '77%' },
+    { level: 'C1 Advanced', min: Math.floor(totalQuestions * 0.77) + 1, max: Math.floor(totalQuestions * 0.90), scoreMin: '80%', scoreMax: '90%' },
+    { level: 'C2 Proficient', min: Math.floor(totalQuestions * 0.90) + 1, max: totalQuestions, scoreMin: '93%', scoreMax: '100%' }
+  ];
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -470,7 +480,7 @@ async function sendTestResultEmail(resultData) {
             color: #666;
             font-size: 16px;
           }
-          .result-box {
+          .score-box {
             background: linear-gradient(135deg, #fec016 0%, #f59e0b 100%);
             border-radius: 10px;
             padding: 25px;
@@ -478,7 +488,7 @@ async function sendTestResultEmail(resultData) {
             margin: 25px 0;
             color: white;
           }
-          .score-circle {
+          .score-number {
             font-size: 48px;
             font-weight: bold;
             margin: 10px 0;
@@ -548,6 +558,24 @@ async function sendTestResultEmail(resultData) {
             color: #f59e0b;
             text-decoration: none;
           }
+          .level-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .level-table th, .level-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .level-table th {
+            background-color: #f9f9f9;
+            color: #333;
+            font-weight: bold;
+          }
+          .highlight-row {
+            background-color: #e0f7fa;
+          }
         </style>
       </head>
       <body>
@@ -562,10 +590,13 @@ async function sendTestResultEmail(resultData) {
           
           <p>Thank you for completing the Tutelage English Placement Test! We're pleased to share your results with you.</p>
 
-          <div class="result-box">
+          <div class="score-box">
             <div>Your Score</div>
-            <div class="score-circle">${score}%</div>
+            <div class="score-number">${score}%</div>
             <div class="level-badge">${level}</div>
+            <div style="margin-top: 15px; font-size: 14px;">
+              ${correctAnswers} out of ${totalQuestions} correct answers
+            </div>
           </div>
 
           <div class="details-section">
@@ -603,6 +634,26 @@ async function sendTestResultEmail(resultData) {
               Explore Our Courses
             </a>
           </div>
+
+          <h3 style="color: #1f2937;">Score Comparison Table</h3>
+          <table class="level-table">
+            <thead>
+              <tr>
+                <th>CEFR Level</th>
+                <th>Correct Answers (out of ${totalQuestions})</th>
+                <th>Score Range</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ranges.map(range => `
+                <tr ${level === range.level ? 'class="highlight-row"' : ''}>
+                  <td><strong>${range.level}</strong></td>
+                  <td>${range.min} - ${range.max}</td>
+                  <td>${range.scoreMin} - ${range.scoreMax}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
 
           <p style="margin-top: 30px;">We recommend reviewing the following areas to continue your English learning journey:</p>
           <ul>

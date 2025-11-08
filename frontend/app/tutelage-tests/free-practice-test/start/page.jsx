@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,8 +12,6 @@ import BASE_URL from '@/app/config/url'
 import { Loader2, Clock, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-
-const TOTAL_TIME = 30 * 60 // 30 minutes in seconds
 
 // Comprehensive list of world countries
 const COUNTRIES = [
@@ -39,7 +37,7 @@ const COUNTRIES = [
   'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
-const Start = () => {
+export default function FreePracticeTestPage() {
   const router = useRouter()
   
   // Quiz flow state
@@ -60,7 +58,7 @@ const Start = () => {
 
   // Fetch quiz config and questions from API
   const [quizConfig, setQuizConfig] = useState(null)
-  const [quizQuestions, setQuizQuestions] = useState([])
+  const [quizQuestions, setQuizQuestions] = useState([])  
   const [loading, setLoading] = useState(true)
 
   // Section tracking state
@@ -68,47 +66,52 @@ const Start = () => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [sectionProgress, setSectionProgress] = useState({})
 
+  // ✅ Use ref to track if data has been fetched (prevent infinite loop)
+  const hasFetchedData = useRef(false)
+
+  // ✅ Fetch quiz data ONCE on mount
   useEffect(() => {
+    if (hasFetchedData.current) return // ✅ Prevent refetching
+    
     const fetchQuizData = async () => {
       try {
         setLoading(true)
         
-        // Fetch config (total questions + time limit)
         const configRes = await fetch(`${BASE_URL}/api/quiz/config`)
         const configData = await configRes.json()
         if (configData.success) {
-          setQuizConfig(configData.data)
-          setTimeLeft(configData.data.timeLimitMinutes * 60) // convert to seconds
+          const config = configData.data
+          setQuizConfig(config)
+          setTimeLeft(config.timeLimitMinutes * 60)
         } else {
           toast.error('Quiz is currently unavailable. Please try again later.')
           return
         }
 
-        // Fetch sections to get questionCount limits
         const sectionsRes = await fetch(`${BASE_URL}/api/admin/quiz/sections`, {
           credentials: 'include'
         })
         const sectionsData = await sectionsRes.json()
 
-        // Fetch questions (30 random questions distributed by level)
         const questionsRes = await fetch(`${BASE_URL}/api/quiz/questions`)
         const questionsData = await questionsRes.json()
+        
         if (questionsData.success) {
-          setQuizQuestions(questionsData.data)
+          const questions = questionsData.data
+          setQuizQuestions(questions)
           
-          // Build section structure based on fetched sections and their questionCount limits
           if (sectionsData.success && Array.isArray(sectionsData.data)) {
             let questionOffset = 0
             const sectionArray = sectionsData.data
-              .filter(s => s.isActive) // Only active sections
-              .sort((a, b) => a.displayOrder - b.displayOrder) // Sort by display order
+              .filter(s => s.isActive)
+              .sort((a, b) => a.displayOrder - b.displayOrder)
               .map((s, idx) => {
                 const limit = s.questionCount || 0
                 const section = {
                   number: idx + 1,
                   name: s.name,
                   slug: s.slug,
-                  questionCount: limit, // How many questions to show in quiz
+                  questionCount: limit,
                   startIndex: questionOffset,
                   endIndex: questionOffset + limit - 1,
                   isCompleted: false
@@ -119,7 +122,6 @@ const Start = () => {
             
             setSections(sectionArray)
             
-            // Initialize section progress
             const initialProgress = {}
             sectionArray.forEach((s, idx) => {
               initialProgress[idx] = { completed: false }
@@ -129,6 +131,8 @@ const Start = () => {
         } else {
           toast.error('Failed to load quiz questions.')
         }
+        
+        hasFetchedData.current = true // ✅ Mark as fetched
       } catch (error) {
         console.error('Error fetching quiz data:', error)
         toast.error('Failed to load quiz. Please try again.')
@@ -136,59 +140,67 @@ const Start = () => {
         setLoading(false)
       }
     }
+    
     fetchQuizData()
-  }, [])
+  }, []) // ✅ Empty dependency array - only run once on mount
 
   // Timer countdown
   useEffect(() => {
-    if (stage !== 'quiz') return
-    const interval = setInterval(() => {
+    if (stage !== 'quiz' || timeLeft <= 0) return
+
+    const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          clearInterval(interval)
-          handleFinishQuiz()
+          clearInterval(timer)
+          handleQuizComplete()
           return 0
         }
         return prev - 1
       })
     }, 1000)
-    return () => clearInterval(interval)
-  }, [stage])
 
+    return () => clearInterval(timer)
+  }, [stage, timeLeft])
+
+  // ✅ FIX: Check section completion WITHOUT circular dependencies
   useEffect(() => {
     if (sections.length === 0) return
     
     const currentSection = sections[currentSectionIndex]
     if (!currentSection) return
     
-    // Check if all questions in current section (based on startIndex -> endIndex) are answered
-    let allAnsweredInSection = true
+    // Check if all questions in current section are answered
+    let allAnswered = true
     for (let i = currentSection.startIndex; i <= currentSection.endIndex; i++) {
       if (answers[i] === undefined) {
-        allAnsweredInSection = false
+        allAnswered = false
         break
       }
     }
     
-    if (allAnsweredInSection && !sectionProgress[currentSectionIndex]?.completed) {
+    // ✅ Only update if status actually changed (prevents infinite loop)
+    const isAlreadyCompleted = sectionProgress[currentSectionIndex]?.completed
+    if (allAnswered && !isAlreadyCompleted) {
       setSectionProgress(prev => ({
         ...prev,
         [currentSectionIndex]: { completed: true }
       }))
     }
-  }, [answers, currentQuestionIndex, sections, currentSectionIndex, sectionProgress])
+  }, [answers, currentSectionIndex]) // ✅ Removed sections and sectionProgress from deps
 
-  // Update current section index when question changes
+  // ✅ FIX: Update current section index WITHOUT circular dependencies
   useEffect(() => {
     if (sections.length === 0) return
     
     const nextSectionIndex = sections.findIndex(s => 
       currentQuestionIndex >= s.startIndex && currentQuestionIndex <= s.endIndex
     )
+    
+    // ✅ Only update if index actually changed (prevents infinite loop)
     if (nextSectionIndex !== -1 && nextSectionIndex !== currentSectionIndex) {
       setCurrentSectionIndex(nextSectionIndex)
     }
-  }, [currentQuestionIndex, sections, currentSectionIndex])
+  }, [currentQuestionIndex]) // ✅ Removed sections and currentSectionIndex from deps
 
   const handleStartQuiz = () => {
     setStage('quiz')
@@ -218,17 +230,30 @@ const Start = () => {
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
     })
-    const percentage = Math.round((correct / quizQuestions.length) * 100)
     
-    // ✅ NEW LOGIC: Based on number of correct answers (out of 30)
+    // ✅ Use ACTUAL number of questions fetched, not config limit
+    const totalQuestions = quizQuestions.length
+    const percentage = Math.round((correct / totalQuestions) * 100)
+    
+    // ✅ Dynamic level calculation based on percentage of fetched questions
     let calculatedLevel = ''
-    if (correct >= 0 && correct <= 3) calculatedLevel = 'A1 Beginner'
-    else if (correct >= 4 && correct <= 9) calculatedLevel = 'A2 Pre-intermediate'
-    else if (correct >= 10 && correct <= 16) calculatedLevel = 'B1 Intermediate'
-    else if (correct >= 17 && correct <= 23) calculatedLevel = 'B2 Upper-Intermediate'
-    else if (correct >= 24 && correct <= 27) calculatedLevel = 'C1 Advanced'
-    else if (correct >= 28 && correct <= 30) calculatedLevel = 'C2 Proficient'
-    else calculatedLevel = 'A1 Beginner' // Fallback
+    const ranges = [
+      { min: 0, max: Math.floor(totalQuestions * 0.10), level: 'A1 Beginner' },
+      { min: Math.floor(totalQuestions * 0.10) + 1, max: Math.floor(totalQuestions * 0.30), level: 'A2 Pre-intermediate' },
+      { min: Math.floor(totalQuestions * 0.30) + 1, max: Math.floor(totalQuestions * 0.53), level: 'B1 Intermediate' },
+      { min: Math.floor(totalQuestions * 0.53) + 1, max: Math.floor(totalQuestions * 0.77), level: 'B2 Upper-Intermediate' },
+      { min: Math.floor(totalQuestions * 0.77) + 1, max: Math.floor(totalQuestions * 0.90), level: 'C1 Advanced' },
+      { min: Math.floor(totalQuestions * 0.90) + 1, max: totalQuestions, level: 'C2 Proficient' }
+    ]
+    
+    for (const range of ranges) {
+      if (correct >= range.min && correct <= range.max) {
+        calculatedLevel = range.level
+        break
+      }
+    }
+    
+    if (!calculatedLevel) calculatedLevel = 'A1 Beginner'
     
     setScore(percentage)
     setLevel(calculatedLevel)
@@ -246,7 +271,7 @@ const Start = () => {
           yearOfBirth: formData.yearOfBirth,
           score: percentage,
           level: calculatedLevel,
-          totalQuestions: quizQuestions.length,
+          totalQuestions: totalQuestions,
           correctAnswers: correct
         })
       })
@@ -269,17 +294,29 @@ const Start = () => {
     quizQuestions.forEach((q, idx) => {
       if (answers[idx] === q.correctAnswer) correct++
     })
-    const percentage = Math.round((correct / quizQuestions.length) * 100)
     
-    // ✅ NEW LOGIC: Based on number of correct answers (out of 30)
+    // ✅ Use ACTUAL number of questions fetched
+    const totalQuestions = quizQuestions.length
+    const percentage = Math.round((correct / totalQuestions) * 100)
+    
     let calculatedLevel = ''
-    if (correct >= 0 && correct <= 3) calculatedLevel = 'A1 Beginner'
-    else if (correct >= 4 && correct <= 9) calculatedLevel = 'A2 Pre-intermediate'
-    else if (correct >= 10 && correct <= 16) calculatedLevel = 'B1 Intermediate'
-    else if (correct >= 17 && correct <= 23) calculatedLevel = 'B2 Upper-Intermediate'
-    else if (correct >= 24 && correct <= 27) calculatedLevel = 'C1 Advanced'
-    else if (correct >= 28 && correct <= 30) calculatedLevel = 'C2 Proficient'
-    else calculatedLevel = 'A1 Beginner' // Fallback
+    const ranges = [
+      { min: 0, max: Math.floor(totalQuestions * 0.10), level: 'A1 Beginner' },
+      { min: Math.floor(totalQuestions * 0.10) + 1, max: Math.floor(totalQuestions * 0.30), level: 'A2 Pre-intermediate' },
+      { min: Math.floor(totalQuestions * 0.30) + 1, max: Math.floor(totalQuestions * 0.53), level: 'B1 Intermediate' },
+      { min: Math.floor(totalQuestions * 0.53) + 1, max: Math.floor(totalQuestions * 0.77), level: 'B2 Upper-Intermediate' },
+      { min: Math.floor(totalQuestions * 0.77) + 1, max: Math.floor(totalQuestions * 0.90), level: 'C1 Advanced' },
+      { min: Math.floor(totalQuestions * 0.90) + 1, max: totalQuestions, level: 'C2 Proficient' }
+    ]
+    
+    for (const range of ranges) {
+      if (correct >= range.min && correct <= range.max) {
+        calculatedLevel = range.level
+        break
+      }
+    }
+    
+    if (!calculatedLevel) calculatedLevel = 'A1 Beginner'
     
     setScore(percentage)
     setLevel(calculatedLevel)
@@ -338,8 +375,9 @@ const Start = () => {
     const isSectionCompleted = sectionProgress[currentSectionIndex]?.completed
     
     // Calculate progress percentage
-    const progressPercentage = quizQuestions.length > 0 
-      ? ((currentQuestionIndex + 1) / quizQuestions.length) * 100 
+    const totalQuestions = quizQuestions.length
+    const progressPercentage = totalQuestions > 0 
+      ? ((currentQuestionIndex + 1) / totalQuestions) * 100 
       : 0
 
     return (
@@ -446,6 +484,13 @@ const Start = () => {
                   </div>
                 </button>
               ))}
+
+              {/* Debug: Show correct answer */}
+              {false && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                  <strong>Debug Info:</strong> Correct answer is {String.fromCharCode(65 + question.correctAnswer)}.
+                </div>
+              )}
             </div>
           </div>
 
@@ -674,4 +719,3 @@ const Start = () => {
   return null
 }
 
-export default Start
