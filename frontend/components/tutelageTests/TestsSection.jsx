@@ -16,7 +16,7 @@ export default function TestsSection() {
         'The test can be retaken at any time to monitor progress.'
       ],
       ReadMoreHref: '/tutelage-tests/free-practice-test',
-      TakeHref: '/tutelage-tests/practicetests',
+      TakeHref: '/tutelage-tests/free-practice-test/start',
       image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400',
       btn: 'Read More',
       btn2: 'Take Free Test'

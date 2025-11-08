@@ -454,11 +454,11 @@ export default function FreePracticeTestPage() {
           {/* Question card */}
           <div className="bg-muted border border-border rounded-lg p-6 mt-2 shadow-sm mb-6 max-w-xl mx-auto">
             <h2 className="text-2xl font-semibold text-foreground mb-6">
-              {question.text}
+              {question?.text}
             </h2>
 
             <div className="space-y-3">
-              {question.options.map((option, idx) => (
+              {question?.options.map((option, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectAnswer(idx)}
@@ -488,7 +488,7 @@ export default function FreePracticeTestPage() {
               {/* Debug: Show correct answer */}
               {false && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                  <strong>Debug Info:</strong> Correct answer is {String.fromCharCode(65 + question.correctAnswer)}.
+                  <strong>Debug Info:</strong> Correct answer is {String.fromCharCode(65 + question?.correctAnswer)}.
                 </div>
               )}
             </div>

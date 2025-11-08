@@ -77,7 +77,7 @@ export default function Navbar (){
       dropdown: [
         { name: "Free Practice Tests", href: "/tutelage-tests/free-practice-test" },
         { name: "Language placement test", href: "/tutelage-tests/language-placement" },
-        { name: "International/ mock test", href: "/tutelage-tests/language-placement" },
+        { name: "International/ mock test", href: "/tutelage-tests/mock-exam" },
       ],
     },
     {
