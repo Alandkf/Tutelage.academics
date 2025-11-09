@@ -17,6 +17,7 @@ const {
 } = require('../controllers/speakingController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -58,13 +59,13 @@ router.get('/:id', getSpeakingById);
  * POST /api/speakings
  * Create a new speaking item
  */
-router.post('/', isAuthenticated, createSpeaking);
+router.post('/', isAuthenticated, pdfUpload, createSpeaking);
 
 /**
  * PUT /api/speakings/:id
  * Update speaking item (author/admin)
  */
-router.put('/:id', isAuthenticated, updateSpeaking);
+router.put('/:id', isAuthenticated, pdfUpload, updateSpeaking);
 
 /**
  * DELETE /api/speakings/:id
@@ -80,13 +81,13 @@ router.delete('/:id', isAuthenticated, deleteSpeaking);
  * POST /api/speakings/admin
  * Admin-only creation
  */
-router.post('/admin', isAuthenticated, adminAuth, createSpeaking);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createSpeaking);
 
 /**
  * PUT /api/speakings/admin/:id
  * Admin-only update
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateSpeaking);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateSpeaking);
 
 /**
  * DELETE /api/speakings/admin/:id

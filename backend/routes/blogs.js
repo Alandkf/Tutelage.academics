@@ -19,6 +19,7 @@ const {
 } = require('../controllers/blogController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -62,14 +63,14 @@ router.get('/category/:category', getBlogsByCategory);
  * Create a new blog post
  * Requires authentication
  */
-router.post('/', isAuthenticated, createBlog);
+router.post('/', isAuthenticated, pdfUpload, createBlog);
 
 /**
  * PUT /api/blogs/:id
  * Update a blog post
  * Requires authentication (author or admin only)
  */
-router.put('/:id', isAuthenticated, updateBlog);
+router.put('/:id', isAuthenticated, pdfUpload, updateBlog);
 
 /**
  * DELETE /api/blogs/:id
@@ -87,14 +88,14 @@ router.delete('/:id', isAuthenticated, deleteBlog);
  * Create a new blog post (admin only)
  * Requires admin authentication
  */
-router.post('/admin', isAuthenticated, adminAuth, createBlog);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createBlog);
 
 /**
  * PUT /api/blogs/admin/:id
  * Update any blog post (admin only)
  * Requires admin authentication
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateBlog);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateBlog);
 
 /**
  * DELETE /api/blogs/admin/:id

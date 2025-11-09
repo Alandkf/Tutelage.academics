@@ -17,6 +17,7 @@ const {
 } = require('../controllers/writingController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -58,13 +59,13 @@ router.get('/:id', getWritingById);
  * POST /api/writings
  * Create a new writing item
  */
-router.post('/', isAuthenticated, createWriting);
+router.post('/', isAuthenticated, pdfUpload, createWriting);
 
 /**
  * PUT /api/writings/:id
  * Update writing item (author/admin)
  */
-router.put('/:id', isAuthenticated, updateWriting);
+router.put('/:id', isAuthenticated, pdfUpload, updateWriting);
 
 /**
  * DELETE /api/writings/:id
@@ -80,13 +81,13 @@ router.delete('/:id', isAuthenticated, deleteWriting);
  * POST /api/writings/admin
  * Admin-only creation
  */
-router.post('/admin', isAuthenticated, adminAuth, createWriting);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createWriting);
 
 /**
  * PUT /api/writings/admin/:id
  * Admin-only update
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateWriting);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateWriting);
 
 /**
  * DELETE /api/writings/admin/:id

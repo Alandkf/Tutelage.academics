@@ -17,6 +17,7 @@ const {
 } = require('../controllers/readingController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -54,13 +55,13 @@ router.get('/:id', getReadingById);
  * POST /api/readings
  * Create a new reading item
  */
-router.post('/', isAuthenticated, createReading);
+router.post('/', isAuthenticated, pdfUpload, createReading);
 
 /**
  * PUT /api/readings/:id
  * Update reading item (author/admin)
  */
-router.put('/:id', isAuthenticated, updateReading);
+router.put('/:id', isAuthenticated, pdfUpload, updateReading);
 
 /**
  * DELETE /api/readings/:id
@@ -76,13 +77,13 @@ router.delete('/:id', isAuthenticated, deleteReading);
  * POST /api/readings/admin
  * Admin-only creation
  */
-router.post('/admin', isAuthenticated, adminAuth, createReading);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createReading);
 
 /**
  * PUT /api/readings/admin/:id
  * Admin-only update
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateReading);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateReading);
 
 /**
  * DELETE /api/readings/admin/:id

@@ -15,6 +15,7 @@ const {
 } = require('../controllers/storyController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // Public routes
 router.get('/', getAllStories);
@@ -23,8 +24,8 @@ router.get('/:id', getStoryById);
 
 // Protected admin routes
 router.use(isAuthenticated);
-router.post('/', adminAuth, createStory);
-router.put('/:id', adminAuth, updateStory);
+router.post('/', adminAuth, pdfUpload, createStory);
+router.put('/:id', adminAuth, pdfUpload, updateStory);
 router.delete('/:id', adminAuth, deleteStory);
 
 module.exports = router;

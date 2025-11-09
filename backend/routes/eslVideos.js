@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 const {
   createEslVideo,
   getAllEslVideos,
@@ -21,8 +22,8 @@ router.get('/:id', getEslVideoById);
 
 // Admin endpoints
 router.use(isAuthenticated);
-router.post('/', adminAuth, createEslVideo);
-router.put('/:id', adminAuth, updateEslVideo);
+router.post('/', adminAuth, pdfUpload, createEslVideo);
+router.put('/:id', adminAuth, pdfUpload, updateEslVideo);
 router.delete('/:id', adminAuth, deleteEslVideo);
 
 module.exports = router;

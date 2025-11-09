@@ -34,3 +34,108 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Uploading PDFs to the Backend
+
+The backend exposes endpoints (e.g., `POST /api/blogs`, `POST /api/readings`, `POST /api/writings`, `POST /api/speakings`, `POST /api/stories`, `POST /api/esl-audios`, `POST /api/esl-videos`) that accept `multipart/form-data` with:
+
+- `pdfFile`: main PDF file
+- `taskPdfFile`: optional secondary PDF file
+- plus any text fields required by the resource (`title`, `content`, etc.)
+
+Important:
+- Do not manually set the `Content-Type` header for `FormData`; the browser will set the boundary.
+- Include credentials so the session cookie is sent: `credentials: 'include'` (or `axios` with `withCredentials: true`).
+
+Example client component (Next.js App Router):
+
+```tsx
+'use client';
+import { useState } from 'react';
+
+export default function BlogPdfUploadForm() {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<string>('');
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pdfFile) {
+      setStatus('Please select a PDF file.');
+      return;
+    }
+    const form = new FormData();
+    form.append('title', title);
+    form.append('content', content);
+    form.append('pdfFile', pdfFile, pdfFile.name);
+
+    const res = await fetch('http://localhost:3001/api/blogs', {
+      method: 'POST',
+      credentials: 'include', // send session cookie
+      body: form,
+    });
+    const data = await res.json();
+    if (res.ok && data?.success) {
+      setStatus(`Created. PDF URL: ${data.data?.pdf ?? 'n/a'}`);
+    } else {
+      setStatus(data?.error || data?.message || 'Upload failed');
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-3">
+      <input
+        type="text"
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <textarea
+        placeholder="Content"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+      />
+      <input
+        type="file"
+        accept="application/pdf"
+        onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+      />
+      <button type="submit">Create Blog with PDF</button>
+      <div>{status}</div>
+    </form>
+  );
+}
+```
+
+Axios variant:
+
+```ts
+import axios from 'axios';
+
+const form = new FormData();
+form.append('title', 'Sample Blog');
+form.append('content', 'Body');
+form.append('pdfFile', file, file.name);
+
+const { data } = await axios.post('http://localhost:3001/api/blogs', form, {
+  withCredentials: true,
+  headers: { /* do not set Content-Type manually */ },
+});
+```
+
+Direct URL (no file upload):
+
+```ts
+await fetch('http://localhost:3001/api/readings', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title: 'Passage', content: '...', pdf: 'https://cdn.example.com/p.pdf' }),
+});
+```
+
+Notes:
+- Backend CORS is configured for `http://localhost:3000` with `credentials: true`.
+- Responses on success include `data.pdf` (and/or `data.taskPdf`) with a hosted URL.
+- On RestPDF upload failure you’ll see `502` with `{ success: false, message: 'PDF upload failed' }`.
