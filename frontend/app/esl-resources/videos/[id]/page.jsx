@@ -181,6 +181,8 @@ const SingleVideo = () => {
         </div>
       </div>
 
+      
+
       {/* Description Section */}
       {video?.description && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -272,7 +274,10 @@ const SingleVideo = () => {
           )}
         </div>
       </div>
-
+      {/* {embedUrl &&
+        <div className=''>
+          <audio src={embedUrl}></audio>
+      </div>} */}
       {/* Transcript + Tasks + Language level section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-6">
         {/* Transcript */}
