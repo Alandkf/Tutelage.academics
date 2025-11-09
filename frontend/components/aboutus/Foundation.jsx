@@ -8,25 +8,25 @@ export const Foundation = () => {
     {
       year: "",
       title: "Foundation",
-      description: "Established in 2022 with a vision to revolutionize language learning through innovative solutions.",
+      description: "Established in 2022, Tutelage was founded with a vision to transform language learning through creativity, technology, and learner-centered solutions. Our goal is to make mastering a new language engaging, effective, and accessible for all.",
       icon: <BookOpen className="w-6 h-6" />,
     },
     {
       year: "",
       title: "Innovation",
-      description: "The first Language institute in the region to implement a full-scale AI tool specifically designed for ESL students.",
+      description: "Tutelage’s innovative teaching style combines interactive lessons, real-life communication practice, and dynamic learning experiences that scale with each learner’s progress. This approach promotes confidence, fluency, and long-term language retention.",
       icon: <Sparkle className="w-6 h-6" />,
     },
     {
       year: "",
       title: "Research",
-      description: "Tutelage continuously conducts a variety of assessments and comprehensive, diagnostic researches, to adapt its teaching methodologies to the underlaying problems of language learners who are aiming to learn another language. Through research, Tutelage has piloted and scaled effective adaptations of its teaching philosophy to learners’ needs.",
+      description: "Tutelage continuously conducts detailed assessments and diagnostic research to refine its teaching approach. Our findings help us understand learners’ challenges and develop evidence-based methods that align with their goals and individual learning styles.",
       icon: <Search className="w-6 h-6" />,
     },
     {
       year: "",
       title: "Expansion",
-      description: "Driven by a strategic, multi-year expansion plan, we have systematically grown both our core services and our team of academic experts.",
+      description: "Following a strategic, multi-year plan, Tutelage has steadily expanded its academic services, digital platforms, and professional team. Our ongoing growth reflects our commitment to quality education and global standards in English language learning.",
       icon: <Users className="w-6 h-6" />,
     },
   ]

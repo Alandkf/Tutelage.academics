@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ExternalLink, GraduationCap, FileText, Target, Info } from 'lucide-react'
 import Link from 'next/link'
 import BASE_URL from '@/app/config/url'
+import { BASE_URL_PROD } from '@/app/config/url'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import {
@@ -466,7 +467,7 @@ const EnrollPage = () => {
                 <p className={`text-sm text-muted-foreground mb-4 ${isRTL ? 'text-right' : ''}`}>
                   {t('enroll.sidebar.aiContent')}
                 </p>
-                <Link href="https://tutelage.vercel.app/" target="_blank" rel="noopener noreferrer">
+                <Link href={BASE_URL_PROD} target="_blank" rel="noopener noreferrer">
                   <Button className={`w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {t('enroll.sidebar.launchAI')}
                     <ExternalLink className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
