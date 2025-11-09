@@ -40,7 +40,8 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
                 <SelectItem value="tests">Tests</SelectItem>
                 <SelectItem value="courses">Courses</SelectItem>
                 <SelectItem value="blogs">Blogs</SelectItem>
-                <SelectItem value="services">Services</SelectItem>
+                <SelectItem value="blogs">Levels</SelectItem>
+                <SelectItem value="services">Skills</SelectItem>
                 <SelectItem value="esl">ESL Resources</SelectItem>
               </SelectContent>
             </Select>

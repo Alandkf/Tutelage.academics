@@ -53,10 +53,6 @@ const SpeakingVideoGridB1 = () => {
       const data = await response.json()
       
       if (data.success) {
-        // Normalize common response shapes:
-        // - { success:true, data: { speakings: [...], pagination: {...} } }
-        // - { success:true, data: [...] } (legacy)
-        // - { success:true, speakings: [...] } (alternate)
         const items = data?.data?.speakings
           || data?.speakings
           || (Array.isArray(data?.data) ? data.data : null)
