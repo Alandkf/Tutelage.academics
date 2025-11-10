@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
 
 function TruncatedText({ text, maxLength = 120 }) {
   const [expanded, setExpanded] = useState(false)
@@ -46,10 +47,7 @@ export function AudioRow({ audio, isLast, lastAudioRef, user, onEdit, onDelete }
         {audio.createdAt && <span>{new Date(audio.createdAt).toLocaleDateString()}</span>}
       </div>
       {audio.audioRef && (
-        <audio controls className="w-full">
-          <source src={audio.audioRef} />
-          Your browser does not support the audio element.
-        </audio>
+        <CompactAudioPlayer src={audio.audioRef} youtubeUrl={audio.audioRef} />
       )}
       {user?.role === "ADMIN" && (
         <div className="flex flex-row gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
