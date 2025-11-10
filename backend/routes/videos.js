@@ -7,6 +7,9 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const {
   createVideo,
   getAllVideos,
@@ -19,6 +22,38 @@ const {
 } = require('../controllers/videoController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+
+// ============================================================================
+// FILE UPLOAD CONFIGURATION
+// ============================================================================
+
+// Ensure upload directory exists
+const uploadDir = path.join(__dirname, '..', 'uploads', 'videos');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -63,17 +98,21 @@ router.get('/search/title', searchVideosByTitle);
 
 /**
  * POST /api/videos
- * Create a new video content
- * Requires authentication
+ * Create a new video content with file uploads
  */
-router.post('/', isAuthenticated, createVideo);
+router.post('/', isAuthenticated, upload.fields([
+  { name: 'pdf', maxCount: 1 },
+  { name: 'taskPdf', maxCount: 1 }
+]), createVideo);
 
 /**
  * PUT /api/videos/:id
- * Update a video content
- * Requires authentication (author or admin only)
+ * Update a video content with file uploads
  */
-router.put('/:id', isAuthenticated, updateVideo);
+router.put('/:id', isAuthenticated, upload.fields([
+  { name: 'pdf', maxCount: 1 },
+  { name: 'taskPdf', maxCount: 1 }
+]), updateVideo);
 
 /**
  * DELETE /api/videos/:id
@@ -88,15 +127,21 @@ router.delete('/:id', isAuthenticated, deleteVideo);
 
 /**
  * POST /api/videos/admin
- * Admin-only video creation (if needed for special cases)
+ * Admin-only video creation
  */
-router.post('/admin', isAuthenticated, adminAuth, createVideo);
+router.post('/admin', isAuthenticated, adminAuth, upload.fields([
+  { name: 'pdf', maxCount: 1 },
+  { name: 'taskPdf', maxCount: 1 }
+]), createVideo);
 
 /**
  * PUT /api/videos/admin/:id
- * Admin-only video update (can update any video)
+ * Admin-only video update
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateVideo);
+router.put('/admin/:id', isAuthenticated, adminAuth, upload.fields([
+  { name: 'pdf', maxCount: 1 },
+  { name: 'taskPdf', maxCount: 1 }
+]), updateVideo);
 
 /**
  * DELETE /api/videos/admin/:id

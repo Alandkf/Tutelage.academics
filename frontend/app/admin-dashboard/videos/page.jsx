@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { VideoCard } from "@/components/admin/videos/VideoCard"
 import VideoForm from "@/components/forms/VideoForm"
-import { Plus, RefreshCw } from "lucide-react"
+import { RefreshCw, Plus } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
@@ -66,13 +66,12 @@ const Videos = () => {
   const lastVideoRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchVideos })
 
   // Handlers
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
       const res = await fetch(`${BASE_URL}/api/videos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
+        body: formData
       })
       if (!res.ok) throw new Error("Failed to create video")
       setShowCreate(false)
@@ -86,14 +85,13 @@ const Videos = () => {
     setEditVideo(video)
     setShowEdit(true)
   }
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     if (!editVideo) return
     try {
       const res = await fetch(`${BASE_URL}/api/videos/${editVideo.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
+        body: formData
       })
       if (!res.ok) throw new Error("Failed to update video")
       setShowEdit(false)
@@ -165,7 +163,7 @@ const Videos = () => {
               <div key={idx} className="relative group" ref={isLast ? lastVideoRef : null}>
                 <VideoCard {...video} />
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 flex gap-1">
                     <Button size="sm" variant="outline" onClick={() => handleEdit(video)}>Edit</Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(video)}>Delete</Button>
                   </div>

@@ -98,10 +98,9 @@ function getYouTubeThumbnail(url) {
  */
 const createVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
-    const createdBy = req.user.id; // From auth middleware
+    const { title, videoRef, description, level, tags } = req.body;
+    const createdBy = req.user.id;
 
-    // Validate required fields
     if (!title || !videoRef) {
       return res.status(400).json({
         success: false,
@@ -109,8 +108,11 @@ const createVideo = async (req, res) => {
       });
     }
 
-    // Normalize level(s) to an array
     const normalizedLevels = normalizeLevels(level);
+
+    // Handle file uploads from multer
+    const pdf = req.files?.pdf?.[0]?.path || null;
+    const taskPdf = req.files?.taskPdf?.[0]?.path || null;
 
     const video = await Video.create({
       title,
@@ -122,7 +124,6 @@ const createVideo = async (req, res) => {
       createdBy
     });
 
-    // Fetch the created video with author information
     const videoWithAuthor = await Video.findByPk(video.id, {
       include: [{
         model: User,
@@ -131,9 +132,7 @@ const createVideo = async (req, res) => {
       }]
     });
 
-    const tagNames = Array.isArray(tags)
-      ? tags
-      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    const tagNames = tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [];
     if (tagNames.length) await attachTags(video.id, tagNames);
     const tagList = await includeTagsFor(video.id);
 
@@ -393,7 +392,7 @@ const getVideoById = async (req, res) => {
 const updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
+    const { title, videoRef, description, level, tags } = req.body;
 
     const video = await Video.findByPk(id);
 
@@ -412,26 +411,26 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    const normalizedLevel = level !== undefined
-      ? normalizeLevels(level)
-      : video.level;
+    const normalizedLevel = level !== undefined ? normalizeLevels(level) : video.level;
+    
+    // Handle file uploads - use new files if provided, otherwise keep existing
+    const pdf = req.files?.pdf?.[0]?.path || video.pdf;
+    const taskPdf = req.files?.taskPdf?.[0]?.path || video.taskPdf;
 
     await video.update({
       title: title ?? video.title,
       videoRef: videoRef ?? video.videoRef,
       description: description ?? video.description,
-      pdf: pdf ?? video.pdf,
-      taskPdf: taskPdf ?? video.taskPdf,
+      pdf,
+      taskPdf,
       level: normalizedLevel ?? video.level
     });
 
     if (tags !== undefined) {
-      const tagNames = Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean);
+      const tagNames = String(tags).split(',').map(t => t.trim()).filter(Boolean);
       await attachTags(video.id, tagNames);
     }
 
-
-    // Fetch updated video with author information
     const updatedVideo = await Video.findByPk(id, {
       include: [{
         model: User,
@@ -444,7 +443,7 @@ const updateVideo = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Video content updated successfully',
-      data: { ...updatedVideo.toJSON(), tags: tagList }
+      data: { ...updatedVideo.toJSON(), thumbnailUrl: getYouTubeThumbnail(updatedVideo.videoRef), tags: tagList }
     });
   } catch (error) {
     console.error('Error updating video:', error);

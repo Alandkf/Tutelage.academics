@@ -113,8 +113,8 @@ const SpeakingVideoGridA2 = () => {
 
   const truncateText = (text, maxLength = 120) => {
     if (!text) return ''
-    if (text.length <= maxLength) return text
-    return text.slice(0, maxLength) + '...'
+    if (text?.length <= maxLength) return text
+    return text?.slice(0, maxLength) + '...'
   }
 
   // Generate page numbers to display

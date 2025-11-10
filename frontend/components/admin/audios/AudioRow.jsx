@@ -7,7 +7,7 @@ function TruncatedText({ text, maxLength = 120 }) {
   const isLong = text.length > maxLength
   return (
     <div className="text-xs text-muted-foreground mb-1">
-      {expanded || !isLong ? text : text.slice(0, maxLength) + '...'}
+      {expanded || !isLong ? text : text?.slice(0, maxLength) + '...'}
       {isLong && (
         <button
           type="button"
