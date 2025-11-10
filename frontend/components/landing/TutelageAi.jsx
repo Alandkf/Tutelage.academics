@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from '@/components/ui/button'
 import { ChevronRight } from 'lucide-react'
-import { BASE_URL_PROD } from "@/app/config/url"
+import BASE_URL, { BASE_URL_PROD } from "@/app/config/url"
 
 const TutelageAi = () => {
   return (
@@ -52,14 +52,19 @@ const TutelageAi = () => {
                 </ul>
 
                 {/* Practice Now Button */}
-                <Link href={BASE_URL_PROD} target="_blank" rel="noopener noreferrer">
+                {(() => {
+                  const practiceHref = BASE_URL_PROD || BASE_URL || '/';
+                  return (
+                    <Link href={practiceHref} target="_blank" rel="noopener noreferrer">
                   <Button 
                     size="lg" 
                     className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                   >
                     Practice Now
                   </Button>
-                </Link>
+                    </Link>
+                  )
+                })()}
               </div>
             </div>
     

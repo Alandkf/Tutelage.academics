@@ -139,3 +139,25 @@ Notes:
 - Backend CORS is configured for `http://localhost:3000` with `credentials: true`.
 - Responses on success include `data.pdf` (and/or `data.taskPdf`) with a hosted URL.
 - On RestPDF upload failure you’ll see `502` with `{ success: false, message: 'PDF upload failed' }`.
+
+## CompactAudioPlayer (YouTube audio-only)
+
+- Use `CompactAudioPlayer` to stream audio-only from a YouTube link without any video or branding.
+- The component resolves the audio stream via backend endpoint `GET /api/youtube-audio/resolve?url=...`.
+- Props:
+  - `src`: optional direct audio URL (mp3/opus/etc.).
+  - `youtubeUrl`: a standard YouTube URL. If provided, audio-only is auto-resolved on mount.
+  - `className`: optional additional class names.
+- Example:
+
+```jsx
+import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
+
+export default function Example({ url }) {
+  return (
+    <CompactAudioPlayer src={url} youtubeUrl={url} />
+  )
+}
+```
+
+- In admin forms, paste either a direct audio URL or any standard YouTube URL into the “Audio URL” field. Pages using the player will automatically resolve and stream the audio track only.

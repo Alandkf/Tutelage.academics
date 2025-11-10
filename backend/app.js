@@ -40,6 +40,7 @@ const tagRoutes = require('./routes/tags');
 const analyticsRoutes = require('./routes/analytics');
 const eslVideoRoutes = require('./routes/eslVideos');
 const eslAudioRoutes = require('./routes/eslAudios');
+const youtubeAudioRoutes = require('./routes/youtubeAudio');
 const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
@@ -130,6 +131,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/esl-videos', eslVideoRoutes);
 app.use('/api/esl-audios', eslAudioRoutes);
+app.use('/api/youtube-audio', youtubeAudioRoutes);
 app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
