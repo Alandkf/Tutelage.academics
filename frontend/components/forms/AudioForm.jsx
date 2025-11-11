@@ -35,8 +35,17 @@ export default function AudioForm({ initialValues = {}, mode = 'create', onSucce
         <Input value={transcript} onChange={e => setTranscript(e.target.value)} maxLength={10000} />
       </div>
       <div>
-        <label className="block mb-1 text-sm font-medium">Audio URL</label>
-        <Input value={audioRef} onChange={e => setAudioRef(e.target.value)} required maxLength={500} placeholder="https://..." />
+        <label className="block mb-1 text-sm font-medium">Audio URL (YouTube or direct)</label>
+        <Input
+          value={audioRef}
+          onChange={e => setAudioRef(e.target.value)}
+          required
+          maxLength={500}
+          placeholder="Paste a YouTube link or an audio URL"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          YouTube links are supported. We extract and stream audio-only, hiding all visuals.
+        </p>
       </div>
       <div>
         <label className="block mb-1 text-sm font-medium">PDF URL</label>

@@ -10,6 +10,7 @@ import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon 
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 import { motion, AnimatePresence } from 'framer-motion'
+import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
 
 const SingleAudio = () => {
   const params = useParams()
@@ -196,9 +197,7 @@ const SingleAudio = () => {
         <div className="w-full rounded-lg overflow-hidden border">
           {audioSrc ? (
             <div className="p-6 bg-card rounded">
-              <audio controls src={audioSrc} className="w-full">
-                Your browser does not support the audio element. <a href={audioSrc} target="_blank" rel="noreferrer">Open audio</a>
-              </audio>
+              <CompactAudioPlayer src={audioSrc} youtubeUrl={audioSrc} />
             </div>
           ) : (
             <div className="p-6">
