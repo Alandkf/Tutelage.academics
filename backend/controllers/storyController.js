@@ -87,7 +87,7 @@ exports.createStory = async (req, res) => {
 
 exports.getAllStories = async (req, res) => {
   try {
-    const { cursor, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, page, limit = 10, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const where = {};
     if (search) {
       where[Op.or] = [
@@ -103,6 +103,46 @@ exports.getAllStories = async (req, res) => {
     if (tags) idFilter = await getTagFilterIds(tags);
     if (Array.isArray(idFilter)) where.id = { [Op.in]: idFilter };
 
+    // PAGE-BASED PAGINATION
+    if (page !== undefined) {
+      const currentPage = parseInt(page);
+      const itemsPerPage = parseInt(limit);
+      const offset = (currentPage - 1) * itemsPerPage;
+
+      const { count, rows } = await Story.findAndCountAll({
+        where,
+        include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+        limit: itemsPerPage,
+        offset: offset,
+        order: [[sortBy, (sortOrder || 'DESC').toUpperCase()], ['id', (sortOrder || 'DESC').toUpperCase()]],
+        distinct: true
+      });
+
+      if (sortBy === 'popularity') {
+        const ids = rows.map(s => s.id);
+        const metrics = await ResourceAnalytics.findAll({ where: { resourceType: 'story', resourceId: { [Op.in]: ids } } });
+        const map = new Map(metrics.map(m => [m.resourceId, m.views]));
+        rows.sort((a,b) => (map.get(b.id) || 0) - (map.get(a.id) || 0));
+      }
+
+      const totalPages = Math.ceil(count / itemsPerPage);
+      return res.status(200).json({ 
+        success: true, 
+        data: { 
+          stories: rows, 
+          pagination: { 
+            currentPage, 
+            totalPages, 
+            totalItems: count, 
+            itemsPerPage, 
+            hasNextPage: currentPage < totalPages, 
+            hasPrevPage: currentPage > 1 
+          } 
+        } 
+      });
+    }
+
+    // CURSOR-BASED PAGINATION (for infinity scroll)
     if (cursor) {
       if ((sortOrder || 'DESC').toUpperCase() === 'DESC') where.id = { ...(where.id || {}), [Op.lt]: parseInt(cursor) };
       else where.id = { ...(where.id || {}), [Op.gt]: parseInt(cursor) };

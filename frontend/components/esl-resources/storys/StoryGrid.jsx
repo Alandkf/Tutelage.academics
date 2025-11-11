@@ -28,13 +28,13 @@ const StoryGrid = () => {
     setLoading(true)
     try {
       const response = await fetch(
-        `${BASE_URL}/api/blogs/paginated?page=${page}&limit=${itemsPerPage}`,
+        `${BASE_URL}/api/stories?page=${page}&limit=${itemsPerPage}`,
         { credentials: 'include' }
       )
       const data = await response.json()
 
       if (data.success) {
-        setStories(data.data.blogs)
+        setStories(data.data.stories)
         setTotalPages(data.data.pagination.totalPages)
         setHasNextPage(data.data.pagination.hasNextPage)
         setHasPrevPage(data.data.pagination.hasPrevPage)
@@ -124,9 +124,9 @@ const StoryGrid = () => {
             Array.from({ length: itemsPerPage }).map((_, index) => (
               <StoryCardSkeleton key={index} />
             ))
-          ) : stories.length > 0 ? (
+          ) : stories?.length > 0 ? (
             // Show actual stories
-            stories.map((story) => (
+            stories?.map((story) => (
               <Link
                 key={story.id}
                 href={`/esl-resources/storys/${story.id}`}
@@ -136,7 +136,7 @@ const StoryGrid = () => {
                   {/* Image */}
                   <div className="relative h-48 w-full overflow-hidden">
                     <Image
-                      src={story.imageRef || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'}
+                      src={story.imageUrl || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'}
                       alt={story.title}
                       fill
                       className="object-cover"
@@ -190,7 +190,7 @@ const StoryGrid = () => {
         </div>
 
         {/* Pagination Controls - Always visible */}
-        {(stories.length > 0 || loading) && (
+        {(stories?.length > 0 || loading) && (
           <div className="flex items-center justify-between">
             {/* Previous Button - Left */}
             <Button
