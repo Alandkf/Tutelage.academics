@@ -43,48 +43,23 @@ const SpeakingVideoGridB2 = () => {
   const fetchVideos = async (page) => {
     setLoading(true)
     try {
-      // fetch ESL videos instead of blogs; preserve pagination parameters
       const levelParam = 'B2'
-      const offset = (page - 1) * itemsPerPage
       const response = await fetch(
-        `${BASE_URL}/api/speakings?limit=${itemsPerPage}&offset=${offset}&level=${encodeURIComponent(levelParam)}`,
+        `${BASE_URL}/api/speakings/paginated?page=${page}&limit=${itemsPerPage}&level=${encodeURIComponent(levelParam)}`,
         { credentials: 'include' }
       )
       const data = await response.json()
       
-      if (data.success) {
-        // Normalize common response shapes:
-        // - { success:true, data: { speakings: [...], pagination: {...} } }
-        // - { success:true, data: [...] } (legacy)
-        // - { success:true, speakings: [...] } (alternate)
-        const items = data?.data?.speakings
-          || data?.speakings
-          || (Array.isArray(data?.data) ? data.data : null)
-          || [];
-
-        const pagination = data?.data?.pagination || data?.pagination || {};
-
-        setVideos(Array.isArray(items) ? items : []);
-
-        // Prefer server-provided pagination flags when available
-        const hasMore = typeof pagination.hasMore !== 'undefined'
-          ? !!pagination.hasMore
-          : (Array.isArray(items) ? items.length === itemsPerPage : false);
-
-        setHasNextPage(hasMore);
-        setHasPrevPage(page > 1);
-
-        // derive a sensible totalPages for UI display
-        if (pagination.totalPages) {
-          setTotalPages(pagination.totalPages);
-        } else {
-          setTotalPages(hasMore ? page + 10 : page);
-        }
+      if (data?.success && data?.data) {
+        setVideos(Array.isArray(data.data.speakings) ? data.data.speakings : [])
+        setTotalPages(data.data.pagination?.totalPages || 1)
+        setHasNextPage(!!data.data.pagination?.hasNextPage)
+        setHasPrevPage(!!data.data.pagination?.hasPrevPage && page > 1)
       } else {
-        setVideos([]);
-        setHasNextPage(false);
-        setHasPrevPage(false);
-        setTotalPages(1);
+        setVideos([])
+        setHasNextPage(false)
+        setHasPrevPage(false)
+        setTotalPages(1)
       }
     } catch (error) {
       console.error('Error fetching videos:', error)

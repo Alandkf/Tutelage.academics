@@ -23,7 +23,7 @@ const WritingArticleGridB2 = () => {
   const [hasPrevPage, setHasPrevPage] = useState(false)
 
   const itemsPerPage = 6
-  const levelParam = 'B1'
+  const levelParam = 'B2'
 
   const fetchArticles = async (page) => {
     setLoading(true)
