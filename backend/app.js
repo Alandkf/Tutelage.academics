@@ -44,6 +44,7 @@ const youtubeAudioRoutes = require('./routes/youtubeAudio');
 const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
+const pdfProxyRoutes = require('./routes/pdfProxy');
 
 
 // ============================================================================
@@ -149,6 +150,7 @@ app.use('/api/youtube-audio', youtubeAudioRoutes);
 app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
+app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
 
 
 // ============================================================================

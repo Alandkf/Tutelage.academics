@@ -7,9 +7,8 @@
 
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+// PDF upload via RestPDF middleware
+const { pdfUpload } = require('../middlewares/pdfUpload');
 const {
   createVideo,
   getAllVideos,
@@ -23,37 +22,9 @@ const {
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
 
-// ============================================================================
-// FILE UPLOAD CONFIGURATION
-// ============================================================================
-
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '..', 'uploads', 'videos');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed'));
-    }
-  },
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-});
+// Using `pdfUpload` which accepts multipart fields `pdfFile` and `taskPdfFile`,
+// uploads them to RestPDF, and injects hosted URLs into `req.body.pdf` and
+// `req.body.taskPdf` for the controller to consume.
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -98,21 +69,15 @@ router.get('/search/title', searchVideosByTitle);
 
 /**
  * POST /api/videos
- * Create a new video content with file uploads
+ * Create a new video content with optional PDF uploads (via RestPDF)
  */
-router.post('/', isAuthenticated, upload.fields([
-  { name: 'pdf', maxCount: 1 },
-  { name: 'taskPdf', maxCount: 1 }
-]), createVideo);
+router.post('/', isAuthenticated, pdfUpload, createVideo);
 
 /**
  * PUT /api/videos/:id
- * Update a video content with file uploads
+ * Update a video content with optional PDF uploads (via RestPDF)
  */
-router.put('/:id', isAuthenticated, upload.fields([
-  { name: 'pdf', maxCount: 1 },
-  { name: 'taskPdf', maxCount: 1 }
-]), updateVideo);
+router.put('/:id', isAuthenticated, pdfUpload, updateVideo);
 
 /**
  * DELETE /api/videos/:id
@@ -127,21 +92,15 @@ router.delete('/:id', isAuthenticated, deleteVideo);
 
 /**
  * POST /api/videos/admin
- * Admin-only video creation
+ * Admin-only video creation (with optional PDF uploads via RestPDF)
  */
-router.post('/admin', isAuthenticated, adminAuth, upload.fields([
-  { name: 'pdf', maxCount: 1 },
-  { name: 'taskPdf', maxCount: 1 }
-]), createVideo);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createVideo);
 
 /**
  * PUT /api/videos/admin/:id
- * Admin-only video update
+ * Admin-only video update (with optional PDF uploads via RestPDF)
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, upload.fields([
-  { name: 'pdf', maxCount: 1 },
-  { name: 'taskPdf', maxCount: 1 }
-]), updateVideo);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateVideo);
 
 /**
  * DELETE /api/videos/admin/:id

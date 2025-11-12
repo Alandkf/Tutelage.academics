@@ -2,8 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
-  output: 'standalone',
-  distDir: '.next-3004',
   images: {
     remotePatterns: [
       {

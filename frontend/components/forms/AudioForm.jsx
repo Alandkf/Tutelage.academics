@@ -4,17 +4,18 @@ import { Button } from '@/components/ui/button'
 
 export default function AudioForm({ initialValues = {}, mode = 'create', onSuccess, onCancel }) {
   const [title, setTitle] = useState(initialValues?.title || '')
-  const [content, setContent] = useState(initialValues?.content || '')
+  const [description, setDescription] = useState(initialValues?.description || '')
   const [transcript, setTranscript] = useState(initialValues?.transcript || '')
   const [audioRef, setAudioRef] = useState(initialValues?.audioRef || '')
-  const [pdfRef, setPdfRef] = useState(initialValues?.pdfRef || '')
+  const [pdf, setPdf] = useState(initialValues?.pdf || '')
+  const [pdfFile, setPdfFile] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await onSuccess({ title, content, transcript, audioRef, pdfRef })
+      await onSuccess({ title, description, transcript, audioRef, pdf, pdfFile })
     } finally {
       setLoading(false)
     }
@@ -28,7 +29,7 @@ export default function AudioForm({ initialValues = {}, mode = 'create', onSucce
       </div>
       <div>
         <label className="block mb-1 text-sm font-medium">Description</label>
-        <Input value={content} onChange={e => setContent(e.target.value)} maxLength={5000} />
+        <Input value={description} onChange={e => setDescription(e.target.value)} maxLength={5000} />
       </div>
       <div>
         <label className="block mb-1 text-sm font-medium">Transcript</label>
@@ -49,7 +50,18 @@ export default function AudioForm({ initialValues = {}, mode = 'create', onSucce
       </div>
       <div>
         <label className="block mb-1 text-sm font-medium">PDF URL</label>
-        <Input value={pdfRef} onChange={e => setPdfRef(e.target.value)} maxLength={500} placeholder="https://..." />
+        <Input value={pdf} onChange={e => setPdf(e.target.value)} maxLength={500} placeholder="https://..." />
+        <div className="mt-3">
+          <label className="block mb-1 text-sm font-medium">Or upload PDF file</label>
+          <Input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            If a file is selected, it will be uploaded to RestPDF. Otherwise, the URL above is saved.
+          </p>
+        </div>
       </div>
       <div className="flex gap-2 justify-end">
         <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>Cancel</Button>

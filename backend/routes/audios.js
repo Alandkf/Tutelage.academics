@@ -18,6 +18,7 @@ const {
 } = require('../controllers/audioController');
 const { isAuthenticated } = require('../middlewares/auth');
 const adminAuth = require('../middlewares/adminAuth');
+const { pdfUpload } = require('../middlewares/pdfUpload');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -59,14 +60,14 @@ router.get('/search/transcript', searchAudioByTranscript);
  * Create a new audio content
  * Requires authentication
  */
-router.post('/', isAuthenticated, createAudio);
+router.post('/', isAuthenticated, pdfUpload, createAudio);
 
 /**
  * PUT /api/audios/:id
  * Update an audio content
  * Requires authentication (author or admin only)
  */
-router.put('/:id', isAuthenticated, updateAudio);
+router.put('/:id', isAuthenticated, pdfUpload, updateAudio);
 
 /**
  * DELETE /api/audios/:id
@@ -83,13 +84,13 @@ router.delete('/:id', isAuthenticated, deleteAudio);
  * POST /api/audios/admin
  * Admin-only audio creation (if needed for special cases)
  */
-router.post('/admin', isAuthenticated, adminAuth, createAudio);
+router.post('/admin', isAuthenticated, adminAuth, pdfUpload, createAudio);
 
 /**
  * PUT /api/audios/admin/:id
  * Admin-only audio update (can update any audio)
  */
-router.put('/admin/:id', isAuthenticated, adminAuth, updateAudio);
+router.put('/admin/:id', isAuthenticated, adminAuth, pdfUpload, updateAudio);
 
 /**
  * DELETE /api/audios/admin/:id

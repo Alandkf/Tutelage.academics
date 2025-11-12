@@ -68,18 +68,31 @@ const Audio = () => {
   // Handlers
   const handleCreateSuccess = async (values) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/audios`, {
+      const isFile = Boolean(values?.pdfFile)
+      const reqInit = {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
-      })
+      }
+      if (isFile) {
+        const fd = new FormData()
+        fd.append('title', values.title ?? '')
+        fd.append('description', values.description ?? '')
+        fd.append('transcript', values.transcript ?? '')
+        fd.append('audioRef', values.audioRef ?? '')
+        // pdfUpload middleware expects 'pdfFile'
+        fd.append('pdfFile', values.pdfFile)
+        reqInit.body = fd
+      } else {
+        reqInit.headers = { "Content-Type": "application/json" }
+        reqInit.body = JSON.stringify(values)
+      }
+      const res = await fetch(`${BASE_URL}/api/audios`, reqInit)
       if (!res.ok) throw new Error("Failed to create audio")
       setShowCreate(false)
       resetAndFetch()
       toast("Audio created successfully", { variant: "success" })
-    } catch {
-      toast("Failed to create audio", { variant: "destructive" })
+    } catch (e) {
+      toast(e.message || "Failed to create audio", { variant: "destructive" })
     }
   }
   const handleEdit = (audio) => {
@@ -89,19 +102,31 @@ const Audio = () => {
   const handleEditSuccess = async (values) => {
     if (!editAudio) return
     try {
-      const res = await fetch(`${BASE_URL}/api/audios/${editAudio.id}`, {
+      const isFile = Boolean(values?.pdfFile)
+      const reqInit = {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
-      })
+      }
+      if (isFile) {
+        const fd = new FormData()
+        fd.append('title', values.title ?? '')
+        fd.append('description', values.description ?? '')
+        fd.append('transcript', values.transcript ?? '')
+        fd.append('audioRef', values.audioRef ?? '')
+        fd.append('pdfFile', values.pdfFile)
+        reqInit.body = fd
+      } else {
+        reqInit.headers = { "Content-Type": "application/json" }
+        reqInit.body = JSON.stringify(values)
+      }
+      const res = await fetch(`${BASE_URL}/api/audios/${editAudio.id}`, reqInit)
       if (!res.ok) throw new Error("Failed to update audio")
       setShowEdit(false)
       setEditAudio(null)
       resetAndFetch()
       toast("Audio updated successfully", { variant: "success" })
-    } catch {
-      toast("Failed to update audio", { variant: "destructive" })
+    } catch (e) {
+      toast(e.message || "Failed to update audio", { variant: "destructive" })
     }
   }
   const handleDelete = (audio) => {

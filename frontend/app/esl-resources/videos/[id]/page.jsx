@@ -56,8 +56,9 @@ const SingleVideo = () => {
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [openTasks, setOpenTasks] = useState({}) // map index -> boolean
 
+  const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
   const openPdfModal = (url) => {
-    setPdfModalUrl(url)
+    setPdfModalUrl(toPdfView(url))
     setPdfModalOpen(true)
   }
   const closePdfModal = () => {
@@ -238,7 +239,7 @@ const SingleVideo = () => {
                           >
                             <ExternalLinkIcon className="w-4 h-4" /> Open
                           </Button>
-                          <a href={video.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
+                          <a href={toPdfView(video.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" /><path d="M17 3h4v4" /><path d="M10 14L21 3" /></svg>
                           </a>
                         </div>
@@ -495,7 +496,14 @@ const SingleVideo = () => {
                 <div className="flex items-center gap-3">
                   <FileTextIcon className="w-6 h-6 text-primary" />
                   <div className="font-semibold">{(() => {
-                    try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' }
+                    try {
+                      const u = new URL(pdfModalUrl)
+                      const real = new URLSearchParams(u.search).get('url')
+                      const name = (real || u.pathname).split('/').pop()
+                      return decodeURIComponent(name || 'document.pdf')
+                    } catch {
+                      return 'document.pdf'
+                    }
                   })()}</div>
                 </div>
                 <div className="flex items-center gap-2">

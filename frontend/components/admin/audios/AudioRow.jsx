@@ -31,11 +31,11 @@ export function AudioRow({ audio, isLast, lastAudioRef, user, onEdit, onDelete }
     >
       <div className="flex flex-wrap items-center gap-2 mb-1">
         <span className="font-semibold text-base truncate max-w-xs block">{audio.title}</span>
-        {audio.pdfRef && (
-          <a href={audio.pdfRef} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline ml-2">PDF</a>
+        {audio.pdf && (
+          <a href={audio.pdf} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline ml-2">PDF</a>
         )}
       </div>
-      <TruncatedText text={audio.content} />
+      <TruncatedText text={audio.description} />
       {audio.transcript && (
         <div className="text-xs text-muted-foreground mb-1">
           <span className="font-bold text-gray-700">Transcript:</span>{' '}
