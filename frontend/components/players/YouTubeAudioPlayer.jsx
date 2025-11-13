@@ -147,7 +147,7 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
   }
 
   return (
-    <div className="w-full p-4 bg-card rounded-md border">
+    <div >
       {/* Hidden/offscreen YouTube player (audio will play) */}
       <div ref={containerRef} style={{ position: "absolute", left: "-9999px", top: 0 }} />
 
@@ -196,10 +196,6 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
             disabled={!ready}
           />
         </div>
-      </div>
-
-      <div className="mt-2 text-xs text-muted-foreground">
-        {ready ? <span>Playing via YouTube audio embed</span> : <span>Loading YouTube…</span>}
       </div>
     </div>
   )
