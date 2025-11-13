@@ -110,9 +110,9 @@ const createVideo = async (req, res) => {
 
     const normalizedLevels = normalizeLevels(level);
 
-    // Handle file uploads from multer
-    const pdf = req.files?.pdf?.[0]?.path || null;
-    const taskPdf = req.files?.taskPdf?.[0]?.path || null;
+    // Handle PDF URLs provided by pdfUpload middleware (or fallback to multer paths)
+    const pdf = (req.body?.pdf ?? null) || (req.files?.pdf?.[0]?.path ?? null);
+    const taskPdf = (req.body?.taskPdf ?? null) || (req.files?.taskPdf?.[0]?.path ?? null);
 
     const video = await Video.create({
       title,
@@ -413,9 +413,13 @@ const updateVideo = async (req, res) => {
 
     const normalizedLevel = level !== undefined ? normalizeLevels(level) : video.level;
     
-    // Handle file uploads - use new files if provided, otherwise keep existing
-    const pdf = req.files?.pdf?.[0]?.path || video.pdf;
-    const taskPdf = req.files?.taskPdf?.[0]?.path || video.taskPdf;
+    // Handle PDF URLs injected by pdfUpload middleware; if not provided, keep existing.
+    const pdf = (req.body?.pdf !== undefined)
+      ? req.body.pdf
+      : (req.files?.pdf?.[0]?.path ?? video.pdf);
+    const taskPdf = (req.body?.taskPdf !== undefined)
+      ? req.body.taskPdf
+      : (req.files?.taskPdf?.[0]?.path ?? video.taskPdf);
 
     await video.update({
       title: title ?? video.title,

@@ -92,8 +92,9 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
       submitData.append('description', formData.description)
       submitData.append('level', formData.level)
       submitData.append('tags', formData.tags.join(','))
-      if (formData.pdf) submitData.append('pdf', formData.pdf)
-      if (formData.taskPdf) submitData.append('taskPdf', formData.taskPdf)
+      // Align multipart keys with backend pdfUpload middleware
+      if (formData.pdf) submitData.append('pdfFile', formData.pdf)
+      if (formData.taskPdf) submitData.append('taskPdfFile', formData.taskPdf)
       
       await onSuccess(submitData)
     } finally {

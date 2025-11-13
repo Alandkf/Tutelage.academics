@@ -44,6 +44,7 @@ const youtubeAudioRoutes = require('./routes/youtubeAudio');
 const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
+const pdfProxyRoutes = require('./routes/pdfProxy');
 
 
 // ============================================================================
@@ -53,6 +54,20 @@ const searchRoutes = require('./routes/search');
 const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const SERVER_PORT = process.env.PORT || 3001;
+
+// Toggle database initialization based on environment variables
+// If critical DB envs are missing or SKIP_DB=true, we will still start the server
+// so routes that don’t require the DB (e.g., YouTube resolve) can be tested.
+const SHOULD_SKIP_DB = (
+  String(process.env.SKIP_DB).toLowerCase() === 'true' ||
+  !(
+    process.env.DB_HOST &&
+    process.env.DB_PORT &&
+    process.env.DB_NAME &&
+    process.env.DB_USER &&
+    process.env.DB_PASSWORD
+  )
+);
 
 // ============================================================================
 // CORS CONFIGURATION
@@ -135,6 +150,7 @@ app.use('/api/youtube-audio', youtubeAudioRoutes);
 app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
+app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
 
 
 // ============================================================================
@@ -192,15 +208,19 @@ const initializeServer = async () => {
     try {
         console.log('🔄 Initializing Tutelage Academics Server...');
         
-        // Test database connection
-        console.log('🔗 Connecting to database...');
-        await sequelize.authenticate();
-        console.log('✅ Database connection established successfully');
-        
-        // Sync database models (create tables if they don't exist)
-        console.log('🔄 Synchronizing database models...');
-        await sequelize.sync({ alter: false }); // Keep alter disabled; use migration script for schema changes
-        console.log('✅ Database models synchronized successfully');
+        if (!SHOULD_SKIP_DB) {
+            // Test database connection
+            console.log('🔗 Connecting to database...');
+            await sequelize.authenticate();
+            console.log('✅ Database connection established successfully');
+
+            // Sync database models (create tables if they don't exist)
+            console.log('🔄 Synchronizing database models...');
+            await sequelize.sync({ alter: false }); // Keep alter disabled; use migration script for schema changes
+            console.log('✅ Database models synchronized successfully');
+        } else {
+            console.warn('⚠️  Skipping database initialization (dev mode). Some endpoints will be unavailable.');
+        }
         
         // Start the Express server
         app.listen(SERVER_PORT, () => {
@@ -209,7 +229,11 @@ const initializeServer = async () => {
             console.log('='.repeat(60));
             console.log(`📡 Server running on: http://localhost:${SERVER_PORT}`);
             console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
-            console.log(`🗄️  Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+            if (!SHOULD_SKIP_DB) {
+                console.log(`🗄️  Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+            } else {
+                console.log('🗄️  Database: SKIPPED (dev mode)');
+            }
             console.log(`🔐 Session store: Memory (consider using database sessions for production)`);
             console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
@@ -233,7 +257,21 @@ const initializeServer = async () => {
         }
         
         console.error('❌'.repeat(20) + '\n');
-        process.exit(1);
+        // In dev mode without DB, do not exit; attempt to start server without DB
+        if (SHOULD_SKIP_DB) {
+            console.warn('⚠️  Continuing without database due to SKIP_DB. Starting server...');
+            app.listen(SERVER_PORT, () => {
+                console.log('\n' + '='.repeat(60));
+                console.log('🚀 TUTELAGE ACADEMICS SERVER STARTED WITH DB DISABLED');
+                console.log('='.repeat(60));
+                console.log(`📡 Server running on: http://localhost:${SERVER_PORT}`);
+                console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
+                console.log('🗄️  Database: SKIPPED (dev mode)');
+                console.log('='.repeat(60) + '\n');
+            });
+        } else {
+            process.exit(1);
+        }
     }
 };
 

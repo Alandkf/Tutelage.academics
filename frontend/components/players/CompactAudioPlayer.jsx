@@ -25,7 +25,14 @@ function isYouTubeUrl(url) {
   }
 }
 
-export default function CompactAudioPlayer({ src, youtubeUrl, className = '', autoResolveOnLoad = true }) {
+export default function CompactAudioPlayer({
+  src,
+  youtubeUrl,
+  className = '',
+  autoResolveOnLoad = true,
+  onResolveSuccess,
+  onResolveError,
+}) {
   const audioRef = useRef(null)
   const [resolvedSrc, setResolvedSrc] = useState(src || null)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -47,10 +54,13 @@ export default function CompactAudioPlayer({ src, youtubeUrl, className = '', au
         const data = await res.json()
         if (cancelled) return
         if (!data.success) throw new Error(data.message || 'Failed to resolve audio')
-        setResolvedSrc(data.data?.src || null)
+        const nextSrc = data.data?.src || null
+        setResolvedSrc(nextSrc)
+        if (typeof onResolveSuccess === 'function') onResolveSuccess(data.data)
       } catch (e) {
         console.error('Audio resolve error:', e)
         setError(e.message)
+        if (typeof onResolveError === 'function') onResolveError(e.message)
       } finally {
         setResolving(false)
       }
@@ -122,7 +132,7 @@ export default function CompactAudioPlayer({ src, youtubeUrl, className = '', au
     <div className={`w-full p-4 bg-card rounded-md border ${className}`}>
       {/* Hidden audio element used for playback */}
       {effectiveSrc && (
-        <audio ref={audioRef} src={effectiveSrc} preload="metadata" className="hidden" />
+        <audio ref={audioRef} src={effectiveSrc} preload="auto" className="hidden" />
       )}
 
       <div className="flex items-center gap-3">

@@ -20,11 +20,12 @@ const SingleBlogPage = () => {
 	const [loading, setLoading] = useState(true)
 
 	// PDF modal state (same pattern as videos)
-	const [pdfModalOpen, setPdfModalOpen] = useState(false)
-	const [pdfModalUrl, setPdfModalUrl] = useState(null)
-	const ANIM_DURATION = 0.3
-	const openPdfModal = (url) => { setPdfModalUrl(url); setPdfModalOpen(true) }
-	const closePdfModal = () => setPdfModalOpen(false)
+    const [pdfModalOpen, setPdfModalOpen] = useState(false)
+    const [pdfModalUrl, setPdfModalUrl] = useState(null)
+    const ANIM_DURATION = 0.3
+    const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
+    const openPdfModal = (url) => { setPdfModalUrl(toPdfView(url)); setPdfModalOpen(true) }
+    const closePdfModal = () => setPdfModalOpen(false)
 
 	// Prep & Tasks UI state (new)
 	const [prepOpen, setPrepOpen] = useState(false)
@@ -152,10 +153,10 @@ const SingleBlogPage = () => {
 													</div>
 												</div>
 												<div className="flex items-center gap-2">
-													<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
-														<ExternalLinkIcon className="w-4 h-4" /> Open
-													</Button>
-													<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                                    <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
+                                        <ExternalLinkIcon className="w-4 h-4" /> Open
+                                    </Button>
+                                    <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
 												</div>
 											</div>
 										</div>
@@ -225,10 +226,10 @@ const SingleBlogPage = () => {
 																</div>
 															</div>
 															<div className="flex items-center gap-2">
-																<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
-																	<ExternalLinkIcon className="w-4 h-4" /> Open
-																</Button>
-																<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
+                                <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
+                                    <ExternalLinkIcon className="w-4 h-4" /> Open
+                                </Button>
+                                <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
 															</div>
 														</div>
 													</div>
@@ -261,8 +262,8 @@ const SingleBlogPage = () => {
 															</div>
 														</div>
 														<div className="flex items-center gap-2">
-															<Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-															<a href={blog.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                                                        <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                                                        <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
 														</div>
 													</div>
 												</div>
@@ -332,7 +333,16 @@ const SingleBlogPage = () => {
 							<div className="flex items-center justify-between p-3 border-b">
 								<div className="flex items-center gap-3">
 									<FileTextIcon className="w-6 h-6 text-primary" />
-									<div className="font-semibold">{(() => { try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' } })()}</div>
+                                    <div className="font-semibold">{(() => {
+                                        try {
+                                            const u = new URL(pdfModalUrl)
+                                            const real = new URLSearchParams(u.search).get('url')
+                                            const name = (real || u.pathname).split('/').pop()
+                                            return decodeURIComponent(name || 'document.pdf')
+                                        } catch {
+                                            return 'document.pdf'
+                                        }
+                                    })()}</div>
 								</div>
 								<div className="flex items-center gap-2">
 									<a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a>

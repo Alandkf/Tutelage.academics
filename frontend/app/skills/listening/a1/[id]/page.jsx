@@ -35,8 +35,9 @@ const SingleAudioA1 = () => {
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [openTasks, setOpenTasks] = useState({}) // map index -> boolean
 
+  const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
   const openPdfModal = (url) => {
-    setPdfModalUrl(url)
+    setPdfModalUrl(toPdfView(url))
     setPdfModalOpen(true)
   }
   const closePdfModal = () => {
@@ -178,7 +179,7 @@ const SingleAudioA1 = () => {
                           <Button className="cursor-pointer" onClick={() => openPdfModal(audio.pdf)}>
                             <ExternalLinkIcon className="w-4 h-4" /> Open
                           </Button>
-                          <a href={audio.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
+                          <a href={toPdfView(audio.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
                               <ExternalLink />
                           </a>
                         </div>
@@ -279,10 +280,10 @@ const SingleAudioA1 = () => {
                                     <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(taskPdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Button onClick={() => openPdfModal(taskPdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                  <a href={taskPdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
-                                </div>
+                      <div className="flex items-center gap-2">
+                        <Button onClick={() => openPdfModal(taskPdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                        <a href={toPdfView(taskPdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
+                      </div>
                               </div>
                             </div>
                           )}
@@ -386,7 +387,14 @@ const SingleAudioA1 = () => {
                 <div className="flex items-center gap-3">
                   <FileTextIcon className="w-6 h-6 text-primary" />
                   <div className="font-semibold">{(() => {
-                    try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' }
+                    try {
+                      const u = new URL(pdfModalUrl)
+                      const real = new URLSearchParams(u.search).get('url')
+                      const name = (real || u.pathname).split('/').pop()
+                      return decodeURIComponent(name || 'document.pdf')
+                    } catch {
+                      return 'document.pdf'
+                    }
                   })()}</div>
                 </div>
                 <div className="flex items-center gap-2">

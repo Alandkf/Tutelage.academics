@@ -18,11 +18,12 @@ const SingleStoryPage = () => {
   const [loading, setLoading] = useState(true)
 
   // PDF modal for story resources
-  const [pdfModalOpen, setPdfModalOpen] = useState(false)
-  const [pdfModalUrl, setPdfModalUrl] = useState(null)
-  const ANIM_DURATION = 0.3
-  const openPdfModal = (url) => { setPdfModalUrl(url); setPdfModalOpen(true) }
-  const closePdfModal = () => setPdfModalOpen(false)
+    const [pdfModalOpen, setPdfModalOpen] = useState(false)
+    const [pdfModalUrl, setPdfModalUrl] = useState(null)
+    const ANIM_DURATION = 0.3
+    const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
+    const openPdfModal = (url) => { setPdfModalUrl(toPdfView(url)); setPdfModalOpen(true) }
+    const closePdfModal = () => setPdfModalOpen(false)
 
   // Prep & Tasks state for story page
   const [prepOpen, setPrepOpen] = useState(false)
@@ -136,8 +137,8 @@ const SingleStoryPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                          <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                                    <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                                    <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
                         </div>
                       </div>
                     </div>
@@ -191,7 +192,7 @@ const SingleStoryPage = () => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
+                                <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
                               </div>
                             </div>
                           </div>
@@ -223,8 +224,8 @@ const SingleStoryPage = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                              <a href={story.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
+                                    <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
+                                    <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
                             </div>
                           </div>
                         </div>
@@ -291,7 +292,16 @@ const SingleStoryPage = () => {
           <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden" initial={{ y: 20, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.98, opacity: 0 }} transition={{ duration: ANIM_DURATION }}>
               <div className="flex items-center justify-between p-3 border-b">
-                <div className="flex items-center gap-3"><FileTextIcon className="w-6 h-6 text-primary" /><div className="font-semibold">{(() => { try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' } })()}</div></div>
+                                <div className="flex items-center gap-3"><FileTextIcon className="w-6 h-6 text-primary" /><div className="font-semibold">{(() => {
+                                    try {
+                                        const u = new URL(pdfModalUrl)
+                                        const real = new URLSearchParams(u.search).get('url')
+                                        const name = (real || u.pathname).split('/').pop()
+                                        return decodeURIComponent(name || 'document.pdf')
+                                    } catch {
+                                        return 'document.pdf'
+                                    }
+                                })()}</div></div>
                 <div className="flex items-center gap-2"><a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a><button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button></div>
               </div>
               <div className="px-6 py-3 text-sm text-muted-foreground border-b">Note: if the PDF does not load, open it in a new tab.</div>
