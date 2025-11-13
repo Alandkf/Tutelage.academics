@@ -7,7 +7,7 @@ function getYouTubeEmbedUrl(url) {
   return ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : '';
 }
 
-export function VideoCard({ id, title, videoRef, description, author, createdAt }) {
+export function SpeakingCard({ id, title, videoRef, description, author, createdAt }) {
   const isYouTube = videoRef && (videoRef.includes('youtu.be') || videoRef.includes('youtube.com'));
   const embedUrl = isYouTube ? getYouTubeEmbedUrl(videoRef) : videoRef;
   return (

@@ -33,7 +33,7 @@ const Audio = () => {
     try {
       const params = new URLSearchParams()
       params.append("limit", 9)
-      if (searchTerm) params.append("search", searchTerm)
+      if (searchTerm) params.append("search", "searchTerm")
       if (!reset && nextCursor) params.append("cursor", nextCursor)
       const res = await fetch(`${BASE_URL}/api/audios?${params.toString()}`, { credentials: "include" })
       const data = await res.json()

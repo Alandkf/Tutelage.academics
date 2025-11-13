@@ -81,7 +81,7 @@ const createSpeaking = async (req, res) => {
     // Normalize level(s)
     const normalizedLevels = normalizeLevels(level);
 
-  const speaking = await Speaking.create({
+    const speaking = await Speaking.create({
       title,
       description: (description ?? discription ?? null),
       content,
@@ -98,7 +98,7 @@ const createSpeaking = async (req, res) => {
     // Sync tags to join table while preserving array column for compatibility
     const tagNames = Array.isArray(tags)
       ? tags.map(t => String(t).trim()).filter(Boolean)
-      : [];
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
     if (tagNames.length) await attachTags(speaking.id, tagNames);
 
     const speakingWithAuthor = await Speaking.findByPk(speaking.id, {
@@ -354,7 +354,7 @@ const updateSpeaking = async (req, res) => {
     // Sync join-table tags
     const tagNames = Array.isArray(tags)
       ? tags.map(t => String(t).trim()).filter(Boolean)
-      : [];
+      : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
     if (tagNames.length) await attachTags(speaking.id, tagNames);
 
     const updatedSpeaking = await Speaking.findByPk(id, {
