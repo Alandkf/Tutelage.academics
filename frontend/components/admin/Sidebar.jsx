@@ -15,6 +15,7 @@ const menuItems = [
   { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
   { icon: Video, name: "Speakings", href: "/admin-dashboard/speakings" },
   { icon: FileVolume, name: "Listening", href: "/admin-dashboard/listenings" },
+  { icon: FileVolume, name: "Readings", href: "/admin-dashboard/readings" },
   { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
