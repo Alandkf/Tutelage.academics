@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
-  // Use a custom build directory to avoid OneDrive locks on .next
-  distDir: 'build',
+  // Revert to default `.next` dir; avoids OneDrive lock on `build/trace`
+  distDir: '.next',
   images: {
     remotePatterns: [
       {
