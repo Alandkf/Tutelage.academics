@@ -2,44 +2,43 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/AuthContext'
 import BASE_URL from '@/app/config/url'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import BlogForm from '@/components/forms/BlogForm'
+import EslVideoForm from '@/components/forms/EslVideoForm'
 
-const SingleBlog = () => {
+export default function AdminEslVideoDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { user } = useAuth()
-  const [blog, setBlog] = useState(null)
+  const [video, setVideo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
 
-  const fetchBlog = async () => {
+  const fetchVideo = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BASE_URL}/api/blogs/${params.id}`, { credentials: 'include' })
+      const res = await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
-        setBlog(data.data)
+        setVideo(data.data)
       } else {
-        toast('Blog not found', { variant: 'destructive' })
-        router.push('/admin-dashboard/blogs')
+        toast('Video not found', { variant: 'destructive' })
+        router.push('/admin-dashboard/eslVideos')
       }
     } catch (e) {
-      toast('Failed to load blog', { variant: 'destructive' })
+      toast('Failed to load video', { variant: 'destructive' })
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (params.id) fetchBlog()
+    if (params.id) fetchVideo()
     // eslint-disable-next-line
   }, [params.id])
 
@@ -47,35 +46,34 @@ const SingleBlog = () => {
     try {
       const fd = new FormData()
       fd.append('title', values.title ?? '')
-      fd.append('content', values.content ?? '')
+      fd.append('videoRef', values.videoRef ?? '')
       fd.append('description', values.description ?? '')
-      fd.append('imageRef', values.imageRef ?? '')
       fd.append('level', values.level ?? '')
       fd.append('tags', values.tags?.join(',') ?? '')
       if (values.pdf) fd.append('pdfFile', values.pdf)
       if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
       
-      const res = await fetch(`${BASE_URL}/api/blogs/${params.id}`, {
+      const res = await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, {
         method: 'PUT',
         credentials: 'include',
         body: fd
       })
       if (!res.ok) throw new Error('Failed to update')
       setShowEdit(false)
-      fetchBlog()
-      toast('Blog updated successfully', { variant: 'success' })
+      fetchVideo()
+      toast('Video updated successfully', { variant: 'success' })
     } catch (e) {
-      toast(e.message || 'Failed to update blog', { variant: 'destructive' })
+      toast(e.message || 'Failed to update video', { variant: 'destructive' })
     }
   }
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${BASE_URL}/api/blogs/${params.id}`, { method: 'DELETE', credentials: 'include' })
-      toast('Blog deleted successfully', { variant: 'destructive' })
-      router.push('/admin-dashboard/blogs')
+      await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      toast('Video deleted successfully', { variant: 'destructive' })
+      router.push('/admin-dashboard/eslVideos')
     } catch {
-      toast('Failed to delete blog', { variant: 'destructive' })
+      toast('Failed to delete video', { variant: 'destructive' })
     }
   }
 
@@ -87,7 +85,7 @@ const SingleBlog = () => {
     )
   }
 
-  if (!blog) return null
+  if (!video) return null
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -107,96 +105,100 @@ const SingleBlog = () => {
         )}
       </div>
 
-      <h1 className="text-3xl font-bold text-foreground mb-4">{blog.title}</h1>
+      <h1 className="text-3xl font-bold text-foreground mb-4">{video.title}</h1>
 
-      {blog.imageRef && (
-        <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden mb-6">
-          <Image src={blog.imageRef} alt={blog.title} fill className="object-cover" sizes="100vw" priority />
-        </div>
-      )}
-
-      {blog.description && (
+      {video.videoRef && (
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Description</h2>
-          <p className="text-muted-foreground leading-relaxed">{blog.description}</p>
-        </div>
-      )}
-
-
-      {blog.content && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Content</h2>
-          <div className="p-4 bg-card border rounded-md">
-            <div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">{blog.content}</div>
+          <h2 className="text-xl font-semibold mb-2">Video</h2>
+          <div className="aspect-video w-full">
+            <iframe 
+              src={video.videoRef.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+              className="w-full h-full rounded-lg"
+              allowFullScreen
+              title={video.title}
+            />
           </div>
         </div>
       )}
 
-      {blog.pdf && (
+      {video.description && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Description</h2>
+          <p className="text-muted-foreground leading-relaxed">{video.description}</p>
+        </div>
+      )}
+
+      {video.pdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>
-          <a href={blog.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+          <a href={video.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
             <ExternalLink className="w-4 h-4" />View PDF
           </a>
         </div>
       )}
 
-      {blog.taskPdf && (
+      {video.taskPdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <a href={blog.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+          <a href={video.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
             <ExternalLink className="w-4 h-4" />View Task PDF
           </a>
         </div>
       )}
 
-      {blog.tags && blog.tags.length > 0 && (
+      {video.tags && video.tags.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {blog.tags.map((tag, i) => (
+            {video.tags.map((tag, i) => (
               <span key={i} className="px-3 py-1 bg-primary/10 text-primary text-sm rounded">{tag}</span>
             ))}
           </div>
         </div>
       )}
 
-      {blog.level && (
+      {video.level && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Level</h3>
           <div className="flex flex-wrap gap-2">
-            {(Array.isArray(blog.level) ? blog.level : [blog.level]).map((lvl, i) => (
+            {(Array.isArray(video.level) ? video.level : [video.level]).map((lvl, i) => (
               <span key={i} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded">{lvl}</span>
             ))}
           </div>
         </div>
       )}
 
-      {blog.author && (
+      {video.metrics && (
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Author</h3>
-          <p className="text-muted-foreground">{blog.author.name} ({blog.author.email})</p>
-        </div>
-      )}
-
-      {blog.createdAt && (
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Created At</h3>
-          <p className="text-muted-foreground">{new Date(blog.createdAt).toLocaleString()}</p>
+          <h3 className="text-lg font-semibold mb-2">Analytics</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 bg-card border rounded">
+              <div className="text-2xl font-bold">{video.metrics.views || 0}</div>
+              <div className="text-sm text-muted-foreground">Views</div>
+            </div>
+            <div className="p-4 bg-card border rounded">
+              <div className="text-2xl font-bold">{video.metrics.plays || 0}</div>
+              <div className="text-sm text-muted-foreground">Plays</div>
+            </div>
+            <div className="p-4 bg-card border rounded">
+              <div className="text-2xl font-bold">{video.metrics.downloads || 0}</div>
+              <div className="text-sm text-muted-foreground">Downloads</div>
+            </div>
+          </div>
         </div>
       )}
 
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
-          <DialogHeader><DialogTitle>Edit Blog</DialogTitle></DialogHeader>
-          <BlogForm mode="edit" initialValues={blog} onSuccess={handleEditSuccess} onCancel={() => setShowEdit(false)} />
+          <DialogHeader><DialogTitle>Edit ESL Video</DialogTitle></DialogHeader>
+          <EslVideoForm mode="edit" initialValues={video} onSuccess={handleEditSuccess} onCancel={() => setShowEdit(false)} />
         </DialogContent>
       </Dialog>
 
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent className="max-w-sm w-full" aria-describedby={undefined}>
-          <DialogHeader><DialogTitle>Delete Blog</DialogTitle></DialogHeader>
-          <div className="py-4 text-sm">Are you sure you want to delete <span className="font-semibold">{blog.title}</span>?</div>
+          <DialogHeader><DialogTitle>Delete ESL Video</DialogTitle></DialogHeader>
+          <div className="py-4 text-sm">Are you sure you want to delete <span className="font-semibold">{video.title}</span>?</div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDelete(false)}>Cancel</Button>
             <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
@@ -206,5 +208,3 @@ const SingleBlog = () => {
     </div>
   )
 }
-
-export default SingleBlog

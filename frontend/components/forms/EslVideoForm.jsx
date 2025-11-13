@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -18,11 +18,10 @@ const LEVEL_OPTIONS = [
 	{ value: 'c2', label: 'C2 Proficient' }
 ]
 
-const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
+const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
 	const [formData, setFormData] = useState({
 		title: '',
-		content: '',
-		imageRef: '',
+		videoRef: '',
 		description: '',
 		level: '',
 		tags: [],
@@ -42,8 +41,7 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 			
 			setFormData({
 				title: initialValues.title || '',
-				content: initialValues.content || '',
-				imageRef: initialValues.imageRef || '',
+				videoRef: initialValues.videoRef || '',
 				description: initialValues.description || '',
 				level: levelValue || '',
 				tags: initialValues.tags || [],
@@ -117,8 +115,8 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 				</div>
 
 				<div>
-					<Label htmlFor="content">Content *</Label>
-					<Textarea id="content" value={formData.content} onChange={(e) => setFormData(v => ({ ...v, content: e.target.value }))} rows={5} required />
+					<Label htmlFor="videoRef">Video URL *</Label>
+					<Input id="videoRef" value={formData.videoRef} onChange={(e) => setFormData(v => ({ ...v, videoRef: e.target.value }))} placeholder="https://youtube.com/..." required />
 				</div>
 
 				<div>
@@ -127,13 +125,8 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 				</div>
 
 				<div>
-					<Label htmlFor="imageRef">Image URL</Label>
-					<Input id="imageRef" value={formData.imageRef} onChange={(e) => setFormData(v => ({ ...v, imageRef: e.target.value }))} placeholder="https://..." />
-				</div>
-
-				<div>
-					<Label htmlFor="level">Level</Label>
-					<Select value={formData.level} onValueChange={handleLevelChange}>
+					<Label htmlFor="level">Level *</Label>
+					<Select value={formData.level} onValueChange={handleLevelChange} required>
 						<SelectTrigger id="level"><SelectValue placeholder="Select a level" /></SelectTrigger>
 						<SelectContent>
 							{LEVEL_OPTIONS.map(level => (
@@ -192,4 +185,4 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 	)
 }
 
-export default BlogForm
+export default EslVideoForm

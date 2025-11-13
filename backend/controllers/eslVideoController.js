@@ -50,7 +50,6 @@ const attachTags = async (resourceId, tagNames = []) => {
     created.forEach(t => existingMap.set(t.name, t.id));
   }
   const tagIds = trimmed.map(n => existingMap.get(n)).filter(Boolean);
-  // use DB_RESOURCE_TYPE (enum-compliant) for DB operations
   await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId } });
   await ResourceTag.bulkCreate(tagIds.map(tagId => ({ resourceType: DB_RESOURCE_TYPE, resourceId, tagId })));
 };
@@ -79,11 +78,31 @@ exports.createEslVideo = async (req, res) => {
     const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
-    const createdBy = req.user?.id || 1; // default for admin scripts/tests
-    const video = await EslVideo.create({ title, videoRef, description, pdf, taskPdf, level: normalizedLevel, thumbnailUrl, createdBy });
-    if (Array.isArray(tags)) await attachTags(video.id, tags);
-    const tagNames = await includeTagsFor(video.id);
-    res.status(201).json({ success: true, data: { ...video.toJSON(), tags: tagNames } });
+    const createdBy = req.user?.id || 1;
+    
+    // Parse tags from request body (can be array or comma-separated string)
+    const tagNames = Array.isArray(tags) 
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    
+    // Create video with tags array column
+    const video = await EslVideo.create({ 
+      title, 
+      videoRef, 
+      description, 
+      pdf, 
+      taskPdf, 
+      level: normalizedLevel, 
+      thumbnailUrl, 
+      tags: tagNames.length ? tagNames : null, // Store in array column too
+      createdBy 
+    });
+    
+    // Also sync to join table for relational queries
+    if (tagNames.length) await attachTags(video.id, tagNames);
+    
+    const tagList = await includeTagsFor(video.id);
+    res.status(201).json({ success: true, data: { ...video.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error creating ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -92,11 +111,22 @@ exports.createEslVideo = async (req, res) => {
 
 exports.getAllEslVideos = async (req, res) => {
   try {
-    const { search, level, tags, sortBy = 'date', sortOrder = 'desc', limit = 6, offset = 0 } = req.query;
+    const { cursor, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const where = {};
+    
     if (search) where.title = { [Op.like]: `%${search}%` };
+    
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
+
+    // Cursor-based pagination
+    if (cursor) {
+      if (sortOrder.toUpperCase() === 'DESC') {
+        where.id = { [Op.lt]: parseInt(cursor) };
+      } else {
+        where.id = { [Op.gt]: parseInt(cursor) };
+      }
+    }
 
     // Tag filtering
     let idFilter = null;
@@ -105,32 +135,44 @@ exports.getAllEslVideos = async (req, res) => {
       const tagRows = await Tag.findAll({ where: { name: { [Op.in]: tagNames } } });
       const tagIds = tagRows.map(t => t.id);
       if (tagIds.length) {
-        // use DB_RESOURCE_TYPE for filtering
         const rtRows = await ResourceTag.findAll({ where: { resourceType: DB_RESOURCE_TYPE, tagId: { [Op.in]: tagIds } } });
         const matchedIds = [...new Set(rtRows.map(r => r.resourceId))];
         idFilter = matchedIds.length ? matchedIds : [-1];
       }
     }
 
-    const order = [];
-    if (sortBy === 'popularity') order.push(['id', sortOrder.toUpperCase()]); // fallback
-    else order.push(['createdAt', sortOrder.toUpperCase()]);
+    // Fetch one extra to check hasMore
+    const fetchLimit = parseInt(limit) + 1;
+    const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
 
     const rows = await EslVideo.findAll({
-      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
+      where: idFilter ? { ...where, id: { ...where.id, [Op.in]: idFilter } } : where,
       order,
-      limit: Number(limit),
-      offset: Number(offset)
+      limit: fetchLimit,
+      distinct: true
     });
 
-    // Attach tags and analytics summary
-    const enriched = await Promise.all(rows.map(async (row) => {
-      const tags = await includeTagsFor(row.id); // includeTagsFor uses DB_RESOURCE_TYPE
+    const hasMore = rows.length > parseInt(limit);
+    const items = hasMore ? rows.slice(0, parseInt(limit)) : rows;
+    const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
+
+    // Attach tags and analytics
+    const enriched = await Promise.all(items.map(async (row) => {
+      const tags = await includeTagsFor(row.id);
       const metrics = await ResourceAnalytics.findOne({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: row.id } });
       return { ...row.toJSON(), tags, metrics };
     }));
 
-    res.status(200).json({ success: true, data: enriched });
+    res.status(200).json({ 
+      success: true, 
+      data: enriched,
+      pagination: {
+        nextCursor,
+        hasMore,
+        itemsPerPage: parseInt(limit),
+        totalItemsReturned: enriched.length
+      }
+    });
   } catch (err) {
     console.error('Error fetching ESL videos:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -157,12 +199,39 @@ exports.updateEslVideo = async (req, res) => {
     const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
-    const payload = { title, videoRef, description, pdf, taskPdf, level: normalizeLevels(level) };
+    
+    // Parse tags
+    const tagNames = tags !== undefined
+      ? (Array.isArray(tags) 
+          ? tags.map(t => String(t).trim()).filter(Boolean)
+          : String(tags).split(',').map(t => t.trim()).filter(Boolean))
+      : null;
+    
+    const payload = { 
+      title, 
+      videoRef, 
+      description, 
+      pdf, 
+      taskPdf, 
+      level: normalizeLevels(level) 
+    };
     if (videoRef) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
+    
+    // Update tags array column if tags were provided
+    if (tagNames !== null) {
+      payload.tags = tagNames.length ? tagNames : null;
+    }
+    
     await video.update(payload);
-    if (Array.isArray(tags)) await attachTags(video.id, tags);
-    const tagNames = await includeTagsFor(video.id);
-    res.status(200).json({ success: true, data: { ...video.toJSON(), tags: tagNames } });
+    
+    // Sync join table if tags were provided
+    if (tagNames !== null) {
+      await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
+      if (tagNames.length) await attachTags(video.id, tagNames);
+    }
+    
+    const tagList = await includeTagsFor(video.id);
+    res.status(200).json({ success: true, data: { ...video.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error updating ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

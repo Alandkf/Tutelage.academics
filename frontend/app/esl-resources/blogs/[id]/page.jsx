@@ -277,50 +277,35 @@ const SingleBlogPage = () => {
 				</div>
 			</div>
 
-			{/* Tags Section (unchanged placement moved after Tasks) */}
+			{/* Tags Section - styled like language level but with dark background */}
 			{Array.isArray(blog?.tags) && blog.tags.length > 0 && (
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-					<h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
-					<div className="flex flex-wrap gap-3">
-						{blog.tags.map((t, i) => (
-							<div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">
-								{t}
-							</div>
-						))}
+					<h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{blog.tags.map((t, i) => (
+								<span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+							))}
+						</div>
 					</div>
 				</div>
 			)}
 
-			{/* Language Level — clickable pills */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-				<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
-				<div className="p-6 rounded-md">
-					<div className="flex flex-wrap gap-3">
-						{(() => {
-							const levels = Array.isArray(blog?.level) ? blog.level : (blog?.level ? [blog.level] : []);
-							if (!levels.length) {
-								return <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">Not specified</div>
-							}
-							const mapToSlug = (lvl) => {
-								if (!lvl) return '/levels';
-								const key = String(lvl).toLowerCase();
-								if (key.includes('a1')) return '/levels/a1';
-								if (key.includes('a2')) return '/levels/a2';
-								if (key.includes('b1')) return '/levels/b1';
-								if (key.includes('b2')) return '/levels/b2';
-								if (key.includes('c1')) return '/levels/c1';
-								if (key.includes('c2')) return '/levels/c2';
-								return '/levels';
-							};
-							return levels.map((lvl, i) => (
-								<Link key={i} href={mapToSlug(lvl)} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
-										{lvl}
+			{/* Language Level — clickable pills (render only when levels exist) */}
+			{Array.isArray(blog?.level) && blog.level.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{blog.level.map((lvl, i) => (
+								<Link key={i} href={`/levels/${String(lvl).toLowerCase().split(' ')[0]}`} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+									{lvl}
 								</Link>
-							));
-						})()}
+							))}
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 
 			{/* CTA Section */}
 			<SingleSourceCTA />

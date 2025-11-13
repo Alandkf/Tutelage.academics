@@ -182,8 +182,6 @@ const SingleVideo = () => {
         </div>
       </div>
 
-      
-
       {/* Description Section */}
       {video?.description && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -433,44 +431,35 @@ const SingleVideo = () => {
           )}
         </div>
 
-        {/* Language Level — bigger title and distinct boxed section at the end */}
-        <div className="mt-12">
-          <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
-          <div className="p-6 rounded-md">
-            <div className="flex flex-wrap gap-3">
-              {(() => {
-                const levels = Array.isArray(video?.level) ? video.level : (video?.level ? [video.level] : []);
-                if (!levels.length) {
-                  return (
-                    <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">
-                      Not specified
-                    </div>
-                  );
-                }
+        {/* Tags Section - styled like language level but with dark background */}
+			{Array.isArray(video?.tags) && video.tags.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{video.tags.map((t, i) => (
+								<span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
 
-                const mapToSlug = (lvl) => {
-                  if (!lvl) return '/levels';
-                  const key = String(lvl).toLowerCase();
-                  if (key.includes('a1')) return '/levels/a1';
-                  if (key.includes('a2')) return '/levels/a2';
-                  if (key.includes('b1')) return '/levels/b1';
-                  if (key.includes('b2')) return '/levels/b2';
-                  if (key.includes('c1')) return '/levels/c1';
-                  if (key.includes('c2')) return '/levels/c2';
-                  // fallback to generic levels page
-                  return '/levels';
-                };
-
-                return levels.map((lvl, i) => (
-                  <Link key={`lvl-${i}`} href={mapToSlug(lvl)}                     
-                        className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
-                    {lvl}
-                  </Link>
-                ));
-              })()}
-            </div>
-          </div>
-        </div>
+			{/* Language Level — clickable pills (render only when levels exist) */}
+			{Array.isArray(video?.level) && video.level.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{video.level.map((lvl, i) => (
+								<Link key={i} href={`/levels/${String(lvl).toLowerCase().split(' ')[0]}`} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+									{lvl}
+								</Link>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
       </div>
 
       {/* CTA Section */}
