@@ -142,11 +142,11 @@ Notes:
 
 ## CompactAudioPlayer (YouTube audio-only)
 
-- Use `CompactAudioPlayer` to stream audio-only from a YouTube link without any video or branding.
-- The component resolves the audio stream via backend endpoint `GET /api/youtube-audio/resolve?url=...`.
+- Use `CompactAudioPlayer` to stream audio-only from a YouTube link without showing video.
+- The player uses the YouTube IFrame API client-side with custom controls; no backend resolver or ytdl is required.
 - Props:
   - `src`: optional direct audio URL (mp3/opus/etc.).
-  - `youtubeUrl`: a standard YouTube URL. If provided, audio-only is auto-resolved on mount.
+  - `youtubeUrl`: a standard YouTube URL. If provided, audio-only is embedded and controlled via a custom UI.
   - `className`: optional additional class names.
 - Example:
 
@@ -160,4 +160,4 @@ export default function Example({ url }) {
 }
 ```
 
-- In admin forms, paste either a direct audio URL or any standard YouTube URL into the “Audio URL” field. Pages using the player will automatically resolve and stream the audio track only.
+- In admin forms, paste either a direct audio URL or any standard YouTube URL into the “Audio URL” field. Pages using the player will automatically embed the YouTube audio-only player or play the direct audio URL.
