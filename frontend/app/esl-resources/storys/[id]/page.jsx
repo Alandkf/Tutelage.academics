@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react'
-import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon, ChevronDown , ChevronUp } from 'lucide-react'
+import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 const SingleStoryPage = () => {
   const params = useParams()
@@ -17,13 +19,10 @@ const SingleStoryPage = () => {
   const [story, setStory] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // PDF modal for story resources
-    const [pdfModalOpen, setPdfModalOpen] = useState(false)
-    const [pdfModalUrl, setPdfModalUrl] = useState(null)
-    const ANIM_DURATION = 0.3
-    const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
-    const openPdfModal = (url) => { setPdfModalUrl(toPdfView(url)); setPdfModalOpen(true) }
-    const closePdfModal = () => setPdfModalOpen(false)
+  // Use the custom hook for PDF modal
+  const { isOpen, pdfUrl, title, openPdf, closePdf } = usePdfModal()
+
+  const ANIM_DURATION = 0.3
 
   // Prep & Tasks state for story page
   const [prepOpen, setPrepOpen] = useState(false)
@@ -127,21 +126,11 @@ const SingleStoryPage = () => {
               <motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
                 <div className="px-6 py-4">
                   {story?.pdf ? (
-                    <div className="w-fit">
-                      <div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
-                        <div className="flex items-center gap-3">
-                          <FileTextIcon className="w-6 h-6 text-primary" />
-                          <div>
-                            <div className="font-semibold text-foreground">Preparation PDF</div>
-                            <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                                    <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                    <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
-                        </div>
-                      </div>
-                    </div>
+                    <PdfButton 
+                      pdfUrl={story.pdf} 
+                      onOpen={openPdf}
+                      label="Preparation PDF"
+                    />
                   ) : <p className="text-sm text-muted-foreground">No preparation PDF available.</p>}
                 </div>
               </motion.div>
@@ -181,20 +170,12 @@ const SingleStoryPage = () => {
                       <div className="px-4 py-3">
                         <div className="text-sm text-foreground leading-relaxed">{task.content || 'Task details will be added here.'}</div>
                         {story?.pdf && (
-                          <div className="mt-3 mx-auto max-w-3xl">
-                            <div className="flex items-center justify-between gap-4 p-3 border rounded-md bg-card">
-                              <div className="flex items-center gap-3">
-                                <FileTextIcon className="w-5 h-5 text-primary" />
-                                <div>
-                                  <div className="font-medium">Task PDF</div>
-                                  <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
-                              </div>
-                            </div>
+                          <div className="mt-3">
+                            <PdfButton 
+                              pdfUrl={story.pdf} 
+                              onOpen={openPdf}
+                              label="Task PDF"
+                            />
                           </div>
                         )}
                       </div>
@@ -214,21 +195,11 @@ const SingleStoryPage = () => {
                   <motion.div key="task-0" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
                     <div className="px-4 py-3">
                       {story?.pdf && (
-                        <div className="mt-3 w-fit">
-                          <div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
-                            <div className="flex items-center gap-3">
-                              <FileTextIcon className="w-5 h-5 text-primary" />
-                              <div>
-                                <div className="font-medium">Task PDF</div>
-                                <div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(story.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                    <Button onClick={() => openPdfModal(story.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                    <a href={toPdfView(story.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
-                            </div>
-                          </div>
-                        </div>
+                        <PdfButton 
+                          pdfUrl={story.pdf} 
+                          onOpen={openPdf}
+                          label="Task PDF"
+                        />
                       )}
                     </div>
                   </motion.div>
@@ -286,30 +257,14 @@ const SingleStoryPage = () => {
       {/* CTA Section */}
       <SingleSourceCTA />
 
-      {/* PDF Modal (same as blog) */}
-      <AnimatePresence>
-        {pdfModalOpen && pdfModalUrl && (
-          <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden" initial={{ y: 20, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.98, opacity: 0 }} transition={{ duration: ANIM_DURATION }}>
-              <div className="flex items-center justify-between p-3 border-b">
-                                <div className="flex items-center gap-3"><FileTextIcon className="w-6 h-6 text-primary" /><div className="font-semibold">{(() => {
-                                    try {
-                                        const u = new URL(pdfModalUrl)
-                                        const real = new URLSearchParams(u.search).get('url')
-                                        const name = (real || u.pathname).split('/').pop()
-                                        return decodeURIComponent(name || 'document.pdf')
-                                    } catch {
-                                        return 'document.pdf'
-                                    }
-                                })()}</div></div>
-                <div className="flex items-center gap-2"><a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a><button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button></div>
-              </div>
-              <div className="px-6 py-3 text-sm text-muted-foreground border-b">Note: if the PDF does not load, open it in a new tab.</div>
-              <div className="w-full h-[70vh]"><iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" /></div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* PDF Modal - replaced with reusable component */}
+      <PdfModal 
+        isOpen={isOpen}
+        onClose={closePdf}
+        pdfUrl={pdfUrl}
+        title={title}
+        animationDuration={ANIM_DURATION}
+      />
 
     </div>
   )
