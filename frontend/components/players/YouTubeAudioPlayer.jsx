@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { Play, Pause, Volume2, VolumeX } from "lucide-react"
 
 // Extract YouTube videoId from common URL shapes
 function extractVideoId(input) {
@@ -54,7 +55,8 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
   const [playing, setPlaying] = useState(false)
   const [duration, setDuration] = useState(0)
   const [current, setCurrent] = useState(0)
-  const [volume, setVolume] = useState(initialVolume)
+  // Keep UI volume normalized (0..1) like CompactAudioPlayer
+  const [volume, setVolume] = useState(() => Math.max(0, Math.min(1, initialVolume / 100)))
 
   useEffect(() => {
     let intervalId = null
@@ -80,7 +82,7 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
         events: {
           onReady: () => {
             setReady(true)
-            try { playerRef.current.setVolume(volume) } catch {}
+            try { playerRef.current.setVolume(Math.round(volume * 100)) } catch {}
             setDuration(playerRef.current.getDuration() || 0)
           },
           onStateChange: (e) => {
@@ -97,7 +99,7 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
           const t = playerRef.current?.getCurrentTime?.() || 0
           setCurrent(t)
         } catch {}
-      }, 500)
+      }, 250)
     }
 
     setup()
@@ -119,55 +121,85 @@ export default function YouTubeAudioPlayer({ videoId, videoUrl, initialVolume = 
     } catch {}
   }
 
-  function onSeek(pct) {
+  function onSeek(seconds) {
     if (!ready || !playerRef.current || !duration) return
-    const target = Math.max(0, Math.min(duration, duration * pct))
+    const target = Math.max(0, Math.min(duration, seconds))
     try { playerRef.current.seekTo(target, true) } catch {}
     setCurrent(target)
   }
 
   function onVolume(v) {
-    const vol = Math.max(0, Math.min(100, v))
-    setVolume(vol)
-    try { playerRef.current?.setVolume?.(vol) } catch {}
+    const normalized = Math.max(0, Math.min(1, v))
+    setVolume(normalized)
+    try { playerRef.current?.setVolume?.(Math.round(normalized * 100)) } catch {}
   }
 
   const pct = duration ? current / duration : 0
 
+  // Time formatter to match CompactAudioPlayer
+  function formatTime(t) {
+    const s = Math.floor(t || 0)
+    const h = Math.floor(s / 3600)
+    const m = Math.floor((s % 3600) / 60)
+    const sec = s % 60
+    const pad = (n) => String(n).padStart(2, "0")
+    return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`
+  }
+
   return (
-    <div className="yt-audio-player" style={{ maxWidth: 520 }}>
+    <div className="w-full p-4 bg-card rounded-md border">
       {/* Hidden/offscreen YouTube player (audio will play) */}
       <div ref={containerRef} style={{ position: "absolute", left: "-9999px", top: 0 }} />
 
-      {/* Simple audio-like controls */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <button onClick={togglePlay} disabled={!ready} style={{ padding: "6px 12px" }}>
-          {playing ? "Pause" : "Play"}
+      <div className="flex items-center gap-3">
+        {/* Play/Pause */}
+        <button
+          type="button"
+          onClick={togglePlay}
+          className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50"
+          disabled={!ready}
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </button>
-        <div style={{ flex: 1 }}>
+
+        {/* Progress */}
+        <div className="flex-1 flex items-center gap-2">
           <input
             type="range"
             min={0}
-            max={100}
-            value={Math.round(pct * 100)}
-            onChange={(e) => onSeek(Number(e.target.value) / 100)}
-            style={{ width: "100%" }}
+            max={Math.max(duration, 0.1)}
+            step={0.1}
+            value={current}
+            onChange={(e) => onSeek(parseFloat(e.target.value))}
+            className="w-full h-2 accent-primary"
+            aria-label="Seek"
+            disabled={!ready || duration === 0}
           />
+          <div className="text-xs text-muted-foreground whitespace-nowrap">
+            {formatTime(current)} / {formatTime(duration)}
+          </div>
         </div>
-        <div style={{ width: 120, display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 12 }}>Vol</span>
+
+        {/* Volume */}
+        <div className="flex items-center gap-1 w-32">
+          {volume > 0 ? <Volume2 className="h-4 w-4 text-muted-foreground" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
           <input
             type="range"
             min={0}
-            max={100}
+            max={1}
+            step={0.01}
             value={volume}
-            onChange={(e) => onVolume(Number(e.target.value))}
-            style={{ width: 80 }}
+            onChange={(e) => onVolume(parseFloat(e.target.value))}
+            className="w-full h-2 accent-primary"
+            aria-label="Volume"
+            disabled={!ready}
           />
         </div>
       </div>
-      <div style={{ marginTop: 6, fontSize: 12, color: "#666" }}>
-        {ready ? `${Math.floor(current)}s / ${Math.floor(duration)}s` : "Loading YouTube…"}
+
+      <div className="mt-2 text-xs text-muted-foreground">
+        {ready ? <span>Playing via YouTube audio embed</span> : <span>Loading YouTube…</span>}
       </div>
     </div>
   )
