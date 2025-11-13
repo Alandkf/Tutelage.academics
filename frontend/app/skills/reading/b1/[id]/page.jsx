@@ -21,14 +21,7 @@ const SingleArticleB1 = () => {
 	const [loading, setLoading] = useState(true)
 
 	const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
-
-	// PDF modal state (same pattern as videos)
-	const [pdfModalOpen, setPdfModalOpen] = useState(false)
-	const [pdfModalUrl, setPdfModalUrl] = useState(null)
-    const ANIM_DURATION = 0.3
-    const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
-    const openPdfModal = (url) => { setPdfModalUrl(toPdfView(url)); setPdfModalOpen(true) }
-	const closePdfModal = () => setPdfModalOpen(false)
+	const ANIM_DURATION = 0.3
 
 	// Prep & Tasks UI state (new)
 	const [prepOpen, setPrepOpen] = useState(false)
@@ -134,25 +127,7 @@ const SingleArticleB1 = () => {
 							{prepOpen && (
 								<motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
 									<div className="px-6 py-4">
-										<div className="w-fit">
-											<div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
-												<div className="flex items-center gap-3">
-													<FileTextIcon className="w-6 h-6 text-primary" />
-													<div>
-														<div className="font-semibold text-foreground">Preparation PDF</div>
-														<div className="text-sm text-muted-foreground">
-															{(() => { try { return decodeURIComponent(new URL(article.pdf).pathname.split('/').pop()) } catch { return 'file.pdf' } })()}
-														</div>
-													</div>
-												</div>
-                                                <div className="flex items-center gap-2">
-                                                    <Button onClick={() => openPdfModal(article.pdf)} className="cursor-pointer">
-                                                        <ExternalLinkIcon className="w-4 h-4" /> Open
-                                                    </Button>
-                                                    <a href={toPdfView(article.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /> </a>
-                                                </div>
-											</div>
-										</div>
+										<PdfButton pdfUrl={article.pdf} onOpen={(url) => openPdf(url, 'Preparation PDF')} label="Preparation PDF" />
 									</div>
 								</motion.div>
 							)}
@@ -303,7 +278,7 @@ const SingleArticleB1 = () => {
 			{/* CTA Section */}
 			<SingleSourceCTA />
 
-			{/* PDF Modal */}
+			{/* PDF Modal - USE state from hook */}
 			<PdfModal isOpen={pdfModalOpen} onClose={closePdf} pdfUrl={pdfModalUrl} title={pdfModalTitle} />
 		</div>
 	)

@@ -70,9 +70,10 @@ export default function PdfModal({
                   Open in new tab
                 </a>
                 <button 
-                  className="p-2 hover:bg-accent rounded" 
+                  className="p-2 hover:bg-accent rounded transition-colors" 
                   onClick={onClose}
                   aria-label="Close"
+                  type="button"
                 >
                   <XIcon className="w-5 h-5" />
                 </button>
