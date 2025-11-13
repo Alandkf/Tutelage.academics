@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { VideoCard } from "@/components/admin/videos/VideoCard"
+import { SpeakingCard } from "@/components/admin/speaking/SpeakingCard"
 import VideoForm from "@/components/forms/VideoForm"
 import { RefreshCw, Plus } from "lucide-react"
 import { toast } from "sonner"
@@ -13,7 +13,7 @@ import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
 import BASE_URL from "@/app/config/url"
 
 const Videos = () => {
-  const [videos, setVideos] = useState([])  
+  const [speakings, setSpeakings] = useState([])  
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [nextCursor, setNextCursor] = useState(null)
@@ -26,7 +26,7 @@ const Videos = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
 
-  // Fetch videos with cursor-based pagination
+  // Fetch speakings with cursor-based pagination
   const fetchVideos = async (reset = false) => {
     setLoading(true)
     setError(null)
@@ -35,10 +35,10 @@ const Videos = () => {
       params.append("limit", 9)
       if (searchTerm) params.append("search", searchTerm)
       if (!reset && nextCursor) params.append("cursor", nextCursor)
-      const res = await fetch(`http://localhost:3001/api/videos?${params.toString()}`, { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/speakings?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
-      if (!data.success) throw new Error(data.message || "Failed to fetch videos")
-      setVideos(prev => reset ? data.data.videos || [] : [...prev, ...(data.data.videos || [])])
+      if (!data.success) throw new Error(data.message || "Failed to fetch speakings")
+      setSpeakings(prev => reset ? data.data.speakings || [] : [...prev, ...(data.data.speakings || [])])
       setHasMore(data.data.pagination?.hasMore ?? false)
       setNextCursor(data.data.pagination?.nextCursor ?? null)
     } catch (e) {
@@ -48,9 +48,9 @@ const Videos = () => {
     }
   }
 
-  // Reset and fetch videos (for search/refresh)
+  // Reset and fetch speakings (for search/refresh)
   const resetAndFetch = () => {
-    setVideos([])
+    setSpeakings([])
     setNextCursor(null)
     setHasMore(true)
     fetchVideos(true)
@@ -63,22 +63,22 @@ const Videos = () => {
   }, [searchTerm])
 
   // Reusable infinite scroll observer
-  const lastVideoRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchVideos })
+  const lastItemRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchVideos })
 
   // Handlers
   const handleCreateSuccess = async (formData) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/videos`, {
+      const res = await fetch(`${BASE_URL}/api/speakings`, {
         method: "POST",
         credentials: "include",
         body: formData
       })
-      if (!res.ok) throw new Error("Failed to create video")
+      if (!res.ok) throw new Error("Failed to create speaking")
       setShowCreate(false)
       resetAndFetch()
-      toast("Video created successfully", { variant: "success" })
+      toast("Speaking created successfully", { variant: "success" })
     } catch {
-      toast("Failed to create video", { variant: "destructive" })
+      toast("Failed to create speaking", { variant: "destructive" })
     }
   }
   const handleEdit = (video) => {
@@ -88,18 +88,18 @@ const Videos = () => {
   const handleEditSuccess = async (formData) => {
     if (!editVideo) return
     try {
-      const res = await fetch(`${BASE_URL}/api/videos/${editVideo.id}`, {
+      const res = await fetch(`${BASE_URL}/api/speakings/${editVideo.id}`, {
         method: "PUT",
         credentials: "include",
         body: formData
       })
-      if (!res.ok) throw new Error("Failed to update video")
+      if (!res.ok) throw new Error("Failed to update speaking")
       setShowEdit(false)
       setEditVideo(null)
       resetAndFetch()
-      toast("Video updated successfully", { variant: "success" })
+      toast("Speaking updated successfully", { variant: "success" })
     } catch {
-      toast("Failed to update video", { variant: "destructive" })
+      toast("Failed to update speaking", { variant: "destructive" })
     }
   }
   const handleDelete = (video) => {
@@ -109,33 +109,33 @@ const Videos = () => {
   const confirmDelete = async () => {
     if (!deleteVideo) return
     try {
-      await fetch(`${BASE_URL}/api/videos/${deleteVideo.id}`, {
-        method: "DELETE",
-        credentials: "include"
-      })
+      await fetch(`${BASE_URL}/api/speakings/${deleteVideo.id}`, {
+         method: "DELETE",
+         credentials: "include"
+       })
       setShowDelete(false)
       setDeleteVideo(null)
       resetAndFetch()
-      toast("Video deleted successfully", { variant: "destructive" })
+      toast("Speaking deleted successfully", { variant: "destructive" })
     } catch {
-      toast("Failed to delete video", { variant: "destructive" })
+      toast("Failed to delete speaking", { variant: "destructive" })
     }
   }
 
   return (
     <div className="mx-auto w-full">
      <div className="flex flex-row justify-between gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Videos</h1>
+        <h1 className="text-2xl font-bold text-foreground">Speakings</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 px-4">
             <Plus className="h-5 w-5" />
-            Create Video
+            Create Speaking
           </Button>
         )}
       </div>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Input
-          placeholder="Search videos..."
+          placeholder="Search speakings..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="max-w-xs"
@@ -144,7 +144,7 @@ const Videos = () => {
           variant="ghost"
           size="icon"
           onClick={resetAndFetch}
-          title="Refresh videos"
+          title="Refresh speakings"
           className="ml-2"
           disabled={loading}
         >
@@ -152,20 +152,20 @@ const Videos = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading && videos.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground py-12">Loading videos...</div>
-        ) : videos.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground py-12">No videos found.</div>
+        {loading && speakings.length === 0 ? (
+          <div className="col-span-full text-center text-muted-foreground py-12">Loading speakings...</div>
+        ) : speakings.length === 0 ? (
+          <div className="col-span-full text-center text-muted-foreground py-12">No speakings found.</div>
         ) : (
-          videos.map((video, idx) => {
-            const isLast = idx === videos.length - 1
+          speakings.map((item, idx) => {
+            const isLast = idx === speakings.length - 1
             return (
-              <div key={idx} className="relative group" ref={isLast ? lastVideoRef : null}>
-                <VideoCard {...video} />
+              <div key={idx} className="relative group" ref={isLast ? lastItemRef : null}>
+                <SpeakingCard {...item} />
                 {user?.role === "ADMIN" && (
                   <div className="absolute top-2 right-2 flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(video)}>Edit</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(video)}>Delete</Button>
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(item)}>Delete</Button>
                   </div>
                 )}
               </div>
@@ -174,13 +174,13 @@ const Videos = () => {
         )}
       </div>
       {/* Show More fallback button */}
-      {hasMore && videos.length !== 0 && !loading && (
+      {hasMore && speakings.length !== 0 && !loading && (
         <div className="flex justify-center mt-8 mb-4">
           <Button variant="outline" onClick={() => fetchVideos()}>Show More</Button>
         </div>
       )}
       {/* Loading indicator for more fetches */}
-      {loading && videos.length > 0 && (
+      {loading && speakings.length > 0 && (
         <div className="flex justify-center p-4 mt-4">
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-blue-500 animate-spin"></div>
@@ -192,7 +192,7 @@ const Videos = () => {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle>Create Video</DialogTitle>
+            <DialogTitle>Create Speaking</DialogTitle>
           </DialogHeader>
           <VideoForm onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
         </DialogContent>
@@ -201,7 +201,7 @@ const Videos = () => {
       <Dialog open={showEdit} onOpenChange={(v) => { setShowEdit(v); if (!v) setEditVideo(null) }}>
         <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle>Edit Video</DialogTitle>
+            <DialogTitle>Edit Speaking</DialogTitle>
           </DialogHeader>
           <VideoForm
             mode="edit"
@@ -215,7 +215,7 @@ const Videos = () => {
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent className="max-w-sm w-full" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle>Delete Video</DialogTitle>
+            <DialogTitle>Delete Speaking</DialogTitle>
           </DialogHeader>
           <div className="py-4 text-sm">
             Are you sure you want to delete <span className="font-semibold text-foreground">{deleteVideo?.title}</span>?

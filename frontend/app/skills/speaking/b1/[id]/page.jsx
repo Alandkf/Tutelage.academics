@@ -427,8 +427,28 @@ const SingleVideoB1 = () => {
           )}
         </div>
 
+        {/* Tags (black) - placed above Language Level */}
+        {Array.isArray(video?.tags) && video.tags.length > 0 && (
+          <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 py-4">
+            <h3 className="text-3xl font-bold text-foreground mb-4">Tags</h3>
+            <div className="p-6 rounded-md">
+              <div className="flex flex-wrap gap-3">
+                {video.tags.map((t, i) => (
+                  <span
+                    key={`tag-${i}`}
+                    title={t}
+                    className="px-4 py-3 bg-black text-white text-sm font-semibold rounded"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Language Level — bigger title and distinct boxed section at the end */}
-        <div className="mt-12">
+        <div className="mt-4">
           <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
           <div className="p-6 rounded-md">
             <div className="flex flex-wrap gap-3">

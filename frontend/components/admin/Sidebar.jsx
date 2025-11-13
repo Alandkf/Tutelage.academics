@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark, Layers } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark, Layers, PenTool } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 import { useAuth } from "@/components/AuthContext"
@@ -13,10 +13,11 @@ const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
   { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
-  { icon: Video, name: "Videos", href: "/admin-dashboard/videos" },
-  { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
+  { icon: Video, name: "Speakings", href: "/admin-dashboard/speakings" },
+  { icon: FileVolume, name: "Listening", href: "/admin-dashboard/listenings" },
+  { icon: FileVolume, name: "Readings", href: "/admin-dashboard/readings" },
+  { icon: PenTool, name: "Writings", href: "/admin-dashboard/writings" },
   { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
-  { icon: CircleQuestionMark, name: "Faqs", href: "/admin-dashboard/faqs" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
 

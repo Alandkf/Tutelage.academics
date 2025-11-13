@@ -1,0 +1,205 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { toast } from 'sonner'
+import { useAuth } from '@/components/AuthContext'
+import BASE_URL from '@/app/config/url'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import ReadingForm from '@/components/forms/ReadingForm'
+
+export default function AdminReadingDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const { user } = useAuth()
+  const [reading, setReading] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [showEdit, setShowEdit] = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
+
+  const fetchReading = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, { credentials: 'include' })
+      const data = await res.json()
+      if (data.success) {
+        setReading(data.data)
+      } else {
+        toast('Reading not found', { variant: 'destructive' })
+        router.push('/admin-dashboard/readings')
+      }
+    } catch (e) {
+      toast('Failed to load reading', { variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (params.id) fetchReading()
+    // eslint-disable-next-line
+  }, [params.id])
+
+  const handleEditSuccess = async (values) => {
+    try {
+      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
+      const reqInit = { method: 'PUT', credentials: 'include' }
+      if (isFile) {
+        const fd = new FormData()
+        fd.append('title', values.title ?? '')
+        fd.append('description', values.description ?? '')
+        fd.append('content', values.content ?? '')
+        fd.append('imageUrl', values.imageUrl ?? '')
+        fd.append('level', values.level ?? '')
+        fd.append('tags', values.tags?.join(',') ?? '')
+        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
+        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
+        reqInit.body = fd
+      } else {
+        reqInit.headers = { 'Content-Type': 'application/json' }
+        reqInit.body = JSON.stringify(values)
+      }
+      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, reqInit)
+      if (!res.ok) throw new Error('Failed to update')
+      setShowEdit(false)
+      fetchReading()
+      toast('Reading updated successfully', { variant: 'success' })
+    } catch (e) {
+      toast(e.message || 'Failed to update reading', { variant: 'destructive' })
+    }
+  }
+
+  const confirmDelete = async () => {
+    try {
+      await fetch(`${BASE_URL}/api/readings/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      toast('Reading deleted successfully', { variant: 'destructive' })
+      router.push('/admin-dashboard/readings')
+    } catch {
+      toast('Failed to delete reading', { variant: 'destructive' })
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    )
+  }
+
+  if (!reading) return null
+
+  return (
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="outline" onClick={() => router.back()} className="gap-2">
+          <ArrowLeft className="w-4 h-4" />Back
+        </Button>
+        {user?.role === 'ADMIN' && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowEdit(true)} className="gap-2">
+              <Edit className="w-4 h-4" />Edit
+            </Button>
+            <Button variant="destructive" onClick={() => setShowDelete(true)} className="gap-2">
+              <Trash2 className="w-4 h-4" />Delete
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Title */}
+      <h1 className="text-3xl font-bold text-foreground mb-4">{reading.title}</h1>
+
+      {/* Image */}
+      {reading.imageUrl && (
+        <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden mb-6">
+          <Image src={reading.imageUrl} alt={reading.title} fill className="object-cover" sizes="100vw" priority />
+        </div>
+      )}
+
+      {/* Description */}
+      {reading.description && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Description</h2>
+          <p className="text-muted-foreground leading-relaxed">{reading.description}</p>
+        </div>
+      )}
+
+      {/* Content */}
+      {reading.content && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Reading Content</h2>
+          <div className="p-4 bg-card border rounded-md">
+            <div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">{reading.content}</div>
+          </div>
+        </div>
+      )}
+
+      {/* PDFs */}
+      {reading.pdf && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>
+          <a href={reading.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+            <ExternalLink className="w-4 h-4" />View PDF
+          </a>
+        </div>
+      )}
+      {reading.taskPdf && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
+          <a href={reading.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+            <ExternalLink className="w-4 h-4" />View Task PDF
+          </a>
+        </div>
+      )}
+
+      {/* Tags */}
+      {reading.tags && reading.tags.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Tags</h3>
+          <div className="flex flex-wrap gap-2">
+            {reading.tags.map((tag, i) => (
+              <span key={i} className="px-3 py-1 bg-primary/10 text-primary text-sm rounded">{tag}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Level */}
+      {reading.level && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Level</h3>
+          <div className="flex flex-wrap gap-2">
+            {(Array.isArray(reading.level) ? reading.level : [reading.level]).map((lvl, i) => (
+              <span key={i} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded">{lvl}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Dialog */}
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
+          <DialogHeader><DialogTitle>Edit Reading</DialogTitle></DialogHeader>
+          <ReadingForm mode="edit" initialValues={reading} onSuccess={handleEditSuccess} onCancel={() => setShowEdit(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={showDelete} onOpenChange={setShowDelete}>
+        <DialogContent className="max-w-sm w-full" aria-describedby={undefined}>
+          <DialogHeader><DialogTitle>Delete Reading</DialogTitle></DialogHeader>
+          <div className="py-4 text-sm">Are you sure you want to delete <span className="font-semibold">{reading.title}</span>?</div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDelete(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

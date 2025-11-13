@@ -279,16 +279,16 @@ const SingleArticleC1 = () => {
                 </div>
             </div>
 
-            {/* Tags Section (unchanged placement moved after Tasks) */}
+            {/* Tags Section - styled like language level but with dark background */}
             {Array.isArray(article?.tags) && article.tags.length > 0 && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
-                    <div className="flex flex-wrap gap-3">
-                        {article.tags.map((t, i) => (
-                            <div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">
-                                {t}
-                            </div>
-                        ))}
+                    <h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+                    <div className="p-6 rounded-md">
+                        <div className="flex flex-wrap gap-3">
+                            {article.tags.map((t, i) => (
+                                <span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}

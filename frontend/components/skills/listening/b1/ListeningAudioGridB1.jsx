@@ -28,38 +28,18 @@ const ListeningAudioGridB1 = () => {
   const fetchAudios = async (page) => {
     setLoading(true)
     try {
-      const offset = (page - 1) * itemsPerPage
-      // filter for A1 level only (controller does a LIKE `${level}%`)
       const levelParam = 'B1'
       const response = await fetch(
-        `${BASE_URL}/api/audios?limit=${itemsPerPage}&offset=${offset}&level=${encodeURIComponent(levelParam)}`,
+        `${BASE_URL}/api/audios/paginated?page=${page}&limit=${itemsPerPage}&level=${encodeURIComponent(levelParam)}`,
         { credentials: 'include' }
       )
       const data = await response.json()
 
-      if (data.success) {
-        if (Array.isArray(data.data)) {
-          setAudios(data.data)
-          const hasNext = data.data.length === itemsPerPage
-          setHasNextPage(hasNext)
-          setHasPrevPage(page > 1)
-          setTotalPages(hasNext ? page + 10 : page)
-        } else {
-          // If API returns an object shape, try to find array
-          const list = data.data && (data.data.audios || data.data.items || data.data)
-          if (Array.isArray(list)) {
-            setAudios(list)
-            const hasNext = list.length === itemsPerPage
-            setHasNextPage(hasNext)
-            setHasPrevPage(page > 1)
-            setTotalPages(hasNext ? page + 10 : page)
-          } else {
-            setAudios([])
-            setHasNextPage(false)
-            setHasPrevPage(false)
-            setTotalPages(1)
-          }
-        }
+      if (data?.success && data?.data) {
+        setAudios(Array.isArray(data.data.audios) ? data.data.audios : [])
+        setTotalPages(data.data.pagination?.totalPages || 1)
+        setHasNextPage(!!data.data.pagination?.hasNextPage)
+        setHasPrevPage(!!data.data.pagination?.hasPrevPage && page > 1)
       } else {
         setAudios([])
         setHasNextPage(false)
