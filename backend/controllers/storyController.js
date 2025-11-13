@@ -70,11 +70,32 @@ exports.createStory = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Title is required' });
     }
     const normalizedLevel = normalizeLevels(level);
-    const wc = wordCount ?? (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : null);
+    
+    // Properly handle wordCount - ensure it's either a valid integer or null
+    let wc;
+    if (wordCount !== undefined) {
+      const parsed = parseInt(wordCount);
+      wc = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    } else if (contentText) {
+      wc = String(contentText).split(/\s+/).filter(Boolean).length;
+    } else {
+      wc = null;
+    }
+    
+    // Parse tags properly - handle both array and comma-separated string
+    const tagNames = Array.isArray(tags) 
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    
     const story = await Story.create({
       title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount: wc, level: normalizedLevel, createdBy
     });
-    await attachTags(story.id, tags);
+    
+    // Attach tags only if we have valid tag names
+    if (tagNames.length > 0) {
+      await attachTags(story.id, tagNames);
+    }
+    
     const storyWithAuthor = await Story.findByPk(story.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
@@ -198,8 +219,23 @@ exports.updateStory = async (req, res) => {
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
     if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
+    
     const normalizedLevel = level !== undefined ? normalizeLevels(level) : story.level;
-    const wc = wordCount !== undefined ? wordCount : (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : story.wordCount);
+    
+    // Properly handle wordCount - ensure it's either a valid integer or null
+    let wc;
+    if (wordCount !== undefined) {
+      // If wordCount is provided but empty/invalid, set to null
+      const parsed = parseInt(wordCount);
+      wc = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    } else if (contentText !== undefined && contentText) {
+      // Auto-calculate from contentText if provided
+      wc = String(contentText).split(/\s+/).filter(Boolean).length;
+    } else {
+      // Keep existing wordCount
+      wc = story.wordCount;
+    }
+    
     await story.update({
       title: title ?? story.title,
       imageUrl: imageUrl ?? story.imageUrl,
@@ -211,6 +247,7 @@ exports.updateStory = async (req, res) => {
       wordCount: wc,
       level: normalizedLevel
     });
+    
     if (tags) {
       // Reset tags then attach
       await ResourceTag.destroy({ where: { resourceType: 'story', resourceId: story.id } });
