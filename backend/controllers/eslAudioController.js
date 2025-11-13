@@ -62,10 +62,33 @@ exports.createEslAudio = async (req, res) => {
   try {
     const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const createdBy = req.user?.id || 1;
-    const audio = await EslAudio.create({ title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level: normalizeLevels(level), createdBy });
-    if (Array.isArray(tags)) await attachTags(audio.id, tags);
-    const tagNames = await includeTagsFor(audio.id);
-    res.status(201).json({ success: true, data: { ...audio.toJSON(), tags: tagNames } });
+    
+    // Parse tags from request body (can be array or comma-separated string)
+    const tagNames = Array.isArray(tags) 
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    
+    // Create audio WITHOUT tags array column first
+    const audio = await EslAudio.create({ 
+      title, 
+      imageUrl, 
+      description, 
+      transcript, 
+      audioRef, 
+      pdf, 
+      taskPdf, 
+      level: normalizeLevels(level), 
+      createdBy 
+    });
+    
+    // Attach tags to join table
+    if (tagNames.length > 0) {
+      await attachTags(audio.id, tagNames);
+    }
+    
+    // Fetch tags from join table for response
+    const tagList = await includeTagsFor(audio.id);
+    res.status(201).json({ success: true, data: { ...audio.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error creating ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -99,7 +122,6 @@ exports.getAllEslAudios = async (req, res) => {
     }
 
     const order = [];
-    // Sorting by difficulty is ambiguous for array levels; default to createdAt
     order.push(['createdAt', sortOrder.toUpperCase()]);
 
     const rows = await EslAudio.findAll({
@@ -109,10 +131,11 @@ exports.getAllEslAudios = async (req, res) => {
       offset: Number(offset)
     });
 
+    // Attach tags from join table to each row
     const enriched = await Promise.all(rows.map(async (row) => {
-      const tags = await includeTagsFor(row.id);
+      const tagList = await includeTagsFor(row.id);
       const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'audio', resourceId: row.id } });
-      return { ...row.toJSON(), tags, metrics };
+      return { ...row.toJSON(), tags: tagList, metrics };
     }));
 
     res.status(200).json({ success: true, data: enriched });
@@ -142,14 +165,38 @@ exports.updateEslAudio = async (req, res) => {
     const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
-    await audio.update({ title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level: normalizeLevels(level) });
-    if (Array.isArray(tags)) await attachTags(audio.id, tags);
-    const tagNames = await includeTagsFor(audio.id);
-    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    console.log(audio.toJSON());
     
+    // Parse tags from request body (can be array or comma-separated string)
+    const tagNames = tags !== undefined
+      ? (Array.isArray(tags) 
+          ? tags.map(t => String(t).trim()).filter(Boolean)
+          : String(tags).split(',').map(t => t.trim()).filter(Boolean))
+      : null;
     
-    res.status(200).json({ success: true, data: { ...audio.toJSON(), tags: tagNames } });
+    await audio.update({ 
+      title, 
+      imageUrl, 
+      description, 
+      transcript, 
+      audioRef, 
+      pdf, 
+      taskPdf, 
+      level: normalizeLevels(level) 
+    });
+    
+    // Update tags if provided
+    if (tagNames !== null) {
+      // Clear existing tags first
+      await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: id } });
+      // Add new tags
+      if (tagNames.length > 0) {
+        await attachTags(audio.id, tagNames);
+      }
+    }
+    
+    // Fetch updated tags from join table
+    const tagList = await includeTagsFor(audio.id);
+    res.status(200).json({ success: true, data: { ...audio.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error updating ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

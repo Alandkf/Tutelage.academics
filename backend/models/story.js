@@ -70,6 +70,13 @@ module.exports = (sequelize, DataTypes) => {
         comment: 'Language levels (e.g., ["B1 Intermediate"])'
       },
 
+      // Add tags array column for compatibility
+      tags: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        comment: 'Array of tag names associated with this story'
+      },
+
       createdBy: {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
