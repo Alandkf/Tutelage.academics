@@ -35,7 +35,7 @@ const Videos = () => {
       params.append("limit", 9)
       if (searchTerm) params.append("search", searchTerm)
       if (!reset && nextCursor) params.append("cursor", nextCursor)
-      const res = await fetch(`http://localhost:3001/api/videos?${params.toString()}`, { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/videos?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
       if (!data.success) throw new Error(data.message || "Failed to fetch videos")
       setVideos(prev => reset ? data.data.videos || [] : [...prev, ...(data.data.videos || [])])

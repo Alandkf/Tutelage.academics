@@ -243,10 +243,10 @@ const SingleAudio = () => {
         )}
 
         {/* Tasks (render stacked full-width boxes) */}
-        {Array.isArray(audio?.tasks) && audio.tasks.length > 0 ? (
+        {Array.isArray(audio?.taskPdf) && audio.taskPdf.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
-            {audio.tasks.map((task, idx) => {
-              const taskPdf = task?.pdf || audio?.pdf || null;
+            {audio.taskPdf.map((task, idx) => {
+              const taskPdf = task?.pdf || audio?.pdf || task?.taskPdf || audio?.taskPdf || null;
               return (
                 <div key={idx} className="border rounded-md overflow-hidden">
                   <button
