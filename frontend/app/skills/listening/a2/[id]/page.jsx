@@ -11,6 +11,9 @@ import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 import { motion, AnimatePresence } from 'framer-motion'
 import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 const SingleAudioA2 = () => {
   const params = useParams()
@@ -141,49 +144,25 @@ const SingleAudioA2 = () => {
       {/* Preparation exercise (show when audio.pdf exists) */}
       {audio?.pdf && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border rounded-md overflow-hidden mb-2">
+          <div className="border rounded-md overflow-hidden mb-6">
             <button
               onClick={() => setPrepOpen(p => !p)}
-              className="w-full flex items-center justify-between px-6 py-5 bg-card"
+              className="w-full flex items-center justify-between px-6 py-4 bg-card"
             >
-              <span className="font-semibold text-foreground">Preparation exercise</span>
-              <span className="text-muted-foreground">
-                {prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-              </span>
+              <span className="font-semibold">Preparation exercise</span>
+              <span>{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
             </button>
-
             <AnimatePresence initial={false}>
               {prepOpen && (
                 <motion.div
-                  key="prep"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
-                  className="overflow-hidden border-t bg-background"
+                  transition={{ duration: ANIM_DURATION }}
+                  className="overflow-hidden border-t"
                 >
                   <div className="px-6 py-4">
-                    <div className="w-fit">
-                      <div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
-                        <div className="flex items-center gap-3">
-                          <FileTextIcon className="w-6 h-6 text-primary" />
-                          <div>
-                            <div className="font-semibold text-foreground">Preparation PDF</div>
-                            <div className="text-sm text-muted-foreground">
-                              {(() => { try { return decodeURIComponent(new URL(audio.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button className="cursor-pointer" onClick={() => openPdfModal(audio.pdf)}>
-                            <ExternalLinkIcon className="w-4 h-4" /> Open
-                          </Button>
-                          <a href={audio.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
-                              <ExternalLink />
-                          </a>
-                        </div>
-                      </div>
-                    </div>
+                    <PdfButton pdfUrl={audio.pdf} onOpen={(url) => openPdf(url, 'Preparation PDF')} label="Preparation PDF" />
                   </div>
                 </motion.div>
               )}
@@ -367,43 +346,7 @@ const SingleAudioA2 = () => {
       <SingleSourceCTA />
 
       {/* PDF Modal */}
-      <AnimatePresence>
-        {pdfModalOpen && pdfModalUrl && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden"
-              initial={{ y: 20, scale: 0.98, opacity: 0 }}
-              animate={{ y: 0, scale: 1, opacity: 1 }}
-              exit={{ y: 20, scale: 0.98, opacity: 0 }}
-              transition={{ duration: ANIM_DURATION }}
-            >
-              <div className="flex items-center justify-between p-3 border-b">
-                <div className="flex items-center gap-3">
-                  <FileTextIcon className="w-6 h-6 text-primary" />
-                  <div className="font-semibold">{(() => {
-                    try { return decodeURIComponent(new URL(pdfModalUrl).pathname.split('/').pop()) } catch { return 'document.pdf' }
-                  })()}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a>
-                  <button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button>
-                </div>
-              </div>
-              <div className="px-6 py-3 text-sm text-muted-foreground border-b">
-                Note: if the PDF does not load, you can open it in a new tab using the button on the right.
-              </div>
-              <div className="w-full h-[70vh]">
-                <iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PdfModal isOpen={pdfModalOpen} onClose={closePdf} pdfUrl={pdfModalUrl} title={pdfModalTitle} />
      </div>
 
  )
