@@ -10,12 +10,17 @@ import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon,
 import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 const SingleArticleB2 = () => {
 	const params = useParams()
 	const router = useRouter()
 	const [article, setArticle] = useState(null)
 	const [loading, setLoading] = useState(true)
+
+	const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
 
 	// PDF modal state (same pattern as videos)
 	const [pdfModalOpen, setPdfModalOpen] = useState(false)

@@ -163,7 +163,7 @@ const Audio = () => {
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Audios</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />
             Create Audio
           </Button>

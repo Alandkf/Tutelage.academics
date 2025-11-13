@@ -10,12 +10,17 @@ import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon,
 import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 const SingleArticleB1 = () => {
 	const params = useParams()
 	const router = useRouter()
 	const [article, setArticle] = useState(null)
 	const [loading, setLoading] = useState(true)
+
+	const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
 
 	// PDF modal state (same pattern as videos)
 	const [pdfModalOpen, setPdfModalOpen] = useState(false)
@@ -299,36 +304,7 @@ const SingleArticleB1 = () => {
 			<SingleSourceCTA />
 
 			{/* PDF Modal */}
-			<AnimatePresence>
-				{pdfModalOpen && pdfModalUrl && (
-					<motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-						<motion.div className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden" initial={{ y: 20, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.98, opacity: 0 }} transition={{ duration: ANIM_DURATION }}>
-							<div className="flex items-center justify-between p-3 border-b">
-								<div className="flex items-center gap-3">
-									<FileTextIcon className="w-6 h-6 text-primary" />
-                                    <div className="font-semibold">{(() => {
-                                        try {
-                                            const u = new URL(pdfModalUrl, 'http://localhost');
-                                            const real = new URLSearchParams(u.search).get('url') || pdfModalUrl;
-                                            return decodeURIComponent(new URL(real).pathname.split('/').pop());
-                                        } catch {
-                                            return 'document.pdf'
-                                        }
-                                    })()}</div>
-								</div>
-								<div className="flex items-center gap-2">
-									<a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a>
-									<button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button>
-								</div>
-							</div>
-							<div className="px-6 py-3 text-sm text-muted-foreground border-b">Note: some hosts block embedding. Use "Open in new tab" if preview fails.</div>
-							<div className="w-full h-[70vh]">
-								<iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" />
-							</div>
-						</motion.div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			<PdfModal isOpen={pdfModalOpen} onClose={closePdf} pdfUrl={pdfModalUrl} title={pdfModalTitle} />
 		</div>
 	)
 }
