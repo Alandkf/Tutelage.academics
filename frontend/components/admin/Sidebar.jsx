@@ -13,8 +13,8 @@ const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
   { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
-  { icon: Video, name: "Speakings", href: "/admin-dashboard/speaking" },
-  { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
+  { icon: Video, name: "Speakings", href: "/admin-dashboard/speakings" },
+  { icon: FileVolume, name: "Listening", href: "/admin-dashboard/listenings" },
   { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
