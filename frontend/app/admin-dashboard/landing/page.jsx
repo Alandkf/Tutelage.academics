@@ -21,7 +21,7 @@ export default function LandingAdminPage() {
   const fetchLatest = async () => {
     setLoadingLatest(true)
     try {
-      const res = await fetch(`${BASE_URL}/api/landing-sections/latest`, { credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/landing-sections/1`, { credentials: "include" })
       const data = await res.json()
       if (data?.success && data?.landingSection) {
         setCurrent(data.landingSection)
@@ -48,22 +48,12 @@ export default function LandingAdminPage() {
     }
     setSaving(true)
     try {
-      let res
-      if (current?.id) {
-        res = await fetch(`${BASE_URL}/api/landing-sections/${current.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ title, subtitle, imageUrl })
-        })
-      } else {
-        res = await fetch(`${BASE_URL}/api/landing-sections`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ title, subtitle, imageUrl })
-        })
-      }
+      const res = await fetch(`${BASE_URL}/api/landing-sections/1`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ title, subtitle, imageUrl })
+      })
       if (!res.ok) throw new Error("Failed to save landing section")
       toast("Landing section saved", { variant: "success" })
       await fetchLatest()
@@ -121,7 +111,7 @@ export default function LandingAdminPage() {
           </div>
           <div className="flex gap-2 pt-2">
             <Button onClick={onSave} disabled={loading || !canEdit || saving || loadingLatest}>
-              {saving ? "Saving..." : current?.id ? "Save" : "Create"}
+              {saving ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>

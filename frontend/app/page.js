@@ -11,7 +11,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
 
 async function getLatestLandingSection() {
   try {
-    const res = await fetch(`${BASE_URL}/api/landing-sections/latest`, { cache: 'no-store' })
+    const res = await fetch(`${BASE_URL}/api/landing-sections/1`, { cache: 'no-store' })
     const data = await res.json()
     if (data?.success && data?.landingSection) {
       return data.landingSection

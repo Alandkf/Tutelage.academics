@@ -16,7 +16,6 @@ const menuItems = [
   { icon: Video, name: "Speakings", href: "/admin-dashboard/speaking" },
   { icon: FileVolume, name: "Audios", href: "/admin-dashboard/audios" },
   { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
-  { icon: CircleQuestionMark, name: "Faqs", href: "/admin-dashboard/faqs" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]
 
