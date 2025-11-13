@@ -44,7 +44,12 @@ export default async function middleware(req) {
   // RULE 2: If user is not authenticated and tries to access a private route
   // redirect them to the signin page
   if (!isAuthenticated && isPrivateRoute) {
-    return NextResponse.redirect(new URL('/', req.url));
+    return NextResponse.redirect(new URL('/signin', req.url));
+  }
+
+  // Alias common path /login -> /signin
+  if (pathname === '/login') {
+    return NextResponse.redirect(new URL('/signin', req.url));
   }
   
   // Additional role-based access control for admin-dashboard
