@@ -6,10 +6,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
-import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 import { motion, AnimatePresence } from 'framer-motion'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 // Helper: extract YouTube ID and build thumbnail/embed URLs
 const parseYouTubeId = (url) => {
@@ -44,9 +46,8 @@ const SingleVideo = () => {
   // chosen thumbnail to display (after probing maxres/hq)
   const [displayThumb, setDisplayThumb] = useState(null)
 
-  // modal for displaying PDFs
-  const [pdfModalOpen, setPdfModalOpen] = useState(false)
-  const [pdfModalUrl, setPdfModalUrl] = useState(null)
+  // Use the custom hook for PDF modal
+  const { isOpen, pdfUrl, title, openPdf, closePdf } = usePdfModal()
 
   // animation duration (slower)
   const ANIM_DURATION = 0.3
@@ -216,42 +217,20 @@ const SingleVideo = () => {
               >
                 <div className="px-6 py-4">
                   {video?.pdf ? (
-                    // compact file card instead of full iframe — constrained width
-                    <div className="w-fit">
-                      <div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
-                        <div className="flex items-center gap-3">
-                          <FileTextIcon className="w-6 h-6 text-primary" />
-                          <div>
-                            <div className="font-semibold text-foreground">Preparation PDF</div>
-                            <div className="text-sm text-muted-foreground">
-                              {(() => {
-                                try { return decodeURIComponent(new URL(video.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' }
-                              })()}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            className="cursor-pointer"
-                            onClick={() => openPdfModal(video.pdf)}
-                          >
-                            <ExternalLinkIcon className="w-4 h-4" /> Open
-                          </Button>
-                          <a href={toPdfView(video.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" /><path d="M17 3h4v4" /><path d="M10 14L21 3" /></svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                   ) : (
-                     <p className="text-sm text-muted-foreground">No preparation PDF available.</p>
-                   )}
-                 </div>
-               </motion.div>
-             )}
-           </AnimatePresence>
-         </div>
-       </div>
+                    <PdfButton 
+                      pdfUrl={video.pdf} 
+                      onOpen={openPdf}
+                      label="Preparation PDF"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No preparation PDF available.</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Video Player Section (unchanged content, stays below prep) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
@@ -329,49 +308,30 @@ const SingleVideo = () => {
                 </button>
                 <AnimatePresence initial={false}>
                   {openTasks[idx] && (
-                    <AnimatePresence initial={false}>
-                      <motion.div
-                        key={`task-${idx}`}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
-                        className="overflow-hidden border-t bg-background"
-                      >
-                        <div className="px-4 py-3">
-                          <div className="text-sm text-foreground leading-relaxed">
-                            {task.content || 'Task details will be added here.'}
-                          </div>
-                          {video?.pdf && (
-                            // task file-card (constrained width like prep)
-                            <div className="mt-3 mx-auto max-w-3xl">
-                              <div className="flex items-center justify-between gap-4 p-3 border rounded-md bg-card">
-                                <div className="flex items-center gap-3">
-                                  <FileTextIcon className="w-5 h-5 text-primary" />
-                                  <div>
-                                    <div className="font-medium">Task PDF</div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {(() => {
-                                        try { return decodeURIComponent(new URL(video.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' }
-                                      })()}
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Button onClick={() => openPdfModal(video.pdf)} className="cursor-pointer">
-                                    <ExternalLinkIcon className="w-4 h-4" /> Open
-                                  </Button>
-                                  <a href={video.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" /><path d="M17 3h4v4" /><path d="M10 14L21 3" /></svg>
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                    <motion.div
+                      key={`task-${idx}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
+                      className="overflow-hidden border-t bg-background"
+                    >
+                      <div className="px-4 py-3">
+                        <div className="text-sm text-foreground leading-relaxed">
+                          {task.content || 'Task details will be added here.'}
                         </div>
-                      </motion.div>
-                    </AnimatePresence>
-                   )}
+                        {video?.pdf && (
+                          <div className="mt-3">
+                            <PdfButton 
+                              pdfUrl={video.pdf} 
+                              onOpen={openPdf}
+                              label="Task PDF"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </div>
             ))
@@ -399,29 +359,11 @@ const SingleVideo = () => {
                   >
                     <div className="px-4 py-3">
                       {video?.pdf && (
-                        <div className="mt-3 w-fit">
-                          <div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
-                            <div className="flex items-center gap-3">
-                              <FileTextIcon className="w-5 h-5 text-primary" />
-                              <div>
-                                <div className="font-medium">Task PDF</div>
-                                <div className="text-sm text-muted-foreground">
-                                  {(() => {
-                                    try { return decodeURIComponent(new URL(video.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' }
-                                  })()}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button onClick={() => openPdfModal(video.pdf)} className="cursor-pointer">
-                                <ExternalLinkIcon className="w-4 h-4" /> Open
-                              </Button>
-                              <a href={video.pdf} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" /><path d="M17 3h4v4" /><path d="M10 14L21 3" /></svg>
-                              </a>
-                            </div>
-                          </div>
-                        </div>
+                        <PdfButton 
+                          pdfUrl={video.pdf} 
+                          onOpen={openPdf}
+                          label="Task PDF"
+                        />
                       )}
                     </div>
                   </motion.div>
@@ -465,51 +407,14 @@ const SingleVideo = () => {
       {/* CTA Section */}
       <SingleSourceCTA />
 
-      {/* PDF Modal */}
-      <AnimatePresence>
-        {pdfModalOpen && pdfModalUrl && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden"
-              initial={{ y: 20, scale: 0.98, opacity: 0 }}
-              animate={{ y: 0, scale: 1, opacity: 1 }}
-              exit={{ y: 20, scale: 0.98, opacity: 0 }}
-              transition={{ duration: ANIM_DURATION }}
-            >
-              <div className="flex items-center justify-between p-3 border-b">
-                <div className="flex items-center gap-3">
-                  <FileTextIcon className="w-6 h-6 text-primary" />
-                  <div className="font-semibold">{(() => {
-                    try {
-                      const u = new URL(pdfModalUrl)
-                      const real = new URLSearchParams(u.search).get('url')
-                      const name = (real || u.pathname).split('/').pop()
-                      return decodeURIComponent(name || 'document.pdf')
-                    } catch {
-                      return 'document.pdf'
-                    }
-                  })()}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a>
-                  <button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button>
-                </div>
-              </div>
-              <div className="px-6 py-3 text-sm text-muted-foreground border-b">
-                Note: if the PDF does not load, you can open it in a new tab using the button on the right.
-              </div>
-              <div className="w-full h-[70vh]">
-                <iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* PDF Modal - replaced with reusable component */}
+      <PdfModal 
+        isOpen={isOpen}
+        onClose={closePdf}
+        pdfUrl={pdfUrl}
+        title={title}
+        animationDuration={ANIM_DURATION}
+      />
      </div>
 
  )
