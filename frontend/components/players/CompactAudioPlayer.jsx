@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Play, Pause, Volume2, VolumeX } from 'lucide-react'
-import BASE_URL from '@/app/config/url'
+import YouTubeAudioPlayer from './YouTubeAudioPlayer'
 
 // Utility: time formatting mm:ss or hh:mm:ss
 function formatTime(seconds) {
@@ -29,45 +29,14 @@ export default function CompactAudioPlayer({
   src,
   youtubeUrl,
   className = '',
-  autoResolveOnLoad = true,
-  onResolveSuccess,
-  onResolveError,
 }) {
   const audioRef = useRef(null)
-  const [resolvedSrc, setResolvedSrc] = useState(src || null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(0.9)
-  const [resolving, setResolving] = useState(false)
-  const [error, setError] = useState(null)
-
-  // Resolve YouTube audio-only URL via backend
-  useEffect(() => {
-    let cancelled = false
-    async function resolve() {
-      if (!youtubeUrl || !isYouTubeUrl(youtubeUrl)) return
-      try {
-        setResolving(true)
-        setError(null)
-        const res = await fetch(`${BASE_URL}/api/youtube-audio/resolve?url=${encodeURIComponent(youtubeUrl)}`)
-        const data = await res.json()
-        if (cancelled) return
-        if (!data.success) throw new Error(data.message || 'Failed to resolve audio')
-        const nextSrc = data.data?.src || null
-        setResolvedSrc(nextSrc)
-        if (typeof onResolveSuccess === 'function') onResolveSuccess(data.data)
-      } catch (e) {
-        console.error('Audio resolve error:', e)
-        setError(e.message)
-        if (typeof onResolveError === 'function') onResolveError(e.message)
-      } finally {
-        setResolving(false)
-      }
-    }
-    if (autoResolveOnLoad) resolve()
-    return () => { cancelled = true }
-  }, [youtubeUrl, autoResolveOnLoad])
+  
+  const isYouTube = isYouTubeUrl(youtubeUrl)
 
   // Bind audio events
   useEffect(() => {
@@ -94,7 +63,7 @@ export default function CompactAudioPlayer({
       el.removeEventListener('pause', onPause)
       el.removeEventListener('ended', onEnded)
     }
-  }, [resolvedSrc])
+  }, [src])
 
   const togglePlay = async () => {
     const el = audioRef.current
@@ -126,22 +95,28 @@ export default function CompactAudioPlayer({
     setVolume(value)
   }
 
-  const effectiveSrc = resolvedSrc || src || null
+  const effectiveSrc = src || null
 
   return (
     <div className={`w-full p-4 bg-card rounded-md border ${className}`}>
-      {/* Hidden audio element used for playback */}
-      {effectiveSrc && (
+      {/* If YouTube URL provided, render audio-only YouTube player */}
+      {isYouTube && (
+        <YouTubeAudioPlayer videoUrl={youtubeUrl} />
+      )}
+
+      {/* Hidden audio element used for non-YouTube playback */}
+      {!isYouTube && effectiveSrc && (
         <audio ref={audioRef} src={effectiveSrc} preload="auto" className="hidden" />
       )}
 
+      {!isYouTube && (
       <div className="flex items-center gap-3">
         {/* Play/Pause */}
         <button
           type="button"
           onClick={togglePlay}
           className="h-9 w-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50"
-          disabled={!effectiveSrc || resolving}
+          disabled={!effectiveSrc}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -179,12 +154,12 @@ export default function CompactAudioPlayer({
           />
         </div>
       </div>
+      )}
 
       {/* Status & error */}
       <div className="mt-2 text-xs text-muted-foreground">
-        {resolving && <span>Resolving audio stream…</span>}
-        {!effectiveSrc && !resolving && !error && <span>No audio source</span>}
-        {error && <span className="text-destructive">{error}</span>}
+        {isYouTube && <span>Playing via YouTube audio embed</span>}
+        {!isYouTube && !effectiveSrc && <span>No audio source</span>}
       </div>
     </div>
   )

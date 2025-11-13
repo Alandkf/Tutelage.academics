@@ -2,6 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
+  // Use a custom build directory to avoid OneDrive locks on .next
+  distDir: 'build',
   images: {
     remotePatterns: [
       {
