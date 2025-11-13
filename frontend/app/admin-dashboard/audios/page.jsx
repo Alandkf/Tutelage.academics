@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import AudioForm from "@/components/forms/AudioForm"
-import { Plus, RefreshCw } from "lucide-react"
+import { Plus, RefreshCw, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
 import BASE_URL from "@/app/config/url"
-import { AudioRow } from "@/components/admin/audios/AudioRow"
+import Image from "next/image"
 
 const Audio = () => {
   const [audios, setAudios] = useState([])
@@ -26,14 +26,13 @@ const Audio = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
 
-  // Fetch audios with cursor-based pagination
   const fetchAudios = async (reset = false) => {
     setLoading(true)
     setError(null)
     try {
       const params = new URLSearchParams()
       params.append("limit", 9)
-      if (searchTerm) params.append("search", "searchTerm")
+      if (searchTerm) params.append("search", searchTerm)
       if (!reset && nextCursor) params.append("cursor", nextCursor)
       const res = await fetch(`${BASE_URL}/api/audios?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
@@ -48,7 +47,6 @@ const Audio = () => {
     }
   }
 
-  // Reset and fetch audios (for search/refresh)
   const resetAndFetch = () => {
     setAudios([])
     setNextCursor(null)
@@ -56,19 +54,16 @@ const Audio = () => {
     fetchAudios(true)
   }
 
-  // Fetch on mount and when searchTerm changes
   useEffect(() => {
     resetAndFetch()
     // eslint-disable-next-line
   }, [searchTerm])
 
-  // Reusable infinite scroll observer
   const lastAudioRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchAudios })
 
-  // Handlers
   const handleCreateSuccess = async (values) => {
     try {
-      const isFile = Boolean(values?.pdfFile)
+      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
       const reqInit = {
         method: "POST",
         credentials: "include",
@@ -79,8 +74,10 @@ const Audio = () => {
         fd.append('description', values.description ?? '')
         fd.append('transcript', values.transcript ?? '')
         fd.append('audioRef', values.audioRef ?? '')
-        // pdfUpload middleware expects 'pdfFile'
-        fd.append('pdfFile', values.pdfFile)
+        fd.append('imageUrl', values.imageUrl ?? '')
+        fd.append('level', values.level ?? '')
+        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
+        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
         reqInit.body = fd
       } else {
         reqInit.headers = { "Content-Type": "application/json" }
@@ -95,14 +92,16 @@ const Audio = () => {
       toast(e.message || "Failed to create audio", { variant: "destructive" })
     }
   }
+
   const handleEdit = (audio) => {
     setEditAudio(audio)
     setShowEdit(true)
   }
+
   const handleEditSuccess = async (values) => {
     if (!editAudio) return
     try {
-      const isFile = Boolean(values?.pdfFile)
+      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
       const reqInit = {
         method: "PUT",
         credentials: "include",
@@ -113,7 +112,10 @@ const Audio = () => {
         fd.append('description', values.description ?? '')
         fd.append('transcript', values.transcript ?? '')
         fd.append('audioRef', values.audioRef ?? '')
-        fd.append('pdfFile', values.pdfFile)
+        fd.append('imageUrl', values.imageUrl ?? '')
+        fd.append('level', values.level ?? '')
+        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
+        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
         reqInit.body = fd
       } else {
         reqInit.headers = { "Content-Type": "application/json" }
@@ -129,10 +131,12 @@ const Audio = () => {
       toast(e.message || "Failed to update audio", { variant: "destructive" })
     }
   }
+
   const handleDelete = (audio) => {
     setDeleteAudio(audio)
     setShowDelete(true)
   }
+
   const confirmDelete = async () => {
     if (!deleteAudio) return
     try {
@@ -149,8 +153,13 @@ const Audio = () => {
     }
   }
 
+  const truncate = (text, maxLength = 80) => {
+    if (!text) return ''
+    return text.length <= maxLength ? text : text.slice(0, maxLength) + '...'
+  }
+
   return (
-    <div className="mx-auto w-full">
+    <div className="mx-auto w-full h-full flex flex-col">
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Audios</h1>
         {user?.role === "ADMIN" && (
@@ -178,43 +187,74 @@ const Audio = () => {
           <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
+
       {error && <div className="text-destructive text-center mb-4">{error}</div>}
-      {loading && audios.length === 0 && (
-        <div className="col-span-full text-center text-muted-foreground py-12">Loading audios...</div>
-      )}
-      <div className="divide-y divide-border">
-        {audios.length === 0 && !loading ? (
+
+        {loading && audios.length === 0 ? (
+          <div className="text-center text-muted-foreground py-12">Loading audios...</div>
+        ) : audios.length === 0 && !loading ? (
           <div className="text-center text-muted-foreground py-12">No audios found.</div>
         ) : (
-          audios.map((audio, idx) => (
-            <AudioRow
-              key={idx}
-              audio={audio}
-              isLast={idx === audios.length - 1}
-              lastAudioRef={lastAudioRef}
-              user={user}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))
-        )}
-      </div>
-      {/* Show More fallback button */}
-      {hasMore && audios.length !== 0 && !loading && (
-        <div className="flex justify-center mt-8 mb-4">
-          <Button variant="outline" onClick={() => fetchAudios()}>Show More</Button>
-        </div>
-      )}
-      {/* Loading indicator for more fetches */}
-      {loading && audios.length > 0 && (
-        <div className="flex justify-center p-4 mt-4">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-blue-500 animate-spin"></div>
-            <span className="text-muted-foreground text-sm">Loading more...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {audios.map((audio, idx) => (
+              <div
+                key={audio.id}
+                ref={idx === audios.length - 1 ? lastAudioRef : null}
+                className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
+              >
+                <div className="relative h-44 w-full overflow-hidden">
+                  <Image
+                    src={audio.imageUrl || '/placeholder-16-9.png'}
+                    alt={audio.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
+                </div>
+
+                <div className="p-4">
+                  <h3 className="text-lg font-bold text-foreground mb-2 truncate">{audio.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{truncate(audio.description)}</p>
+                  {audio.level && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {(Array.isArray(audio.level) ? audio.level : [audio.level]).map((lvl, i) => (
+                        <span key={i} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">{lvl}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {user?.role === "ADMIN" && (
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(audio)} className="h-8 px-2">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(audio)} className="h-8 px-2">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        </div>
-      )}
-      {/* Create Audio Dialog */}
+        )}
+
+        {loading && audios.length > 0 && (
+          <div className="flex justify-center p-4 mt-4">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-blue-500 animate-spin"></div>
+              <span className="text-muted-foreground text-sm">Loading more...</span>
+            </div>
+          </div>
+        )}
+
+        {hasMore && audios.length !== 0 && !loading && (
+          <div className="flex justify-center mt-8 mb-4">
+            <Button variant="outline" onClick={() => fetchAudios()}>Show More</Button>
+          </div>
+        )}
+      
+
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
           <DialogHeader>
@@ -223,7 +263,7 @@ const Audio = () => {
           <AudioForm onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
         </DialogContent>
       </Dialog>
-      {/* Edit Audio Dialog */}
+
       <Dialog open={showEdit} onOpenChange={(v) => { setShowEdit(v); if (!v) setEditAudio(null) }}>
         <DialogContent className="max-w-md w-full" aria-describedby={undefined}>
           <DialogHeader>
@@ -237,7 +277,7 @@ const Audio = () => {
           />
         </DialogContent>
       </Dialog>
-      {/* Delete Confirmation Dialog */}
+
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent className="max-w-sm w-full" aria-describedby={undefined}>
           <DialogHeader>
