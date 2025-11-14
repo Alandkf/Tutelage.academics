@@ -45,6 +45,7 @@ const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
 const pdfProxyRoutes = require('./routes/pdfProxy');
 const statsRoutes = require('./routes/stats');
+const websiteAnalyticsRoutes = require('./routes/websiteAnalytics');
 
 
 // ============================================================================
@@ -151,6 +152,7 @@ app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend
 app.use('/api/search', searchRoutes);
 app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
 app.use('/api/stats', statsRoutes);           // Dashboard statistics
+app.use('/api/website-analytics', websiteAnalyticsRoutes); // Google Analytics data
 
 // ============================================================================
 // HEALTH CHECK ENDPOINTS

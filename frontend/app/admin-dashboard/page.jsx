@@ -1,5 +1,6 @@
 import DashboardOverview from '@/components/admin/MainPage/DashboardOverview';
 import DashboardUsersTable from '@/components/admin/MainPage/DashboardUsersTable';
+import AnalyticsChart from '@/components/admin/MainPage/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 const Page = () => {
@@ -10,12 +11,8 @@ const Page = () => {
       <DashboardOverview />
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        {/* Left table placeholder */}
-        <Card className="min-h-[500px]">
-          <div className="bg-muted/50 rounded-lg border-2 border-dashed flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Left Table Coming Soon</p>
-          </div>
-        </Card>
+        {/* Analytics Chart */}
+        <AnalyticsChart />
 
         {/* Right table - Users */}
         <Card className="min-h-[500px]">

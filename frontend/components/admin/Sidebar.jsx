@@ -4,13 +4,14 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark, Layers, PenTool, Monitor, BookOpen, Headphones } from "lucide-react"
+import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVolume, FileQuestion, CircleQuestionMark, Layers, PenTool, Monitor, BookOpen, Headphones, ChartArea } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 import { useAuth } from "@/components/AuthContext"
 
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
+  { icon: ChartArea, name: "Analytics", href: "/admin-dashboard/analytics" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
   // SKILLS: 
   { icon: Video, name: "Speakings", href: "/admin-dashboard/speakings" },
