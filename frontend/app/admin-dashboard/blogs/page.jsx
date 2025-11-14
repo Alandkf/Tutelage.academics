@@ -149,7 +149,7 @@ export default function BlogsPage() {
           blogs.map((blog, idx) => {
             const isLast = idx === blogs.length - 1
             return (
-              <div key={blog.id} className="relative group" ref={isLast ? lastBlogRef : null}>
+              <div key={idx} className="relative group" ref={isLast ? lastBlogRef : null}>
                 <BlogCard
                   {...blog}
                   author={blog.author?.name || ''}

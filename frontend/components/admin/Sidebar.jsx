@@ -12,7 +12,7 @@ import { useAuth } from "@/components/AuthContext"
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
   { icon: Users, name: "Users", href: "/admin-dashboard/users" },
-  { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
+  // SKILLS: 
   { icon: Video, name: "Speakings", href: "/admin-dashboard/speakings" },
   { icon: FileVolume, name: "Listening", href: "/admin-dashboard/listenings" },
   { icon: FileVolume, name: "Readings", href: "/admin-dashboard/readings" },
@@ -20,6 +20,7 @@ const menuItems = [
   { icon: Monitor, name: "ESL Videos", href: "/admin-dashboard/eslVideos" },
   { icon: Headphones, name: "ESL Audios", href: "/admin-dashboard/eslAudios" },
   { icon: BookOpen, name: "Stories", href: "/admin-dashboard/stories" },
+  { icon: Newspaper, name: "Blogs", href: "/admin-dashboard/blogs" },
   { icon: FileQuestion, name: "Quiz", href: "/admin-dashboard/quiz" },
   { icon: MonitorCog, name: "Landing", href: "/admin-dashboard/landing" },
 ]

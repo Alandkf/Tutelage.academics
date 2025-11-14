@@ -128,6 +128,15 @@ export default function AdminEslVideoDetailPage() {
         </div>
       )}
 
+      {video.transcript && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Transcript</h2>
+          <div className="p-4 bg-card border rounded-md">
+            <p className="text-foreground whitespace-pre-wrap leading-relaxed">{video.transcript}</p>
+          </div>
+        </div>
+      )}
+
       {video.pdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>

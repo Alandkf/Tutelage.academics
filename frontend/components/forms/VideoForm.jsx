@@ -18,11 +18,13 @@ const LEVEL_OPTIONS = [
 	{ value: 'c2', label: 'C2 Proficient' }
 ]
 
-const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
+const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel, showTranscript = false }) => {
 	const [formData, setFormData] = useState({
 		title: '',
 		videoRef: '',
 		description: '',
+		content: '',
+		transcript: '',
 		level: '',
 		tags: [],
 		pdf: null,
@@ -44,6 +46,8 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 				title: initialValues.title || '',
 				videoRef: initialValues.videoRef || '',
 				description: initialValues.description || '',
+				content: initialValues.content || '',
+				transcript: initialValues.transcript || '',
 				level: levelValue || '',
 				tags: initialValues.tags || [],
 				pdf: null,
@@ -121,6 +125,11 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 		}
 	}
 
+	const handleChange = (e) => {
+		const { name, value } = e.target
+		setFormData(prev => ({ ...prev, [name]: value }))
+	}
+
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		setLoading(true)
@@ -129,6 +138,10 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 			submitData.append('title', formData.title)
 			submitData.append('videoRef', formData.videoRef)
 			submitData.append('description', formData.description)
+			submitData.append('content', formData.content)
+			if (showTranscript) {
+				submitData.append('transcript', formData.transcript || '')
+			}
 			submitData.append('level', formData.level)
 			submitData.append('tags', formData.tags.join(','))
 			// Align multipart keys with backend pdfUpload middleware
@@ -142,14 +155,16 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
 			<div>
 				<Label htmlFor="title">Title *</Label>
 				<Input
 					id="title"
+					name="title"
 					value={formData.title}
-					onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+					onChange={handleChange}
 					required
+					placeholder="Enter title"
 				/>
 			</div>
 
@@ -157,8 +172,9 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 				<Label htmlFor="videoRef">Video URL *</Label>
 				<Input
 					id="videoRef"
+					name="videoRef"
 					value={formData.videoRef}
-					onChange={(e) => setFormData(prev => ({ ...prev, videoRef: e.target.value }))}
+					onChange={handleChange}
 					placeholder="https://youtube.com/watch?v=..."
 					required
 				/>
@@ -168,11 +184,39 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 				<Label htmlFor="description">Description</Label>
 				<Textarea
 					id="description"
+					name="description"
 					value={formData.description}
-					onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+					onChange={handleChange}
+					placeholder="Brief description"
 					rows={3}
 				/>
 			</div>
+
+			<div>
+				<Label htmlFor="content">Content</Label>
+				<Textarea
+					id="content"
+					name="content"
+					value={formData.content}
+					onChange={handleChange}
+					placeholder="Detailed content"
+					rows={4}
+				/>
+			</div>
+
+			{showTranscript && (
+				<div>
+					<Label htmlFor="transcript">Transcript</Label>
+					<Textarea
+						id="transcript"
+						name="transcript"
+						value={formData.transcript}
+						onChange={handleChange}
+						placeholder="Video transcript"
+						rows={5}
+					/>
+				</div>
+			)}
 
 			<div>
 				<Label htmlFor="level">Level *</Label>

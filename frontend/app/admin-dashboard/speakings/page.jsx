@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -161,11 +162,13 @@ const Videos = () => {
             const isLast = idx === speakings.length - 1
             return (
               <div key={idx} className="relative group" ref={isLast ? lastItemRef : null}>
-                <SpeakingCard {...item} />
+                <Link href={`/admin-dashboard/speakings/${item.id}`}>
+                  <SpeakingCard {...item} />
+                </Link>
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>Edit</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(item)}>Delete</Button>
+                  <div className="absolute top-2 right-2 flex gap-1 z-10">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(item) }}>Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(item) }}>Delete</Button>
                   </div>
                 )}
               </div>
@@ -194,7 +197,7 @@ const Videos = () => {
           <DialogHeader>
             <DialogTitle>Create Speaking</DialogTitle>
           </DialogHeader>
-          <VideoForm onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
+          <VideoForm showTranscript={true} onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
         </DialogContent>
       </Dialog>
       {/* Edit Video Dialog */}
@@ -204,6 +207,7 @@ const Videos = () => {
             <DialogTitle>Edit Speaking</DialogTitle>
           </DialogHeader>
           <VideoForm
+            showTranscript={true}
             mode="edit"
             initialValues={editVideo}
             onSuccess={handleEditSuccess}

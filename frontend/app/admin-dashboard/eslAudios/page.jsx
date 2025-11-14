@@ -156,8 +156,8 @@ const EslAudios = () => {
         <div className="text-center text-muted-foreground py-12">No ESL audios found.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {audios.map((audio) => (
-            <Link key={audio.id} href={`/admin-dashboard/eslAudios/${audio.id}`} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
+          {audios.map((audio, i) => (
+            <Link key={i} href={`/admin-dashboard/eslAudios/${audio.id}`} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
               <div className="relative h-44 w-full overflow-hidden">
                 <Image src={audio.imageUrl || '/placeholder-16-9.png'} alt={audio.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
               </div>
