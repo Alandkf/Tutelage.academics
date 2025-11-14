@@ -428,25 +428,31 @@ const AnalyticsPage = () => {
             <CardDescription>Most visited pages</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {topPages.map((page, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium truncate flex-1" title={page.page}>
-                      {page.page}
-                    </span>
-                    <span className="text-muted-foreground ml-2">
-                      {page.views.toLocaleString()}
-                    </span>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+              {topPages.length > 0 ? (
+                topPages.map((page, idx) => (
+                  <div key={idx} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm gap-2">
+                      <span className="font-medium flex-1 break-all" title={page.page}>
+                        {page.page}
+                      </span>
+                      <span className="text-muted-foreground whitespace-nowrap">
+                        {page.views.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                      <div 
+                        className="bg-primary h-full rounded-full transition-all"
+                        style={{ width: `${page.percentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="bg-primary h-full rounded-full transition-all"
-                      style={{ width: `${page.percentage}%` }}
-                    />
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  No page data available yet
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

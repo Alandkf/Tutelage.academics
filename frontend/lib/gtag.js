@@ -5,6 +5,12 @@ export const pageview = (url) => {
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('config', GA_MEASUREMENT_ID, {
       page_path: url,
+      page_title: document.title || url,
+    })
+    // Also send as an event for better tracking
+    window.gtag('event', 'page_view', {
+      page_path: url,
+      page_title: document.title || url,
     })
   }
 }

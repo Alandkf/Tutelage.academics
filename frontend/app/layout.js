@@ -8,6 +8,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { GA_MEASUREMENT_ID } from "@/lib/gtag";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata = {
   title: "Tutelage",
@@ -26,31 +27,29 @@ export default function RootLayout({ children }) {
       </head>
       <body className="relative">
         {/* Google Analytics */}
-        {GA_MEASUREMENT_ID && (
-          <>
-            <Script
-              strategy="afterInteractive"
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-            />
-            <Script
-              id="google-analytics"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${GA_MEASUREMENT_ID}', {
-                    page_path: window.location.pathname,
-                  });
-                `,
-              }}
-            />
-          </>
-        )}
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=G-RM0EWLJGN8`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-RM0EWLJGN8', {
+                page_path: window.location.pathname,
+                send_page_view: false
+              });
+            `,
+          }}
+        />
         <ThemeProvider>
           <RefreshTokenProvider>
             <AuthProvider>
+              <GoogleAnalytics GA_MEASUREMENT_ID="G-RM0EWLJGN8" />
               <NavbarWrapper>
                   <Navbar />
               </NavbarWrapper>

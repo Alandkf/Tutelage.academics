@@ -121,15 +121,6 @@ exports.getWebsiteStats = async (req, res) => {
     const seconds = Math.floor(avgSessionDuration % 60);
     const avgSessionFormatted = `${minutes}m ${seconds}s`;
 
-    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    console.log('Website Stats:', {
-        totalViews,
-        uniqueVisitors,
-        avgSessionDuration: avgSessionFormatted,
-        todayActive,
-        weeklyGrowth
-      })
-
     res.status(200).json({
       success: true,
       data: {
@@ -242,14 +233,46 @@ exports.getTopPages = async (req, res) => {
     let response;
 
     if (isRealtime) {
-      // Use Realtime API
-      [response] = await analyticsDataClient.runRealtimeReport({
-        property: `properties/${propertyId}`,
-        dimensions: [{ name: 'unifiedScreenName' }],
-        metrics: [{ name: 'screenPageViews' }],
-        orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
-        limit
-      });
+      // Use Realtime API - try different dimensions to find page paths
+      // First try: pagePath, pageLocation, or unifiedScreenName
+      let pathResponse, locationResponse;
+      
+      try {
+        // Try pagePath dimension
+        [pathResponse] = await analyticsDataClient.runRealtimeReport({
+          property: `properties/${propertyId}`,
+          dimensions: [{ name: 'pagePath' }],
+          metrics: [{ name: 'screenPageViews' }],
+          orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+          limit
+        });
+        response = pathResponse;
+        console.log('✅ Using pagePath dimension for real-time');
+      } catch (error) {
+        console.log('⚠️ pagePath dimension not available, trying pageLocation...');
+        try {
+          // Try pageLocation dimension as fallback
+          [locationResponse] = await analyticsDataClient.runRealtimeReport({
+            property: `properties/${propertyId}`,
+            dimensions: [{ name: 'pageLocation' }],
+            metrics: [{ name: 'screenPageViews' }],
+            orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+            limit
+          });
+          response = locationResponse;
+          console.log('✅ Using pageLocation dimension for real-time');
+        } catch (error2) {
+          // Fallback to unifiedScreenName (page title)
+          console.log('⚠️ pageLocation not available, falling back to unifiedScreenName');
+          [response] = await analyticsDataClient.runRealtimeReport({
+            property: `properties/${propertyId}`,
+            dimensions: [{ name: 'unifiedScreenName' }],
+            metrics: [{ name: 'screenPageViews' }],
+            orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+            limit
+          });
+        }
+      }
     } else {
       const daysAgo = parseInt(req.query.days) || 30;
       const startDate = `${daysAgo}daysAgo`;
@@ -270,13 +293,35 @@ exports.getTopPages = async (req, res) => {
 
     const topPages = response.rows?.map(row => {
       const views = parseInt(row.metricValues?.[0]?.value || '0');
+      let pagePath = row.dimensionValues?.[0]?.value || '/';
+      
+      // If it's a full URL (pageLocation), extract just the path
+      if (isRealtime && pagePath.startsWith('http')) {
+        try {
+          const url = new URL(pagePath);
+          pagePath = url.pathname + url.search;
+        } catch (e) {
+          // Keep original if URL parsing fails
+        }
+      }
+      
       return {
-        page: row.dimensionValues?.[0]?.value || '/',
+        page: pagePath,
         views,
         percentage: Math.round((views / totalViews) * 100)
       };
     }) || [];
 
+    // Debug logging for real-time
+    if (isRealtime) {
+      console.log('🔍 Real-time Top Pages Raw Data:');
+      response.rows?.forEach((row, idx) => {
+        console.log(`  ${idx + 1}. Value: "${row.dimensionValues?.[0]?.value}", Views: ${row.metricValues?.[0]?.value}`);
+      });
+    }
+
+      console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+      console.log('Top Pages:', topPages);
     res.status(200).json({
       success: true,
       data: topPages
