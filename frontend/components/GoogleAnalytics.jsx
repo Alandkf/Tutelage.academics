@@ -12,7 +12,6 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }) {
     if (pathname) {
       const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
       pageview(url)
-      console.log('📊 GA Page View:', url)
     }
   }, [pathname, searchParams])
 

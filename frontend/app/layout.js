@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <RefreshTokenProvider>
             <AuthProvider>
-              <GoogleAnalytics GA_MEASUREMENT_ID="G-RM0EWLJGN8" />
+              <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
               <NavbarWrapper>
                   <Navbar />
               </NavbarWrapper>
