@@ -21,12 +21,16 @@ exports.getWebsiteStats = async (req, res) => {
       });
     }
 
+    // Get date range from query params (default to 30 days)
+    const daysAgo = parseInt(req.query.days) || 30;
+    const startDate = `${daysAgo}daysAgo`;
+
     // Fetch multiple metrics in parallel
     const [totalViewsResponse, last30DaysResponse, todayResponse] = await Promise.all([
-      // Total views (last 365 days as "all time" approximation)
+      // Total views for the selected period
       analyticsDataClient.runReport({
         property: `properties/${propertyId}`,
-        dateRanges: [{ startDate: '365daysAgo', endDate: 'today' }],
+        dateRanges: [{ startDate, endDate: 'today' }],
         metrics: [
           { name: 'screenPageViews' },
           { name: 'totalUsers' },
@@ -165,10 +169,12 @@ exports.getTopPages = async (req, res) => {
     }
 
     const limit = parseInt(req.query.limit) || 5;
+    const daysAgo = parseInt(req.query.days) || 30;
+    const startDate = `${daysAgo}daysAgo`;
 
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dateRanges: [{ startDate, endDate: 'today' }],
       dimensions: [{ name: 'pagePathPlusQueryString' }],
       metrics: [{ name: 'screenPageViews' }],
       orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
@@ -215,9 +221,12 @@ exports.getDeviceStats = async (req, res) => {
       });
     }
 
+    const daysAgo = parseInt(req.query.days) || 30;
+    const startDate = `${daysAgo}daysAgo`;
+
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dateRanges: [{ startDate, endDate: 'today' }],
       dimensions: [{ name: 'deviceCategory' }],
       metrics: [{ name: 'activeUsers' }]
     });
@@ -264,10 +273,12 @@ exports.getCountryStats = async (req, res) => {
     }
 
     const limit = parseInt(req.query.limit) || 5;
+    const daysAgo = parseInt(req.query.days) || 30;
+    const startDate = `${daysAgo}daysAgo`;
 
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dateRanges: [{ startDate, endDate: 'today' }],
       dimensions: [{ name: 'country' }],
       metrics: [{ name: 'activeUsers' }],
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],

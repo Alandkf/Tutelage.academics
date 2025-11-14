@@ -19,6 +19,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 
@@ -30,17 +32,29 @@ const AnalyticsPage = () => {
   const [countries, setCountries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [dateRange, setDateRange] = useState(30) // Default to 30 days
+  const [showDateMenu, setShowDateMenu] = useState(false)
+
+  const dateRangeOptions = [
+    { label: 'Last 7 Days', value: 7 },
+    { label: 'Last 30 Days', value: 30 },
+    { label: 'Last 90 Days', value: 90 },
+    { label: 'Last 365 Days', value: 365 }
+  ]
 
   useEffect(() => {
     const fetchAllAnalytics = async () => {
       try {
         setLoading(true)
+        const daysParam = dateRange
+        const chartDays = Math.min(dateRange, 30) // Max 30 days for chart
+        
         const [statsRes, dailyRes, pagesRes, devicesRes, countriesRes] = await Promise.all([
-          fetch(`${BASE_URL}/api/website-analytics/website-stats`),
-          fetch(`${BASE_URL}/api/website-analytics/daily-stats?days=7`),
-          fetch(`${BASE_URL}/api/website-analytics/top-pages?limit=5`),
-          fetch(`${BASE_URL}/api/website-analytics/device-stats`),
-          fetch(`${BASE_URL}/api/website-analytics/country-stats?limit=5`)
+          fetch(`${BASE_URL}/api/website-analytics/website-stats?days=${daysParam}`),
+          fetch(`${BASE_URL}/api/website-analytics/daily-stats?days=${chartDays}`),
+          fetch(`${BASE_URL}/api/website-analytics/top-pages?limit=5&days=${daysParam}`),
+          fetch(`${BASE_URL}/api/website-analytics/device-stats?days=${daysParam}`),
+          fetch(`${BASE_URL}/api/website-analytics/country-stats?limit=5&days=${daysParam}`)
         ])
 
         if (!statsRes.ok) throw new Error('Failed to fetch stats')
@@ -67,7 +81,7 @@ const AnalyticsPage = () => {
     }
 
     fetchAllAnalytics()
-  }, [])
+  }, [dateRange])
 
   if (loading) {
     return (
@@ -98,6 +112,142 @@ const AnalyticsPage = () => {
 
   const maxValue = Math.max(...dailyData.map(d => Math.max(d.views, d.users)), 1)
 
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    const pageWidth = doc.internal.pageSize.getWidth()
+    
+    // Title
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Tutelage Analytics Report', pageWidth / 2, 20, { align: 'center' })
+    
+    // Date range
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Last 30 Days'
+    doc.text(`Date Range: ${selectedRange}`, pageWidth / 2, 28, { align: 'center' })
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 33, { align: 'center' })
+    
+    let yPos = 45
+    
+    // Key Metrics
+    doc.setFontSize(14)
+    doc.setTextColor(40, 40, 40)
+    doc.text('Key Metrics', 14, yPos)
+    yPos += 8
+    
+    const metricsData = [
+      ['Total Views', stats?.totalViews?.toLocaleString() || '0'],
+      ['Unique Visitors', stats?.uniqueVisitors?.toLocaleString() || '0'],
+      ['Avg. Session Duration', stats?.avgSessionDuration || '0m 0s'],
+      ['Active Users Today', stats?.todayActive?.toLocaleString() || '0'],
+      ['Growth', `${stats?.weeklyGrowth >= 0 ? '+' : ''}${stats?.weeklyGrowth || 0}%`]
+    ]
+    
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Metric', 'Value']],
+      body: metricsData,
+      theme: 'grid',
+      headStyles: { fillColor: [59, 130, 246] },
+      margin: { left: 14, right: 14 }
+    })
+    
+    yPos = doc.lastAutoTable.finalY + 15
+    
+    // Top Pages
+    if (topPages.length > 0) {
+      doc.setFontSize(14)
+      doc.text('Top Pages', 14, yPos)
+      yPos += 8
+      
+      const pagesData = topPages.map(page => [
+        page.page,
+        page.views.toLocaleString(),
+        `${page.percentage}%`
+      ])
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Page', 'Views', 'Percentage']],
+        body: pagesData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246] },
+        margin: { left: 14, right: 14 }
+      })
+      
+      yPos = doc.lastAutoTable.finalY + 15
+    }
+    
+    // Device Stats
+    if (deviceStats.length > 0 && yPos < 250) {
+      doc.setFontSize(14)
+      doc.text('Device Breakdown', 14, yPos)
+      yPos += 8
+      
+      const devicesData = deviceStats.map(device => [
+        device.device,
+        device.count.toLocaleString(),
+        `${device.percentage}%`
+      ])
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Device', 'Users', 'Percentage']],
+        body: devicesData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246] },
+        margin: { left: 14, right: 14 }
+      })
+      
+      yPos = doc.lastAutoTable.finalY + 15
+    }
+    
+    // New page for countries if needed
+    if (countries.length > 0) {
+      if (yPos > 250) {
+        doc.addPage()
+        yPos = 20
+      }
+      
+      doc.setFontSize(14)
+      doc.text('Top Countries', 14, yPos)
+      yPos += 8
+      
+      const countriesData = countries.map(country => [
+        country.name,
+        country.users.toLocaleString()
+      ])
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Country', 'Users']],
+        body: countriesData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246] },
+        margin: { left: 14, right: 14 }
+      })
+    }
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(8)
+      doc.setTextColor(150, 150, 150)
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      )
+    }
+    
+    // Save PDF
+    const fileName = `tutelage-analytics-${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -116,13 +266,48 @@ const AnalyticsPage = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Calendar className="h-4 w-4 mr-2" />
-            Last 30 Days
-          </Button>
-          <Button variant="outline" size="sm">
+          {/* Date Range Picker */}
+          <div className="relative">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDateMenu(!showDateMenu)}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              {dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Last 30 Days'}
+            </Button>
+            
+            {showDateMenu && (
+              <Card className="absolute right-0 top-12 z-50 w-48 shadow-lg">
+                <CardContent className="p-2">
+                  {dateRangeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setDateRange(option.value)
+                        setShowDateMenu(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors ${
+                        dateRange === option.value ? 'bg-accent font-medium' : ''
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+          
+          {/* Export Button */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={exportToPDF}
+            disabled={!stats}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export PDF
           </Button>
         </div>
       </div>
@@ -136,7 +321,9 @@ const AnalyticsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalViews?.toLocaleString() || '0'}</div>
-            <p className="text-xs text-muted-foreground">Last 365 days</p>
+            <p className="text-xs text-muted-foreground">
+              {dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Selected period'}
+            </p>
           </CardContent>
         </Card>
 
