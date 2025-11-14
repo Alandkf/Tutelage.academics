@@ -6,20 +6,21 @@ import { BarChart, TrendingUp, Users, Eye, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
-
 const AnalyticsChart = () => {
   const [stats, setStats] = useState(null)
   const [dailyData, setDailyData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || ''
+
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         setLoading(true)
         const [statsRes, dailyRes] = await Promise.all([
-          fetch(`${BASE_URL}/api/website-analytics/website-stats`),
+          fetch(`${BASE_URL}/api/website-analytics/website-stats?days=realtime`),
           fetch(`${BASE_URL}/api/website-analytics/daily-stats?days=7`)
         ])
 
@@ -89,7 +90,7 @@ const AnalyticsChart = () => {
             <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
               {stats?.totalViews?.toLocaleString() || '0'}
             </p>
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Last 365 days</p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{stats?.isRealtime ? 'Right now' : 'Last 365 days'}</p>
           </div>
           
           <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 p-4 rounded-lg border border-green-200 dark:border-green-800">
@@ -100,13 +101,13 @@ const AnalyticsChart = () => {
             <p className="text-2xl font-bold text-green-900 dark:text-green-100">
               {stats?.todayActive?.toLocaleString() || '0'}
             </p>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1">Today</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">{stats?.isRealtime ? 'Active now' : 'Today'}</p>
           </div>
         </div>
 
         {/* Simple Chart Visualization */}
         <div className="flex-1 flex flex-col justify-end mb-6">
-          <p className="text-sm font-medium mb-3 text-muted-foreground">Last 7 Days Activity</p>
+          <p className="text-sm font-medium mb-3 text-muted-foreground">Last 7 Days Activity {dailyData.length === 0 && '(Building history...)'}</p>
           <div className="flex items-end justify-between gap-2 h-32">
             {dailyData.length > 0 ? (
               dailyData.map((data, idx) => {

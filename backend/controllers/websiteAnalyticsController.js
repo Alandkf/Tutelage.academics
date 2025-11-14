@@ -177,7 +177,7 @@ exports.getDailyStats = async (req, res) => {
       orderBys: [{ dimension: { dimensionName: 'date' }, desc: false }]
     });
 
-    const dailyData = response.rows?.map(row => {
+    let dailyData = response.rows?.map(row => {
       const dateStr = row.dimensionValues?.[0]?.value || '';
       // Format: YYYYMMDD -> parse to readable date
       const year = dateStr.substring(0, 4);
@@ -193,6 +193,21 @@ exports.getDailyStats = async (req, res) => {
         users: parseInt(row.metricValues?.[1]?.value || '0')
       };
     }) || [];
+
+    // If no historical data, create placeholder data for last 7 days
+    if (dailyData.length === 0) {
+      dailyData = Array.from({ length: days }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (days - 1 - i));
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        return {
+          date: date.toISOString().split('T')[0].replace(/-/g, ''),
+          day: dayName,
+          views: 0,
+          users: 0
+        };
+      });
+    }
 
     res.status(200).json({
       success: true,
