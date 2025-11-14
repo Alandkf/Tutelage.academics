@@ -12,6 +12,7 @@ import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
 import PdfModal from '@/components/ui/PdfModal'
 import PdfButton from '@/components/ui/PdfButton'
 import { usePdfModal } from '@/hooks/usePdfModal'
+import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
 
 const SingleStoryPage = () => {
   const params = useParams()
@@ -33,13 +34,14 @@ const SingleStoryPage = () => {
     const fetchStory = async () => {
       try {
         const response = await fetch(
-          `${BASE_URL}/api/blogs/${params.id}`,
+          `${BASE_URL}/api/stories/${params.id}`,
           { credentials: 'include' }
         )
         const data = await response.json()
         
         if (data.success) {
-          setStory(data.data)
+          // Handle nested story object from API
+          setStory(data.data.story || data.data)
         }
       } catch (error) {
         console.error('Error fetching story:', error)
@@ -90,19 +92,21 @@ const SingleStoryPage = () => {
       </div>
 
       {/* Hero Image Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
-          <Image
-            src={story.imageRef || 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80'}
-            alt={story.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+      {story.imageUrl && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] rounded-lg overflow-hidden shadow-lg">
+            <Image
+              src={story.imageUrl}
+              alt={story.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Description Section */}
       {story.description && (
@@ -113,146 +117,131 @@ const SingleStoryPage = () => {
         </div>
       )}
 
-      {/* Preparation Exercise block BEFORE Reading Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border rounded-md overflow-hidden mb-6">
-          <button onClick={() => setPrepOpen(p => !p)} className="w-full flex items-center justify-between px-6 py-4 bg-card">
-            <span className="font-semibold text-foreground">Preparation exercise</span>
-            <span className="text-muted-foreground">{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
-          </button>
+      {/* Preparation Exercise block BEFORE content */}
+      {story.pdf && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="border rounded-md overflow-hidden mb-6">
+            <button onClick={() => setPrepOpen(p => !p)} className="w-full flex items-center justify-between px-6 py-4 bg-card">
+              <span className="font-semibold text-foreground">Preparation exercise</span>
+              <span className="text-muted-foreground">{prepOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+            </button>
 
-          <AnimatePresence initial={false}>
-            {prepOpen && (
-              <motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
-                <div className="px-6 py-4">
-                  {story?.pdf ? (
+            <AnimatePresence initial={false}>
+              {prepOpen && (
+                <motion.div key="prep" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
+                  <div className="px-6 py-4">
                     <PdfButton 
                       pdfUrl={story.pdf} 
                       onOpen={openPdf}
                       label="Preparation PDF"
                     />
-                  ) : <p className="text-sm text-muted-foreground">No preparation PDF available.</p>}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Reading Content Section - boxed, always open (use contentText) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
-        <div className="border rounded-md overflow-hidden bg-background">
-          <div className="px-6 py-4 border-b bg-card">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Reading Text</h2>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        </div>
+      )}
 
-          <div className="px-6 py-6">
-            <div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">
-              {story.content || 'No content available.'}
+      {/* Audio Player Section (if audioRef exists) */}
+      {story.audioRef && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="w-full rounded-lg overflow-hidden border">
+            <div className="p-6 bg-card rounded">
+              <h2 className="text-xl font-semibold mb-4">Audio Story</h2>
+              <CompactAudioPlayer src={story.audioRef} youtubeUrl={story.audioRef} />
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Tasks (inserted after reading content) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="grid grid-cols-1 gap-4">
-          {Array.isArray(story?.tasks) && story.tasks.length > 0 ? (
-            story.tasks.map((task, idx) => (
-              <div key={idx} className="border rounded-md overflow-hidden">
-                <button onClick={() => toggleTask(idx)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-                  <span className="font-medium text-foreground">Task {idx + 1}</span>
-                  <span className="text-muted-foreground">{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {openTasks[idx] && (
-                    <motion.div key={`task-${idx}`} initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
-                      <div className="px-4 py-3">
-                        <div className="text-sm text-foreground leading-relaxed">{task.content || 'Task details will be added here.'}</div>
-                        {story?.pdf && (
-                          <div className="mt-3">
-                            <PdfButton 
-                              pdfUrl={story.pdf} 
-                              onOpen={openPdf}
-                              label="Task PDF"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+      {/* Reading Content Section - boxed, always open */}
+      {story.contentText && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16">
+          <div className="border rounded-md overflow-hidden bg-background">
+            <div className="px-6 py-4 border-b bg-card">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Story Content</h2>
+            </div>
+
+            <div className="px-6 py-6">
+              <div className="prose prose-lg max-w-none text-foreground whitespace-pre-wrap">
+                {story.contentText}
               </div>
-            ))
-          ) : (
+              {story.wordCount && (
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Word count: {story.wordCount}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Task PDF (if taskPdf exists) */}
+      {story.taskPdf && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="grid grid-cols-1 gap-4">
             <div className="border rounded-md overflow-hidden">
               <button onClick={() => toggleTask(0)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-                <span className="font-medium text-foreground">Task 1</span>
+                <span className="font-medium text-foreground">Task</span>
                 <span className="text-muted-foreground">{openTasks[0] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
               </button>
               <AnimatePresence initial={false}>
                 {openTasks[0] && (
                   <motion.div key="task-0" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
                     <div className="px-4 py-3">
-                      {story?.pdf && (
-                        <PdfButton 
-                          pdfUrl={story.pdf} 
-                          onOpen={openPdf}
-                          label="Task PDF"
-                        />
-                      )}
+                      <PdfButton 
+                        pdfUrl={story.taskPdf} 
+                        onOpen={openPdf}
+                        label="Task PDF"
+                      />
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Tags section if story has tags (story model may not have tags) */}
+      {/* Tags section */}
       {Array.isArray(story?.tags) && story.tags.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-          <h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
-          <div className="flex flex-wrap gap-3">
-            {story.tags.map((t, i) => (
-              <div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">{t}</div>
-            ))}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pb-6">
+          <h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+          <div className="p-6 rounded-md">
+            <div className="flex flex-wrap gap-3">
+              {story.tags.map((t, i) => (
+                <span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* Language Level - clickable pills */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
-        <div className="p-6 rounded-md">
-          <div className="flex flex-wrap gap-3">
-            {(() => {
-              const levels = Array.isArray(story?.level) ? story.level : (story?.level ? [story.level] : []);
-              if (!levels.length) {
-                return <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">Not specified</div>
-              }
-              const mapToSlug = (lvl) => {
-                if (!lvl) return '/levels';
-                const key = String(lvl).toLowerCase();
-                if (key.includes('a1')) return '/levels/a1';
-                if (key.includes('a2')) return '/levels/a2';
-                if (key.includes('b1')) return '/levels/b1';
-                if (key.includes('b2')) return '/levels/b2';
-                if (key.includes('c1')) return '/levels/c1';
-                if (key.includes('c2')) return '/levels/c2';
-                return '/levels';
-              };
-              return levels.map((lvl, i) => (
-                <Link key={i} href={mapToSlug(lvl)} 
-                      className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
-                    {lvl}
-                </Link>
-              ));
-            })()}
+      {story.level && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+          <div className="p-6 rounded-md">
+            <div className="flex flex-wrap gap-3">
+              {(() => {
+                const levels = Array.isArray(story.level) ? story.level : [story.level];
+                return levels.map((lvl, i) => {
+                  const slug = String(lvl).toLowerCase().split(' ')[0];
+                  return (
+                    <Link key={i} href={`/levels/${slug}`} 
+                          className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+                        {lvl}
+                    </Link>
+                  );
+                });
+              })()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      
 
       {/* CTA Section */}
       <SingleSourceCTA />

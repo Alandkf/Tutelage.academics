@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/AuthContext'
 import BASE_URL from '@/app/config/url'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import StoryForm from '@/components/forms/StoryForm'
+import CompactAudioPlayer from '@/components/players/CompactAudioPlayer'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 export default function AdminStoryDetailPage() {
   const params = useParams()
@@ -19,6 +23,9 @@ export default function AdminStoryDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+
+  // PDF modal state using custom hook
+  const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
 
   const fetchStory = async () => {
     setLoading(true)
@@ -141,38 +148,42 @@ export default function AdminStoryDetailPage() {
       )}
 
       {story.audioRef && (
-        <div className="mb-4">
+        <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">Audio Accompaniment</h3>
-          <a href={story.audioRef} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />Listen to Audio
-          </a>
+          <div className="p-4 bg-card border rounded-md">
+            <CompactAudioPlayer src={story.audioRef} youtubeUrl={story.audioRef} />
+          </div>
         </div>
       )}
 
       {story.pdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>
-          <a href={story.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View PDF
-          </a>
+          <PdfButton 
+            pdfUrl={story.pdf} 
+            onOpen={(url) => openPdf(url, 'Resource PDF')} 
+            label="Resource PDF"
+          />
         </div>
       )}
 
       {story.taskPdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <a href={story.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View Task PDF
-          </a>
+          <PdfButton 
+            pdfUrl={story.taskPdf} 
+            onOpen={(url) => openPdf(url, 'Task PDF')} 
+            label="Task PDF"
+          />
         </div>
       )}
 
-      {story.level && (
+      {story.tags && story.tags.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Level</h3>
+          <h3 className="text-lg font-semibold mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {(Array.isArray(story.level) ? story.level : [story.level]).map((lvl, i) => (
-              <span key={i} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded">{lvl}</span>
+            {story.tags.map((tag, i) => (
+              <span key={i} className="px-3 py-1 bg-primary/10 text-primary text-sm rounded">{tag}</span>
             ))}
           </div>
         </div>
@@ -209,6 +220,14 @@ export default function AdminStoryDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reusable PDF Modal */}
+      <PdfModal 
+        isOpen={pdfModalOpen} 
+        onClose={closePdf} 
+        pdfUrl={pdfModalUrl} 
+        title={pdfModalTitle}
+      />
     </div>
   )
 }
