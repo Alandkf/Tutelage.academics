@@ -5,7 +5,7 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Blog, User } = require('../models');
+const { Blog, User, Tag, ResourceTag } = require('../models');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -28,6 +28,40 @@ function normalizeLevels(input) {
   return unique.length ? unique : null;
 }
 
+// Helper functions for tags - change 'blog' to 'reading' to match existing enum
+async function attachTags(resourceId, tagNames = []) {
+  if (!tagNames?.length) return;
+  const existing = await Tag.findAll({ where: { name: { [Op.in]: tagNames } } });
+  const existingNames = new Set(existing.map(t => t.name));
+  const toCreate = tagNames.filter(n => !existingNames.has(n)).map(name => ({ name, namespace: 'reading' }));
+  if (toCreate.length) await Tag.bulkCreate(toCreate);
+  const allTags = await Tag.findAll({ where: { name: { [Op.in]: tagNames } } });
+  const mappings = allTags.map(tag => ({ resourceType: 'reading', resourceId, tagId: tag.id }));
+  for (const m of mappings) {
+    const exists = await ResourceTag.findOne({ where: m });
+    if (!exists) await ResourceTag.create(m);
+  }
+}
+
+async function includeTagsFor(resourceId) {
+  const rts = await ResourceTag.findAll({ where: { resourceType: 'reading', resourceId } });
+  if (!rts.length) return [];
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name);
+}
+
+async function getTagFilterIds(tagQuery) {
+  if (!tagQuery) return null;
+  const names = Array.isArray(tagQuery) ? tagQuery : String(tagQuery).split(',').map(s => s.trim()).filter(Boolean);
+  if (!names.length) return null;
+  const tags = await Tag.findAll({ where: { name: { [Op.in]: names } } });
+  if (!tags.length) return [];
+  const tagIds = tags.map(t => t.id);
+  const mappings = await ResourceTag.findAll({ where: { resourceType: 'reading', tagId: { [Op.in]: tagIds } } });
+  return [...new Set(mappings.map(m => m.resourceId))];
+}
+
 /**
  * Create a new blog post
  * @param {Object} req - Express request object
@@ -35,8 +69,8 @@ function normalizeLevels(input) {
  */
 const createBlog = async (req, res) => {
   try {
-    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf, taskPdf } = req.body;
-    const createdBy = req.user.id; // From auth middleware
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level } = req.body;
+    const createdBy = req.user.id;
 
     // Validate required fields
     if (!title || !content) {
@@ -49,18 +83,27 @@ const createBlog = async (req, res) => {
     // Normalize level(s) to an array of CEFR labels
     const normalizedLevels = normalizeLevels(level);
 
+    // Get PDF paths from uploaded files
+    const pdfPath = req.files?.pdfFile?.[0]?.path || null;
+    const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || null;
+
     const blog = await Blog.create({
       title,
       content,
       imageRef: imageRef ?? imageUrl ?? imageurl ?? null,
       category: category ?? tag ?? null,
       description: description ?? discription ?? desccription ?? null,
-      tags: Array.isArray(tags) ? tags : undefined,
       level: normalizedLevels,
-      pdf,
-      taskPdf,
+      pdf: pdfPath,
+      taskPdf: taskPdfPath,
       createdBy
     });
+
+    // Handle tags
+    const tagNames = Array.isArray(tags)
+      ? tags
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    if (tagNames.length) await attachTags(blog.id, tagNames);
 
     // Fetch the created blog with author information
     const blogWithAuthor = await Blog.findByPk(blog.id, {
@@ -71,10 +114,12 @@ const createBlog = async (req, res) => {
       }]
     });
 
+    const tagList = await includeTagsFor(blog.id);
+
     res.status(201).json({
       success: true,
       message: 'Blog post created successfully',
-      data: blogWithAuthor
+      data: { ...blogWithAuthor.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error creating blog:', error);
@@ -102,8 +147,6 @@ const getAllBlogs = async (req, res) => {
       sortOrder = 'DESC'
     } = req.query;
 
-    
-
     // Build where clause for filtering
     const whereClause = {};
     if (category) {
@@ -122,12 +165,22 @@ const getAllBlogs = async (req, res) => {
     if (levelsFilter) {
       whereClause.level = { [Op.overlap]: levelsFilter };
     }
+
+    // Tag filtering
+    const tagParam = req.query.tags;
+    if (tagParam) {
+      const idFilter = await getTagFilterIds(tagParam);
+      if (Array.isArray(idFilter)) {
+        whereClause.id = { ...(whereClause.id || {}), [Op.in]: idFilter };
+      }
+    }
+
     // Add cursor condition for infinite scroll
     if (cursor) {
       if (sortOrder.toUpperCase() === 'DESC') {
-        whereClause.id = { [Op.lt]: parseInt(cursor) };
+        whereClause.id = { ...whereClause.id, [Op.lt]: parseInt(cursor) };
       } else {
-        whereClause.id = { [Op.gt]: parseInt(cursor) };
+        whereClause.id = { ...whereClause.id, [Op.gt]: parseInt(cursor) };
       }
     }
     // Fetch one extra item to check if there are more items
@@ -152,9 +205,16 @@ const getAllBlogs = async (req, res) => {
     const items = hasMore ? blogs.slice(0, parseInt(limit)) : blogs;
     // Get the cursor for the next request (ID of the last item)
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
+
+    // Enrich with tags
+    const enriched = await Promise.all(items.map(async (b) => {
+      const tagList = await includeTagsFor(b.id);
+      return { ...b.toJSON(), tags: tagList };
+    }));
+
     res.status(200).json({
       success: true,
-      blogs: items,
+      blogs: enriched,
       hasMore,
       nextCursor
     });
@@ -192,9 +252,11 @@ const getBlogById = async (req, res) => {
       });
     }
 
+    const tagList = await includeTagsFor(blog.id);
+
     res.status(200).json({
       success: true,
-      data: blog
+      data: { ...blog.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error fetching blog:', error);
@@ -214,7 +276,7 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level, pdf, taskPdf } = req.body;
+    const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level } = req.body;
 
     const blog = await Blog.findByPk(id);
 
@@ -238,17 +300,27 @@ const updateBlog = async (req, res) => {
       ? normalizeLevels(level)
       : blog.level;
 
+    // Get PDF paths from uploaded files
+    const pdfPath = req.files?.pdfFile?.[0]?.path || blog.pdf;
+    const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || blog.taskPdf;
+
     await blog.update({
       title: title || blog.title,
       content: content || blog.content,
       imageRef: (imageRef ?? imageUrl ?? imageurl ?? blog.imageRef),
       category: (category ?? tag ?? blog.category),
       description: (description ?? discription ?? desccription ?? blog.description),
-      tags: Array.isArray(tags) ? tags : blog.tags,
       level: normalizedLevelUpdate,
-      pdf: (typeof pdf !== 'undefined' ? pdf : blog.pdf),
-      taskPdf: (typeof taskPdf !== 'undefined' ? taskPdf : blog.taskPdf)
+      pdf: pdfPath,
+      taskPdf: taskPdfPath
     });
+
+    // Update tags
+    if (tags !== undefined) {
+      const tagNames = Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean);
+      await ResourceTag.destroy({ where: { resourceType: 'reading', resourceId: blog.id } });
+      if (tagNames.length) await attachTags(blog.id, tagNames);
+    }
 
     // Fetch updated blog with author information
     const updatedBlog = await Blog.findByPk(id, {
@@ -259,10 +331,12 @@ const updateBlog = async (req, res) => {
       }]
     });
 
+    const tagList = await includeTagsFor(blog.id);
+
     res.status(200).json({
       success: true,
       message: 'Blog post updated successfully',
-      data: updatedBlog
+      data: { ...updatedBlog.toJSON(), tags: tagList }
     });
   } catch (error) {
     console.error('Error updating blog:', error);

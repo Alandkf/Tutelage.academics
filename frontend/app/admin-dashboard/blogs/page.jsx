@@ -66,13 +66,22 @@ export default function BlogsPage() {
   const lastBlogRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchBlogs })
 
   // Handlers
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
+      const fd = new FormData()
+      fd.append('title', formData.title ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('imageRef', formData.imageRef ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      if (formData.pdf) fd.append('pdfFile', formData.pdf)
+      if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+
       const res = await fetch(`${BASE_URL}/api/blogs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
+        body: fd
       })
       if (!res.ok) throw new Error("Failed to create blog")
       setShowCreate(false)
@@ -199,15 +208,23 @@ export default function BlogsPage() {
           <BlogForm
             mode="edit"
             initialValues={editBlog}
-            onSuccess={async (values) => {
+            onSuccess={async (formData) => {
               if (!editBlog) return
               try {
-                // API call for editing blog (PUT)
+                const fd = new FormData()
+                fd.append('title', formData.title ?? '')
+                fd.append('content', formData.content ?? '')
+                fd.append('description', formData.description ?? '')
+                fd.append('imageRef', formData.imageRef ?? '')
+                fd.append('level', formData.level ?? '')
+                fd.append('tags', formData.tags?.join(',') ?? '')
+                if (formData.pdf) fd.append('pdfFile', formData.pdf)
+                if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+
                 const res = await fetch(`${BASE_URL}/api/blogs/${editBlog.id}`, {
                   method: "PUT",
-                  headers: { "Content-Type": "application/json" },
                   credentials: "include",
-                  body: JSON.stringify(values)
+                  body: fd
                 })
                 if (!res.ok) throw new Error("Failed to update blog")
                 setShowEdit(false)
