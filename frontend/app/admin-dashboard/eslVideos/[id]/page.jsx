@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/AuthContext'
 import BASE_URL from '@/app/config/url'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import EslVideoForm from '@/components/forms/EslVideoForm'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 export default function AdminEslVideoDetailPage() {
   const params = useParams()
@@ -18,6 +21,9 @@ export default function AdminEslVideoDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+
+  // PDF modal state using custom hook
+  const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
 
   const fetchVideo = async () => {
     setLoading(true)
@@ -140,18 +146,22 @@ export default function AdminEslVideoDetailPage() {
       {video.pdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>
-          <a href={video.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View PDF
-          </a>
+          <PdfButton 
+            pdfUrl={video.pdf} 
+            onOpen={(url) => openPdf(url, 'Resource PDF')} 
+            label="Resource PDF"
+          />
         </div>
       )}
 
       {video.taskPdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <a href={video.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View Task PDF
-          </a>
+          <PdfButton 
+            pdfUrl={video.taskPdf} 
+            onOpen={(url) => openPdf(url, 'Task PDF')} 
+            label="Task PDF"
+          />
         </div>
       )}
 
@@ -214,6 +224,14 @@ export default function AdminEslVideoDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reusable PDF Modal */}
+      <PdfModal 
+        isOpen={pdfModalOpen} 
+        onClose={closePdf} 
+        pdfUrl={pdfModalUrl} 
+        title={pdfModalTitle}
+      />
     </div>
   )
 }
