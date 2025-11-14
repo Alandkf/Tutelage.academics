@@ -23,6 +23,7 @@ exports.getWebsiteStats = async (req, res) => {
 
     // Check if real-time mode is requested
     const isRealtime = req.query.days === 'realtime';
+    const isAllTime = req.query.days === 'all';
 
     if (isRealtime) {
       // Use Realtime API for live data
@@ -67,7 +68,8 @@ exports.getWebsiteStats = async (req, res) => {
 
     // Get date range from query params (default to 30 days)
     const daysAgo = parseInt(req.query.days) || 30;
-    const startDate = `${daysAgo}daysAgo`;
+    // For "all time", use a far back date (GA4 max is ~14 months by default, can be up to 50 months)
+    const startDate = isAllTime ? '2020-01-01' : `${daysAgo}daysAgo`;
 
     // Fetch multiple metrics in parallel
     const [totalViewsResponse, last30DaysResponse, todayResponse] = await Promise.all([
@@ -155,11 +157,14 @@ exports.getDailyStats = async (req, res) => {
       });
     }
 
-    const days = parseInt(req.query.days) || 7;
+    const isAllTime = req.query.days === 'all';
+    // For all time, send 365 days so frontend can aggregate into 12 months
+    const days = isAllTime ? 365 : (parseInt(req.query.days) || 7);
+    const startDate = isAllTime ? '2020-01-01' : `${days}daysAgo`;
 
     const [response] = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate, endDate: 'today' }],
       dimensions: [{ name: 'date' }],
       metrics: [
         { name: 'screenPageViews' },
@@ -229,6 +234,7 @@ exports.getTopPages = async (req, res) => {
 
     const limit = parseInt(req.query.limit) || 5;
     const isRealtime = req.query.days === 'realtime';
+    const isAllTime = req.query.days === 'all';
 
     let response;
 
@@ -275,7 +281,7 @@ exports.getTopPages = async (req, res) => {
       }
     } else {
       const daysAgo = parseInt(req.query.days) || 30;
-      const startDate = `${daysAgo}daysAgo`;
+      const startDate = isAllTime ? '2020-01-01' : `${daysAgo}daysAgo`;
 
       [response] = await analyticsDataClient.runReport({
         property: `properties/${propertyId}`,
@@ -350,6 +356,7 @@ exports.getDeviceStats = async (req, res) => {
     }
 
     const isRealtime = req.query.days === 'realtime';
+    const isAllTime = req.query.days === 'all';
     let response;
 
     if (isRealtime) {
@@ -361,7 +368,7 @@ exports.getDeviceStats = async (req, res) => {
       });
     } else {
       const daysAgo = parseInt(req.query.days) || 30;
-      const startDate = `${daysAgo}daysAgo`;
+      const startDate = isAllTime ? '2020-01-01' : `${daysAgo}daysAgo`;
 
       [response] = await analyticsDataClient.runReport({
         property: `properties/${propertyId}`,
@@ -414,6 +421,7 @@ exports.getCountryStats = async (req, res) => {
 
     const limit = parseInt(req.query.limit) || 5;
     const isRealtime = req.query.days === 'realtime';
+    const isAllTime = req.query.days === 'all';
     let response;
 
     if (isRealtime) {
@@ -427,7 +435,7 @@ exports.getCountryStats = async (req, res) => {
       });
     } else {
       const daysAgo = parseInt(req.query.days) || 30;
-      const startDate = `${daysAgo}daysAgo`;
+      const startDate = isAllTime ? '2020-01-01' : `${daysAgo}daysAgo`;
 
       [response] = await analyticsDataClient.runReport({
         property: `properties/${propertyId}`,

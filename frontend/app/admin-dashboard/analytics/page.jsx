@@ -39,7 +39,8 @@ const AnalyticsPage = () => {
     { label: 'Last 7 Days', value: 7 },
     { label: 'Last 30 Days', value: 30 },
     { label: 'Last 90 Days', value: 90 },
-    { label: 'Last 365 Days', value: 365 }
+    { label: 'Last 365 Days', value: 365 },
+    { label: 'all time', value: 'all' }
   ]
 
   useEffect(() => {
@@ -47,8 +48,10 @@ const AnalyticsPage = () => {
       try {
         setLoading(true)
         const isRealtime = dateRange === 'realtime'
-        const daysParam = isRealtime ? 'realtime' : dateRange
-        const chartDays = isRealtime ? 7 : Math.min(dateRange, 30) // Max 30 days for chart
+        const isAllTime = dateRange === 'all'
+        const daysParam = isRealtime ? 'realtime' : (isAllTime ? 'all' : dateRange)
+        // For 'All Time' fetch 365 days so we can aggregate into 12 monthly bars.
+        const chartDays = isAllTime ? 365 : Math.min(isRealtime ? 7 : (typeof dateRange === 'number' ? dateRange : 30), 30)
         
         const [statsRes, dailyRes, pagesRes, devicesRes, countriesRes] = await Promise.all([
           fetch(`${BASE_URL}/api/website-analytics/website-stats?days=${daysParam}`),
@@ -111,7 +114,42 @@ const AnalyticsPage = () => {
     )
   }
 
-  const maxValue = Math.max(...dailyData.map(d => Math.max(d.views, d.users)), 1)
+  // Limit chart display based on date range
+  // For "All Time", show monthly aggregated data (12 months max)
+  // For other ranges, show daily data (max 30 days)
+  const isAllTime = dateRange === 'all'
+  
+  let chartData = []
+  if (isAllTime && dailyData.length > 30) {
+    // Aggregate data by month for all time view (produce short month labels: Jan, Feb, ...)
+    const monthlyMap = new Map()
+    dailyData.forEach(day => {
+      const date = new Date(
+        day.date.substring(0, 4),
+        day.date.substring(4, 6) - 1,
+        day.date.substring(6, 8)
+      )
+      const year = date.getFullYear()
+      const monthIndex = date.getMonth() + 1
+      const monthId = `${year}-${String(monthIndex).padStart(2, '0')}` // e.g. 2025-01
+      const monthLabel = date.toLocaleDateString('en-US', { month: 'short' }) // Jan, Feb, Mar
+
+      if (!monthlyMap.has(monthId)) {
+        monthlyMap.set(monthId, { id: monthId, day: monthLabel, views: 0, users: 0 })
+      }
+      const m = monthlyMap.get(monthId)
+      m.views += day.views
+      m.users += day.users
+    })
+
+    // Keep chronological order and take last 12 months
+    chartData = Array.from(monthlyMap.values()).sort((a, b) => a.id.localeCompare(b.id)).slice(-12)
+  } else {
+    // Show daily data (max 30 days)
+    chartData = dailyData.slice(-30)
+  }
+  
+  const maxValue = Math.max(...chartData.map(d => Math.max(d.views, d.users)), 1)
 
   const exportToPDF = () => {
     const doc = new jsPDF()
@@ -379,8 +417,8 @@ const AnalyticsPage = () => {
             <div className="space-y-4">
               {/* Chart */}
               <div className="flex items-end justify-between gap-3 h-64">
-                {dailyData.length > 0 ? (
-                  dailyData.map((data, idx) => (
+                {chartData.length > 0 ? (
+                  chartData.map((data, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
                       <div className="w-full flex gap-1 items-end" style={{ height: '85%' }}>
                         {/* Views bar */}
@@ -397,7 +435,7 @@ const AnalyticsPage = () => {
                         />
                       </div>
                       <span className="text-xs text-muted-foreground font-medium">
-                        {data.day}
+                        {isAllTime ? data.day : data.day}
                       </span>
                     </div>
                   ))
