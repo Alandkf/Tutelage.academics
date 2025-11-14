@@ -44,6 +44,7 @@ const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
 const pdfProxyRoutes = require('./routes/pdfProxy');
+const statsRoutes = require('./routes/stats');
 
 
 // ============================================================================
@@ -149,7 +150,7 @@ app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
 app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
-
+app.use('/api/stats', statsRoutes);           // Dashboard statistics
 
 // ============================================================================
 // HEALTH CHECK ENDPOINTS

@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 const StatsCardSkeleton = () => {
   return (
     <Card className="overflow-hidden border shadow-sm">
-      <CardContent className="p-3 md:p-4">
+      <CardContent className="">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <Skeleton className="h-3 w-16" />
