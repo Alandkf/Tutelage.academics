@@ -167,7 +167,7 @@ const Audio = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {audios.map((audio, idx) => (
               <div
-                key={inx}
+                key={idx}
                 ref={idx === audios.length - 1 ? lastAudioRef : null}
                 className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
               >
