@@ -1,7 +1,6 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { 
   BarChart, 
@@ -21,8 +20,8 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import BASE_URL from '/app/config/url'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'
 
 const AnalyticsPage = () => {
   const [stats, setStats] = useState(null)
@@ -32,10 +31,11 @@ const AnalyticsPage = () => {
   const [countries, setCountries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [dateRange, setDateRange] = useState(30) // Default to 30 days
+  const [dateRange, setDateRange] = useState('realtime') // Default to real-time
   const [showDateMenu, setShowDateMenu] = useState(false)
 
   const dateRangeOptions = [
+    { label: 'Real-time', value: 'realtime' },
     { label: 'Last 7 Days', value: 7 },
     { label: 'Last 30 Days', value: 30 },
     { label: 'Last 90 Days', value: 90 },
@@ -46,8 +46,9 @@ const AnalyticsPage = () => {
     const fetchAllAnalytics = async () => {
       try {
         setLoading(true)
-        const daysParam = dateRange
-        const chartDays = Math.min(dateRange, 30) // Max 30 days for chart
+        const isRealtime = dateRange === 'realtime'
+        const daysParam = isRealtime ? 'realtime' : dateRange
+        const chartDays = isRealtime ? 7 : Math.min(dateRange, 30) // Max 30 days for chart
         
         const [statsRes, dailyRes, pagesRes, devicesRes, countriesRes] = await Promise.all([
           fetch(`${BASE_URL}/api/website-analytics/website-stats?days=${daysParam}`),
@@ -125,7 +126,8 @@ const AnalyticsPage = () => {
     doc.setFontSize(10)
     doc.setTextColor(100, 100, 100)
     const selectedRange = dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Last 30 Days'
-    doc.text(`Date Range: ${selectedRange}`, pageWidth / 2, 28, { align: 'center' })
+    const rangeText = dateRange === 'realtime' ? 'Real-time (Live Data)' : `Date Range: ${selectedRange}`
+    doc.text(rangeText, pageWidth / 2, 28, { align: 'center' })
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, 33, { align: 'center' })
     
     let yPos = 45
@@ -274,7 +276,7 @@ const AnalyticsPage = () => {
               onClick={() => setShowDateMenu(!showDateMenu)}
             >
               <Calendar className="h-4 w-4 mr-2" />
-              {dateRangeOptions.find(opt => opt.value === dateRange)?.label || 'Last 30 Days'}
+              {dateRangeOptions.find(opt => opt.value === dateRange)?.label }
             </Button>
             
             {showDateMenu && (

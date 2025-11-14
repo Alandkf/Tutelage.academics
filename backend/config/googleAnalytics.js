@@ -4,11 +4,13 @@
 // Initialize Google Analytics Data API client
 
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+const { log } = require('console');
 const path = require('path');
+
 
 // Initialize the Google Analytics Data API client
 const analyticsDataClient = new BetaAnalyticsDataClient({
-  keyFilename: path.resolve(__dirname, process.env.GA_KEY_FILE_PATH || './google-analytics-key.json')
+  keyFilename: path.resolve(__dirname, process.env.GA_KEY_FILE_PATH)
 });
 
 const propertyId = process.env.GA_PROPERTY_ID;

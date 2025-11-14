@@ -21,6 +21,50 @@ exports.getWebsiteStats = async (req, res) => {
       });
     }
 
+    // Check if real-time mode is requested
+    const isRealtime = req.query.days === 'realtime';
+
+    if (isRealtime) {
+      // Use Realtime API for live data
+      const [realtimeResponse] = await analyticsDataClient.runRealtimeReport({
+        property: `properties/${propertyId}`,
+        metrics: [
+          { name: 'activeUsers' },
+          { name: 'screenPageViews' }
+        ]
+      });
+
+      const row = realtimeResponse.rows?.[0];
+      const activeUsers = parseInt(row?.metricValues?.[0]?.value || '0');
+      const realtimeViews = parseInt(row?.metricValues?.[1]?.value || '0');
+
+      // For real-time, also get last 30 minutes trend
+      const [last30MinResponse] = await analyticsDataClient.runRealtimeReport({
+        property: `properties/${propertyId}`,
+        dimensions: [{ name: 'minutesAgo' }],
+        metrics: [{ name: 'activeUsers' }],
+        orderBys: [{ dimension: { dimensionName: 'minutesAgo' }, desc: false }]
+      });
+
+      console.log('Real-time Stats:', {
+        activeUsers,
+        realtimeViews,
+        last30MinData: last30MinResponse.rows?.length || 0
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          totalViews: realtimeViews,
+          uniqueVisitors: activeUsers,
+          avgSessionDuration: 'Live',
+          todayActive: activeUsers,
+          weeklyGrowth: 0,
+          isRealtime: true
+        }
+      });
+    }
+
     // Get date range from query params (default to 30 days)
     const daysAgo = parseInt(req.query.days) || 30;
     const startDate = `${daysAgo}daysAgo`;
@@ -76,6 +120,15 @@ exports.getWebsiteStats = async (req, res) => {
     const minutes = Math.floor(avgSessionDuration / 60);
     const seconds = Math.floor(avgSessionDuration % 60);
     const avgSessionFormatted = `${minutes}m ${seconds}s`;
+
+    console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    console.log('Website Stats:', {
+        totalViews,
+        uniqueVisitors,
+        avgSessionDuration: avgSessionFormatted,
+        todayActive,
+        weeklyGrowth
+      })
 
     res.status(200).json({
       success: true,
@@ -169,17 +222,32 @@ exports.getTopPages = async (req, res) => {
     }
 
     const limit = parseInt(req.query.limit) || 5;
-    const daysAgo = parseInt(req.query.days) || 30;
-    const startDate = `${daysAgo}daysAgo`;
+    const isRealtime = req.query.days === 'realtime';
 
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [{ startDate, endDate: 'today' }],
-      dimensions: [{ name: 'pagePathPlusQueryString' }],
-      metrics: [{ name: 'screenPageViews' }],
-      orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
-      limit
-    });
+    let response;
+
+    if (isRealtime) {
+      // Use Realtime API
+      [response] = await analyticsDataClient.runRealtimeReport({
+        property: `properties/${propertyId}`,
+        dimensions: [{ name: 'unifiedScreenName' }],
+        metrics: [{ name: 'screenPageViews' }],
+        orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+        limit
+      });
+    } else {
+      const daysAgo = parseInt(req.query.days) || 30;
+      const startDate = `${daysAgo}daysAgo`;
+
+      [response] = await analyticsDataClient.runReport({
+        property: `properties/${propertyId}`,
+        dateRanges: [{ startDate, endDate: 'today' }],
+        dimensions: [{ name: 'pagePathPlusQueryString' }],
+        metrics: [{ name: 'screenPageViews' }],
+        orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+        limit
+      });
+    }
 
     const totalViews = response.rows?.reduce((sum, row) => {
       return sum + parseInt(row.metricValues?.[0]?.value || '0');
@@ -221,15 +289,27 @@ exports.getDeviceStats = async (req, res) => {
       });
     }
 
-    const daysAgo = parseInt(req.query.days) || 30;
-    const startDate = `${daysAgo}daysAgo`;
+    const isRealtime = req.query.days === 'realtime';
+    let response;
 
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [{ startDate, endDate: 'today' }],
-      dimensions: [{ name: 'deviceCategory' }],
-      metrics: [{ name: 'activeUsers' }]
-    });
+    if (isRealtime) {
+      // Use Realtime API
+      [response] = await analyticsDataClient.runRealtimeReport({
+        property: `properties/${propertyId}`,
+        dimensions: [{ name: 'deviceCategory' }],
+        metrics: [{ name: 'activeUsers' }]
+      });
+    } else {
+      const daysAgo = parseInt(req.query.days) || 30;
+      const startDate = `${daysAgo}daysAgo`;
+
+      [response] = await analyticsDataClient.runReport({
+        property: `properties/${propertyId}`,
+        dateRanges: [{ startDate, endDate: 'today' }],
+        dimensions: [{ name: 'deviceCategory' }],
+        metrics: [{ name: 'activeUsers' }]
+      });
+    }
 
     const totalUsers = response.rows?.reduce((sum, row) => {
       return sum + parseInt(row.metricValues?.[0]?.value || '0');
@@ -273,17 +353,31 @@ exports.getCountryStats = async (req, res) => {
     }
 
     const limit = parseInt(req.query.limit) || 5;
-    const daysAgo = parseInt(req.query.days) || 30;
-    const startDate = `${daysAgo}daysAgo`;
+    const isRealtime = req.query.days === 'realtime';
+    let response;
 
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [{ startDate, endDate: 'today' }],
-      dimensions: [{ name: 'country' }],
-      metrics: [{ name: 'activeUsers' }],
-      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
-      limit
-    });
+    if (isRealtime) {
+      // Use Realtime API
+      [response] = await analyticsDataClient.runRealtimeReport({
+        property: `properties/${propertyId}`,
+        dimensions: [{ name: 'country' }],
+        metrics: [{ name: 'activeUsers' }],
+        orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+        limit
+      });
+    } else {
+      const daysAgo = parseInt(req.query.days) || 30;
+      const startDate = `${daysAgo}daysAgo`;
+
+      [response] = await analyticsDataClient.runReport({
+        property: `properties/${propertyId}`,
+        dateRanges: [{ startDate, endDate: 'today' }],
+        dimensions: [{ name: 'country' }],
+        metrics: [{ name: 'activeUsers' }],
+        orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+        limit
+      });
+    }
 
     // Country flag mapping
     const countryFlags = {
