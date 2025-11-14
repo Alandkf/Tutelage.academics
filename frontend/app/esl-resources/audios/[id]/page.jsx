@@ -309,12 +309,26 @@ const SingleAudio = () => {
           </div>
         ) : null }
 
+        {/* Tags Section - styled like language level but with dark background */}
+			{Array.isArray(audio?.tags) && audio.tags.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{audio.tags.map((t, i) => (
+								<span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+							))}
+						</div>
+					</div>
+				</div>
+			)}
+
         {/* Language Level — accept string or array and render when present */}
         {(() => {
           const levels = Array.isArray(audio?.level) ? audio.level : (audio?.level ? [audio.level] : []);
           if (!levels.length) return null;
           return (
-            <div className="mt-12">
+            <div className="mt-4">
               <h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
               <div className="p-6 rounded-md">
                 <div className="flex flex-wrap gap-3">
