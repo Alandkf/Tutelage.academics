@@ -30,7 +30,7 @@ const EnglishProficiencyTestsPage = () => {
       title: "IELTS Academic",
       description: "Comprehensive preparation for IELTS Academic test covering all four skills with expert strategies and practice materials.",
       image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ieltsacademic",
+      href: "/courses/englishproficiencytests/ieltsacademic",
       features: [
         "Comprehensive coverage of all four IELTS sections",
         "Practice with authentic IELTS materials",
@@ -42,7 +42,7 @@ const EnglishProficiencyTestsPage = () => {
       title: "IELTS General Training",
       description: "Targeted preparation for IELTS General Training with focus on practical English skills for work and migration.",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ieltsgeneral",
+      href: "/courses/englishproficiencytests/ieltsgeneral",
       features: [
         "Focus on practical English for everyday situations",
         "Targeted preparation for migration and work visa requirements",
@@ -54,7 +54,7 @@ const EnglishProficiencyTestsPage = () => {
       title: "TOEFL Preparation Course",
       description: "Complete TOEFL iBT preparation with proven strategies for Reading, Listening, Speaking, and Writing sections.",
       image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
-      href: "/courses/Englishproficiencytests/toeflpreparationcourse",
+      href: "/courses/englishproficiencytests/toeflpreparationcourse",
       features: [
         "Master the computer-based TOEFL format",
         "Comprehensive training in all four sections",
@@ -66,7 +66,7 @@ const EnglishProficiencyTestsPage = () => {
       title: "PTE Preparation Course",
       description: "Expert coaching for PTE Academic with computer-based practice and scoring strategies for all test sections.",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80",
-      href: "/courses/Englishproficiencytests/ptepreparationcourse",
+      href: "/courses/englishproficiencytests/ptepreparationcourse",
       features: [
         "Specialized computer-based testing preparation",
         "Understanding of automated scoring algorithm",

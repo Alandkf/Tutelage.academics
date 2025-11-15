@@ -17,7 +17,7 @@ const CoursesShowcase = () => {
     "/courses/englishforkids",
     "/courses/englishforadults",
     "/courses/academicenglish",
-    "/courses/Englishproficiencytests",
+    "/courses/englishproficiencytests",
     "/courses/businessenglish"
   ]
 
