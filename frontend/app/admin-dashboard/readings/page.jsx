@@ -82,12 +82,13 @@ const Readings = () => {
         reqInit.body = JSON.stringify(values)
       }
       const res = await fetch(`${BASE_URL}/api/readings`, reqInit)
-      if (!res.ok) throw new Error("Failed to create reading")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Reading created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create reading", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -117,13 +118,14 @@ const Readings = () => {
         reqInit.body = JSON.stringify(values)
       }
       const res = await fetch(`${BASE_URL}/api/readings/${editReading.id}`, reqInit)
-      if (!res.ok) throw new Error("Failed to update reading")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditReading(null)
       resetAndFetch()
-      toast("Reading updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update reading", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -135,13 +137,18 @@ const Readings = () => {
   const confirmDelete = async () => {
     if (!deleteReading) return
     try {
-      await fetch(`${BASE_URL}/api/readings/${deleteReading.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/readings/${deleteReading.id}`, {
+        method: "DELETE",
+        credentials: "include"
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteReading(null)
       resetAndFetch()
-      toast("Reading deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete reading", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 

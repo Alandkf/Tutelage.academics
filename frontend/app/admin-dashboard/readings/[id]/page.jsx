@@ -69,22 +69,25 @@ export default function AdminReadingDetailPage() {
         reqInit.body = JSON.stringify(values)
       }
       const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, reqInit)
-      if (!res.ok) throw new Error('Failed to update')
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       fetchReading()
-      toast('Reading updated successfully', { variant: 'success' })
+      toast(data.message, { variant: 'success' })
     } catch (e) {
-      toast(e.message || 'Failed to update reading', { variant: 'destructive' })
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${BASE_URL}/api/readings/${params.id}`, { method: 'DELETE', credentials: 'include' })
-      toast('Reading deleted successfully', { variant: 'destructive' })
+      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
+      toast(data.message, { variant: 'destructive' })
       router.push('/admin-dashboard/readings')
-    } catch {
-      toast('Failed to delete reading', { variant: 'destructive' })
+    } catch (e) {
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
