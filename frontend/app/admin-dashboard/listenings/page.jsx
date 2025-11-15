@@ -69,12 +69,13 @@ const Audio = () => {
         credentials: "include",
         body: formData // FormData is already prepared by AudioForm
       })
-      if (!res.ok) throw new Error("Failed to create audio")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Audio created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -91,13 +92,14 @@ const Audio = () => {
         credentials: "include",
         body: formData // FormData is already prepared by AudioForm
       })
-      if (!res.ok) throw new Error("Failed to update audio")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditAudio(null)
       resetAndFetch()
-      toast("Audio updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -109,16 +111,18 @@ const Audio = () => {
   const confirmDelete = async () => {
     if (!deleteAudio) return
     try {
-      await fetch(`${BASE_URL}/api/audios/${deleteAudio.id}`, {
+      const res = await fetch(`${BASE_URL}/api/audios/${deleteAudio.id}`, {
         method: "DELETE",
         credentials: "include"
       })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteAudio(null)
       resetAndFetch()
-      toast("Audio deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete audio", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 

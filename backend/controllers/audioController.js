@@ -211,6 +211,7 @@ const getAllAudios = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Audios fetched successfully',
       data: {
         audios: enriched,
         pagination: {
@@ -295,6 +296,7 @@ const getPaginatedAudios = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Audios fetched successfully',
       data: {
         audios: enriched,
         pagination: {
@@ -346,6 +348,7 @@ const getAudioById = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Audio content fetched successfully',
       data: { ...audio.toJSON(), tags: tagList }
     });
   } catch (error) {
