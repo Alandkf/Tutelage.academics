@@ -45,7 +45,7 @@ export default function Navbar (){
         { name: "English for kids and teens", href: "/courses/englishforkids" },
         { name: "English for adults", href: "/courses/englishforadults" },
         { name: "Academic English", href: "/courses/academicenglish" },
-        { name: "English proficiency Tests", href: "/courses/Englishproficiencytests" },
+        { name: "English proficiency Tests", href: "/courses/englishproficiencytests" },
         { name: "Business English", href: "/courses/businessenglish" },
       ],
     },
@@ -63,7 +63,7 @@ export default function Navbar (){
       name: "ESL resources",
       href: "/esl-resources",
       dropdown: [
-        { name: "Story Library", href: "/esl-resources/storys" },
+        { name: "Story Library", href: "/esl-resources/stories" },
         { name: "Blog Library", href: "/esl-resources/blogs" },
         { name: "Video Library", href: "/esl-resources/videos" },
         { name: "Audio Library", href: "/esl-resources/audios" },

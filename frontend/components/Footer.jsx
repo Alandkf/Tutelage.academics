@@ -36,7 +36,7 @@ export const Footer = () => {
 
   // ESL Resources links
   const eslResourcesLinks = [
-    { name: "Story Library", href: "/esl-resources/storys" },
+    { name: "Story Library", href: "/esl-resources/stories" },
     { name: "Blog Library", href: "/esl-resources/blogs" },
     { name: "Video Library", href: "/esl-resources/videos" },
     { name: "Audio Library", href: "/esl-resources/audiso" },

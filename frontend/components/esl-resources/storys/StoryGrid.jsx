@@ -129,7 +129,7 @@ const StoryGrid = () => {
             stories?.map((story) => (
               <Link
                 key={story.id}
-                href={`/esl-resources/storys/${story.id}`}
+                href={`/esl-resources/stories/${story.id}`}
                 className="group"
               >
                 <div className="bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">

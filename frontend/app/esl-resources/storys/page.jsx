@@ -1,8 +1,8 @@
 'use client'
 
-import StoryLibraryHero from '@/components/esl-resources/storys/StoryLibraryHero'
-import StoryLibraryDescription from '@/components/esl-resources/storys/StoryLibraryDescription'
-import StoryGrid from '@/components/esl-resources/storys/StoryGrid'
+import StoryLibraryHero from '@/components/esl-resources/stories/StoryLibraryHero'
+import StoryLibraryDescription from '@/components/esl-resources/stories/StoryLibraryDescription'
+import StoryGrid from '@/components/esl-resources/stories/StoryGrid'
 import CallToAction from '@/components/CallToAction'
 
 const StoryLibraryPage = () => {

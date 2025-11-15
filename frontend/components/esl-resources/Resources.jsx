@@ -11,7 +11,7 @@ const Resources = () => {
       title: "Story Library",
       description: "Enjoy reading! Discover a variety of free short stories for all levels. Stories help you learn new words, improve reading skills, and see English used naturally.",
       image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80", // Person reading a book
-      href: "/esl-resources/storys",
+      href: "/esl-resources/stories",
       buttonText: "Explore Stories"
     },
     {
