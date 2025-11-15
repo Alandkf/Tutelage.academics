@@ -176,7 +176,7 @@ const Writings = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {writings.map((writing, idx) => (
-            <Link key={writing.id} href={`/admin-dashboard/writings/${writing.id}`} ref={idx === writings.length - 1 ? lastWritingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
+            <Link key={idx} href={`/admin-dashboard/writings/${writing.id}`} ref={idx === writings.length - 1 ? lastWritingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
               <div className="relative h-44 w-full overflow-hidden">
                 <Image src={writing.imageUrl || '/placeholder-16-9.png'} alt={writing.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
               </div>

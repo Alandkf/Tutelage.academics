@@ -25,7 +25,7 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
         <div className="absolute inset-0 bg-black/60 z-10" />
         <div className="absolute inset-0 flex flex-col items-start justify-center z-20 px-4 text-left md:text-center md:items-center mt-14 md:mt-40">
           <div className='w-full bg-transparent max-md:h-[58px]'/>
-          <h1 className="text-6xl sm:text-7xl max-md:leading-20 md:text-5xl max-w-3xl font-semibold text-white drop-shadow mb-10 md:mb-4">{safeTitle}</h1>
+          <h1 className="text-6xl sm:text-7xl max-md:leading-20 md:text-5xl max-w-5xl font-semibold text-white drop-shadow mb-10 md:mb-4">{safeTitle}</h1>
           <p className="text-lg sm:text-xl md:text-lg text-white/80 font-normal max-w-4xl mx-auto mb-7">{safeSubtitle}</p>
           <form className="hidden w-full max-w-2xl md:flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 mx-auto">
             <Input

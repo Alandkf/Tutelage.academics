@@ -54,11 +54,12 @@ export default function LandingAdminPage() {
         credentials: "include",
         body: JSON.stringify({ title, subtitle, imageUrl })
       })
-      if (!res.ok) throw new Error("Failed to save landing section")
-      toast("Landing section saved", { variant: "success" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
+      toast(data.message, { variant: "success" })
       await fetchLatest()
     } catch (e) {
-      toast("Failed to save landing section", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     } finally {
       setSaving(false)
     }
