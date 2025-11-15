@@ -1,11 +1,13 @@
 'use client'
 
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BarChart, TrendingUp, Users, Eye, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import BASE_URL from '/app/config/url'
+import AnalyticsChartSkeleton from "@/components/skeletons/AnalyticsChartSkeleton"
 
 const AnalyticsChart = () => {
   const [stats, setStats] = useState(null)
@@ -52,14 +54,7 @@ const AnalyticsChart = () => {
 
 
   if (loading) {
-    return (
-      <Card className="min-h-[500px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading analytics...</p>
-        </div>
-      </Card>
-    )
+    return <AnalyticsChartSkeleton />
   }
 
   if (error) {
