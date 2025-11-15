@@ -172,7 +172,13 @@ const AnalyticsPage = () => {
       const dd = String(d.getDate()).padStart(2, '0')
       const dateStr = `${yyyy}${mm}${dd}`
       const existing = dailyMap.get(dateStr)
-      const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' })
+      // For 30 and 90 days, show date (e.g., Nov 15); otherwise, show weekday
+      let dayLabel
+      if (dateRange === 30 || dateRange === 90) {
+        dayLabel = d.toLocaleDateString('en-US', { day: 'numeric' , month: 'short'})
+      } else {
+        dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' })
+      }
       padded.push({
         date: dateStr,
         day: dayLabel,
@@ -483,11 +489,11 @@ const AnalyticsPage = () => {
               <div className="flex items-center justify-center gap-6 pt-4 border-t">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded bg-primary" />
-                  <span className="text-sm text-muted-foreground">Page Views</span>
+                  <span className="text-sm text-muted-foreground">website Views</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded bg-green-500" />
-                  <span className="text-sm text-muted-foreground">Unique Visitors</span>
+                  <span className="text-sm text-muted-foreground">Active Visitors</span>
                 </div>
               </div>
             </div>
