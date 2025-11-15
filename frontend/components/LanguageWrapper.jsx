@@ -6,7 +6,7 @@ export default function LanguageWrapper({ children }) {
   const pathname = usePathname();
   
   const LanguageRoutes = [
-    '/courses',
+    '/languages',
   ];
 
 
