@@ -65,12 +65,13 @@ const EslAudios = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create audio")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       fetchAudios()
-      toast("ESL Audio created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -98,13 +99,14 @@ const EslAudios = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to update audio")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditAudio(null)
       fetchAudios()
-      toast("ESL Audio updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -116,13 +118,15 @@ const EslAudios = () => {
   const confirmDelete = async () => {
     if (!deleteAudio) return
     try {
-      await fetch(`${BASE_URL}/api/esl-audios/${deleteAudio.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/esl-audios/${deleteAudio.id}`, { method: "DELETE", credentials: "include" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteAudio(null)
       fetchAudios()
-      toast("ESL Audio deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete audio", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 

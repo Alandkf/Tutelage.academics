@@ -68,22 +68,25 @@ export default function AdminEslAudioDetailPage() {
         credentials: 'include',
         body: fd
       })
-      if (!res.ok) throw new Error('Failed to update')
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       fetchAudio()
-      toast('Audio updated successfully', { variant: 'success' })
+      toast(data.message, { variant: 'success' })
     } catch (e) {
-      toast(e.message || 'Failed to update audio', { variant: 'destructive' })
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${BASE_URL}/api/esl-audios/${params.id}`, { method: 'DELETE', credentials: 'include' })
-      toast('Audio deleted successfully', { variant: 'destructive' })
+      const res = await fetch(`${BASE_URL}/api/esl-audios/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
+      toast(data.message, { variant: 'destructive' })
       router.push('/admin-dashboard/eslAudios')
-    } catch {
-      toast('Failed to delete audio', { variant: 'destructive' })
+    } catch (e) {
+      toast(e.message, { variant: 'destructive' })
     }
   }
 

@@ -102,7 +102,7 @@ exports.createEslVideo = async (req, res) => {
     if (tagNames.length) await attachTags(video.id, tagNames);
     
     const tagList = await includeTagsFor(video.id);
-    res.status(201).json({ success: true, data: { ...video.toJSON(), tags: tagList } });
+    res.status(201).json({ success: true, message: 'Esl Video Created Successfully', data: { ...video.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error creating ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -165,6 +165,7 @@ exports.getAllEslVideos = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
+      message: 'Esl Videos fetched successfully',
       data: enriched,
       pagination: {
         nextCursor,
@@ -186,7 +187,7 @@ exports.getEslVideoById = async (req, res) => {
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
     const tags = await includeTagsFor(video.id);
     const metrics = await bumpAnalytics(video.id, 'views', 1);
-    res.status(200).json({ success: true, data: { ...video.toJSON(), tags, metrics } });
+    res.status(200).json({ success: true, message: 'Esl Video fetched successfully', data: { ...video.toJSON(), tags, metrics } });
   } catch (err) {
     console.error('Error fetching ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -231,7 +232,7 @@ exports.updateEslVideo = async (req, res) => {
     }
     
     const tagList = await includeTagsFor(video.id);
-    res.status(200).json({ success: true, data: { ...video.toJSON(), tags: tagList } });
+    res.status(200).json({ success: true, message: 'Esl Video Updated Successfully', data: { ...video.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error updating ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -247,7 +248,7 @@ exports.deleteEslVideo = async (req, res) => {
     await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
     await video.destroy();
-    res.status(200).json({ success: true, message: 'Video deleted' });
+    res.status(200).json({ success: true, message: 'Esl Video deleted Successfully' });
   } catch (err) {
     console.error('Error deleting ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

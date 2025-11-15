@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { BlogCard } from "@/components/admin/blogs/BlogCard"
 import BlogForm from "@/components/forms/BlogForm"
-import { Plus, RefreshCw } from "lucide-react"
+import { Edit, Plus, RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
@@ -168,9 +168,9 @@ export default function BlogsPage() {
                   authorEmail={blog.author?.email || ''}
                 />
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}>Edit</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}>Delete</Button>
+                  <div className="absolute top-2 right-2 flex gap-1 ">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}><Edit className="h-4 w-4" /></Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 )}
               </div>

@@ -88,7 +88,7 @@ exports.createEslAudio = async (req, res) => {
     
     // Fetch tags from join table for response
     const tagList = await includeTagsFor(audio.id);
-    res.status(201).json({ success: true, data: { ...audio.toJSON(), tags: tagList } });
+    res.status(201).json({ success: true,message: "Esl Audio Created Successfully", data: { ...audio.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error creating ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -196,7 +196,7 @@ exports.updateEslAudio = async (req, res) => {
     
     // Fetch updated tags from join table
     const tagList = await includeTagsFor(audio.id);
-    res.status(200).json({ success: true, data: { ...audio.toJSON(), tags: tagList } });
+    res.status(200).json({ success: true,message : 'Esl Audio Updated Successfully', data: { ...audio.toJSON(), tags: tagList } });
   } catch (err) {
     console.error('Error updating ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -211,7 +211,7 @@ exports.deleteEslAudio = async (req, res) => {
     await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await audio.destroy();
-    res.status(200).json({ success: true, message: 'Audio deleted' });
+    res.status(200).json({ success: true, message: 'Esl Audio deleted Successfully' });
   } catch (err) {
     console.error('Error deleting ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
