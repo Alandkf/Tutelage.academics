@@ -81,12 +81,13 @@ const Stories = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create story")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Story created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create story", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -115,13 +116,14 @@ const Stories = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to update story")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditStory(null)
       resetAndFetch()
-      toast("Story updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update story", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -133,13 +135,15 @@ const Stories = () => {
   const confirmDelete = async () => {
     if (!deleteStory) return
     try {
-      await fetch(`${BASE_URL}/api/stories/${deleteStory.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/stories/${deleteStory.id}`, { method: "DELETE", credentials: "include" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteStory(null)
       resetAndFetch()
-      toast("Story deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete story", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 

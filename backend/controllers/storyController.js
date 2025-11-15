@@ -99,7 +99,7 @@ exports.createStory = async (req, res) => {
     const storyWithAuthor = await Story.findByPk(story.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
-    res.status(201).json({ success: true, message: 'Story created', data: storyWithAuthor });
+    res.status(201).json({ success: true, message: 'Story created Successfully', data: storyWithAuthor });
   } catch (err) {
     console.error('Error creating story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -149,6 +149,7 @@ exports.getAllStories = async (req, res) => {
       const totalPages = Math.ceil(count / itemsPerPage);
       return res.status(200).json({ 
         success: true, 
+        message: 'Stories fetched successfully',
         data: { 
           stories: rows, 
           pagination: { 
@@ -205,7 +206,7 @@ exports.getStoryById = async (req, res) => {
     // Attach tag names
     const mappings = await ResourceTag.findAll({ where: { resourceType: 'story', resourceId: story.id }, include: [{ model: Tag, as: 'tag' }] });
     const tagNames = mappings.map(m => m.tag?.name).filter(Boolean);
-    res.status(200).json({ success: true, data: { story, tags: tagNames } });
+    res.status(200).json({ success: true, message: "Story Fetched Successfully" , data: { story, tags: tagNames } });
   } catch (err) {
     console.error('Error fetching story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -254,7 +255,7 @@ exports.updateStory = async (req, res) => {
       await attachTags(story.id, Array.isArray(tags) ? tags : String(tags).split(',').map(s => s.trim()).filter(Boolean));
     }
     const updated = await Story.findByPk(id, { include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }] });
-    res.status(200).json({ success: true, message: 'Story updated', data: updated });
+    res.status(200).json({ success: true, message: 'Story updated successfully', data: updated });
   } catch (err) {
     console.error('Error updating story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -270,7 +271,7 @@ exports.deleteStory = async (req, res) => {
     await ResourceTag.destroy({ where: { resourceType: 'story', resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: 'story', resourceId: id } });
     await story.destroy();
-    res.status(200).json({ success: true, message: 'Story deleted' });
+    res.status(200).json({ success: true, message: 'Story deleted successfully' });
   } catch (err) {
     console.error('Error deleting story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
