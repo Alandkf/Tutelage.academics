@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import BASE_URL from '/app/config/url'
+import AnalyticsPageSkeleton from "@/components/skeletons/AnalyticsPageSkeleton"
 
 
 const AnalyticsPage = () => {
@@ -88,14 +89,7 @@ const AnalyticsPage = () => {
   }, [dateRange])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-lg font-medium">Loading analytics dashboard...</p>
-        </div>
-      </div>
-    )
+    return <AnalyticsPageSkeleton />
   }
 
   if (error) {
