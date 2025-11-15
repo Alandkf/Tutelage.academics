@@ -120,8 +120,10 @@ const AnalyticsPage = () => {
   const isAllTime = dateRange === 'all'
   
   let chartData = []
-  if (isAllTime && dailyData.length > 30) {
-    // Aggregate data by month for all time view (produce short month labels: Jan, Feb, ...)
+  // For 'all time' and '365 days', always aggregate by month (12 bars, month labels)
+  const shouldShowMonthly = isAllTime || dateRange === 365
+  if (shouldShowMonthly) {
+    // Aggregate data by month for all time or 365 days view (produce short month labels: Jan, Feb, ...)
     const monthlyMap = new Map()
     dailyData.forEach(day => {
       const date = new Date(
@@ -142,8 +144,19 @@ const AnalyticsPage = () => {
       m.users += day.users
     })
 
-    // Keep chronological order and take last 12 months
-    chartData = Array.from(monthlyMap.values()).sort((a, b) => a.id.localeCompare(b.id)).slice(-12)
+    // Always show last 12 months, even if some months have zero data
+    const now = new Date()
+    const months = []
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const year = d.getFullYear()
+      const monthIndex = d.getMonth() + 1
+      const monthId = `${year}-${String(monthIndex).padStart(2, '0')}`
+      const monthLabel = d.toLocaleDateString('en-US', { month: 'short' })
+      const m = monthlyMap.get(monthId) || { id: monthId, day: monthLabel, views: 0, users: 0 }
+      months.push(m)
+    }
+    chartData = months
   } else {
     // Show daily data (pad to requested days: realtime -> 7, otherwise selected number or 30)
     const daysToShow = dateRange === 'realtime' ? 7 : (typeof dateRange === 'number' ? dateRange : 30)
