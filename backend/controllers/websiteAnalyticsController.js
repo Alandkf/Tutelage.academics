@@ -173,35 +173,32 @@ exports.getDailyStats = async (req, res) => {
       orderBys: [{ dimension: { dimensionName: 'date' }, desc: false }]
     });
 
-    let dailyData = response.rows?.map(row => {
+    // Map rows by date string for quick lookup
+    const rowsMap = new Map();
+    (response.rows || []).forEach(row => {
       const dateStr = row.dimensionValues?.[0]?.value || '';
-      // Format: YYYYMMDD -> parse to readable date
-      const year = dateStr.substring(0, 4);
-      const month = dateStr.substring(4, 6);
-      const day = dateStr.substring(6, 8);
-      const date = new Date(`${year}-${month}-${day}`);
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+      const views = parseInt(row.metricValues?.[0]?.value || '0');
+      const users = parseInt(row.metricValues?.[1]?.value || '0');
+      if (dateStr) rowsMap.set(dateStr, { date: dateStr, views, users });
+    });
 
-      return {
+    // Build a continuous daily array for the requested `days` length (oldest -> newest)
+    const dailyData = [];
+    const today = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}${mm}${dd}`;
+      const found = rowsMap.get(dateStr);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      dailyData.push({
         date: dateStr,
         day: dayName,
-        views: parseInt(row.metricValues?.[0]?.value || '0'),
-        users: parseInt(row.metricValues?.[1]?.value || '0')
-      };
-    }) || [];
-
-    // If no historical data, create placeholder data for last 7 days
-    if (dailyData.length === 0) {
-      dailyData = Array.from({ length: days }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (days - 1 - i));
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-        return {
-          date: date.toISOString().split('T')[0].replace(/-/g, ''),
-          day: dayName,
-          views: 0,
-          users: 0
-        };
+        views: found ? found.views : 0,
+        users: found ? found.users : 0
       });
     }
 

@@ -145,8 +145,29 @@ const AnalyticsPage = () => {
     // Keep chronological order and take last 12 months
     chartData = Array.from(monthlyMap.values()).sort((a, b) => a.id.localeCompare(b.id)).slice(-12)
   } else {
-    // Show daily data (max 30 days)
-    chartData = dailyData.slice(-30)
+    // Show daily data (pad to requested days: realtime -> 7, otherwise selected number or 30)
+    const daysToShow = dateRange === 'realtime' ? 7 : (typeof dateRange === 'number' ? dateRange : 30)
+    // Build map of existing dailyData by date
+    const dailyMap = new Map(dailyData.map(d => [d.date, d]))
+    const today = new Date()
+    const padded = []
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      const dateStr = `${yyyy}${mm}${dd}`
+      const existing = dailyMap.get(dateStr)
+      const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' })
+      padded.push({
+        date: dateStr,
+        day: dayLabel,
+        views: existing ? existing.views : 0,
+        users: existing ? existing.users : 0
+      })
+    }
+    chartData = padded
   }
   
   const maxValue = Math.max(...chartData.map(d => Math.max(d.views, d.users)), 1)
@@ -416,7 +437,7 @@ const AnalyticsPage = () => {
           <CardContent>
             <div className="space-y-4">
               {/* Chart */}
-              <div className="flex items-end justify-between gap-3 h-64">
+              <div className="flex items-end justify-between gap-3 h-64 overflow-y-auto">
                 {chartData.length > 0 ? (
                   chartData.map((data, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">

@@ -5,15 +5,20 @@ import { Button } from "@/components/ui/button"
 import { BarChart, TrendingUp, Users, Eye, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import BASE_URL from '/app/config/url'
 
 const AnalyticsChart = () => {
   const [stats, setStats] = useState(null)
   const [dailyData, setDailyData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showDebug, setShowDebug] = useState(false)
+  
 
 
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || ''
+
+
+  // Use same BASE_URL helper as the main dashboard so endpoints are consistent
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -43,6 +48,8 @@ const AnalyticsChart = () => {
 
     fetchAnalytics()
   }, [])
+    
+
 
   if (loading) {
     return (
@@ -66,7 +73,36 @@ const AnalyticsChart = () => {
     )
   }
 
-  const maxViews = Math.max(...dailyData.map(d => d.views), 1)
+  // Build a padded 7-day dataset (oldest -> newest) so the chart always shows 7 bars
+  const build7DayData = () => {
+    const daysToShow = 7
+    const map = new Map(dailyData.map(d => [d.date, d]))
+    const today = new Date()
+    const out = []
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      const dateStr = `${yyyy}${mm}${dd}`
+      const found = map.get(dateStr)
+      out.push({
+        date: dateStr,
+        day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        views: found ? found.views : 0,
+        users: found ? found.users : 0
+      })
+    }
+    return out
+  }
+  const displayData = build7DayData()
+  // Debug logs to help verify data on the client
+  if (process.env.NODE_ENV === 'development') {
+    console.debug('AnalyticsChart: raw dailyData:', dailyData)
+    console.debug('AnalyticsChart: displayData (7-day padded):', displayData)
+  }
+  const displayMax = Math.max(...displayData.map(d => Math.max(d.views, d.users)), 1)
 
   return (
     <Card className="min-h-[500px] flex flex-col">
@@ -108,23 +144,30 @@ const AnalyticsChart = () => {
         {/* Simple Chart Visualization */}
         <div className="flex-1 flex flex-col justify-end mb-6">
           <p className="text-sm font-medium mb-3 text-muted-foreground">Last 7 Days Activity {dailyData.length === 0 && '(Building history...)'}</p>
-          <div className="flex items-end justify-between gap-2 h-32">
-            {dailyData.length > 0 ? (
-              dailyData.map((data, idx) => {
-                const height = (data.views / maxViews) * 100
-                return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                    <div 
-                      className="w-full bg-gradient-to-t from-primary to-primary/60 rounded-t-md transition-all hover:from-primary/80 hover:to-primary/40"
-                      style={{ height: `${height}%` }}
+          <div className="flex items-start gap-1 h-32">
+            {displayData.length > 0 ? (
+              displayData.map((data, idx) => (
+                <div
+                  key={idx}
+                  className="flex-none flex flex-col items-center gap-1 h-full justify-start"
+                  style={{ width: `${100 / displayData.length}%` }}
+                >
+                  {/* <div className="text-[10px] text-muted-foreground h-4">
+                    {data.views > 0 ? data.views : ''}
+                  </div> */}
+                  <div className="w-[80%] flex gap-1 items-end" style={{ height: '100%' }}>
+                    {/* Views bar (primary) */}
+                    <div
+                      className="flex-1 bg-gradient-to-t from-primary to-primary/60 rounded-t-md hover:from-primary/80 transition-all"
+                      style={{ height: `${(data.views / displayMax) * 100}%` }}
                       title={`${data.views} views`}
                     />
-                    <span className="text-xs text-muted-foreground">
-                      {data.day}
-                    </span>
                   </div>
-                )
-              })
+                  <span className="text-xs text-muted-foreground">
+                    {data.day}
+                  </span>
+                </div>
+              ))
             ) : (
               <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
                 No data available yet
