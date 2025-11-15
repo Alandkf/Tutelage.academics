@@ -80,12 +80,13 @@ const Writings = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create writing")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Writing created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create writing", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -113,13 +114,14 @@ const Writings = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to update writing")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditWriting(null)
       resetAndFetch()
-      toast("Writing updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update writing", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -131,13 +133,15 @@ const Writings = () => {
   const confirmDelete = async () => {
     if (!deleteWriting) return
     try {
-      await fetch(`${BASE_URL}/api/writings/${deleteWriting.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/writings/${deleteWriting.id}`, { method: "DELETE", credentials: "include" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteWriting(null)
       resetAndFetch()
-      toast("Writing deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete writing", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
