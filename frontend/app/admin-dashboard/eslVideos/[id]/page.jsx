@@ -64,22 +64,25 @@ export default function AdminEslVideoDetailPage() {
         credentials: 'include',
         body: fd
       })
-      if (!res.ok) throw new Error('Failed to update')
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       fetchVideo()
-      toast('Video updated successfully', { variant: 'success' })
+      toast(data.message, { variant: 'success' })
     } catch (e) {
-      toast(e.message || 'Failed to update video', { variant: 'destructive' })
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, { method: 'DELETE', credentials: 'include' })
-      toast('Video deleted successfully', { variant: 'destructive' })
+      const res = await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
+      toast(data.message, { variant: 'destructive' })
       router.push('/admin-dashboard/eslVideos')
-    } catch {
-      toast('Failed to delete video', { variant: 'destructive' })
+    } catch (e) {
+      toast(e.message, { variant: 'destructive' })
     }
   }
 

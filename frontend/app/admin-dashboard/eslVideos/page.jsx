@@ -79,12 +79,13 @@ const EslVideos = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create video")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("ESL Video created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create video", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -110,13 +111,14 @@ const EslVideos = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to update video")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditVideo(null)
       resetAndFetch()
-      toast("ESL Video updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update video", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -128,13 +130,15 @@ const EslVideos = () => {
   const confirmDelete = async () => {
     if (!deleteVideo) return
     try {
-      await fetch(`${BASE_URL}/api/esl-videos/${deleteVideo.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/esl-videos/${deleteVideo.id}`, { method: "DELETE", credentials: "include" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteVideo(null)
       resetAndFetch()
-      toast("ESL Video deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete video", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
