@@ -83,12 +83,13 @@ export default function BlogsPage() {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create blog")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Blog created successfully", { variant: "success" })
-    } catch {
-      toast("Failed to create blog", { variant: "destructive" })
+      toast(data.message, { variant: "success" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -107,16 +108,18 @@ export default function BlogsPage() {
   const confirmDelete = async () => {
     if (!deleteBlog) return
     try {
-      await fetch(`${BASE_URL}/api/blogs/${deleteBlog.id}`, {
+      const res = await fetch(`${BASE_URL}/api/blogs/${deleteBlog.id}`, {
         method: "DELETE",
         credentials: "include"
       })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteBlog(null)
       resetAndFetch()
-      toast("Blog deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete blog", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -226,13 +229,14 @@ export default function BlogsPage() {
                   credentials: "include",
                   body: fd
                 })
-                if (!res.ok) throw new Error("Failed to update blog")
+                const data = await res.json()
+                if (!res.ok || !data.success) throw new Error(data.message)
                 setShowEdit(false)
                 setEditBlog(null)
                 resetAndFetch()
-                toast("Blog updated successfully", { variant: "success" })
-              } catch {
-                toast("Failed to update blog", { variant: "destructive" })
+                toast(data.message, { variant: "success" })
+              } catch (e) {
+                toast(e.message, { variant: "destructive" })
               }
             }}
             onCancel={() => { setShowEdit(false); setEditBlog(null) }}
