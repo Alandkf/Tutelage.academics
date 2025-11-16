@@ -80,12 +80,13 @@ const Writings = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to create writing")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Writing created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create writing", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -113,13 +114,14 @@ const Writings = () => {
         credentials: "include",
         body: fd
       })
-      if (!res.ok) throw new Error("Failed to update writing")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditWriting(null)
       resetAndFetch()
-      toast("Writing updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update writing", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -131,13 +133,15 @@ const Writings = () => {
   const confirmDelete = async () => {
     if (!deleteWriting) return
     try {
-      await fetch(`${BASE_URL}/api/writings/${deleteWriting.id}`, { method: "DELETE", credentials: "include" })
+      const res = await fetch(`${BASE_URL}/api/writings/${deleteWriting.id}`, { method: "DELETE", credentials: "include" })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteWriting(null)
       resetAndFetch()
-      toast("Writing deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete writing", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -151,7 +155,7 @@ const Writings = () => {
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Writings</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />Create Writing
           </Button>
         )}
@@ -172,7 +176,7 @@ const Writings = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {writings.map((writing, idx) => (
-            <Link key={writing.id} href={`/admin-dashboard/writings/${writing.id}`} ref={idx === writings.length - 1 ? lastWritingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
+            <Link key={idx} href={`/admin-dashboard/writings/${writing.id}`} ref={idx === writings.length - 1 ? lastWritingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
               <div className="relative h-44 w-full overflow-hidden">
                 <Image src={writing.imageUrl || '/placeholder-16-9.png'} alt={writing.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
               </div>

@@ -6,13 +6,13 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { SlidersHorizontal } from 'lucide-react'
 
 export default function HeroSection({ title, subtitle, imageUrl }) {
-  const safeTitle = title || 'Empowering students worldwide with innovative virtual learning solutions'
-  const safeSubtitle = subtitle || 'Education is vital to everyone on this planet. With a passion for education, compassion for teachers, and advanced technology, we believe we can provide high-quality education for learners everywhere.'
+  const safeTitle = title || 'Your Solution For English Language Learning'
+  const safeSubtitle = subtitle || 'Driven by technology and expertise, we have empowered English learners worldwide since 2010, transforming the way language is taught and mastered. Discover new opportunities and reach your goals with Tutelage.'
   const imageSrc = imageUrl || '/hero.jpg'
 
   return (
     <>
-      <div className="relative w-full aspect-[16/7] min-h-[300px] h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[100vh]">
+      <div className="relative w-full min-h-[300px] h-[100vh]">
         <Image
           src={imageSrc}
           alt="Landing Hero"
@@ -23,9 +23,10 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 100vw"
         />
         <div className="absolute inset-0 bg-black/60 z-10" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 px-4 text-center mt-40">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl max-w-4xl font-bold text-white drop-shadow mb-4">{safeTitle}</h1>
-          <p className="text-sm sm:text-base md:text-lg text-white/80 font-normal max-w-5xl mx-auto mb-7">{safeSubtitle}</p>
+        <div className="absolute inset-0 flex flex-col items-start justify-center z-20 px-4 text-left md:text-center md:items-center mt-14 md:mt-40">
+          <div className='w-full bg-transparent max-md:h-[58px]'/>
+          <h1 className="text-6xl sm:text-7xl max-md:leading-20 md:text-5xl max-w-5xl font-semibold text-white drop-shadow mb-10 md:mb-4">{safeTitle}</h1>
+          <p className="text-lg sm:text-xl md:text-lg text-white/80 font-normal max-w-4xl mx-auto mb-7">{safeSubtitle}</p>
           <form className="hidden w-full max-w-2xl md:flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 mx-auto">
             <Input
               type="text"
@@ -40,8 +41,8 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
                 <SelectItem value="tests">Tests</SelectItem>
                 <SelectItem value="courses">Courses</SelectItem>
                 <SelectItem value="blogs">Blogs</SelectItem>
-                <SelectItem value="blogs">Levels</SelectItem>
-                <SelectItem value="services">Skills</SelectItem>
+                <SelectItem value="levels">Levels</SelectItem>
+                <SelectItem value="skills">Skills</SelectItem>
                 <SelectItem value="esl">ESL Resources</SelectItem>
               </SelectContent>
             </Select>

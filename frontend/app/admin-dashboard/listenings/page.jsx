@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -61,35 +62,20 @@ const Audio = () => {
 
   const lastAudioRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchAudios })
 
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
-      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
-      const reqInit = {
+      const res = await fetch(`${BASE_URL}/api/audios`, {
         method: "POST",
         credentials: "include",
-      }
-      if (isFile) {
-        const fd = new FormData()
-        fd.append('title', values.title ?? '')
-        fd.append('description', values.description ?? '')
-        fd.append('transcript', values.transcript ?? '')
-        fd.append('audioRef', values.audioRef ?? '')
-        fd.append('imageUrl', values.imageUrl ?? '')
-        fd.append('level', values.level ?? '')
-        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
-        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
-        reqInit.body = fd
-      } else {
-        reqInit.headers = { "Content-Type": "application/json" }
-        reqInit.body = JSON.stringify(values)
-      }
-      const res = await fetch(`${BASE_URL}/api/audios`, reqInit)
-      if (!res.ok) throw new Error("Failed to create audio")
+        body: formData // FormData is already prepared by AudioForm
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Audio created successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to create audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -98,37 +84,22 @@ const Audio = () => {
     setShowEdit(true)
   }
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     if (!editAudio) return
     try {
-      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
-      const reqInit = {
+      const res = await fetch(`${BASE_URL}/api/audios/${editAudio.id}`, {
         method: "PUT",
         credentials: "include",
-      }
-      if (isFile) {
-        const fd = new FormData()
-        fd.append('title', values.title ?? '')
-        fd.append('description', values.description ?? '')
-        fd.append('transcript', values.transcript ?? '')
-        fd.append('audioRef', values.audioRef ?? '')
-        fd.append('imageUrl', values.imageUrl ?? '')
-        fd.append('level', values.level ?? '')
-        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
-        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
-        reqInit.body = fd
-      } else {
-        reqInit.headers = { "Content-Type": "application/json" }
-        reqInit.body = JSON.stringify(values)
-      }
-      const res = await fetch(`${BASE_URL}/api/audios/${editAudio.id}`, reqInit)
-      if (!res.ok) throw new Error("Failed to update audio")
+        body: formData // FormData is already prepared by AudioForm
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditAudio(null)
       resetAndFetch()
-      toast("Audio updated successfully", { variant: "success" })
+      toast(data.message, { variant: "success" })
     } catch (e) {
-      toast(e.message || "Failed to update audio", { variant: "destructive" })
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -140,16 +111,18 @@ const Audio = () => {
   const confirmDelete = async () => {
     if (!deleteAudio) return
     try {
-      await fetch(`${BASE_URL}/api/audios/${deleteAudio.id}`, {
+      const res = await fetch(`${BASE_URL}/api/audios/${deleteAudio.id}`, {
         method: "DELETE",
         credentials: "include"
       })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteAudio(null)
       resetAndFetch()
-      toast("Audio deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete audio", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -163,7 +136,7 @@ const Audio = () => {
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Audios</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />
             Create Audio
           </Button>
@@ -198,38 +171,40 @@ const Audio = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {audios.map((audio, idx) => (
               <div
-                key={audio.id}
+                key={idx}
                 ref={idx === audios.length - 1 ? lastAudioRef : null}
                 className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
               >
-                <div className="relative h-44 w-full overflow-hidden">
-                  <Image
-                    src={audio.imageUrl || '/placeholder-16-9.png'}
-                    alt={audio.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                  />
-                </div>
+                <Link href={`/admin-dashboard/listenings/${audio.id}`} className="block">
+                  <div className="relative h-44 w-full overflow-hidden">
+                    <Image
+                      src={audio.imageUrl || '/placeholder-16-9.png'}
+                      alt={audio.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                    />
+                  </div>
 
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-foreground mb-2 truncate">{audio.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{truncate(audio.description)}</p>
-                  {audio.level && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {(Array.isArray(audio.level) ? audio.level : [audio.level]).map((lvl, i) => (
-                        <span key={i} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">{lvl}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-foreground mb-2 truncate">{audio.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-2">{truncate(audio.description)}</p>
+                    {audio.level && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {(Array.isArray(audio.level) ? audio.level : [audio.level]).map((lvl, i) => (
+                          <span key={i} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">{lvl}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Link>
 
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(audio)} className="h-8 px-2">
+                  <div className="absolute top-2 right-2 flex gap-1 z-10">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(audio) }} className="h-8 px-2">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(audio)} className="h-8 px-2">
+                    <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(audio) }} className="h-8 px-2">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

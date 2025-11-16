@@ -1,3 +1,5 @@
+'use client'
+
 import LevelsHero from '@/components/levels/LevelsHero'
 import LevelsDescription from '@/components/levels/LevelsDescription'
 import LevelsCards from '@/components/levels/LevelsCards'

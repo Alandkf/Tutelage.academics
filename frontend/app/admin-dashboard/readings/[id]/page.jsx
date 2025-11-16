@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/AuthContext'
 import BASE_URL from '@/app/config/url'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import ReadingForm from '@/components/forms/ReadingForm'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 export default function AdminReadingDetailPage() {
   const params = useParams()
@@ -19,6 +22,9 @@ export default function AdminReadingDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+
+  // PDF modal state using custom hook
+  const { isOpen: pdfModalOpen, pdfUrl: pdfModalUrl, title: pdfModalTitle, openPdf, closePdf } = usePdfModal()
 
   const fetchReading = async () => {
     setLoading(true)
@@ -63,22 +69,25 @@ export default function AdminReadingDetailPage() {
         reqInit.body = JSON.stringify(values)
       }
       const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, reqInit)
-      if (!res.ok) throw new Error('Failed to update')
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       fetchReading()
-      toast('Reading updated successfully', { variant: 'success' })
+      toast(data.message, { variant: 'success' })
     } catch (e) {
-      toast(e.message || 'Failed to update reading', { variant: 'destructive' })
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
   const confirmDelete = async () => {
     try {
-      await fetch(`${BASE_URL}/api/readings/${params.id}`, { method: 'DELETE', credentials: 'include' })
-      toast('Reading deleted successfully', { variant: 'destructive' })
+      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, { method: 'DELETE', credentials: 'include' })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
+      toast(data.message, { variant: 'destructive' })
       router.push('/admin-dashboard/readings')
-    } catch {
-      toast('Failed to delete reading', { variant: 'destructive' })
+    } catch (e) {
+      toast(e.message, { variant: 'destructive' })
     }
   }
 
@@ -143,17 +152,21 @@ export default function AdminReadingDetailPage() {
       {reading.pdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">PDF Resource</h3>
-          <a href={reading.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View PDF
-          </a>
+          <PdfButton 
+            pdfUrl={reading.pdf} 
+            onOpen={(url) => openPdf(url, 'Resource PDF')} 
+            label="Resource PDF"
+          />
         </div>
       )}
       {reading.taskPdf && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <a href={reading.taskPdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-            <ExternalLink className="w-4 h-4" />View Task PDF
-          </a>
+          <PdfButton 
+            pdfUrl={reading.taskPdf} 
+            onOpen={(url) => openPdf(url, 'Task PDF')} 
+            label="Task PDF"
+          />
         </div>
       )}
 
@@ -200,6 +213,14 @@ export default function AdminReadingDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Reusable PDF Modal */}
+      <PdfModal 
+        isOpen={pdfModalOpen} 
+        onClose={closePdf} 
+        pdfUrl={pdfModalUrl} 
+        title={pdfModalTitle}
+      />
     </div>
   )
 }

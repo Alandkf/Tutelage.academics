@@ -31,7 +31,11 @@ const createLandingSection = async (req, res) => {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email', 'role'] }]
     });
 
-    return res.status(201).json({ success: true, landingSection: withAuthor });
+    return res.status(201).json({
+      success: true,
+      message: 'Landing section created successfully',
+      landingSection: withAuthor
+    });
   } catch (error) {
     console.error('❌ createLandingSection error:', error);
     return res.status(500).json({ success: false, message: 'Server error creating landing section', error: error.message });
@@ -103,7 +107,11 @@ const getLandingSectionById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Landing section not found' });
     }
 
-    return res.status(200).json({ success: true, landingSection: entry });
+    return res.status(200).json({
+      success: true,
+      message: 'Landing section fetched successfully',
+      landingSection: entry
+    });
   } catch (error) {
     console.error('❌ getLandingSectionById error:', error);
     return res.status(500).json({ success: false, message: 'Server error getting landing section', error: error.message });
@@ -138,7 +146,11 @@ const updateLandingSection = async (req, res) => {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email', 'role'] }]
     });
 
-    return res.status(200).json({ success: true, landingSection: updated });
+    return res.status(200).json({
+      success: true,
+      message: 'Landing section updated successfully',
+      landingSection: updated
+    });
   } catch (error) {
     console.error('❌ updateLandingSection error:', error);
     return res.status(500).json({ success: false, message: 'Server error updating landing section', error: error.message });
@@ -162,7 +174,10 @@ const deleteLandingSection = async (req, res) => {
 
     await entry.destroy();
 
-    return res.status(200).json({ success: true, message: 'Landing section deleted successfully' });
+    return res.status(200).json({
+      success: true,
+      message: 'Landing section deleted successfully'
+    });
   } catch (error) {
     console.error('❌ deleteLandingSection error:', error);
     return res.status(500).json({ success: false, message: 'Server error deleting landing section', error: error.message });

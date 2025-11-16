@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -73,12 +74,13 @@ const Videos = () => {
         credentials: "include",
         body: formData
       })
-      if (!res.ok) throw new Error("Failed to create speaking")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Speaking created successfully", { variant: "success" })
-    } catch {
-      toast("Failed to create speaking", { variant: "destructive" })
+      toast(data.message, { variant: "success" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
   const handleEdit = (video) => {
@@ -93,13 +95,14 @@ const Videos = () => {
         credentials: "include",
         body: formData
       })
-      if (!res.ok) throw new Error("Failed to update speaking")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       setEditVideo(null)
       resetAndFetch()
-      toast("Speaking updated successfully", { variant: "success" })
-    } catch {
-      toast("Failed to update speaking", { variant: "destructive" })
+      toast(data.message, { variant: "success" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
   const handleDelete = (video) => {
@@ -109,16 +112,18 @@ const Videos = () => {
   const confirmDelete = async () => {
     if (!deleteVideo) return
     try {
-      await fetch(`${BASE_URL}/api/speakings/${deleteVideo.id}`, {
+      const res = await fetch(`${BASE_URL}/api/speakings/${deleteVideo.id}`, {
          method: "DELETE",
          credentials: "include"
        })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteVideo(null)
       resetAndFetch()
-      toast("Speaking deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete speaking", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -161,11 +166,13 @@ const Videos = () => {
             const isLast = idx === speakings.length - 1
             return (
               <div key={idx} className="relative group" ref={isLast ? lastItemRef : null}>
-                <SpeakingCard {...item} />
+                <Link href={`/admin-dashboard/speakings/${item.id}`}>
+                  <SpeakingCard {...item} />
+                </Link>
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(item)}>Edit</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(item)}>Delete</Button>
+                  <div className="absolute top-2 right-2 flex gap-1 z-10">
+                    <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(item) }}>Edit</Button>
+                    <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(item) }}>Delete</Button>
                   </div>
                 )}
               </div>
@@ -194,7 +201,7 @@ const Videos = () => {
           <DialogHeader>
             <DialogTitle>Create Speaking</DialogTitle>
           </DialogHeader>
-          <VideoForm onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
+          <VideoForm showTranscript={true} onSuccess={handleCreateSuccess} onCancel={() => setShowCreate(false)} />
         </DialogContent>
       </Dialog>
       {/* Edit Video Dialog */}
@@ -204,6 +211,7 @@ const Videos = () => {
             <DialogTitle>Edit Speaking</DialogTitle>
           </DialogHeader>
           <VideoForm
+            showTranscript={true}
             mode="edit"
             initialValues={editVideo}
             onSuccess={handleEditSuccess}

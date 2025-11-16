@@ -161,6 +161,7 @@ const getAllWritings = async (req, res) => {
     const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
     res.status(200).json({
       success: true,
+      message: 'Writings fetched successfully',
       data: {
         writings: items,
         pagination: {
@@ -214,6 +215,7 @@ const getPaginatedWritings = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
     res.status(200).json({
       success: true,
+      message: 'Writings fetched successfully',
       data: {
         writings: rows,
         pagination: {
@@ -245,7 +247,7 @@ const getWritingById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
     }
     const tagNames = await includeTagsFor(writing.id);
-    res.status(200).json({ success: true, data: { ...writing.toJSON(), tags: tagNames } });
+    res.status(200).json({ success: true, message: 'Writing content fetched successfully', data: { ...writing.toJSON(), tags: tagNames } });
   } catch (error) {
     console.error('Error fetching writing:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });

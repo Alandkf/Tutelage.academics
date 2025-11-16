@@ -70,15 +70,36 @@ exports.createStory = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Title is required' });
     }
     const normalizedLevel = normalizeLevels(level);
-    const wc = wordCount ?? (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : null);
+    
+    // Properly handle wordCount - ensure it's either a valid integer or null
+    let wc;
+    if (wordCount !== undefined) {
+      const parsed = parseInt(wordCount);
+      wc = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    } else if (contentText) {
+      wc = String(contentText).split(/\s+/).filter(Boolean).length;
+    } else {
+      wc = null;
+    }
+    
+    // Parse tags properly - handle both array and comma-separated string
+    const tagNames = Array.isArray(tags) 
+      ? tags.map(t => String(t).trim()).filter(Boolean)
+      : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
+    
     const story = await Story.create({
       title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount: wc, level: normalizedLevel, createdBy
     });
-    await attachTags(story.id, tags);
+    
+    // Attach tags only if we have valid tag names
+    if (tagNames.length > 0) {
+      await attachTags(story.id, tagNames);
+    }
+    
     const storyWithAuthor = await Story.findByPk(story.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
-    res.status(201).json({ success: true, message: 'Story created', data: storyWithAuthor });
+    res.status(201).json({ success: true, message: 'Story created Successfully', data: storyWithAuthor });
   } catch (err) {
     console.error('Error creating story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -128,6 +149,7 @@ exports.getAllStories = async (req, res) => {
       const totalPages = Math.ceil(count / itemsPerPage);
       return res.status(200).json({ 
         success: true, 
+        message: 'Stories fetched successfully',
         data: { 
           stories: rows, 
           pagination: { 
@@ -184,7 +206,7 @@ exports.getStoryById = async (req, res) => {
     // Attach tag names
     const mappings = await ResourceTag.findAll({ where: { resourceType: 'story', resourceId: story.id }, include: [{ model: Tag, as: 'tag' }] });
     const tagNames = mappings.map(m => m.tag?.name).filter(Boolean);
-    res.status(200).json({ success: true, data: { story, tags: tagNames } });
+    res.status(200).json({ success: true, message: "Story Fetched Successfully" , data: { story, tags: tagNames } });
   } catch (err) {
     console.error('Error fetching story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -198,8 +220,23 @@ exports.updateStory = async (req, res) => {
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
     if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
+    
     const normalizedLevel = level !== undefined ? normalizeLevels(level) : story.level;
-    const wc = wordCount !== undefined ? wordCount : (contentText ? String(contentText).split(/\s+/).filter(Boolean).length : story.wordCount);
+    
+    // Properly handle wordCount - ensure it's either a valid integer or null
+    let wc;
+    if (wordCount !== undefined) {
+      // If wordCount is provided but empty/invalid, set to null
+      const parsed = parseInt(wordCount);
+      wc = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    } else if (contentText !== undefined && contentText) {
+      // Auto-calculate from contentText if provided
+      wc = String(contentText).split(/\s+/).filter(Boolean).length;
+    } else {
+      // Keep existing wordCount
+      wc = story.wordCount;
+    }
+    
     await story.update({
       title: title ?? story.title,
       imageUrl: imageUrl ?? story.imageUrl,
@@ -211,13 +248,14 @@ exports.updateStory = async (req, res) => {
       wordCount: wc,
       level: normalizedLevel
     });
+    
     if (tags) {
       // Reset tags then attach
       await ResourceTag.destroy({ where: { resourceType: 'story', resourceId: story.id } });
       await attachTags(story.id, Array.isArray(tags) ? tags : String(tags).split(',').map(s => s.trim()).filter(Boolean));
     }
     const updated = await Story.findByPk(id, { include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }] });
-    res.status(200).json({ success: true, message: 'Story updated', data: updated });
+    res.status(200).json({ success: true, message: 'Story updated successfully', data: updated });
   } catch (err) {
     console.error('Error updating story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -233,7 +271,7 @@ exports.deleteStory = async (req, res) => {
     await ResourceTag.destroy({ where: { resourceType: 'story', resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: 'story', resourceId: id } });
     await story.destroy();
-    res.status(200).json({ success: true, message: 'Story deleted' });
+    res.status(200).json({ success: true, message: 'Story deleted successfully' });
   } catch (err) {
     console.error('Error deleting story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

@@ -1,134 +1,195 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { X, Upload } from "lucide-react"
 
-const blogSchema = z.object({
-  title: z.string().min(2, "Title is required"),
-  content: z.string().min(2, "Content is required"),
-  imageRef: z.string().optional(),
-  category: z.string().optional(),
-  description: z.string().optional()
-})
+const LEVEL_OPTIONS = [
+	{ value: 'a1', label: 'A1 Beginner' },
+	{ value: 'a2', label: 'A2 Pre-intermediate' },
+	{ value: 'b1', label: 'B1 Intermediate' },
+	{ value: 'b2', label: 'B2 Upper-Intermediate' },
+	{ value: 'c1', label: 'C1 Advanced' },
+	{ value: 'c2', label: 'C2 Proficient' }
+]
 
-export default function BlogForm({ onSuccess, onCancel, initialValues, mode = "create" }) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const form = useForm({
-    resolver: zodResolver(blogSchema),
-    defaultValues: initialValues || {
-      title: "",
-      content: "",
-      imageRef: "",
-      category: "",
-      description: ""
-    }
-  })
+const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
+	const [formData, setFormData] = useState({
+		title: '',
+		content: '',
+		imageRef: '',
+		description: '',
+		level: '',
+		tags: [],
+		pdf: null,
+		taskPdf: null
+	})
+	const [tagInput, setTagInput] = useState('')
+	const [pdfPreview, setPdfPreview] = useState(null)
+	const [taskPdfPreview, setTaskPdfPreview] = useState(null)
+	const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (initialValues) {
-      const mapped = {
-        title: initialValues.title ?? "",
-        content: initialValues.content ?? "",
-        imageRef: initialValues.imageRef ?? "",
-        category: initialValues.category ?? "",
-        description: initialValues.description ?? initialValues.desccription ?? ""
-      }
-      form.reset(mapped)
-    }
-  }, [initialValues])
+	useEffect(() => {
+		if (mode === 'edit' && initialValues) {
+			const levelValue = Array.isArray(initialValues.level) 
+				? initialValues.level[0]?.toLowerCase().split(' ')[0] 
+				: (initialValues.level ? initialValues.level.toLowerCase().split(' ')[0] : '');
+			
+			setFormData({
+				title: initialValues.title || '',
+				content: initialValues.content || '',
+				imageRef: initialValues.imageRef || '',
+				description: initialValues.description || '',
+				level: levelValue || '',
+				tags: initialValues.tags || [],
+				pdf: null,
+				taskPdf: null
+			})
+			setPdfPreview(initialValues.pdf || null)
+			setTaskPdfPreview(initialValues.taskPdf || null)
+		}
+	}, [mode, initialValues])
 
-  const onSubmit = async (values) => {
-    setIsLoading(true)
-    setError(null)
-    // For now, just call onSuccess after a short delay (simulate API)
-    setTimeout(() => {
-      setIsLoading(false)
-      if (onSuccess) onSuccess(values)
-      form.reset()
-    }, 600)
-  }
+	const handleLevelChange = (level) => {
+		setFormData(prev => ({ ...prev, level }))
+	}
 
-  return (
-    <div className="w-full bg-card rounded-lg p-0">
-      <h2 className="text-lg font-bold mb-4">{mode === "edit" ? "Edit Blog" : "Create Blog"}</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Blog title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Content</FormLabel>
-                <FormControl>
-                  <textarea className="w-full min-h-[100px] border rounded-md p-2 bg-background" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Short Description</FormLabel>
-                <FormControl>
-                  <textarea className="w-full min-h-[80px] border rounded-md p-2 bg-background" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="imageRef"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Input placeholder="Category (optional)" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {error && <div className="text-destructive text-sm">{error}</div>}
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>Cancel</Button>
-            <Button type="submit" disabled={isLoading}>{isLoading ? (mode === "edit" ? "Saving..." : "Creating...") : (mode === "edit" ? "Save" : "Create")}</Button>
-          </div>
-        </form>
-      </Form>
-    </div>
-  )
+	const handleAddTag = () => {
+		const raw = tagInput.trim()
+		if (!raw) return
+		const newTags = raw.split(',').map(t => t.trim()).filter(Boolean)
+		if (!newTags.length) { setTagInput(''); return }
+		setFormData(prev => {
+			const set = new Set(prev.tags || [])
+			newTags.forEach(t => set.add(t))
+			return { ...prev, tags: Array.from(set) }
+		})
+		setTagInput('')
+	}
+
+	const handleRemoveTag = (tag) => {
+		setFormData(prev => {
+			const current = Array.isArray(prev.tags) ? prev.tags : []
+			const newTags = current.filter(t => t !== tag)
+			return { ...prev, tags: newTags }
+		})
+	}
+
+	const handleTagKeyDown = (e) => {
+		if (e.key === 'Enter' || e.key === ',') {
+			e.preventDefault()
+			handleAddTag()
+		} else if (e.key === 'Backspace' && tagInput === '') {
+			setFormData(prev => ({ ...prev, tags: prev.tags.slice(0, -1) }))
+		}
+	}
+
+	const handleFileChange = (e, field) => {
+		const file = e.target.files?.[0]
+		if (file) {
+			setFormData(prev => ({ ...prev, [field]: file }))
+			if (field === 'pdf') setPdfPreview(file.name)
+			if (field === 'taskPdf') setTaskPdfPreview(file.name)
+		}
+	}
+
+	const handleSubmit = async (e) => {
+		e.preventDefault()
+		setLoading(true)
+		try {
+			await onSuccess(formData)
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	return (
+		<div className="max-h-[70vh] overflow-y-auto pr-2">
+			<form onSubmit={handleSubmit} className="space-y-4">
+				<div>
+					<Label htmlFor="title">Title *</Label>
+					<Input id="title" value={formData.title} onChange={(e) => setFormData(v => ({ ...v, title: e.target.value }))} required />
+				</div>
+
+				<div>
+					<Label htmlFor="content">Content *</Label>
+					<Textarea id="content" value={formData.content} onChange={(e) => setFormData(v => ({ ...v, content: e.target.value }))} rows={5} required />
+				</div>
+
+				<div>
+					<Label htmlFor="description">Description</Label>
+					<Textarea id="description" value={formData.description} onChange={(e) => setFormData(v => ({ ...v, description: e.target.value }))} rows={3} />
+				</div>
+
+				<div>
+					<Label htmlFor="imageRef">Image URL</Label>
+					<Input id="imageRef" value={formData.imageRef} onChange={(e) => setFormData(v => ({ ...v, imageRef: e.target.value }))} placeholder="https://..." />
+				</div>
+
+				<div>
+					<Label htmlFor="level">Level</Label>
+					<Select value={formData.level} onValueChange={handleLevelChange}>
+						<SelectTrigger id="level"><SelectValue placeholder="Select a level" /></SelectTrigger>
+						<SelectContent>
+							{LEVEL_OPTIONS.map(level => (
+								<SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div>
+					<Label htmlFor="tagInput">Tags</Label>
+					<div className="flex gap-2">
+						<Input id="tagInput" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} placeholder="Add a tag..." />
+						<Button type="button" onClick={handleAddTag} variant="outline">Add</Button>
+					</div>
+					<div className="flex flex-wrap gap-2 mt-2">
+						{(formData.tags || []).map(tag => (
+							<Badge key={tag} variant="secondary" className="flex items-center gap-2 px-2 py-1">
+								<span className="text-sm">{tag}</span>
+								<button type="button" onClick={() => handleRemoveTag(tag)} className="inline-flex items-center justify-center p-1">
+									<X className="h-3 w-3" />
+								</button>
+							</Badge>
+						))}
+					</div>
+				</div>
+
+				<div>
+					<Label>PDF File</Label>
+					<div className="flex items-center gap-2">
+						<Input id="pdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'pdf')} className="hidden" />
+						<Button type="button" variant="outline" onClick={() => document.getElementById('pdf').click()} className="gap-2">
+							<Upload className="h-4 w-4" />Choose PDF
+						</Button>
+						{pdfPreview && <span className="text-sm text-muted-foreground">{pdfPreview}</span>}
+					</div>
+				</div>
+
+				<div>
+					<Label>Task PDF File</Label>
+					<div className="flex items-center gap-2">
+						<Input id="taskPdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'taskPdf')} className="hidden" />
+						<Button type="button" variant="outline" onClick={() => document.getElementById('taskPdf').click()} className="gap-2">
+							<Upload className="h-4 w-4" />Choose Task PDF
+						</Button>
+						{taskPdfPreview && <span className="text-sm text-muted-foreground">{taskPdfPreview}</span>}
+					</div>
+				</div>
+
+				<div className="flex gap-2 justify-end pt-4">
+					<Button type="button" variant="outline" onClick={onCancel} disabled={loading}>Cancel</Button>
+					<Button type="submit" disabled={loading}>{loading ? 'Saving...' : mode === 'edit' ? 'Update' : 'Create'}</Button>
+				</div>
+			</form>
+		</div>
+	)
 }
+
+export default BlogForm

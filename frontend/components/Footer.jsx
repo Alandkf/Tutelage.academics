@@ -22,7 +22,7 @@ export const Footer = () => {
     { name: "English for Kids and Teens", href: "/courses/englishforkids" },
     { name: "English for Adults", href: "/courses/englishforadults" },
     { name: "Academic English", href: "/courses/academicenglish" },
-    { name: "English Proficiency Tests", href: "/courses/Englishproficiencytests" },
+    { name: "English Proficiency Tests", href: "/courses/englishproficiencytests" },
     { name: "Business English", href: "/courses/businessenglish" },
   ]
 
@@ -36,7 +36,7 @@ export const Footer = () => {
 
   // ESL Resources links
   const eslResourcesLinks = [
-    { name: "Story Library", href: "/esl-resources/storys" },
+    { name: "Story Library", href: "/esl-resources/stories" },
     { name: "Blog Library", href: "/esl-resources/blogs" },
     { name: "Video Library", href: "/esl-resources/videos" },
     { name: "Audio Library", href: "/esl-resources/audiso" },

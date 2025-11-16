@@ -228,7 +228,7 @@ const EnrollPage = () => {
       case 'Academic English':
         return '/courses/academicenglish';
       case 'English Proficiency Tests':
-        return '/courses/Englishproficiencytests';
+        return '/courses/englishproficiencytests';
       case 'Business English':
         return '/courses/businessenglish';
       default:

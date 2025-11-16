@@ -55,11 +55,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false,
         comment: 'Foreign key to the user who created the ESL video'
+      },
+
+      // Add tags array column for compatibility with frontend expectations
+      tags: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        comment: 'Array of tag names associated with this video'
       }
     },
     {
       tableName: 'esl_videos',
-      comment: 'ESL Library video resources (separate from skills videos)'
+      comment: 'ESL platform video resources with exercises and materials'
     }
   );
 

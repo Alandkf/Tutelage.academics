@@ -98,7 +98,7 @@ export default function CompactAudioPlayer({
   const effectiveSrc = src || null
 
   return (
-    <div className={`w-full p-4 bg-card rounded-md border ${className}`}>
+    <div >
       {/* If YouTube URL provided, render audio-only YouTube player */}
       {isYouTube && (
         <YouTubeAudioPlayer videoUrl={youtubeUrl} />
@@ -158,7 +158,6 @@ export default function CompactAudioPlayer({
 
       {/* Status & error */}
       <div className="mt-2 text-xs text-muted-foreground">
-        {isYouTube && <span>Playing via YouTube audio embed</span>}
         {!isYouTube && !effectiveSrc && <span>No audio source</span>}
       </div>
     </div>

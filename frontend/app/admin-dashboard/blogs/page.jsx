@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { BlogCard } from "@/components/admin/blogs/BlogCard"
 import BlogForm from "@/components/forms/BlogForm"
-import { Plus, RefreshCw } from "lucide-react"
+import { Edit, Plus, RefreshCw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
@@ -66,20 +66,30 @@ export default function BlogsPage() {
   const lastBlogRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchBlogs })
 
   // Handlers
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
+      const fd = new FormData()
+      fd.append('title', formData.title ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('imageRef', formData.imageRef ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      if (formData.pdf) fd.append('pdfFile', formData.pdf)
+      if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+
       const res = await fetch(`${BASE_URL}/api/blogs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(values)
+        body: fd
       })
-      if (!res.ok) throw new Error("Failed to create blog")
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
-      toast("Blog created successfully", { variant: "success" })
-    } catch {
-      toast("Failed to create blog", { variant: "destructive" })
+      toast(data.message, { variant: "success" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -98,16 +108,18 @@ export default function BlogsPage() {
   const confirmDelete = async () => {
     if (!deleteBlog) return
     try {
-      await fetch(`${BASE_URL}/api/blogs/${deleteBlog.id}`, {
+      const res = await fetch(`${BASE_URL}/api/blogs/${deleteBlog.id}`, {
         method: "DELETE",
         credentials: "include"
       })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message)
       setShowDelete(false)
       setDeleteBlog(null)
       resetAndFetch()
-      toast("Blog deleted successfully", { variant: "destructive" })
-    } catch {
-      toast("Failed to delete blog", { variant: "destructive" })
+      toast(data.message, { variant: "destructive" })
+    } catch (e) {
+      toast(e.message, { variant: "destructive" })
     }
   }
 
@@ -116,7 +128,7 @@ export default function BlogsPage() {
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Blogs</h1>
         {user?.role === "ADMIN" && (
-          <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-32">
+          <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />
             Create Blog
           </Button>
@@ -149,16 +161,16 @@ export default function BlogsPage() {
           blogs.map((blog, idx) => {
             const isLast = idx === blogs.length - 1
             return (
-              <div key={blog.id} className="relative group" ref={isLast ? lastBlogRef : null}>
+              <div key={idx} className="relative group" ref={isLast ? lastBlogRef : null}>
                 <BlogCard
                   {...blog}
                   author={blog.author?.name || ''}
                   authorEmail={blog.author?.email || ''}
                 />
                 {user?.role === "ADMIN" && (
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}>Edit</Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}>Delete</Button>
+                  <div className="absolute top-2 right-2 flex gap-1 ">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}><Edit className="h-4 w-4" /></Button>
+                    <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 )}
               </div>
@@ -199,23 +211,32 @@ export default function BlogsPage() {
           <BlogForm
             mode="edit"
             initialValues={editBlog}
-            onSuccess={async (values) => {
+            onSuccess={async (formData) => {
               if (!editBlog) return
               try {
-                // API call for editing blog (PUT)
+                const fd = new FormData()
+                fd.append('title', formData.title ?? '')
+                fd.append('content', formData.content ?? '')
+                fd.append('description', formData.description ?? '')
+                fd.append('imageRef', formData.imageRef ?? '')
+                fd.append('level', formData.level ?? '')
+                fd.append('tags', formData.tags?.join(',') ?? '')
+                if (formData.pdf) fd.append('pdfFile', formData.pdf)
+                if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+
                 const res = await fetch(`${BASE_URL}/api/blogs/${editBlog.id}`, {
                   method: "PUT",
-                  headers: { "Content-Type": "application/json" },
                   credentials: "include",
-                  body: JSON.stringify(values)
+                  body: fd
                 })
-                if (!res.ok) throw new Error("Failed to update blog")
+                const data = await res.json()
+                if (!res.ok || !data.success) throw new Error(data.message)
                 setShowEdit(false)
                 setEditBlog(null)
                 resetAndFetch()
-                toast("Blog updated successfully", { variant: "success" })
-              } catch {
-                toast("Failed to update blog", { variant: "destructive" })
+                toast(data.message, { variant: "success" })
+              } catch (e) {
+                toast(e.message, { variant: "destructive" })
               }
             }}
             onCancel={() => { setShowEdit(false); setEditBlog(null) }}

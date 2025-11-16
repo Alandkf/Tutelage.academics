@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ExternalLink, Loader2 } from 'lucide-react'
-import { X as XIcon, FileText as FileTextIcon, ExternalLink as ExternalLinkIcon, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import BASE_URL from '@/app/config/url'
 import SingleSourceCTA from '@/components/esl-resources/SingleSourceCTA'
+import PdfModal from '@/components/ui/PdfModal'
+import PdfButton from '@/components/ui/PdfButton'
+import { usePdfModal } from '@/hooks/usePdfModal'
 
 const SingleBlogPage = () => {
 	const params = useParams()
@@ -19,15 +21,12 @@ const SingleBlogPage = () => {
 	
 	const [loading, setLoading] = useState(true)
 
-	// PDF modal state (same pattern as videos)
-    const [pdfModalOpen, setPdfModalOpen] = useState(false)
-    const [pdfModalUrl, setPdfModalUrl] = useState(null)
-    const ANIM_DURATION = 0.3
-    const toPdfView = (u) => `${BASE_URL}/api/pdf/view?url=${encodeURIComponent(u)}`
-    const openPdfModal = (url) => { setPdfModalUrl(toPdfView(url)); setPdfModalOpen(true) }
-    const closePdfModal = () => setPdfModalOpen(false)
+	// Use the custom hook for PDF modal
+	const { isOpen, pdfUrl, title, openPdf, closePdf } = usePdfModal()
 
-	// Prep & Tasks UI state (new)
+	const ANIM_DURATION = 0.3
+
+	// Prep & Tasks UI state
 	const [prepOpen, setPrepOpen] = useState(false)
 	const [openTasks, setOpenTasks] = useState({}) // map idx -> bool
 	const toggleTask = (idx) => setOpenTasks(prev => ({ ...prev, [idx]: !prev[idx] }))
@@ -141,25 +140,11 @@ const SingleBlogPage = () => {
 							>
 								<div className="px-6 py-4">
 									{blog?.pdf ? (
-										<div className="w-fit">
-											<div className="flex items-center justify-between gap-6 p-4 border rounded-md bg-card">
-												<div className="flex items-center gap-3">
-													<FileTextIcon className="w-6 h-6 text-primary" />
-													<div>
-														<div className="font-semibold text-foreground">Preparation PDF</div>
-														<div className="text-sm text-muted-foreground">
-															{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}
-														</div>
-													</div>
-												</div>
-												<div className="flex items-center gap-2">
-                                    <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
-                                        <ExternalLinkIcon className="w-4 h-4" /> Open
-                                    </Button>
-                                    <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
-												</div>
-											</div>
-										</div>
+										<PdfButton 
+											pdfUrl={blog.pdf} 
+											onOpen={openPdf}
+											label="Preparation PDF"
+										/>
 									) : (
 										<p className="text-sm text-muted-foreground">No preparation PDF available.</p>
 									)}
@@ -216,22 +201,12 @@ const SingleBlogPage = () => {
 													{task.content || 'Task details will be added here.'}
 												</div>
 												{blog?.pdf && (
-													<div className="mt-3 w-fit">
-														<div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
-															<div className="flex items-center gap-3">
-																<FileTextIcon className="w-5 h-5 text-primary" />
-																<div>
-																	<div className="font-medium">Task PDF</div>
-																	<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
-																</div>
-															</div>
-															<div className="flex items-center gap-2">
-                                <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer">
-                                    <ExternalLinkIcon className="w-4 h-4" /> Open
-                                </Button>
-                                <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2">Open in new tab</a>
-															</div>
-														</div>
+													<div className="mt-3">
+														<PdfButton 
+															pdfUrl={blog.pdf} 
+															onOpen={openPdf}
+															label="Task PDF"
+														/>
 													</div>
 												)}
 											</div>
@@ -252,21 +227,11 @@ const SingleBlogPage = () => {
 									<motion.div key="task-0" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }} className="overflow-hidden border-t bg-background">
 										<div className="px-4 py-3">
 											{blog?.pdf && (
-												<div className="mt-3 w-fit">
-													<div className="flex items-center justify-between gap-6 p-3 border rounded-md bg-card">
-														<div className="flex items-center gap-3">
-															<FileTextIcon className="w-5 h-5 text-primary" />
-															<div>
-																<div className="font-medium">Task PDF</div>
-																<div className="text-sm text-muted-foreground">{(() => { try { return decodeURIComponent(new URL(blog.pdf).pathname.split('/').pop()) } catch { return 'resource.pdf' } })()}</div>
-															</div>
-														</div>
-														<div className="flex items-center gap-2">
-                                                        <Button onClick={() => openPdfModal(blog.pdf)} className="cursor-pointer"><ExternalLinkIcon className="w-4 h-4" /> Open</Button>
-                                                        <a href={toPdfView(blog.pdf)} target="_blank" rel="noreferrer" className="text-muted-foreground px-2"><ExternalLink /></a>
-														</div>
-													</div>
-												</div>
+												<PdfButton 
+													pdfUrl={blog.pdf} 
+													onOpen={openPdf}
+													label="Task PDF"
+												/>
 											)}
 										</div>
 									</motion.div>
@@ -277,86 +242,47 @@ const SingleBlogPage = () => {
 				</div>
 			</div>
 
-			{/* Tags Section (unchanged placement moved after Tasks) */}
+			{/* Tags Section - styled like language level but with dark background */}
 			{Array.isArray(blog?.tags) && blog.tags.length > 0 && (
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-					<h3 className="text-lg font-semibold text-muted-foreground mb-3">Tags</h3>
-					<div className="flex flex-wrap gap-3">
-						{blog.tags.map((t, i) => (
-							<div key={i} className="px-3 py-2 bg-card border rounded text-sm text-foreground">
-								{t}
-							</div>
-						))}
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pb-6">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Tags</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{blog.tags.map((t, i) => (
+								<span key={i} className="px-4 py-3 bg-black text-white text-base font-semibold rounded">{t}</span>
+							))}
+						</div>
 					</div>
 				</div>
 			)}
 
-			{/* Language Level — clickable pills */}
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-				<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
-				<div className="p-6 rounded-md">
-					<div className="flex flex-wrap gap-3">
-						{(() => {
-							const levels = Array.isArray(blog?.level) ? blog.level : (blog?.level ? [blog.level] : []);
-							if (!levels.length) {
-								return <div className="px-4 py-3 bg-primary/90 border border-primary/30 text-lg font-semibold text-white">Not specified</div>
-							}
-							const mapToSlug = (lvl) => {
-								if (!lvl) return '/levels';
-								const key = String(lvl).toLowerCase();
-								if (key.includes('a1')) return '/levels/a1';
-								if (key.includes('a2')) return '/levels/a2';
-								if (key.includes('b1')) return '/levels/b1';
-								if (key.includes('b2')) return '/levels/b2';
-								if (key.includes('c1')) return '/levels/c1';
-								if (key.includes('c2')) return '/levels/c2';
-								return '/levels';
-							};
-							return levels.map((lvl, i) => (
-								<Link key={i} href={mapToSlug(lvl)} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
-										{lvl}
+			{/* Language Level — clickable pills (render only when levels exist) */}
+			{Array.isArray(blog?.level) && blog.level.length > 0 && (
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+					<h3 className="text-3xl font-bold text-foreground mb-6">Language Level</h3>
+					<div className="p-6 rounded-md">
+						<div className="flex flex-wrap gap-3">
+							{blog.level.map((lvl, i) => (
+								<Link key={i} href={`/levels/${String(lvl).toLowerCase().split(' ')[0]}`} className="px-4 py-3 bg-primary/90 border border-primary/30 text-base font-semibold text-white rounded" title={lvl}>
+									{lvl}
 								</Link>
-							));
-						})()}
+							))}
+						</div>
 					</div>
 				</div>
-			</div>
+			)}
 
 			{/* CTA Section */}
 			<SingleSourceCTA />
 
-			{/* PDF Modal */}
-			<AnimatePresence>
-				{pdfModalOpen && pdfModalUrl && (
-					<motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-						<motion.div className="w-[90%] md:w-[80%] lg:w-[70%] bg-background rounded shadow-lg overflow-hidden" initial={{ y: 20, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 20, scale: 0.98, opacity: 0 }} transition={{ duration: ANIM_DURATION }}>
-							<div className="flex items-center justify-between p-3 border-b">
-								<div className="flex items-center gap-3">
-									<FileTextIcon className="w-6 h-6 text-primary" />
-                                    <div className="font-semibold">{(() => {
-                                        try {
-                                            const u = new URL(pdfModalUrl)
-                                            const real = new URLSearchParams(u.search).get('url')
-                                            const name = (real || u.pathname).split('/').pop()
-                                            return decodeURIComponent(name || 'document.pdf')
-                                        } catch {
-                                            return 'document.pdf'
-                                        }
-                                    })()}</div>
-								</div>
-								<div className="flex items-center gap-2">
-									<a href={pdfModalUrl} target="_blank" rel="noreferrer" className="px-3 py-1 text-sm text-muted-foreground">Open in new tab</a>
-									<button className="p-2" onClick={closePdfModal}><XIcon className="w-5 h-5" /></button>
-								</div>
-							</div>
-							<div className="px-6 py-3 text-sm text-muted-foreground border-b">Note: some hosts block embedding. Use "Open in new tab" if preview fails.</div>
-							<div className="w-full h-[70vh]">
-								<iframe src={pdfModalUrl} className="w-full h-full border-0" title="PDF preview" />
-							</div>
-						</motion.div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+			{/* PDF Modal - replaced with reusable component */}
+			<PdfModal 
+				isOpen={isOpen}
+				onClose={closePdf}
+				pdfUrl={pdfUrl}
+				title={title}
+				animationDuration={ANIM_DURATION}
+			/>
 		</div>
 	)
 }

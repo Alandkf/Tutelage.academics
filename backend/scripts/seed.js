@@ -26,9 +26,6 @@ const { Op } = require('sequelize');
     EslAudio,
     Tag,
     ResourceTag,
-    QuizConfiguration,
-    QuizSection,
-    QuizQuestion,
     Story,
   } = require('../models');
 
@@ -10565,6 +10562,14 @@ Finally, remember that learning English is itself an achievement worthy of recog
     'C2 Proficient'
   ];
 
+  const tagSets = [
+    ['Motivation', 'Study Tips'],
+    ['Progress', 'Reflection'],
+    ['Goals', 'Achievement'],
+    ['Consistency', 'Habits'],
+    ['Confidence', 'Growth Mindset'],
+  ]
+
   // Use the top-level pickLevel that returns an array (defined near file start)
   // Removed duplicate local definition to avoid mismatched return type
   const buildPdfUrl = (_title) => 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
@@ -10575,6 +10580,7 @@ Finally, remember that learning English is itself an achievement worthy of recog
       ...b,
       // level: LEVELS[i % LEVELS.length],
       pdf: b.pdf || buildPdfUrl(b.title),
+      tags: tagSets[i % tagSets.length],
       createdBy: admin.id
     }))
   );
@@ -10585,12 +10591,25 @@ async function seedVideos(admin) {
   const count = await Video.count();
   const MIN = 30;
   if (count >= MIN) return;
+ const tagSets = [
+    ['IELTS', 'Task 1', 'Cue Cards'],
+    ['IELTS', 'Task 2', 'Fluency'],
+    ['Pronunciation', 'Intonation'],
+    ['Part 1', 'Personal'],
+    ['Part 2', 'Long Turn'],
+    ['Part 3', 'Discussion'],
+    ['Interview', 'Practice'],
+    ['Describing', 'Places'],
+    ['Opinions', 'Agree/Disagree'],
+    ['Storytelling']
+  ];
 
   const videos = Array.from({ length: 30 }).map((_, i) => ({
     title: `Platform Video ${i + 1}`,
     videoRef: `https://youtu.be/lwI4UNWOHkU?si=PaKVF2lZx4I03UpD`,
     description: 'Short demo or tutorial segment.',
     pdf: SAMPLE_PDF_URL,
+    tags: tagSets[i % tagSets.length],
     level: pickLevel()
   }));
 
@@ -10792,80 +10811,6 @@ async function seedReadings(admin) {
   }
 }
 
-async function seedQuizSections(admin) {
-  const count = await QuizSection.count();
-  const MIN = 3;
-  if (count >= MIN) return;
-
-
-  const readings = Array.from({ length: 3 }).map((_, i) => ({
-    name : "Grammer",
-    slug: "grammer",
-    description : "This section contains grammar related questions.",
-    displayOrder : i + 1,
-    questionCount : 10,
-    isActive : true,
-  }));
-
-  const remaining = MIN - count;
-  await QuizSection.bulkCreate(
-    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
-    { returning: true }
-  );
-}
-
-async function seedQuizconf(admin) {
-  const count = await QuizConfiguration.count();
-  const MIN = 1;
-  if (count >= MIN) return;
-
-
-  const readings = Array.from({ length: 1 }).map((_, i) => ({
-    totalQuestions : 30,
-    timeLimitMinutes : 30,
-    isActive : true,
-  }));
-
-  const remaining = MIN - count;
-  await QuizConfiguration.bulkCreate(
-    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
-    { returning: true }
-  );
-}
-
-
-async function seedQuizQuestions(admin) {
-  const count = await QuizQuestion.count();
-  const MIN = 70;
-  if (count >= MIN) return;
-
-  const LEVELS = [
-  'A1',
-  'A2',
-  'B1',
-  'B2',
-  'C1',
-  'C2'
-];
-
-  const readings = Array.from({ length: 70 }).map((_, i) => ({
-    sectionId : 1,
-    level : LEVELS[i % LEVELS.length],
-    text: "She _____ to the store",
-    optionA : "go",
-    optionB : "goes",
-    optionC : "going",
-    optionD : "gone",
-    correctAnswer: 1,
-    isActive : true,
-  }));
-
-  const remaining = MIN - count;
-  await QuizQuestion.bulkCreate(
-    readings.slice(0, remaining).map(r => ({ ...r, createdBy: admin.id })),
-    { returning: true }
-  );
-}
 
 
 
@@ -11054,9 +10999,6 @@ async function main() {
     await seedReadings(admin);
     await seedCourses(admin);
     await seedFaqs(admin);
-    await seedQuizconf(admin)
-    await seedQuizQuestions(admin)
-    await seedQuizSections(admin)
     await seedStories(admin);
 
     // Ensure existing content has level/pdf values for filtering demonstrations

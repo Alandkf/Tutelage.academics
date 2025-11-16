@@ -55,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
       },
 
       // Tags array for blog post
-      tags: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: true,
-        comment: 'List of tags associated with the blog post'
-      },
+      // tags: {
+      //   type: DataTypes.ARRAY(DataTypes.STRING),
+      //   allowNull: true,
+      //   comment: 'List of tags associated with the blog post'
+      // },
       
       description: {
         type: DataTypes.TEXT,

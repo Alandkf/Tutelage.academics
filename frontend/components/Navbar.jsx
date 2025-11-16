@@ -29,6 +29,15 @@ export default function Navbar (){
       href: "/",
       dropdown: null,
     },
+     {
+      name: "Languages",
+      href: "/langauges",
+      dropdown: [
+        { name: "English Language", href: "/courses" },
+        { name: "Kurdish Language", href: "/languages/kurdish" },
+        { name: "Arabic Language", href: "/languages/arabic" },
+      ],
+    },
     {
       name: "Courses",
       href: "/courses",
@@ -36,7 +45,7 @@ export default function Navbar (){
         { name: "English for kids and teens", href: "/courses/englishforkids" },
         { name: "English for adults", href: "/courses/englishforadults" },
         { name: "Academic English", href: "/courses/academicenglish" },
-        { name: "English proficiency Tests", href: "/courses/Englishproficiencytests" },
+        { name: "English proficiency Tests", href: "/courses/englishproficiencytests" },
         { name: "Business English", href: "/courses/businessenglish" },
       ],
     },
@@ -54,7 +63,7 @@ export default function Navbar (){
       name: "ESL resources",
       href: "/esl-resources",
       dropdown: [
-        { name: "Story Library", href: "/esl-resources/storys" },
+        { name: "Story Library", href: "/esl-resources/stories" },
         { name: "Blog Library", href: "/esl-resources/blogs" },
         { name: "Video Library", href: "/esl-resources/videos" },
         { name: "Audio Library", href: "/esl-resources/audios" },
@@ -96,7 +105,7 @@ export default function Navbar (){
     <nav className="top-0 z-50 bg-background md:pt-4 ">
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 bg-background">
-        <div className="max-w-6xl w-full flex items-center justify-between mx-auto">
+        <div className="max-w-7xl w-full flex items-center justify-between mx-auto">
           {/* Logo */}
           <Link href={"/"} className="flex items-center gap-3">
             <Image src={'/only-logo-black-border-yellow-bg.svg'} className='w-[35px] h-[35px] md:w-[40px] md:h-[40px]' alt='logo' width={40} height={40} />
@@ -136,7 +145,7 @@ export default function Navbar (){
       </div>
       {/* Bottom Bar: Navigation */}
       <div className="w-full bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <div className="flex-1 flex items-center justify-center">
               <div className="hidden lg:flex lg:space-x-2 xl:space-x-8">

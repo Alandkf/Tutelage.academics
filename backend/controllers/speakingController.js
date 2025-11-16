@@ -220,6 +220,7 @@ const getAllSpeakings = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Speakings fetched successfully',
       data: {
         speakings: items,
         pagination: {
@@ -274,6 +275,7 @@ const getPaginatedSpeakings = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
     res.status(200).json({
       success: true,
+      message: 'Speakings fetched successfully',
       data: {
         speakings: rows,
         pagination: {
@@ -308,7 +310,7 @@ const getSpeakingById = async (req, res) => {
     }
 
     const tagNames = await includeTagsFor(speaking.id);
-    res.status(200).json({ success: true, data: { ...speaking.toJSON(), tags: tagNames } });
+    res.status(200).json({ success: true, message: 'Speaking content fetched successfully', data: { ...speaking.toJSON(), tags: tagNames } });
   } catch (error) {
     console.error('Error fetching speaking:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });

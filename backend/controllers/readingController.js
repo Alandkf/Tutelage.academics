@@ -160,6 +160,7 @@ const getAllReadings = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: 'Readings fetched successfully',
       data: {
         readings: items,
         pagination: {
@@ -215,6 +216,7 @@ const getPaginatedReadings = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
     res.status(200).json({
       success: true,
+      message: 'Readings fetched successfully',
       data: {
         readings: rows,
         pagination: {
@@ -246,7 +248,7 @@ const getReadingById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Reading content not found' });
     }
     const tagNames = await includeTagsFor(reading.id);
-    res.status(200).json({ success: true, data: { ...reading.toJSON(), tags: tagNames } });
+    res.status(200).json({ success: true, message: 'Reading content fetched successfully', data: { ...reading.toJSON(), tags: tagNames } });
   } catch (error) {
     console.error('Error fetching reading:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
