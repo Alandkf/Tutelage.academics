@@ -46,6 +46,7 @@ const searchRoutes = require('./routes/search');
 const pdfProxyRoutes = require('./routes/pdfProxy');
 const statsRoutes = require('./routes/stats');
 const websiteAnalyticsRoutes = require('./routes/websiteAnalytics');
+const approvalsRoutes = require('./routes/approvals');
 
 
 // ============================================================================
@@ -153,6 +154,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
 app.use('/api/stats', statsRoutes);           // Dashboard statistics
 app.use('/api/website-analytics', websiteAnalyticsRoutes); // Google Analytics data
+app.use('/api/approvals', approvalsRoutes);               // Admin approvals workflow
 
 // ============================================================================
 // HEALTH CHECK ENDPOINTS

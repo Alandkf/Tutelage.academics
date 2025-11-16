@@ -5,7 +5,8 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Video, User, Tag, ResourceTag } = require('../models');
+const { Video, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -403,7 +404,57 @@ const updateVideo = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const normalizedLevel = level !== undefined ? normalizeLevels(level) : video.level;
+      const pdf = (req.body?.pdf !== undefined)
+        ? req.body.pdf
+        : (req.files?.pdf?.[0]?.path ?? video.pdf);
+      const taskPdf = (req.body?.taskPdf !== undefined)
+        ? req.body.taskPdf
+        : (req.files?.taskPdf?.[0]?.path ?? video.taskPdf);
+
+      const payload = {
+        title: title ?? video.title,
+        videoRef: videoRef ?? video.videoRef,
+        description: description ?? video.description,
+        pdf,
+        taskPdf,
+        level: normalizedLevel ?? video.level,
+        tags: (tags !== undefined)
+          ? String(tags).split(',').map(t => t.trim()).filter(Boolean)
+          : undefined
+      };
+
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Video',
+        resourceId: video.id,
+        action: 'UPDATE',
+        payload,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        const changedKeys = Object.keys(payload).filter(k => payload[k] !== undefined);
+        await sendApprovalRequestNotification({
+          resourceType: 'Video',
+          resourceId: video.id,
+          action: 'UPDATE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email,
+          changesSummary: changedKeys.length ? `Fields changed: ${changedKeys.join(', ')}` : null
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+
+      return res.status(202).json({
+        success: true,
+        message: 'Update queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
@@ -477,7 +528,34 @@ const deleteVideo = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Video',
+        resourceId: video.id,
+        action: 'DELETE',
+        payload: null,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Video',
+          resourceId: video.id,
+          action: 'DELETE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Delete queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,

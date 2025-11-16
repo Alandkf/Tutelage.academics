@@ -4,7 +4,8 @@
 // Handles CRUD operations for Writing content with pagination and filtering.
 // ============================================================================
 
-const { Writing, User, Tag, ResourceTag } = require('../models');
+const { Writing, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -265,6 +266,54 @@ const updateWriting = async (req, res) => {
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
     }
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const normalizedLevelUpdate = level !== undefined
+        ? normalizeLevels(level)
+        : writing.level;
+
+      const payload = {
+        title: title ?? writing.title,
+        content: content ?? writing.content,
+        description: (description ?? discription ?? writing.description),
+        pdf: pdf ?? writing.pdf,
+        taskPdf: taskPdf ?? writing.taskPdf,
+        imageUrl: (imageUrl ?? imageurl ?? writing.imageUrl),
+        level: normalizedLevelUpdate ?? writing.level,
+        tags: Array.isArray(tags)
+          ? tags
+          : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined)
+      };
+
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Writing',
+        resourceId: writing.id,
+        action: 'UPDATE',
+        payload,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        const changedKeys = Object.keys(payload).filter(k => payload[k] !== undefined);
+        await sendApprovalRequestNotification({
+          resourceType: 'Writing',
+          resourceId: writing.id,
+          action: 'UPDATE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email,
+          changesSummary: changedKeys.length ? `Fields changed: ${changedKeys.join(', ')}` : null
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+
+      return res.status(202).json({
+        success: true,
+        message: 'Update queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only update your own writing content' });
     }
@@ -311,6 +360,34 @@ const deleteWriting = async (req, res) => {
     const writing = await Writing.findByPk(id);
     if (!writing) {
       return res.status(404).json({ success: false, message: 'Writing content not found' });
+    }
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Writing',
+        resourceId: writing.id,
+        action: 'DELETE',
+        payload: null,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Writing',
+          resourceId: writing.id,
+          action: 'DELETE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Delete queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
     }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only delete your own writing content' });

@@ -5,7 +5,8 @@
 // Mirrors Writing/Speaking patterns and syncs tags via ResourceTag.
 // ============================================================================
 
-const { Reading, User, Tag, ResourceTag } = require('../models');
+const { Reading, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -268,6 +269,49 @@ const updateReading = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Reading content not found' });
     }
 
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const normalizedLevelUpdate = level !== undefined ? normalizeLevels(level) : reading.level;
+      const payload = {
+        title: title ?? reading.title,
+        content: content ?? reading.content,
+        description: (description ?? discription ?? reading.description),
+        pdf: pdf ?? reading.pdf,
+        taskPdf: taskPdf ?? reading.taskPdf,
+        imageUrl: (imageUrl ?? imageurl ?? reading.imageUrl),
+        level: normalizedLevelUpdate ?? reading.level,
+        tags: Array.isArray(tags)
+          ? tags
+          : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined)
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Reading',
+        resourceId: reading.id,
+        action: 'UPDATE',
+        payload,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        const changedKeys = Object.keys(payload).filter(k => payload[k] !== undefined);
+        await sendApprovalRequestNotification({
+          resourceType: 'Reading',
+          resourceId: reading.id,
+          action: 'UPDATE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email,
+          changesSummary: changedKeys.length ? `Fields changed: ${changedKeys.join(', ')}` : null
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Update queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only update your own reading content' });
     }
@@ -311,6 +355,34 @@ const deleteReading = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Reading content not found' });
     }
 
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Reading',
+        resourceId: reading.id,
+        action: 'DELETE',
+        payload: null,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Reading',
+          resourceId: reading.id,
+          action: 'DELETE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Delete queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only delete your own reading content' });
     }

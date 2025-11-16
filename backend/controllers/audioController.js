@@ -5,7 +5,8 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Audio, User, Tag, ResourceTag, ResourceAnalytics } = require('../models');
+const { Audio, User, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -380,7 +381,51 @@ const updateAudio = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const normalizedLevel = level !== undefined ? normalizeLevels(level) : audio.level;
+      const payload = {
+        title: title ?? audio.title,
+        description: (description ?? discription ?? audio.description),
+        transcript: transcript ?? audio.transcript,
+        audioRef: audioRef ?? audio.audioRef,
+        pdf: (pdf ?? pdfRef ?? audio.pdf),
+        taskPdf: taskPdf ?? audio.taskPdf,
+        imageUrl: (imageUrl ?? imageurl ?? audio.imageUrl),
+        level: normalizedLevel ?? audio.level,
+        tags: (tags !== undefined)
+          ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean))
+          : undefined
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Audio',
+        resourceId: audio.id,
+        action: 'UPDATE',
+        payload,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      // Fire-and-forget admin notification
+      try {
+        const changedKeys = Object.keys(payload).filter(k => payload[k] !== undefined);
+        await sendApprovalRequestNotification({
+          resourceType: 'Audio',
+          resourceId: audio.id,
+          action: 'UPDATE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email,
+          changesSummary: changedKeys.length ? `Fields changed: ${changedKeys.join(', ')}` : null
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Update queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
@@ -451,7 +496,34 @@ const deleteAudio = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Audio',
+        resourceId: audio.id,
+        action: 'DELETE',
+        payload: null,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Audio',
+          resourceId: audio.id,
+          action: 'DELETE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Delete queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,

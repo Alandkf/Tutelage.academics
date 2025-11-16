@@ -1328,6 +1328,149 @@ const sendMockTestConfirmationEmail = async (bookingData) => {
   }
 };
 
+/**
+ * Notify admins that a content change was queued for approval.
+ * payload: { resourceType, resourceId, action, requestedByName, requestedByEmail, changesSummary }
+ */
+const sendApprovalRequestNotification = async (payload) => {
+  const {
+    resourceType,
+    resourceId,
+    action,
+    requestedByName,
+    requestedByEmail,
+    changesSummary
+  } = payload;
+
+  const adminEmail = process.env.EMAIL_USER;
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+        .container { background-color: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .header { border-bottom: 3px solid #fec016; padding-bottom: 12px; margin-bottom: 16px; }
+        .title { color: #1f2937; font-size: 22px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; font-size: 12px; }
+        .meta { background-color: #f9fafb; padding: 12px; border-radius: 8px; margin-top: 12px; }
+        .actions { margin-top: 16px; }
+        .button { display: inline-block; background: #fec016; color: #111827; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        .footer { text-align: center; margin-top: 24px; color: #6b7280; font-size: 12px; }
+        code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">Approval Request Queued</div>
+          <div class="badge">${action} • ${resourceType} • #${resourceId}</div>
+        </div>
+
+        <p><strong>${requestedByName || 'Main Manager'}</strong> (${requestedByEmail || 'N/A'}) has queued a <strong>${action}</strong> for <strong>${resourceType}</strong> <code>#${resourceId}</code>.</p>
+
+        ${changesSummary ? `<div class="meta"><strong>Summary of changes:</strong><div>${changesSummary}</div></div>` : ''}
+
+        <div class="actions">
+          <p>Please review this request in the admin dashboard.</p>
+        </div>
+
+        <div class="footer">Tutelage Admin • ${new Date().getFullYear()}</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Admin" <${process.env.EMAIL_USER}>`,
+    to: adminEmail,
+    subject: `[Approval] ${action} ${resourceType} #${resourceId} queued`,
+    html: htmlContent
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Approval request notification sent to admin:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending approval request notification:', error);
+    // Do not throw to avoid blocking business flow; return failure
+    return { success: false, error };
+  }
+};
+
+/**
+ * Notify requester about approval decision.
+ * payload: { resourceType, resourceId, action, status, requesterEmail, approverName, reason }
+ */
+const sendApprovalDecisionNotification = async (payload) => {
+  const {
+    resourceType,
+    resourceId,
+    action,
+    status,
+    requesterEmail,
+    approverName,
+    reason
+  } = payload;
+
+  if (!requesterEmail) {
+    console.warn('⚠️ No requesterEmail provided for decision notification');
+    return { success: false, error: new Error('No requester email') };
+  }
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+        .container { background-color: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .header { border-bottom: 3px solid #fec016; padding-bottom: 12px; margin-bottom: 16px; }
+        .title { color: #1f2937; font-size: 22px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #ecfeff; color: #0c4a6e; border: 1px solid #67e8f9; font-size: 12px; }
+        .meta { background-color: #f9fafb; padding: 12px; border-radius: 8px; margin-top: 12px; }
+        .footer { text-align: center; margin-top: 24px; color: #6b7280; font-size: 12px; }
+        .reason { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px; border-radius: 8px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="title">Approval ${status}</div>
+          <div class="badge">${action} • ${resourceType} • #${resourceId}</div>
+        </div>
+
+        <p>Your queued <strong>${action}</strong> request for <strong>${resourceType}</strong> <code>#${resourceId}</code> was <strong>${status}</strong> by ${approverName || 'an admin'}.</p>
+        ${status === 'REJECTED' && reason ? `<div class="reason"><strong>Reason:</strong> ${reason}</div>` : ''}
+
+        <div class="footer">Tutelage • ${new Date().getFullYear()}</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"Tutelage Admin" <${process.env.EMAIL_USER}>`,
+    to: requesterEmail,
+    subject: `[Decision] ${status}: ${action} ${resourceType} #${resourceId}`,
+    html: htmlContent
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Approval decision notification sent to requester:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Error sending approval decision notification:', error);
+    return { success: false, error };
+  }
+};
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
@@ -1337,7 +1480,9 @@ module.exports = {
   sendPlacementTestBookingEmail,
   sendPlacementTestConfirmationEmail,
   sendMockTestBookingEmail,
-  sendMockTestConfirmationEmail
+  sendMockTestConfirmationEmail,
+  sendApprovalRequestNotification,
+  sendApprovalDecisionNotification
 };
 
 

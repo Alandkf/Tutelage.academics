@@ -5,7 +5,8 @@
 // support for infinite scrolling functionality.
 // ============================================================================
 
-const { Blog, User, Tag, ResourceTag } = require('../models');
+const { Blog, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -287,7 +288,56 @@ const updateBlog = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const normalizedLevelUpdate = level !== undefined ? normalizeLevels(level) : blog.level;
+      const pdfPath = req.files?.pdfFile?.[0]?.path || blog.pdf;
+      const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || blog.taskPdf;
+
+      const payload = {
+        title: title ?? blog.title,
+        content: content ?? blog.content,
+        imageRef: (imageRef ?? imageUrl ?? imageurl ?? blog.imageRef),
+        category: (category ?? tag ?? blog.category),
+        description: (description ?? discription ?? desccription ?? blog.description),
+        level: normalizedLevelUpdate,
+        pdf: pdfPath,
+        taskPdf: taskPdfPath,
+        // capture tags for later application by admin approval
+        tags: (tags !== undefined)
+          ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean))
+          : undefined
+      };
+
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Blog',
+        resourceId: blog.id,
+        action: 'UPDATE',
+        payload,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        const changedKeys = Object.keys(payload).filter(k => payload[k] !== undefined);
+        await sendApprovalRequestNotification({
+          resourceType: 'Blog',
+          resourceId: blog.id,
+          action: 'UPDATE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email,
+          changesSummary: changedKeys.length ? `Fields changed: ${changedKeys.join(', ')}` : null
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+
+      return res.status(202).json({
+        success: true,
+        message: 'Update queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
@@ -366,7 +416,35 @@ const deleteBlog = async (req, res) => {
       });
     }
 
-    // Check if user is the admin
+    // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
+    if (req.user.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Blog',
+        resourceId: blog.id,
+        action: 'DELETE',
+        payload: null,
+        requestedBy: req.user.id,
+        status: 'PENDING'
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Blog',
+          resourceId: blog.id,
+          action: 'DELETE',
+          requestedByName: req.user?.name,
+          requestedByEmail: req.user?.email
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send approval request email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        message: 'Delete queued for admin approval',
+        queuedForApproval: true,
+        approvalRequestId: approval.id
+      });
+    }
+
     if (req.user.role !== 'ADMIN') {
       return res.status(403).json({
         success: false,
