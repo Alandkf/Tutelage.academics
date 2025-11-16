@@ -71,6 +71,7 @@ const createWriting = async (req, res) => {
   try {
     const { title, content, description, discription, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
+    const role = req.user.role;
 
     if (!title) {
       return res.status(400).json({
@@ -80,6 +81,44 @@ const createWriting = async (req, res) => {
     }
 
     const normalizedLevels = normalizeLevels(level);
+
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        content,
+        description: (description ?? discription ?? null),
+        pdf,
+        taskPdf,
+        imageUrl: (imageUrl ?? imageurl ?? null),
+        level: normalizedLevels,
+        tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [])
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Writing',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Writing',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Writing creation queued for admin approval'
+      });
+    }
 
     const writing = await Writing.create({
       title,

@@ -79,6 +79,7 @@ const createAudio = async (req, res) => {
   try {
     const { title, description, discription, transcript, audioRef, pdf, pdfRef, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
+    const role = req.user.role;
 
     // Validate required fields
     if (!title || !audioRef) {
@@ -90,6 +91,48 @@ const createAudio = async (req, res) => {
 
     // Normalize level(s) to an array
     const normalizedLevels = normalizeLevels(level);
+
+    // MAIN_MANAGER users queue creation for admin approval
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        description: (description ?? discription ?? null),
+        transcript,
+        audioRef,
+        pdf: (pdf ?? pdfRef ?? null),
+        taskPdf: taskPdf ?? null,
+        imageUrl: (imageUrl ?? imageurl ?? null),
+        level: normalizedLevels,
+        tags: Array.isArray(tags)
+          ? tags
+          : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [])
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Audio',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Audio',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Audio creation queued for admin approval'
+      });
+    }
 
     const audio = await Audio.create({
       title,

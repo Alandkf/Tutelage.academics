@@ -3,7 +3,8 @@
 // ============================================================================
 // Handles CRUD operations, search/filter/sort for stories.
 
-const { Story, User, ResourceTag, Tag, ResourceAnalytics, Sequelize } = require('../models');
+const { Story, User, ResourceTag, Tag, ResourceAnalytics, Sequelize, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 function normalizeLevels(input) {
@@ -66,6 +67,7 @@ exports.createStory = async (req, res) => {
   try {
     const { title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount, level, tags } = req.body;
     const createdBy = req.user.id;
+    const role = req.user.role;
     if (!title) {
       return res.status(400).json({ success: false, message: 'Title is required' });
     }
@@ -81,21 +83,61 @@ exports.createStory = async (req, res) => {
     } else {
       wc = null;
     }
-    
+
     // Parse tags properly - handle both array and comma-separated string
     const tagNames = Array.isArray(tags) 
       ? tags.map(t => String(t).trim()).filter(Boolean)
       : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
-    
+
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        imageUrl,
+        description,
+        contentText,
+        audioRef,
+        pdf,
+        taskPdf,
+        wordCount: wc,
+        level: normalizedLevel,
+        tags: tagNames
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Story',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Story',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Story creation queued for admin approval'
+      });
+    }
+
     const story = await Story.create({
       title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount: wc, level: normalizedLevel, createdBy
     });
-    
+
     // Attach tags only if we have valid tag names
     if (tagNames.length > 0) {
       await attachTags(story.id, tagNames);
     }
-    
+
     const storyWithAuthor = await Story.findByPk(story.id, {
       include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
     });
@@ -219,7 +261,60 @@ exports.updateStory = async (req, res) => {
     const { title, imageUrl, description, contentText, audioRef, pdf, taskPdf, wordCount, level, tags } = req.body;
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
-    if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
+    const role = req.user.role;
+    if (role === 'MAIN_MANAGER') {
+      const normalizedLevel = level !== undefined ? normalizeLevels(level) : story.level;
+      let wc;
+      if (wordCount !== undefined) {
+        const parsed = parseInt(wordCount);
+        wc = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+      } else if (contentText !== undefined && contentText) {
+        wc = String(contentText).split(/\s+/).filter(Boolean).length;
+      } else {
+        wc = story.wordCount;
+      }
+      const tagNames = Array.isArray(tags)
+        ? tags.map(t => String(t).trim()).filter(Boolean)
+        : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined);
+      const payload = {
+        title,
+        imageUrl,
+        description,
+        contentText,
+        audioRef,
+        pdf,
+        taskPdf,
+        wordCount: wc,
+        level: normalizedLevel,
+        tags: tagNames
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Story',
+        resourceId: story.id,
+        action: 'UPDATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: req.user.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Story',
+          resourceId: story.id,
+          action: 'UPDATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload).filter(k => payload[k] !== undefined)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send update approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Story update queued for admin approval'
+      });
+    }
+    if (role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only update your own stories' });
     
     const normalizedLevel = level !== undefined ? normalizeLevels(level) : story.level;
     
@@ -267,7 +362,35 @@ exports.deleteStory = async (req, res) => {
     const { id } = req.params;
     const story = await Story.findByPk(id);
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
-    if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only delete your own stories' });
+    const role = req.user.role;
+    if (role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Story',
+        resourceId: story.id,
+        action: 'DELETE',
+        payload: {},
+        status: 'PENDING',
+        requestedBy: req.user.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Story',
+          resourceId: story.id,
+          action: 'DELETE',
+          requestedByEmail: req.user?.email,
+          changesSummary: ['DELETE']
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send delete approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Story deletion queued for admin approval'
+      });
+    }
+    if (role !== 'ADMIN') return res.status(403).json({ success: false, message: 'You can only delete your own stories' });
     await ResourceTag.destroy({ where: { resourceType: 'story', resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: 'story', resourceId: id } });
     await story.destroy();

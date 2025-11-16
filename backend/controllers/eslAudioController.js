@@ -3,8 +3,9 @@
 // ============================================================================
 // CRUD, search, filter, sort, tag assignment, transcript search, analytics.
 
-const { EslAudio, Tag, ResourceTag, ResourceAnalytics } = require('../models');
+const { EslAudio, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
 const { Op } = require('sequelize');
+const { sendApprovalRequestNotification } = require('../config/email');
 
 const normalizeLevels = (input) => {
   if (input === undefined || input === null) return null;
@@ -62,12 +63,52 @@ exports.createEslAudio = async (req, res) => {
   try {
     const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const createdBy = req.user?.id || 1;
+    const role = req.user?.role;
     
     // Parse tags from request body (can be array or comma-separated string)
     const tagNames = Array.isArray(tags) 
       ? tags.map(t => String(t).trim()).filter(Boolean)
       : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
     
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        imageUrl,
+        description,
+        transcript,
+        audioRef,
+        pdf,
+        taskPdf,
+        level: normalizeLevels(level),
+        tags: tagNames
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslAudio',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslAudio',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL audio creation queued for admin approval'
+      });
+    }
+
     // Create audio WITHOUT tags array column first
     const audio = await EslAudio.create({ 
       title, 
@@ -165,6 +206,7 @@ exports.updateEslAudio = async (req, res) => {
     const { title, imageUrl, description, transcript, audioRef, pdf, taskPdf, level, tags } = req.body;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
+    const role = req.user?.role;
     
     // Parse tags from request body (can be array or comma-separated string)
     const tagNames = tags !== undefined
@@ -172,6 +214,44 @@ exports.updateEslAudio = async (req, res) => {
           ? tags.map(t => String(t).trim()).filter(Boolean)
           : String(tags).split(',').map(t => t.trim()).filter(Boolean))
       : null;
+
+    if (role === 'MAIN_MANAGER') {
+      const payload = {};
+      if (title !== undefined) payload.title = title;
+      if (imageUrl !== undefined) payload.imageUrl = imageUrl;
+      if (description !== undefined) payload.description = description;
+      if (transcript !== undefined) payload.transcript = transcript;
+      if (audioRef !== undefined) payload.audioRef = audioRef;
+      if (pdf !== undefined) payload.pdf = pdf;
+      if (taskPdf !== undefined) payload.taskPdf = taskPdf;
+      if (level !== undefined) payload.level = normalizeLevels(level);
+      if (tagNames !== null) payload.tags = tagNames;
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslAudio',
+        resourceId: audio.id,
+        action: 'UPDATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: req.user?.id || 1
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslAudio',
+          resourceId: audio.id,
+          action: 'UPDATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send update approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL audio update queued for admin approval'
+      });
+    }
     
     await audio.update({ 
       title, 
@@ -208,6 +288,34 @@ exports.deleteEslAudio = async (req, res) => {
     const { id } = req.params;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
+    const role = req.user?.role;
+    if (role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslAudio',
+        resourceId: audio.id,
+        action: 'DELETE',
+        payload: {},
+        status: 'PENDING',
+        requestedBy: req.user?.id || 1
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslAudio',
+          resourceId: audio.id,
+          action: 'DELETE',
+          requestedByEmail: req.user?.email,
+          changesSummary: ['DELETE']
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send delete approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL audio deletion queued for admin approval'
+      });
+    }
     await ResourceTag.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: 'audio', resourceId: id } });
     await audio.destroy();

@@ -4,7 +4,8 @@
 // Handles CRUD operations for Speaking content with pagination and filtering.
 // ============================================================================
 
-const { Speaking, User, Tag, ResourceTag } = require('../models');
+const { Speaking, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
 // Convert incoming level(s) to CEFR labels as an array
@@ -70,6 +71,7 @@ const createSpeaking = async (req, res) => {
   try {
     const { title, description, discription, content, transcript, videoRef, pdf, taskPdf, level, imageUrl, imageurl, tags } = req.body;
     const createdBy = req.user.id; // From auth middleware
+    const role = req.user.role;
 
     if (!title || !videoRef) {
       return res.status(400).json({
@@ -80,6 +82,46 @@ const createSpeaking = async (req, res) => {
 
     // Normalize level(s)
     const normalizedLevels = normalizeLevels(level);
+
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        description: (description ?? discription ?? null),
+        content,
+        transcript,
+        videoRef,
+        pdf,
+        taskPdf,
+        imageUrl: (imageUrl ?? imageurl ?? null),
+        level: normalizedLevels,
+        tags: Array.isArray(tags) ? tags : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [])
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Speaking',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Speaking',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Speaking creation queued for admin approval'
+      });
+    }
 
     const speaking = await Speaking.create({
       title,
@@ -318,8 +360,8 @@ const getSpeakingById = async (req, res) => {
 };
 
 /**
- * Update a speaking content (Admin only)
- */
+ * Update a speaking content (Admin or queued for MAIN_MANAGER)
+*/
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
@@ -329,8 +371,51 @@ const updateSpeaking = async (req, res) => {
     if (!speaking) {
       return res.status(404).json({ success: false, message: 'Speaking content not found' });
     }
+    const role = req.user.role;
+    if (role === 'MAIN_MANAGER') {
+      const normalizedLevelUpdate = level !== undefined ? normalizeLevels(level) : speaking.level;
+      const payload = {
+        title,
+        description: (description ?? discription),
+        content,
+        transcript,
+        videoRef,
+        pdf,
+        taskPdf,
+        imageUrl: (imageUrl ?? imageurl),
+        level: normalizedLevelUpdate,
+        tags: Array.isArray(tags)
+          ? tags
+          : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : undefined)
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Speaking',
+        resourceId: speaking.id,
+        action: 'UPDATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: req.user.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Speaking',
+          resourceId: speaking.id,
+          action: 'UPDATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload).filter(k => payload[k] !== undefined)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send update approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Speaking update queued for admin approval'
+      });
+    }
 
-    if (req.user.role !== 'ADMIN') {
+    if (role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only update your own speaking content' });
     }
 
@@ -371,8 +456,8 @@ const updateSpeaking = async (req, res) => {
 };
 
 /**
- * Delete a speaking content (Admin only)
- */
+ * Delete a speaking content (Admin or queued for MAIN_MANAGER)
+*/
 const deleteSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
@@ -382,7 +467,36 @@ const deleteSpeaking = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Speaking content not found' });
     }
 
-    if (req.user.role !== 'ADMIN') {
+    const role = req.user.role;
+    if (role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Speaking',
+        resourceId: speaking.id,
+        action: 'DELETE',
+        payload: {},
+        status: 'PENDING',
+        requestedBy: req.user.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Speaking',
+          resourceId: speaking.id,
+          action: 'DELETE',
+          requestedByEmail: req.user?.email,
+          changesSummary: ['DELETE']
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send delete approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Speaking deletion queued for admin approval'
+      });
+    }
+
+    if (role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'You can only delete your own speaking content' });
     }
 

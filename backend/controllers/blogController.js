@@ -72,6 +72,7 @@ const createBlog = async (req, res) => {
   try {
     const { title, content, imageRef, imageUrl, imageurl, category, tag, tags, description, discription, desccription, level } = req.body;
     const createdBy = req.user.id;
+    const role = req.user.role;
 
     // Validate required fields
     if (!title || !content) {
@@ -87,6 +88,48 @@ const createBlog = async (req, res) => {
     // Get PDF paths from uploaded files
     const pdfPath = req.files?.pdfFile?.[0]?.path || null;
     const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || null;
+
+    // MAIN_MANAGER users queue creation for approval
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        content,
+        imageRef: imageRef ?? imageUrl ?? imageurl ?? null,
+        category: category ?? tag ?? null,
+        description: description ?? discription ?? desccription ?? null,
+        level: normalizedLevels,
+        pdf: pdfPath,
+        taskPdf: taskPdfPath,
+        tags: Array.isArray(tags)
+          ? tags
+          : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : [])
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Blog',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Blog',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Blog creation queued for admin approval'
+      });
+    }
 
     const blog = await Blog.create({
       title,

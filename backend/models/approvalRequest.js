@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       resourceId: {
         type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: false,
+        allowNull: true,
       },
       action: {
         type: DataTypes.STRING, // e.g., 'UPDATE', 'DELETE', 'CREATE'

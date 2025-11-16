@@ -3,8 +3,9 @@
 // ============================================================================
 // CRUD, search, filter, sort, tag assignment, and analytics for ESL videos.
 
-const { EslVideo, Tag, ResourceTag, ResourceAnalytics } = require('../models');
+const { EslVideo, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
 const { Op } = require('sequelize');
+const { sendApprovalRequestNotification } = require('../config/email');
 
 // Helpers
 const normalizeLevels = (input) => {
@@ -79,12 +80,51 @@ exports.createEslVideo = async (req, res) => {
     const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
     const createdBy = req.user?.id || 1;
+    const role = req.user?.role;
     
     // Parse tags from request body (can be array or comma-separated string)
     const tagNames = Array.isArray(tags) 
       ? tags.map(t => String(t).trim()).filter(Boolean)
       : (tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []);
     
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        videoRef,
+        description,
+        pdf,
+        taskPdf,
+        level: normalizedLevel,
+        thumbnailUrl,
+        tags: tagNames
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslVideo',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslVideo',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL video creation queued for admin approval'
+      });
+    }
+
     // Create video with tags array column
     const video = await EslVideo.create({ 
       title, 
@@ -200,6 +240,7 @@ exports.updateEslVideo = async (req, res) => {
     const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
+    const role = req.user?.role;
     
     // Parse tags
     const tagNames = tags !== undefined
@@ -208,6 +249,43 @@ exports.updateEslVideo = async (req, res) => {
           : String(tags).split(',').map(t => t.trim()).filter(Boolean))
       : null;
     
+    if (role === 'MAIN_MANAGER') {
+      const payload = {};
+      if (title !== undefined) payload.title = title;
+      if (videoRef !== undefined) payload.videoRef = videoRef;
+      if (description !== undefined) payload.description = description;
+      if (pdf !== undefined) payload.pdf = pdf;
+      if (taskPdf !== undefined) payload.taskPdf = taskPdf;
+      if (level !== undefined) payload.level = normalizeLevels(level);
+      if (videoRef !== undefined) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
+      if (tagNames !== null) payload.tags = tagNames;
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslVideo',
+        resourceId: video.id,
+        action: 'UPDATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: req.user?.id || 1
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslVideo',
+          resourceId: video.id,
+          action: 'UPDATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send update approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL video update queued for admin approval'
+      });
+    }
+
     const payload = { 
       title, 
       videoRef, 
@@ -244,6 +322,34 @@ exports.deleteEslVideo = async (req, res) => {
     const { id } = req.params;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
+    const role = req.user?.role;
+    if (role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'EslVideo',
+        resourceId: video.id,
+        action: 'DELETE',
+        payload: {},
+        status: 'PENDING',
+        requestedBy: req.user?.id || 1
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'EslVideo',
+          resourceId: video.id,
+          action: 'DELETE',
+          requestedByEmail: req.user?.email,
+          changesSummary: ['DELETE']
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send delete approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'ESL video deletion queued for admin approval'
+      });
+    }
     // use DB_RESOURCE_TYPE for cleanup
     await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
     await ResourceAnalytics.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });

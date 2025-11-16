@@ -6,7 +6,7 @@
 // and keeps tag associations in sync via ResourceTag.
 // ============================================================================
 
-const { ApprovalRequest, Blog, Video, Audio, Reading, Writing, Tag, ResourceTag, User } = require('../models');
+const { ApprovalRequest, Blog, Video, Audio, Reading, Writing, Speaking, Story, EslAudio, EslVideo, Tag, ResourceTag, User } = require('../models');
 const { Op } = require('sequelize');
 const { sendApprovalDecisionNotification } = require('../config/email');
 
@@ -16,7 +16,11 @@ const joinTypeMap = {
   Reading: 'reading',
   Writing: 'writing',
   Video: 'video',
-  Audio: 'audio'
+  Audio: 'audio',
+  Speaking: 'speaking',
+  Story: 'story',
+  EslVideo: 'video',
+  EslAudio: 'audio'
 };
 
 // Choose model by resourceType
@@ -27,6 +31,10 @@ function getModelByType(type) {
     case 'Audio': return Audio;
     case 'Reading': return Reading;
     case 'Writing': return Writing;
+    case 'Speaking': return Speaking;
+    case 'Story': return Story;
+    case 'EslAudio': return EslAudio;
+    case 'EslVideo': return EslVideo;
     default: return null;
   }
 }
@@ -58,7 +66,11 @@ function pickUpdateFields(resourceType, payload) {
     Video: ['title', 'videoRef', 'description', 'pdf', 'taskPdf', 'level'],
     Audio: ['title', 'description', 'transcript', 'audioRef', 'pdf', 'taskPdf', 'imageUrl', 'level'],
     Reading: ['title', 'content', 'description', 'pdf', 'taskPdf', 'imageUrl', 'level', 'tags'],
-    Writing: ['title', 'content', 'description', 'pdf', 'taskPdf', 'imageUrl', 'level', 'tags']
+    Writing: ['title', 'content', 'description', 'pdf', 'taskPdf', 'imageUrl', 'level', 'tags'],
+    Speaking: ['title', 'imageUrl', 'description', 'content', 'transcript', 'videoRef', 'pdf', 'taskPdf', 'level', 'tags'],
+    Story: ['title', 'imageUrl', 'description', 'contentText', 'audioRef', 'pdf', 'taskPdf', 'wordCount', 'level', 'tags'],
+    EslAudio: ['title', 'imageUrl', 'description', 'transcript', 'audioRef', 'pdf', 'taskPdf', 'level'],
+    EslVideo: ['title', 'videoRef', 'description', 'pdf', 'taskPdf', 'thumbnailUrl', 'level', 'tags']
   };
   const allowed = ALLOWED[resourceType] || [];
   const out = {};
@@ -146,6 +158,22 @@ exports.approve = async (req, res) => {
       if (Array.isArray(payload.tags)) {
         await applyTags(approval.resourceType, approval.resourceId, payload.tags);
       }
+    } else if (approval.action === 'CREATE') {
+      const payload = approval.payload || {};
+      const fields = pickUpdateFields(approval.resourceType, payload);
+      // Compute wordCount for Story if missing
+      if (approval.resourceType === 'Story' && fields.wordCount == null && typeof fields.contentText === 'string') {
+        fields.wordCount = fields.contentText.split(/\s+/).filter(Boolean).length;
+      }
+      // Ensure createdBy is set to requester
+      fields.createdBy = fields.createdBy || approval.requestedBy;
+      const created = await Model.create(fields);
+      // Persist tags association if provided
+      if (Array.isArray(payload.tags)) {
+        await applyTags(approval.resourceType, created.id, payload.tags);
+      }
+      // Backfill resourceId on approval
+      approval.resourceId = created.id;
     } else {
       return res.status(400).json({ success: false, message: 'Unsupported action' });
     }
