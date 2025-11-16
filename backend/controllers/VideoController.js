@@ -101,6 +101,7 @@ const createVideo = async (req, res) => {
   try {
     const { title, videoRef, description, level, tags } = req.body;
     const createdBy = req.user.id;
+    const role = req.user.role;
 
     if (!title || !videoRef) {
       return res.status(400).json({
@@ -114,6 +115,44 @@ const createVideo = async (req, res) => {
     // Handle PDF URLs provided by pdfUpload middleware (or fallback to multer paths)
     const pdf = (req.body?.pdf ?? null) || (req.files?.pdf?.[0]?.path ?? null);
     const taskPdf = (req.body?.taskPdf ?? null) || (req.files?.taskPdf?.[0]?.path ?? null);
+
+    // MAIN_MANAGER users queue creation for admin approval
+    if (role === 'MAIN_MANAGER') {
+      const payload = {
+        title,
+        videoRef,
+        description: description ?? null,
+        pdf,
+        taskPdf,
+        level: normalizedLevels,
+        tags: tags ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : []
+      };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'Video',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'Video',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Video creation queued for admin approval'
+      });
+    }
 
     const video = await Video.create({
       title,
