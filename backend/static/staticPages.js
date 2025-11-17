@@ -22,7 +22,7 @@ const STATIC_PAGES = [
   },
   {
     title: 'Language Courses',
-    short_description: 'Overview of available language programs and tracks.',
+    short_description: 'Overview of available languages and programs (English, Kurdish, Arabic).',
     link: '/languages'
   },
   {
