@@ -67,6 +67,41 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
 }
 ```
 
+## Compact Unified Format (Optional)
+
+Use `format=compact` to receive a minimal unified format and include static pages metadata in the search.
+
+- Endpoint: `GET /api/search?query=<text>&format=compact&limit=20&page=1`
+- Returns only three fields for each result: `title`, `id`, `description`.
+- Combines dynamic models (Audio, Video, Blog, Reading, Writing, Speaking, ESL Audio, ESL Video, Story, Course) and documented static pages.
+- Case-insensitive matching against any word found in `title` or `description`.
+
+Example response:
+
+```
+{
+  "mode": "compact",
+  "query": "english",
+  "filter": null,
+  "meta": {
+    "totalResults": 42,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3,
+    "executionTimeMs": 120,
+    "performance": {
+      "executionTimeMs": 95,
+      "dynamicCount": 36,
+      "staticCount": 6
+    }
+  },
+  "results": [
+    { "title": "Business English", "id": 17, "description": "Master professional communication for workplace success." },
+    { "title": "ESL Resources", "id": "/esl-resources", "description": "Access ESL blogs, stories, audios, and videos." }
+  ]
+}
+```
+
 ## Error Responses
 
 - `400 Bad Request` — missing `query`

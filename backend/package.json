@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node scripts/test_search_utils.js && node scripts/test_compact_search_endpoint.js",
+    "test:utils": "node scripts/test_search_utils.js",
+    "test:search": "node scripts/test_compact_search_endpoint.js",
+    "bench:search": "node scripts/search_benchmark.js english 30",
     "dev": "nodemon app.js",
     "start": "node app.js"
   },

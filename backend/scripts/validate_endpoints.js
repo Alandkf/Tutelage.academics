@@ -110,3 +110,19 @@ function printTags(items, getItem) {
 
   console.log('\n== Validation complete ==');
 })();
+
+// ----------------------------------------------------------------------------
+// Compact search quick checks (optional)
+// Run backend before executing this script.
+// ----------------------------------------------------------------------------
+(async function searchChecks() {
+  console.log(`\n== Compact Search Checks on ${BASE} ==`);
+  const queries = ['english', 'business', 'story'];
+  for (const q of queries) {
+    const r = await fetchJson(`/api/search?format=compact&query=${encodeURIComponent(q)}&limit=10&page=1`);
+    console.log(`Query '${q}' status:`, r.statusCode);
+    const sample = r.json?.results?.slice(0, 3) || [];
+    console.log('Sample:', sample);
+  }
+  console.log('\n== Compact Search Checks complete ==');
+})();

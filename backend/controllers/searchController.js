@@ -9,6 +9,8 @@
 
 const { Op } = require('sequelize');
 const models = require('../models');
+const { STATIC_PAGES } = require('../static/staticPages');
+const { tokenizeQuery, buildAnyWordWhere } = require('../utils/searchUtils');
 
 // Helper: normalize filter string to a canonical key
 function normalizeFilter(filter) {
@@ -57,6 +59,53 @@ function buildExcerptAndScore(entry, fields, q) {
     }
   }
   return { excerpt: null, score: 0.5, matchedField: null };
+}
+
+// ----------------------------------------------------------------------------
+// COMPACT UNIFIED SEARCH (3 fields: title, id, description)
+// ----------------------------------------------------------------------------
+async function searchCompactUnified(query, limit) {
+  const words = tokenizeQuery(query);
+  const fields = ['title', 'description'];
+
+  // Dynamic models to include (must have title/description)
+  const sources = [
+    { model: models.Audio, attributes: ['id', 'title', 'description'] },
+    { model: models.Video, attributes: ['id', 'title', 'description'] },
+    { model: models.Blog, attributes: ['id', 'title', 'description'] },
+    { model: models.Reading, attributes: ['id', 'title', 'description'] },
+    { model: models.Writing, attributes: ['id', 'title', 'description'] },
+    { model: models.Speaking, attributes: ['id', 'title', 'description'] },
+    { model: models.EslAudio, attributes: ['id', 'title', 'description'] },
+    { model: models.EslVideo, attributes: ['id', 'title', 'description'] },
+    { model: models.Story, attributes: ['id', 'title', 'description'] },
+    { model: models.Course, attributes: ['id', 'title', 'description'] },
+  ].filter((s) => !!s.model);
+
+  const perSourceLimit = Math.max(Math.ceil(limit / sources.length) + 2, 5);
+  const started = Date.now();
+
+  const dynamicResultsSettled = await Promise.allSettled(
+    sources.map((s) => s.model.findAll({
+      where: buildAnyWordWhere(words, fields),
+      attributes: s.attributes,
+      limit: perSourceLimit,
+    }))
+  );
+
+  const dynamicResults = dynamicResultsSettled.flatMap((p) => (p.status === 'fulfilled' ? p.value : []))
+    .map((r) => ({ title: r.title, id: r.id, description: r.description || '' }));
+
+  // Static results: search words in title or short_description
+  const staticResults = STATIC_PAGES.filter((p) => {
+    const t = (p.title || '').toLowerCase();
+    const d = (p.short_description || '').toLowerCase();
+    return words.some((w) => t.includes(w) || d.includes(w));
+  }).map((p) => ({ title: p.title, id: p.link, description: p.short_description }));
+
+  const combined = [...dynamicResults, ...staticResults].slice(0, limit);
+  const elapsedMs = Date.now() - started;
+  return { results: combined, meta: { executionTimeMs: elapsedMs, dynamicCount: dynamicResults.length, staticCount: staticResults.length } };
 }
 
 // Searchers per collection
@@ -283,6 +332,12 @@ exports.search = async (req, res) => {
     const filterRaw = req.query.filter;
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+    const format = (req.query.format || '').toLowerCase();
+    // Debug: Observe incoming search query params to verify format handling
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('[search] params:', { query, filter: filterRaw, page, limit, format });
+    }
 
     if (!query) {
       return res.status(400).json({
@@ -294,6 +349,31 @@ exports.search = async (req, res) => {
     if (filterRaw && !normalizedFilter) {
       return res.status(422).json({
         error: 'Invalid filter. Allowed values: tests, Courses, Blogs, Skills, Esl Resources',
+      });
+    }
+
+    // Compact unified mode: returns title, id, description and includes static pages
+    if (format === 'compact') {
+      const { results, meta } = await searchCompactUnified(query, limit * Math.max(page, 1));
+      const totalResults = results.length;
+      const totalPages = Math.max(Math.ceil(totalResults / limit), 1);
+      const start = (page - 1) * limit;
+      const end = Math.min(start + limit, totalResults);
+      const sliced = results.slice(start, end);
+      const elapsedMs = Date.now() - started;
+      return res.json({
+        mode: 'compact',
+        query,
+        filter: null,
+        meta: {
+          totalResults,
+          page,
+          limit,
+          totalPages,
+          executionTimeMs: elapsedMs,
+          performance: meta,
+        },
+        results: sliced,
       });
     }
 
