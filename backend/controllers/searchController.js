@@ -137,11 +137,12 @@ async function searchCompactUnified(query, limit) {
       return { title: r.title, id, description: r.description || '', link };
     });
 
-  // Static results: search words in title or short_description
+  // Static results: search words in title, short_description, or keywords (synonyms/plurals)
   const staticResults = STATIC_PAGES.filter((p) => {
     const t = (p.title || '').toLowerCase();
     const d = (p.short_description || '').toLowerCase();
-    return words.some((w) => t.includes(w) || d.includes(w));
+    const kws = Array.isArray(p.keywords) ? p.keywords.map((k) => String(k).toLowerCase()) : [];
+    return words.some((w) => t.includes(w) || d.includes(w) || kws.some((kw) => kw.includes(w) || w.includes(kw)));
   }).map((p) => ({ title: p.title, id: p.link, description: p.short_description, link: p.link }));
 
   const combined = [...dynamicResults, ...staticResults].slice(0, limit);
