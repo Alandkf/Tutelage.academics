@@ -70,16 +70,16 @@ async function searchCompactUnified(query, limit) {
 
   // Dynamic models to include (must have title/description)
   const sources = [
-    { model: models.Audio, attributes: ['id', 'title', 'description'] },
-    { model: models.Video, attributes: ['id', 'title', 'description'] },
-    { model: models.Blog, attributes: ['id', 'title', 'description'] },
-    { model: models.Reading, attributes: ['id', 'title', 'description'] },
-    { model: models.Writing, attributes: ['id', 'title', 'description'] },
-    { model: models.Speaking, attributes: ['id', 'title', 'description'] },
-    { model: models.EslAudio, attributes: ['id', 'title', 'description'] },
-    { model: models.EslVideo, attributes: ['id', 'title', 'description'] },
-    { model: models.Story, attributes: ['id', 'title', 'description'] },
-    { model: models.Course, attributes: ['id', 'title', 'description'] },
+    { type: 'Audio', model: models.Audio, attributes: ['id', 'title', 'description'] },
+    { type: 'Video', model: models.Video, attributes: ['id', 'title', 'description'] },
+    { type: 'Blog', model: models.Blog, attributes: ['id', 'title', 'description'] },
+    { type: 'Reading', model: models.Reading, attributes: ['id', 'title', 'description', 'level'] },
+    { type: 'Writing', model: models.Writing, attributes: ['id', 'title', 'description', 'level'] },
+    { type: 'Speaking', model: models.Speaking, attributes: ['id', 'title', 'description', 'level'] },
+    { type: 'EslAudio', model: models.EslAudio, attributes: ['id', 'title', 'description'] },
+    { type: 'EslVideo', model: models.EslVideo, attributes: ['id', 'title', 'description'] },
+    { type: 'Story', model: models.Story, attributes: ['id', 'title', 'description'] },
+    { type: 'Course', model: models.Course, attributes: ['id', 'title', 'description'] },
   ].filter((s) => !!s.model);
 
   const perSourceLimit = Math.max(Math.ceil(limit / sources.length) + 2, 5);
@@ -90,18 +90,59 @@ async function searchCompactUnified(query, limit) {
       where: buildAnyWordWhere(words, fields),
       attributes: s.attributes,
       limit: perSourceLimit,
-    }))
+    }).then(rows => rows.map(r => ({ ...r.toJSON(), __type: s.type }))))
   );
 
+  // Build link for known public-facing routes (level-aware for Speaking)
+  function linkFor(type, item) {
+    const id = item?.id;
+    if (id === undefined || id === null) return null;
+    const levelArr = Array.isArray(item?.level) ? item.level : null;
+    const firstLevel = levelArr && levelArr.length ? String(levelArr[0]) : '';
+    const cefr = (firstLevel.match(/^[ABC]\d/i)?.[0] || '').toLowerCase();
+    const levelCode = ['a1','a2','b1','b2','c1'].includes(cefr) ? cefr : null;
+
+    switch (type) {
+      case 'Blog':
+        return `/esl-resources/blogs/${id}`;
+      case 'Reading':
+        // Root-level dynamic page exists
+        return `/skills/reading/${id}`;
+      case 'Writing':
+        // Root-level dynamic page exists
+        return `/skills/writing/${id}`;
+      case 'Speaking':
+        // Speaking uses level-specific dynamic routes
+        return levelCode ? `/skills/speaking/${levelCode}/${id}` : null;
+      case 'EslAudio':
+        return `/esl-resources/audios/${id}`;
+      case 'EslVideo':
+        return `/esl-resources/videos/${id}`;
+      case 'Story':
+        return `/esl-resources/stories/${id}`;
+      // Courses currently have no dynamic detail page; omit link
+      case 'Course':
+      case 'Audio':
+      case 'Video':
+      default:
+        return null;
+    }
+  }
+
   const dynamicResults = dynamicResultsSettled.flatMap((p) => (p.status === 'fulfilled' ? p.value : []))
-    .map((r) => ({ title: r.title, id: r.id, description: r.description || '' }));
+    .map((r) => {
+      const link = linkFor(r.__type, r);
+      // For compact mode, set id to a navigable route when available
+      const id = link || r.id;
+      return { title: r.title, id, description: r.description || '', link };
+    });
 
   // Static results: search words in title or short_description
   const staticResults = STATIC_PAGES.filter((p) => {
     const t = (p.title || '').toLowerCase();
     const d = (p.short_description || '').toLowerCase();
     return words.some((w) => t.includes(w) || d.includes(w));
-  }).map((p) => ({ title: p.title, id: p.link, description: p.short_description }));
+  }).map((p) => ({ title: p.title, id: p.link, description: p.short_description, link: p.link }));
 
   const combined = [...dynamicResults, ...staticResults].slice(0, limit);
   const elapsedMs = Date.now() - started;

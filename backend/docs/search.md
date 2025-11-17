@@ -72,7 +72,9 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
 Use `format=compact` to receive a minimal unified format and include static pages metadata in the search.
 
 - Endpoint: `GET /api/search?query=<text>&format=compact&limit=20&page=1`
-- Returns only three fields for each result: `title`, `id`, `description`.
+- Returns three core fields: `title`, `id`, `description`.
+- In compact mode, `id` may be a number (database id) or a string path. When a public detail page exists, `id` is set to a navigable route (e.g., `/skills/reading/123`, `/esl-resources/videos/45`).
+- Additionally, a `link` field may be present, mirroring the navigable route for convenience.
 - Combines dynamic models (Audio, Video, Blog, Reading, Writing, Speaking, ESL Audio, ESL Video, Story, Course) and documented static pages.
 - Case-insensitive matching against any word found in `title` or `description`.
 
