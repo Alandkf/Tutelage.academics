@@ -156,7 +156,7 @@ async function searchCourses(q) {
 }
 
 async function searchSkills(q) {
-  const [readings, writings, speakings] = await Promise.all([
+  const [readings, writings, speakings, audios] = await Promise.all([
     models.Reading.findAll({
       where: {
         [Op.or]: [
@@ -191,6 +191,17 @@ async function searchSkills(q) {
       attributes: ['id', 'title', 'description', 'content', 'transcript', 'level'],
       limit: 150,
     }),
+    models.Audio.findAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.iLike]: ilikeTerm(q) } },
+          { description: { [Op.iLike]: ilikeTerm(q) } },
+          { transcript: { [Op.iLike]: ilikeTerm(q) } },
+        ],
+      },
+      attributes: ['id', 'title', 'description', 'transcript', 'level'],
+      limit: 150,
+    }),
   ]);
 
   const mapWithType = (arr, subType) => arr.map((r) => ({
@@ -203,6 +214,7 @@ async function searchSkills(q) {
     ...mapWithType(readings, 'Reading'),
     ...mapWithType(writings, 'Writing'),
     ...mapWithType(speakings, 'Speaking'),
+    ...mapWithType(audios, 'Audio'),
   ];
 }
 
