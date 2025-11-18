@@ -1345,39 +1345,41 @@ const sendApprovalRequestNotification = async (payload) => {
   const adminEmail = process.env.EMAIL_USER;
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Approval Request: ${action} on ${resourceType}</title>
       <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
-        .container { background-color: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .header { border-bottom: 3px solid #fec016; padding-bottom: 12px; margin-bottom: 16px; }
-        .title { color: #1f2937; font-size: 22px; font-weight: 600; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; font-size: 12px; }
-        .meta { background-color: #f9fafb; padding: 12px; border-radius: 8px; margin-top: 12px; }
-        .actions { margin-top: 16px; }
-        .button { display: inline-block; background: #fec016; color: #111827; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; }
-        .footer { text-align: center; margin-top: 24px; color: #6b7280; font-size: 12px; }
-        code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background-color: #fec016; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 20px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #f59e0b; margin-top: 0; }
+        .footer { background-color: #111111; color: #ffffff; padding: 15px; text-align: center; font-size: 12px; }
+        .button { display: inline-block; background-color: #f59e0b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <div class="title">Approval Request Queued</div>
-          <div class="badge">${action} • ${resourceType} • #${resourceId}</div>
+          <h1>Tutelage</h1>
         </div>
-
-        <p><strong>${requestedByName || 'Main Manager'}</strong> (${requestedByEmail || 'N/A'}) has queued a <strong>${action}</strong> for <strong>${resourceType}</strong> <code>#${resourceId}</code>.</p>
-
-        ${changesSummary ? `<div class="meta"><strong>Summary of changes:</strong><div>${changesSummary}</div></div>` : ''}
-
-        <div class="actions">
-          <p>Please review this request in the admin dashboard.</p>
+        <div class="content">
+          <h2>Approval Request Notification</h2>
+          <p>A new approval request has been submitted for review.</p>
+          <p><strong>Resource Type:</strong> ${resourceType}</p>
+          <p><strong>Action:</strong> ${action}</p>
+          <p><strong>Requested By:</strong> ${requestedByEmail}</p>
+          ${changesSummary ? `<p><strong>Changes Summary:</strong> ${changesSummary}</p>` : ''}
+          <p>Please review and approve or reject this request in the admin dashboard.</p>
+          <a href="${process.env.FRONTEND_URL}/admin-dashboard/approvals" class="button">Review Request</a>
         </div>
-
-        <div class="footer">Tutelage Admin • ${new Date().getFullYear()}</div>
+        <div class="footer">
+          <p>&copy; 2024 Tutelage. All rights reserved.</p>
+          <p>Contact us at support@tutelage.com</p>
+        </div>
       </div>
     </body>
     </html>
@@ -1423,32 +1425,41 @@ const sendApprovalDecisionNotification = async (payload) => {
 
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Approval ${status}: ${action} on ${resourceType}</title>
       <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
-        .container { background-color: #ffffff; border-radius: 10px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-        .header { border-bottom: 3px solid #fec016; padding-bottom: 12px; margin-bottom: 16px; }
-        .title { color: #1f2937; font-size: 22px; font-weight: 600; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #ecfeff; color: #0c4a6e; border: 1px solid #67e8f9; font-size: 12px; }
-        .meta { background-color: #f9fafb; padding: 12px; border-radius: 8px; margin-top: 12px; }
-        .footer { text-align: center; margin-top: 24px; color: #6b7280; font-size: 12px; }
-        .reason { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px; border-radius: 8px; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background-color: #fec016; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 20px; color: #333333; line-height: 1.6; }
+        .content h2 { color: #f59e0b; margin-top: 0; }
+        .footer { background-color: #111111; color: #ffffff; padding: 15px; text-align: center; font-size: 12px; }
+        .decision { font-weight: bold; color: ${status === 'Approved' ? '#28a745' : '#dc3545'}; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <div class="title">Approval ${status}</div>
-          <div class="badge">${action} • ${resourceType} • #${resourceId}</div>
+          <h1>Tutelage</h1>
         </div>
-
-        <p>Your queued <strong>${action}</strong> request for <strong>${resourceType}</strong> <code>#${resourceId}</code> was <strong>${status}</strong> by ${approverName || 'an admin'}.</p>
-        ${status === 'REJECTED' && reason ? `<div class="reason"><strong>Reason:</strong> ${reason}</div>` : ''}
-
-        <div class="footer">Tutelage • ${new Date().getFullYear()}</div>
+        <div class="content">
+          <h2>Approval Decision Notification</h2>
+          <p>Your approval request has been reviewed.</p>
+          <p><strong>Resource Type:</strong> ${resourceType}</p>
+          <p><strong>Action:</strong> ${action}</p>
+          <p><strong>Decision:</strong> <span class="decision">${status}</span></p>
+          <p><strong>Reviewed By:</strong> ${approverName}</p>
+          ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+          <p>If you have any questions, please contact support.</p>
+        </div>
+        <div class="footer">
+          <p>&copy; 2024 Tutelage. All rights reserved.</p>
+          <p>Contact us at support@tutelage.com</p>
+        </div>
       </div>
     </body>
     </html>
