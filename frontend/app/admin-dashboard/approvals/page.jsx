@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { ChevronDown, ChevronUp, CheckCircle, XCircle, Clock, User, FileText } from "lucide-react"
+import { ChevronDown, ChevronUp, CheckCircle, XCircle, Clock, User, FileText, Plus, Edit, Trash2, AlertTriangle, Check, X, Loader2 } from "lucide-react"
 import BASE_URL from "@/app/config/url"
 
 export default function ApprovalsPage() {
@@ -14,7 +15,7 @@ export default function ApprovalsPage() {
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState(null)
   const [actionLoading, setActionLoading] = useState(null)
-  const [confirmAction, setConfirmAction] = useState(null) // { id, action: 'approve' | 'reject' }
+  const [confirmAction, setConfirmAction] = useState(null)
 
   // Fetch approvals
   const fetchApprovals = async () => {
@@ -71,179 +72,384 @@ export default function ApprovalsPage() {
     setExpandedId(expandedId === id ? null : id)
   }
 
-  const getActionIcon = (action) => {
+  const getActionConfig = (action) => {
     switch (action) {
-      case 'CREATE': return '➕'
-      case 'UPDATE': return '✏️'
-      case 'DELETE': return '🗑️'
-      default: return '📝'
-    }
-  }
-
-  const getActionColor = (action) => {
-    switch (action) {
-      case 'CREATE': return 'text-green-600'
-      case 'UPDATE': return 'text-blue-600'
-      case 'DELETE': return 'text-red-600'
-      default: return 'text-gray-600'
+      case 'CREATE':
+        return {
+          icon: Plus,
+          label: 'Create',
+          color: 'text-emerald-600 dark:text-emerald-400',
+          bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
+          borderColor: 'border-emerald-200 dark:border-emerald-800'
+        }
+      case 'UPDATE':
+        return {
+          icon: Edit,
+          label: 'Update',
+          color: 'text-blue-600 dark:text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+          borderColor: 'border-blue-200 dark:border-blue-800'
+        }
+      case 'DELETE':
+        return {
+          icon: Trash2,
+          label: 'Delete',
+          color: 'text-red-600 dark:text-red-400',
+          bgColor: 'bg-red-50 dark:bg-red-950/20',
+          borderColor: 'border-red-200 dark:border-red-800'
+        }
+      default:
+        return {
+          icon: FileText,
+          label: 'Modify',
+          color: 'text-gray-600 dark:text-gray-400',
+          bgColor: 'bg-gray-50 dark:bg-gray-950/20',
+          borderColor: 'border-gray-200 dark:border-gray-800'
+        }
     }
   }
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Approval Requests</h1>
-        </div>
-        <div className="grid gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          {/* Header Skeleton */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="h-8 bg-muted rounded-lg w-64 animate-pulse"></div>
+            <div className="h-6 bg-muted rounded-full w-24 animate-pulse"></div>
+          </div>
+
+          {/* Cards Skeleton */}
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-5 w-5 bg-muted rounded animate-pulse"></div>
+                        <div className="h-6 bg-muted rounded w-48 animate-pulse"></div>
+                        <div className="h-5 bg-muted rounded-full w-16 animate-pulse"></div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="h-4 bg-muted rounded w-32 animate-pulse"></div>
+                        <div className="h-4 bg-muted rounded w-24 animate-pulse"></div>
+                      </div>
+                    </div>
+                    <div className="h-8 w-8 bg-muted rounded animate-pulse"></div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Approval Requests</h1>
-        <Badge variant="secondary" className="text-sm">
-          {approvals.length} pending
-        </Badge>
-      </div>
-
-      {approvals.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">All caught up!</h3>
-            <p className="text-muted-foreground text-center">
-              No pending approval requests at the moment.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {approvals.map((approval) => (
-            <Card key={approval.id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{getActionIcon(approval.action)}</span>
-                      <CardTitle className="text-lg">
-                        {approval.action} {approval.resourceType}
-                      </CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
-                        Pending
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        {approval.requester?.name || 'Unknown'}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FileText className="h-4 w-4" />
-                        ID: {approval.resourceId || 'New'}
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleExpanded(approval.id)}
-                    className="ml-4"
-                  >
-                    {expandedId === approval.id ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </CardHeader>
-
-              {expandedId === approval.id && (
-                <CardContent className="pt-0">
-                  <div className="border-t pt-4 space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Changes Requested:</h4>
-                      <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto whitespace-pre-wrap">
-                        {JSON.stringify(approval.payload, null, 2)}
-                      </pre>
-                    </div>
-
-                    {approval.reason && (
-                      <div>
-                        <h4 className="font-semibold mb-2">Reason:</h4>
-                        <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                          {approval.reason}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3 pt-4">
-                      <Button
-                        onClick={() => setConfirmAction({ id: approval.id, action: 'approve' })}
-                        disabled={actionLoading === approval.id}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        {actionLoading === approval.id ? 'Processing...' : 'Approve'}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => setConfirmAction({ id: approval.id, action: 'reject' })}
-                        disabled={actionLoading === approval.id}
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        {actionLoading === approval.id ? 'Processing...' : 'Reject'}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Approval Requests</h1>
+            <p className="text-muted-foreground mt-1">Review and manage content change requests</p>
+          </div>
+          <Badge
+            variant="secondary"
+            className="w-fit px-3 py-1 text-sm font-medium bg-muted text-muted-foreground"
+          >
+            <Clock className="h-3 w-3 mr-1" />
+            {approvals.length} pending
+          </Badge>
         </div>
-      )}
 
-      {/* Confirmation Dialog */}
-      <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction?.action === 'approve' ? 'Approve Request' : 'Reject Request'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to {confirmAction?.action} this {approvals.find(a => a.id === confirmAction?.id)?.resourceType.toLowerCase()} {confirmAction?.action === 'approve' ? 'update' : 'rejection'}?
-              {confirmAction?.action === 'reject' && ' This action cannot be undone.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => confirmAction && handleAction(confirmAction.id, confirmAction.action)}
-              className={confirmAction?.action === 'reject' ? 'bg-destructive hover:bg-destructive/90' : ''}
-            >
-              {confirmAction?.action === 'approve' ? 'Approve' : 'Reject'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Content */}
+        {approvals.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">All caught up!</h3>
+              <p className="text-muted-foreground text-center max-w-md">
+                No pending approval requests at the moment. New requests will appear here when MAIN_MANAGER users submit changes.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {approvals.map((approval) => {
+              const actionConfig = getActionConfig(approval.action)
+              const ActionIcon = actionConfig.icon
+              const isExpanded = expandedId === approval.id
+
+              return (
+                <Card
+                  key={approval.id}
+                  className="overflow-hidden border-l-4 transition-all duration-200 hover:shadow-md"
+                  style={{ borderLeftColor: actionConfig.color.includes('emerald') ? '#10b981' :
+                                           actionConfig.color.includes('blue') ? '#3b82f6' :
+                                           actionConfig.color.includes('red') ? '#ef4444' : '#6b7280' }}
+                >
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                          <div className={`p-2 rounded-lg ${actionConfig.bgColor} ${actionConfig.borderColor} border`}>
+                            <ActionIcon className={`h-5 w-5 ${actionConfig.color}`} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg text-foreground">
+                              {actionConfig.label} {approval.resourceType}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {approval.enhancedPayload?.summary || `${actionConfig.label} request for ${approval.resourceType.toLowerCase()}`}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs border-muted-foreground/20 text-muted-foreground">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <User className="h-4 w-4" />
+                            <span className="font-medium">{approval.requester?.name || 'Unknown'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <FileText className="h-4 w-4" />
+                            <span>ID: {approval.resourceId || 'New'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleExpanded(approval.id)}
+                        className="shrink-0 h-8 w-8 p-0 hover:bg-muted"
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardHeader>
+
+                  {isExpanded && (
+                    <>
+                      <Separator />
+                      <CardContent className="pt-6">
+                        <div className="space-y-6">
+                          {/* Changes Display */}
+                          <div>
+                            <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              Changes Requested
+                            </h4>
+
+                            {approval.enhancedPayload ? (
+                              <div className="space-y-4">
+                                {approval.enhancedPayload.type === 'UPDATE' && approval.enhancedPayload.changes && (
+                                  <div className="space-y-3">
+                                    {Object.entries(approval.enhancedPayload.changes).map(([field, change]) => (
+                                      <div key={field} className="bg-muted/50 border border-border rounded-lg p-4">
+                                        <div className="font-medium text-sm text-muted-foreground mb-2 capitalize">
+                                          {field.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm">
+                                          <div className="flex-1">
+                                            <div className="text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
+                                              {String(change.from || 'empty')}
+                                            </div>
+                                          </div>
+                                          <div className="text-muted-foreground font-medium">→</div>
+                                          <div className="flex-1">
+                                            <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/20 px-2 py-1 rounded">
+                                              {String(change.to || 'empty')}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {approval.enhancedPayload.type === 'DELETE' && (
+                                  <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                    <div className="flex items-center gap-3 mb-3">
+                                      <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                      <span className="font-semibold text-red-700 dark:text-red-300">Deletion Warning</span>
+                                    </div>
+                                    <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+                                      This will permanently delete the following {approval.resourceType.toLowerCase()}:
+                                    </p>
+                                    {approval.enhancedPayload.currentData && (
+                                      <div className="bg-background border border-border rounded-md p-3">
+                                        <div className="grid gap-2 text-sm">
+                                          {Object.entries(approval.enhancedPayload.currentData)
+                                            .filter(([key]) => ['title', 'name', 'description', 'content'].includes(key))
+                                            .map(([key, value]) => (
+                                              <div key={key} className="flex justify-between">
+                                                <span className="font-medium capitalize text-muted-foreground">{key}:</span>
+                                                <span className="text-foreground ml-2 text-right">
+                                                  {typeof value === 'string' && value.length > 50
+                                                    ? `${value.substring(0, 50)}...`
+                                                    : String(value || 'N/A')
+                                                  }
+                                                </span>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {approval.enhancedPayload.type === 'CREATE' && (
+                                  <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                                    <div className="flex items-center gap-3 mb-3">
+                                      <Plus className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                      <span className="font-semibold text-emerald-700 dark:text-emerald-300">Creation Request</span>
+                                    </div>
+                                    <p className="text-sm text-emerald-600 dark:text-emerald-400 mb-4">
+                                      This will create a new {approval.resourceType.toLowerCase()} with the following data:
+                                    </p>
+                                    <div className="bg-background border border-border rounded-md p-3">
+                                      <div className="grid gap-2 text-sm">
+                                        {Object.entries(approval.enhancedPayload.newData || {})
+                                          .filter(([key]) => ['title', 'name', 'description', 'content'].includes(key))
+                                          .map(([key, value]) => (
+                                            <div key={key} className="flex justify-between">
+                                              <span className="font-medium capitalize text-muted-foreground">{key}:</span>
+                                              <span className="text-foreground ml-2 text-right">
+                                                {typeof value === 'string' && value.length > 50
+                                                  ? `${value.substring(0, 50)}...`
+                                                  : String(value || 'N/A')
+                                                }
+                                              </span>
+                                            </div>
+                                          ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="text-xs text-muted-foreground bg-muted/30 px-3 py-2 rounded-md border">
+                                  {approval.enhancedPayload.summary}
+                                </div>
+                              </div>
+                            ) : (
+                              <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto whitespace-pre-wrap border">
+                                {JSON.stringify(approval.payload, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+
+                          {/* Reason */}
+                          {approval.reason && (
+                            <div>
+                              <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4" />
+                                Reason for Request
+                              </h4>
+                              <div className="bg-muted/50 border border-border rounded-lg p-4">
+                                <p className="text-sm text-foreground leading-relaxed">
+                                  {approval.reason}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                            <Button
+                              onClick={() => setConfirmAction({ id: approval.id, action: 'approve' })}
+                              disabled={actionLoading === approval.id}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              {actionLoading === approval.id ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4 mr-2" />
+                              )}
+                              {actionLoading === approval.id ? 'Processing...' : 'Approve Changes'}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => setConfirmAction({ id: approval.id, action: 'reject' })}
+                              disabled={actionLoading === approval.id}
+                              className="flex-1"
+                            >
+                              {actionLoading === approval.id ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <X className="h-4 w-4 mr-2" />
+                              )}
+                              {actionLoading === approval.id ? 'Processing...' : 'Reject Changes'}
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </>
+                  )}
+                </Card>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                {confirmAction?.action === 'approve' ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                    Approve Request
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-5 w-5 text-red-600" />
+                    Reject Request
+                  </>
+                )}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-left">
+                Are you sure you want to <span className="font-semibold">{confirmAction?.action}</span> this{' '}
+                <span className="font-semibold">
+                  {approvals.find(a => a.id === confirmAction?.id)?.resourceType.toLowerCase()}
+                </span>{' '}
+                {confirmAction?.action === 'approve' ? 'update' : 'rejection'}?
+                {confirmAction?.action === 'reject' && (
+                  <span className="block mt-2 text-red-600 dark:text-red-400 font-medium">
+                    ⚠️ This action cannot be undone.
+                  </span>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => confirmAction && handleAction(confirmAction.id, confirmAction.action)}
+                className={`w-full sm:w-auto ${
+                  confirmAction?.action === 'reject'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                }`}
+              >
+                {confirmAction?.action === 'approve' ? 'Approve' : 'Reject'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   )
 }

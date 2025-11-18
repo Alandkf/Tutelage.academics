@@ -211,7 +211,7 @@ exports.approve = async (req, res) => {
 exports.reject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body;
+    const { reason } = req.body || {};
     const approval = await ApprovalRequest.findByPk(id);
     if (!approval) return res.status(404).json({ success: false, message: 'Approval request not found' });
     if (approval.status !== 'PENDING') {
