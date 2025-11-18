@@ -31,9 +31,9 @@ const LanguagePlacementPage = () => {
 export default LanguagePlacementPage
 
 const LanguagePlacementHero = () => {
-  const title = "Free Practice Test"
-  const heroImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1400"
-  const description = "Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development."
+  const title = "Language Placement Test"
+  const heroImage = "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&q=80&w=1400"
+  const description = "Online placement with a live instructor. A 15–30 minute speaking & comprehension session that measures practical speaking and listening skills in real time."
   
 
   return (

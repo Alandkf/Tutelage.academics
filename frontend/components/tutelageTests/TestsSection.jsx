@@ -8,7 +8,7 @@ export default function TestsSection() {
     {
       id: 'free',
       title: 'Free Practice Test',
-      desc: `Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development.`,
+      desc: `Our free 30-minutes English practice test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development.`,
       bullets: [
         'The test includes 36 multiple-choice questions.',
         'It takes approximately 30 minutes to complete.',
