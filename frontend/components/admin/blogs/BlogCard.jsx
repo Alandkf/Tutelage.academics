@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-export function BlogCard({ id, title, content, imageRef, category, author, createdAt }) {
+export function BlogCard({ id, title, description, content, imageRef, category, author, createdAt }) {
   return (
     <Link href={`/admin-dashboard/blogs/${id}`} className="block h-full">
       <Card className="pt-0 overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full cursor-pointer">
@@ -42,7 +42,7 @@ export function BlogCard({ id, title, content, imageRef, category, author, creat
                 <p className="text-sm text-muted-foreground mb-2 line-clamp-3 cursor-pointer">{content}</p>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs break-words">
-                {content}
+                {description}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
