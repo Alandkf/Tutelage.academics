@@ -55,7 +55,7 @@ export default async function middleware(req) {
   // Additional role-based access control for admin-dashboard
   if (isAuthenticated && pathname.startsWith('/admin-dashboard')) {
     // Specific check for quiz route: only ADMIN can access
-    if (pathname === '/admin-dashboard/quiz') {
+    if (pathname === '/admin-dashboard/quiz' || pathname === '/admin-dashboard/users' || pathname === '/admin-dashboard/approvals') {
       if (userRole !== 'ADMIN') {
         return NextResponse.redirect(new URL('/', req.url));
       }

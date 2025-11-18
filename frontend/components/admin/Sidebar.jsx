@@ -32,7 +32,7 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
   const { user, loading } = useAuth()
-  const filteredMenuItems = menuItems.filter(item => !(user?.role === "MAIN_MANAGER" && (item.name === "Quiz" || item.name === "Approvals")));
+  const filteredMenuItems = menuItems.filter(item => !(user?.role === "MAIN_MANAGER" && (item.name === "Quiz" || item.name === "Approvals" || item.name === "Users")));
   
   useEffect(() => {
     const checkMobile = () => {
