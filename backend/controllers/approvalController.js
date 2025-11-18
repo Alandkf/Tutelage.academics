@@ -8,7 +8,6 @@
 
 const { ApprovalRequest, Blog, Video, Audio, Reading, Writing, Speaking, Story, EslAudio, EslVideo, Tag, ResourceTag, User, LandingSection } = require('../models');
 const { Op } = require('sequelize');
-const { sendApprovalDecisionNotification } = require('../config/email');
 
 // Map ApprovalRequest.resourceType to ResourceTag.resourceType (lowercase)
 const joinTypeMap = {
@@ -329,21 +328,7 @@ exports.approve = async (req, res) => {
     approval.approvedBy = req.user.id;
     await approval.save();
 
-    // Notify requester of decision
-    try {
-      const requester = await User.findByPk(approval.requestedBy);
-      await sendApprovalDecisionNotification({
-        resourceType: approval.resourceType,
-        resourceId: approval.resourceId,
-        action: approval.action,
-        status: 'APPROVED',
-        requesterEmail: requester?.email,
-        approverName: req.user?.email,
-        reason: null
-      });
-    } catch (notifyErr) {
-      console.warn('⚠️ Failed to send approval decision email:', notifyErr?.message || notifyErr);
-    }
+    
 
     return res.status(200).json({ success: true, message: 'Approval applied successfully', approvalId: approval.id });
   } catch (error) {
@@ -370,21 +355,7 @@ exports.reject = async (req, res) => {
     approval.reason = reason || null;
     await approval.save();
 
-    // Notify requester of decision
-    try {
-      const requester = await User.findByPk(approval.requestedBy);
-      await sendApprovalDecisionNotification({
-        resourceType: approval.resourceType,
-        resourceId: approval.resourceId,
-        action: approval.action,
-        status: 'REJECTED',
-        requesterEmail: requester?.email,
-        approverName: req.user?.email,
-        reason: approval.reason || null
-      });
-    } catch (notifyErr) {
-      console.warn('⚠️ Failed to send rejection email:', notifyErr?.message || notifyErr);
-    }
+    
 
     return res.status(200).json({ success: true, message: 'Request rejected', approvalId: approval.id });
   } catch (error) {

@@ -1407,80 +1407,7 @@ const sendApprovalRequestNotification = async (payload) => {
  * Notify requester about approval decision.
  * payload: { resourceType, resourceId, action, status, requesterEmail, approverName, reason }
  */
-const sendApprovalDecisionNotification = async (payload) => {
-  const {
-    resourceType,
-    resourceId,
-    action,
-    status,
-    requesterEmail,
-    approverName,
-    reason
-  } = payload;
 
-  if (!requesterEmail) {
-    console.warn('⚠️ No requesterEmail provided for decision notification');
-    return { success: false, error: new Error('No requester email') };
-  }
-
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Approval ${status}: ${action} on ${resourceType}</title>
-      <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { background-color: #fec016; color: #ffffff; padding: 20px; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .content { padding: 20px; color: #333333; line-height: 1.6; }
-        .content h2 { color: #f59e0b; margin-top: 0; }
-        .footer { background-color: #111111; color: #ffffff; padding: 15px; text-align: center; font-size: 12px; }
-        .decision { font-weight: bold; color: ${status === 'Approved' ? '#28a745' : '#dc3545'}; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Tutelage</h1>
-        </div>
-        <div class="content">
-          <h2>Approval Decision Notification</h2>
-          <p>Your approval request has been reviewed.</p>
-          <p><strong>Resource Type:</strong> ${resourceType}</p>
-          <p><strong>Action:</strong> ${action}</p>
-          <p><strong>Decision:</strong> <span class="decision">${status}</span></p>
-          <p><strong>Reviewed By:</strong> ${approverName}</p>
-          ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
-          <p>If you have any questions, please contact support.</p>
-        </div>
-        <div class="footer">
-          <p>&copy; 2024 Tutelage. All rights reserved.</p>
-          <p>Contact us at support@tutelage.com</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const mailOptions = {
-    from: `"Tutelage Admin" <${process.env.EMAIL_USER}>`,
-    to: requesterEmail,
-    subject: `[Decision] ${status}: ${action} ${resourceType} #${resourceId}`,
-    html: htmlContent
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Approval decision notification sent to requester:', info.messageId);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('❌ Error sending approval decision notification:', error);
-    return { success: false, error };
-  }
-};
 
 module.exports = {
   transporter,
@@ -1493,7 +1420,6 @@ module.exports = {
   sendMockTestBookingEmail,
   sendMockTestConfirmationEmail,
   sendApprovalRequestNotification,
-  sendApprovalDecisionNotification
 };
 
 
