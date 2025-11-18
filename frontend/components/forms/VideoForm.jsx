@@ -73,8 +73,8 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel,
 	}
 
 	// Replace handleAddTag with support for comma-separated input and multiple tags
-	const handleAddTag = (fromInput = null) => {
-		const raw = (fromInput ?? tagInput).trim()
+	const handleAddTag = () => {
+		const raw = tagInput.trim()
 		if (!raw) return
 		// split on commas, dedupe and ignore empties
 		const newTags = raw.split(',').map(t => t.trim()).filter(Boolean)
