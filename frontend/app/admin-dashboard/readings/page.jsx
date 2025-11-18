@@ -58,6 +58,17 @@ const Readings = () => {
     // eslint-disable-next-line
   }, [searchTerm])
 
+  // Add periodic fetching for up-to-date data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!loading) {
+        resetAndFetch()
+      }
+    }, 30000) // Fetch every 30 seconds
+
+    return () => clearInterval(interval) // Cleanup on unmount
+  }, [loading, searchTerm])
+
   const lastReadingRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchReadings })
 
   const handleCreateSuccess = async (values) => {
