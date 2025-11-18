@@ -91,7 +91,7 @@ export default function Header() {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 p-0" align="end">
+              <DropdownMenuContent className="w-80 p-0 ml-10 sm:ml-0" align="end">
                 <div className="p-4 border-b">
                   <h3 className="font-semibold">Approval Requests</h3>
                   <p className="text-sm text-muted-foreground">

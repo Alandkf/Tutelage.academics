@@ -39,6 +39,19 @@ function getModelByType(type) {
   }
 }
 
+// Fetch tags for a resource
+async function getTagsForResource(resourceType, resourceId) {
+  const ns = joinTypeMap[resourceType];
+  if (!ns) return [];
+  
+  const rts = await ResourceTag.findAll({ where: { resourceType: ns, resourceId } });
+  if (!rts.length) return [];
+  
+  const tagIds = rts.map(rt => rt.tagId);
+  const tags = await Tag.findAll({ where: { id: { [Op.in]: tagIds } } });
+  return tags.map(t => t.name).sort();
+}
+
 // Create missing tags by name under appropriate namespace and then
 // replace ResourceTag mappings for the resource.
 async function applyTags(resourceType, resourceId, tagNames) {
@@ -110,15 +123,38 @@ exports.listApprovals = async (req, res) => {
           if (Model) {
             const currentRecord = await Model.findByPk(approval.resourceId);
             if (currentRecord) {
-              const currentData = currentRecord.toJSON();
+              let currentData = currentRecord.toJSON();
+              
+              // Fetch tags for resources that support them
+              if (joinTypeMap[approval.resourceType]) {
+                currentData.tags = await getTagsForResource(approval.resourceType, approval.resourceId);
+              }
+              
               const changes = {};
 
               // Compare each field in the payload with current data
+              // Only show actual changes, not fields that were included but not modified
               Object.keys(approval.payload).forEach(key => {
-                if (JSON.stringify(currentData[key]) !== JSON.stringify(approval.payload[key])) {
+                const payloadValue = approval.payload[key];
+                const currentValue = currentData[key];
+
+                // Skip if payload value is undefined (field wasn't actually changed)
+                if (payloadValue === undefined) return;
+
+                // For arrays (like tags), compare sorted versions
+                let payloadStr, currentStr;
+                if (Array.isArray(payloadValue) && Array.isArray(currentValue)) {
+                  payloadStr = JSON.stringify([...payloadValue].sort());
+                  currentStr = JSON.stringify([...currentValue].sort());
+                } else {
+                  payloadStr = JSON.stringify(payloadValue);
+                  currentStr = JSON.stringify(currentValue);
+                }
+
+                if (payloadStr !== currentStr) {
                   changes[key] = {
-                    from: currentData[key],
-                    to: approval.payload[key]
+                    from: currentValue,
+                    to: payloadValue
                   };
                 }
               });
