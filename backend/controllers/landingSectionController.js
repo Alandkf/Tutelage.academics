@@ -5,7 +5,8 @@
 // ============================================================================
 
 const { Op } = require('sequelize');
-const { LandingSection, User } = require('../models');
+const { LandingSection, User, ApprovalRequest } = require('../models');
+const { sendApprovalRequestNotification } = require('../config/email');
 
 /**
  * Create a new landing section entry (Admin only)
@@ -22,8 +23,39 @@ const createLandingSection = async (req, res) => {
     }
 
     const createdBy = req.user?.id;
+    const role = req.user?.role;
     if (!createdBy) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
+    }
+
+    // Queue for admin approval when MAIN_MANAGER requests creation
+    if (role === 'MAIN_MANAGER') {
+      const payload = { title, subtitle, imageUrl, createdBy };
+      const approval = await ApprovalRequest.create({
+        resourceType: 'LandingSection',
+        resourceId: null,
+        action: 'CREATE',
+        payload,
+        status: 'PENDING',
+        requestedBy: createdBy
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'LandingSection',
+          resourceId: null,
+          action: 'CREATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(payload)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send create approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Landing section creation queued for admin approval'
+      });
     }
 
     const entry = await LandingSection.create({ title, subtitle, imageUrl, createdBy });
@@ -140,6 +172,35 @@ const updateLandingSection = async (req, res) => {
     if (subtitle !== undefined) updateData.subtitle = subtitle;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
 
+    // Queue for admin approval when MAIN_MANAGER requests update
+    if (req.user?.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'LandingSection',
+        resourceId: entry.id,
+        action: 'UPDATE',
+        payload: updateData,
+        status: 'PENDING',
+        requestedBy: req.user?.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'LandingSection',
+          resourceId: entry.id,
+          action: 'UPDATE',
+          requestedByEmail: req.user?.email,
+          changesSummary: Object.keys(updateData)
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send update approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Landing section update queued for admin approval'
+      });
+    }
+
     await entry.update(updateData);
 
     const updated = await LandingSection.findByPk(id, {
@@ -170,6 +231,35 @@ const deleteLandingSection = async (req, res) => {
     const entry = await LandingSection.findByPk(id);
     if (!entry) {
       return res.status(404).json({ success: false, message: 'Landing section not found' });
+    }
+
+    // Queue for admin approval when MAIN_MANAGER requests deletion
+    if (req.user?.role === 'MAIN_MANAGER') {
+      const approval = await ApprovalRequest.create({
+        resourceType: 'LandingSection',
+        resourceId: entry.id,
+        action: 'DELETE',
+        payload: {},
+        status: 'PENDING',
+        requestedBy: req.user?.id
+      });
+      try {
+        await sendApprovalRequestNotification({
+          resourceType: 'LandingSection',
+          resourceId: entry.id,
+          action: 'DELETE',
+          requestedByEmail: req.user?.email,
+          changesSummary: ['DELETE']
+        });
+      } catch (notifyErr) {
+        console.warn('⚠️ Failed to send delete approval email:', notifyErr?.message || notifyErr);
+      }
+      return res.status(202).json({
+        success: true,
+        queuedForApproval: true,
+        approvalRequestId: approval.id,
+        message: 'Landing section deletion queued for admin approval'
+      });
     }
 
     await entry.destroy();

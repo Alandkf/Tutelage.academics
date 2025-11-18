@@ -5,8 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('../middlewares/auth');
-const adminAuth = require('../middlewares/adminAuth');
+const { isAuthenticated, isAdmin } = require('../middlewares/auth');
 const { pdfUpload } = require('../middlewares/pdfUpload');
 const {
   createEslAudio,
@@ -24,8 +23,8 @@ router.post('/search-transcript', searchEslAudioByTranscript);
 
 // Admin endpoints
 router.use(isAuthenticated);
-router.post('/', adminAuth, pdfUpload, createEslAudio);
-router.put('/:id', adminAuth, pdfUpload, updateEslAudio);
-router.delete('/:id', adminAuth, deleteEslAudio);
+router.post('/', isAdmin, pdfUpload, createEslAudio);
+router.put('/:id', isAdmin, pdfUpload, updateEslAudio);
+router.delete('/:id', isAdmin, deleteEslAudio);
 
 module.exports = router;
