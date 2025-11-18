@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 
 // Constants
-const BCRYPT_SALT_ROUNDS = 12;
+const BCRYPT_SALT_ROUNDS = 10;
 const JWT_ACCESS_TOKEN_EXPIRY = '1h';
 const JWT_REFRESH_TOKEN_EXPIRY = '30d';
 const COOKIE_MAX_AGE_ACCESS = 60 * 60 * 1000; // 1 hour
@@ -672,7 +672,7 @@ class AuthController {
   static async updateUser(req, res) {
     try {
       const { id: userId } = req.params;
-      const { name, email, role } = req.body;
+      const { name, email, role, password } = req.body;
       console.log('✏️ Updating user (Admin request)');
       
       if (!userId) {
@@ -699,6 +699,19 @@ class AuthController {
       if (email !== undefined) updateData.email = email;
       if (role !== undefined) updateData.role = role;
 
+      // Handle password update if provided
+      if (password !== undefined && password.trim() !== '') {
+        if (password.length < MIN_PASSWORD_LENGTH) {
+          return res.status(400).json({
+            success: false,
+            message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`
+          });
+        }
+        // Hash the new password
+        updateData.passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+        console.log('🔐 Password updated for user');
+      }
+
       // Validate email uniqueness if email is being updated
       if (email && email !== targetUser.email) {
         const existingUser = await User.findOne({ 
@@ -716,7 +729,7 @@ class AuthController {
         }
       }
 
-      console.log('📝 Updating user with data:', updateData);
+      console.log('📝 Updating user with data:', Object.keys(updateData).join(', '));
 
       // Update user record
       await targetUser.update(updateData);

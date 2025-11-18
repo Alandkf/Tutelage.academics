@@ -54,7 +54,7 @@ const approvalsRoutes = require('./routes/approvals');
 // ============================================================================
 
 const app = express();
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, ''); // Remove trailing slash
 const SERVER_PORT = process.env.PORT || 3001;
 
 // Toggle database initialization based on environment variables

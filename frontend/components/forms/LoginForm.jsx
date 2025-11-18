@@ -16,7 +16,7 @@ console.log('BASE_URL:', BASE_URL);
 // Define form schema with Zod
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  password: z.string().min(6, { message: "Password must be at least 8 characters" }),
 })
 
 const LoginForm = () => {
@@ -48,7 +48,7 @@ const LoginForm = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include', 
       })
 
       const data = await response.json()

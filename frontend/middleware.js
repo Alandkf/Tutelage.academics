@@ -54,10 +54,17 @@ export default async function middleware(req) {
   
   // Additional role-based access control for admin-dashboard
   if (isAuthenticated && pathname.startsWith('/admin-dashboard')) {
-    // Only ADMIN and MAIN_MANAGER roles can access admin-dashboard
-    const allowedRoles = ['ADMIN', 'MAIN_MANAGER'];
-    if (!allowedRoles.includes(userRole)) {
-      return NextResponse.redirect(new URL('/', req.url));
+    // Specific check for quiz route: only ADMIN can access
+    if (pathname === '/admin-dashboard/quiz') {
+      if (userRole !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/', req.url));
+      }
+    } else {
+      // For other admin-dashboard routes: only ADMIN and MAIN_MANAGER can access
+      const allowedRoles = ['ADMIN', 'MAIN_MANAGER'];
+      if (!allowedRoles.includes(userRole)) {
+        return NextResponse.redirect(new URL('/', req.url));
+      }
     }
   }
   

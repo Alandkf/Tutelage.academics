@@ -31,7 +31,8 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
   const { user, loading } = useAuth()
-
+  const filteredMenuItems = menuItems.filter(item => !(user?.role === "MAIN_MANAGER" && item.name === "Quiz"));
+  
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -83,7 +84,7 @@ export default function Sidebar() {
           </div>
           
           <nav className="flex-1 py-2 flex flex-col gap-1 px-3">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <Link key={item.name} href={item.href} className="w-full">
                 <div
                   className={`flex items-center p-2 rounded-md transition-colors ${
@@ -131,7 +132,7 @@ export default function Sidebar() {
               </div>
               
               <nav className="p-2">
-                {menuItems.map((item) => (
+                {filteredMenuItems.map((item) => (
                   <Link 
                     key={item.name} 
                     href={item.href}
