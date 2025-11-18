@@ -99,7 +99,114 @@ exports.listApprovals = async (req, res) => {
       ]
     });
 
-    return res.status(200).json({ success: true, approvals });
+    // Enhance approval data for better frontend display
+    const enhancedApprovals = await Promise.all(approvals.map(async (approval) => {
+      const approvalData = approval.toJSON();
+
+      try {
+        if (approval.action === 'UPDATE' && approval.resourceId) {
+          // For updates, compare current data with requested changes
+          const Model = getModelByType(approval.resourceType);
+          if (Model) {
+            const currentRecord = await Model.findByPk(approval.resourceId);
+            if (currentRecord) {
+              const currentData = currentRecord.toJSON();
+              const changes = {};
+
+              // Compare each field in the payload with current data
+              Object.keys(approval.payload).forEach(key => {
+                if (JSON.stringify(currentData[key]) !== JSON.stringify(approval.payload[key])) {
+                  changes[key] = {
+                    from: currentData[key],
+                    to: approval.payload[key]
+                  };
+                }
+              });
+
+              approvalData.enhancedPayload = {
+                type: 'UPDATE',
+                changes: changes,
+                summary: `Update ${Object.keys(changes).length} field(s) in ${approval.resourceType}`
+              };
+            } else {
+              // Record not found, show what would be updated
+              approvalData.enhancedPayload = {
+                type: 'UPDATE',
+                changes: Object.keys(approval.payload).reduce((acc, key) => {
+                  acc[key] = { from: 'N/A', to: approval.payload[key] };
+                  return acc;
+                }, {}),
+                summary: `Update ${Object.keys(approval.payload).length} field(s) in ${approval.resourceType} (record not found)`
+              };
+            }
+          } else {
+            // Model not found, fallback to showing payload
+            approvalData.enhancedPayload = {
+              type: 'UPDATE',
+              changes: Object.keys(approval.payload).reduce((acc, key) => {
+                acc[key] = { from: 'N/A', to: approval.payload[key] };
+                return acc;
+              }, {}),
+              summary: `Update ${Object.keys(approval.payload).length} field(s) in ${approval.resourceType}`
+            };
+          }
+        } else if (approval.action === 'DELETE' && approval.resourceId) {
+          // For deletes, fetch current data to show what will be deleted
+          const Model = getModelByType(approval.resourceType);
+          if (Model) {
+            const currentRecord = await Model.findByPk(approval.resourceId);
+            if (currentRecord) {
+              const currentData = currentRecord.toJSON();
+              approvalData.enhancedPayload = {
+                type: 'DELETE',
+                currentData: currentData,
+                summary: `Delete ${approval.resourceType}: "${currentData.title || currentData.name || `ID: ${approval.resourceId}`}"`
+              };
+            } else {
+              // Record not found to delete
+              approvalData.enhancedPayload = {
+                type: 'DELETE',
+                currentData: { id: approval.resourceId, note: 'Record not found - may have been already deleted' },
+                summary: `Delete ${approval.resourceType} with ID: ${approval.resourceId} (record not found)`
+              };
+            }
+          } else {
+            // Model not found
+            approvalData.enhancedPayload = {
+              type: 'DELETE',
+              currentData: { id: approval.resourceId, resourceType: approval.resourceType },
+              summary: `Delete ${approval.resourceType} with ID: ${approval.resourceId}`
+            };
+          }
+        } else if (approval.action === 'CREATE') {
+          // For creates, show what will be created
+          approvalData.enhancedPayload = {
+            type: 'CREATE',
+            newData: approval.payload,
+            summary: `Create new ${approval.resourceType}: "${approval.payload.title || approval.payload.name || 'Untitled'}"`
+          };
+        } else {
+          // Fallback for unknown actions
+          approvalData.enhancedPayload = {
+            type: approval.action || 'UNKNOWN',
+            rawData: approval.payload,
+            summary: `${approval.action || 'Unknown action'} on ${approval.resourceType}`
+          };
+        }
+      } catch (error) {
+        console.error('Error enhancing approval payload:', error);
+        // Fallback to basic enhanced payload
+        approvalData.enhancedPayload = {
+          type: approval.action || 'UNKNOWN',
+          rawData: approval.payload,
+          summary: `${approval.action || 'Unknown action'} on ${approval.resourceType} (error processing details)`
+        };
+      }
+
+      return approvalData;
+    }));
+
+    return res.status(200).json({ success: true, approvals: enhancedApprovals });
   } catch (error) {
     console.error('❌ listApprovals error:', error);
     return res.status(500).json({ success: false, message: 'Server error listing approvals', error: error.message });

@@ -257,26 +257,42 @@ export default function ApprovalsPage() {
                               <div className="space-y-4">
                                 {approval.enhancedPayload.type === 'UPDATE' && approval.enhancedPayload.changes && (
                                   <div className="space-y-3">
-                                    {Object.entries(approval.enhancedPayload.changes).map(([field, change]) => (
-                                      <div key={field} className="bg-muted/50 border border-border rounded-lg p-4">
-                                        <div className="font-medium text-sm text-muted-foreground mb-2 capitalize">
-                                          {field.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                                        </div>
-                                        <div className="flex items-center gap-3 text-sm">
-                                          <div className="flex-1">
-                                            <div className="text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
-                                              {String(change.from || 'empty')}
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                      <span className="font-medium text-blue-700 dark:text-blue-300">Field Changes</span>
+                                    </div>
+                                    {Object.keys(approval.enhancedPayload.changes).length > 0 ? (
+                                      Object.entries(approval.enhancedPayload.changes).map(([field, change]) => (
+                                        <div key={field} className="bg-muted/50 border border-border rounded-lg p-4">
+                                          <div className="font-medium text-sm text-muted-foreground mb-2 capitalize">
+                                            {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).toLowerCase()}
+                                          </div>
+                                          <div className="flex items-center gap-3 text-sm">
+                                            <div className="flex-1">
+                                              <div className="text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/20 px-2 py-1 rounded">
+                                                {change.from === null || change.from === undefined ? 'empty' :
+                                                 Array.isArray(change.from) ? change.from.join(', ') :
+                                                 typeof change.from === 'object' ? JSON.stringify(change.from) :
+                                                 String(change.from)}
+                                              </div>
+                                            </div>
+                                            <div className="text-muted-foreground font-medium">→</div>
+                                            <div className="flex-1">
+                                              <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/20 px-2 py-1 rounded">
+                                                {change.to === null || change.to === undefined ? 'empty' :
+                                                 Array.isArray(change.to) ? change.to.join(', ') :
+                                                 typeof change.to === 'object' ? JSON.stringify(change.to) :
+                                                 String(change.to)}
+                                              </div>
                                             </div>
                                           </div>
-                                          <div className="text-muted-foreground font-medium">→</div>
-                                          <div className="flex-1">
-                                            <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/20 px-2 py-1 rounded">
-                                              {String(change.to || 'empty')}
-                                            </div>
-                                          </div>
                                         </div>
+                                      ))
+                                    ) : (
+                                      <div className="text-sm text-muted-foreground italic">
+                                        No changes detected in the payload
                                       </div>
-                                    ))}
+                                    )}
                                   </div>
                                 )}
 
@@ -293,15 +309,15 @@ export default function ApprovalsPage() {
                                       <div className="bg-background border border-border rounded-md p-3">
                                         <div className="grid gap-2 text-sm">
                                           {Object.entries(approval.enhancedPayload.currentData)
-                                            .filter(([key]) => ['title', 'name', 'description', 'content'].includes(key))
+                                            .filter(([key]) => !['id', 'createdAt', 'updatedAt'].includes(key))
                                             .map(([key, value]) => (
                                               <div key={key} className="flex justify-between">
-                                                <span className="font-medium capitalize text-muted-foreground">{key}:</span>
-                                                <span className="text-foreground ml-2 text-right">
-                                                  {typeof value === 'string' && value.length > 50
-                                                    ? `${value.substring(0, 50)}...`
-                                                    : String(value || 'N/A')
-                                                  }
+                                                <span className="font-medium capitalize text-muted-foreground">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).toLowerCase()}:</span>
+                                                <span className="text-foreground ml-2 text-right max-w-xs truncate" title={String(value || 'N/A')}>
+                                                  {value === null || value === undefined ? 'N/A' :
+                                                   Array.isArray(value) ? value.join(', ') :
+                                                   typeof value === 'string' && value.length > 50 ? `${value.substring(0, 50)}...` :
+                                                   String(value)}
                                                 </span>
                                               </div>
                                             ))}
@@ -323,20 +339,37 @@ export default function ApprovalsPage() {
                                     <div className="bg-background border border-border rounded-md p-3">
                                       <div className="grid gap-2 text-sm">
                                         {Object.entries(approval.enhancedPayload.newData || {})
-                                          .filter(([key]) => ['title', 'name', 'description', 'content'].includes(key))
+                                          .filter(([key]) => !['id', 'createdAt', 'updatedAt'].includes(key))
                                           .map(([key, value]) => (
                                             <div key={key} className="flex justify-between">
-                                              <span className="font-medium capitalize text-muted-foreground">{key}:</span>
-                                              <span className="text-foreground ml-2 text-right">
-                                                {typeof value === 'string' && value.length > 50
-                                                  ? `${value.substring(0, 50)}...`
-                                                  : String(value || 'N/A')
-                                                }
+                                              <span className="font-medium capitalize text-muted-foreground">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).toLowerCase()}:</span>
+                                              <span className="text-foreground ml-2 text-right max-w-xs truncate" title={String(value || 'N/A')}>
+                                                {value === null || value === undefined ? 'N/A' :
+                                                 Array.isArray(value) ? value.join(', ') :
+                                                 typeof value === 'string' && value.length > 50 ? `${value.substring(0, 50)}...` :
+                                                 String(value)}
                                               </span>
                                             </div>
                                           ))}
                                       </div>
                                     </div>
+                                  </div>
+                                )}
+
+                                {(approval.enhancedPayload.type !== 'UPDATE' && approval.enhancedPayload.type !== 'DELETE' && approval.enhancedPayload.type !== 'CREATE') && (
+                                  <div className="bg-gray-50 dark:bg-gray-950/20 border border-gray-200 dark:border-gray-800 rounded-lg p-4">
+                                    <div className="flex items-center gap-3 mb-3">
+                                      <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                      <span className="font-semibold text-gray-700 dark:text-gray-300">{approval.enhancedPayload.type} Action</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                      {approval.enhancedPayload.summary || `${approval.enhancedPayload.type} action on ${approval.resourceType}`}
+                                    </p>
+                                    {approval.enhancedPayload.rawData && (
+                                      <pre className="bg-background border border-border rounded-md p-3 text-xs overflow-x-auto">
+                                        {JSON.stringify(approval.enhancedPayload.rawData, null, 2)}
+                                      </pre>
+                                    )}
                                   </div>
                                 )}
 
