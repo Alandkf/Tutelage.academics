@@ -6,7 +6,7 @@
 // and keeps tag associations in sync via ResourceTag.
 // ============================================================================
 
-const { ApprovalRequest, Blog, Video, Audio, Reading, Writing, Speaking, Story, EslAudio, EslVideo, Tag, ResourceTag, User } = require('../models');
+const { ApprovalRequest, Blog, Video, Audio, Reading, Writing, Speaking, Story, EslAudio, EslVideo, Tag, ResourceTag, User, LandingSection } = require('../models');
 const { Op } = require('sequelize');
 const { sendApprovalDecisionNotification } = require('../config/email');
 
@@ -35,6 +35,7 @@ function getModelByType(type) {
     case 'Story': return Story;
     case 'EslAudio': return EslAudio;
     case 'EslVideo': return EslVideo;
+    case 'LandingSection': return LandingSection;
     default: return null;
   }
 }
@@ -83,7 +84,8 @@ function pickUpdateFields(resourceType, payload) {
     Speaking: ['title', 'imageUrl', 'description', 'content', 'transcript', 'videoRef', 'pdf', 'taskPdf', 'level', 'tags'],
     Story: ['title', 'imageUrl', 'description', 'contentText', 'audioRef', 'pdf', 'taskPdf', 'wordCount', 'level', 'tags'],
     EslAudio: ['title', 'imageUrl', 'description', 'transcript', 'audioRef', 'pdf', 'taskPdf', 'level'],
-    EslVideo: ['title', 'videoRef', 'description', 'pdf', 'taskPdf', 'thumbnailUrl', 'level', 'tags']
+    EslVideo: ['title', 'videoRef', 'description', 'pdf', 'taskPdf', 'thumbnailUrl', 'level', 'tags'],
+    LandingSection: ['title', 'subtitle', 'imageUrl']
   };
   const allowed = ALLOWED[resourceType] || [];
   const out = {};
@@ -285,9 +287,11 @@ exports.approve = async (req, res) => {
     if (!Model) return res.status(400).json({ success: false, message: 'Unsupported resource type' });
 
     if (approval.action === 'DELETE') {
-      // Clean up tags and delete resource
+      // Clean up tags (only for resources that use tags) and delete resource
       const ns = joinTypeMap[approval.resourceType];
-      await ResourceTag.destroy({ where: { resourceType: ns, resourceId: approval.resourceId } });
+      if (ns) {
+        await ResourceTag.destroy({ where: { resourceType: ns, resourceId: approval.resourceId } });
+      }
       const row = await Model.findByPk(approval.resourceId);
       if (row) await row.destroy();
     } else if (approval.action === 'UPDATE') {

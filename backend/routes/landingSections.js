@@ -14,8 +14,7 @@ const {
   updateLandingSection,
   deleteLandingSection
 } = require('../controllers/landingSectionController');
-const { isAuthenticated } = require('../middlewares/auth');
-const adminAuth = require('../middlewares/adminAuth');
+const { isAuthenticated, isAdmin } = require('../middlewares/auth');
 
 // Public routes
 router.get('/', getAllLandingSections);
@@ -24,8 +23,8 @@ router.get('/:id', getLandingSectionById);
 
 // Protected admin routes
 router.use(isAuthenticated);
-router.post('/', adminAuth, createLandingSection);
-router.put('/:id', adminAuth, updateLandingSection);
-router.delete('/:id', adminAuth, deleteLandingSection);
+router.post('/', isAdmin, createLandingSection);
+router.put('/:id', isAdmin, updateLandingSection);
+router.delete('/:id', isAdmin, deleteLandingSection);
 
 module.exports = router;
