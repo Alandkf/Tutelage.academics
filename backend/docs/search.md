@@ -1,6 +1,6 @@
 # Search API
 
-Single comprehensive search endpoint supporting universal and filtered modes, with case-insensitive matching, pagination, scoring, excerpts, and execution time metrics.
+Single comprehensive search endpoint supporting universal and filtered modes, with case-insensitive matching, pagination, and execution time metrics. Results items contain only: link, title, description.
 
 ## Endpoint
 
@@ -17,7 +17,7 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
 
 - Universal Search Mode
   - Searches across all collections: Tests, Courses, Blogs, Skills, ESL Resources.
-  - Returns combined results with `collectionType` on each item.
+- Returns standardized results with `link`, `title`, `description` on each item.
   - Example: `GET /api/search?query=grammar`
 
 - Filtered Search Mode
@@ -33,7 +33,7 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
 - ESL Resources: Story/EslAudio/EslVideo → `title`, `description`, `contentText` (Story), `transcript` (EslAudio)
 - Tests: QuizSection → `name`, `description`; QuizQuestion → `text`, `optionA..D`
 
-## Response Format
+## Response Format (Universal/Filtered)
 
 ```json
 {
@@ -48,21 +48,8 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
     "executionTimeMs": 123
   },
   "results": [
-    {
-      "collectionType": "Blogs",
-      "id": 7,
-      "title": "Improving Grammar",
-      "excerpt": "…improving grammar with targeted practice…",
-      "score": 0.98
-    },
-    {
-      "collectionType": "Skills",
-      "subType": "Speaking",
-      "id": 15,
-      "title": "Interview Tips",
-      "excerpt": "…practice your speaking skills…",
-      "score": 0.9
-    }
+    { "link": "/esl-resources/blogs/7", "title": "Improving Grammar", "description": "Targeted practice activities to improve grammar." },
+    { "link": "/skills/speaking/a1/15", "title": "Interview Tips", "description": "Practice speaking skills with common interview scenarios." }
   ]
 }
 ```
@@ -72,9 +59,9 @@ Single comprehensive search endpoint supporting universal and filtered modes, wi
 Use `format=compact` to receive a minimal unified format and include static pages metadata in the search.
 
 - Endpoint: `GET /api/search?query=<text>&format=compact&limit=20&page=1`
-- Returns three core fields: `title`, `id`, `description`.
-- In compact mode, `id` may be a number (database id) or a string path. When a public detail page exists, `id` is set to a navigable route (e.g., `/skills/reading/123`, `/esl-resources/videos/45`).
-- Additionally, a `link` field may be present, mirroring the navigable route for convenience.
+- Returns three core fields: `link`, `title`, `description`.
+- When a public detail page exists, `link` is a navigable route (e.g., `/skills/reading/a1/123`, `/esl-resources/videos/45`).
+- Combines dynamic models (Audio, Video, Blog, Reading, Writing, Speaking, ESL Audio, ESL Video, Story, Course) and documented static pages.
 - Combines dynamic models (Audio, Video, Blog, Reading, Writing, Speaking, ESL Audio, ESL Video, Story, Course) and documented static pages.
  - Static pages include optional `keywords` used for broader matching (synonyms, singular/plural).
  - Case-insensitive matching against any word found in `title`, `description`, or `keywords`.
@@ -99,8 +86,8 @@ Example response:
     }
   },
   "results": [
-    { "title": "Business English", "id": 17, "description": "Master professional communication for workplace success." },
-    { "title": "ESL Resources", "id": "/esl-resources", "description": "Access ESL blogs, stories, audios, and videos." }
+    { "link": "/courses/business-english", "title": "Business English", "description": "Master professional communication for workplace success." },
+    { "link": "/esl-resources", "title": "ESL Resources", "description": "Access ESL blogs, stories, audios, and videos." }
   ]
 }
 ```
@@ -134,5 +121,5 @@ Example response:
 ## Notes
 
 - Matching uses case-insensitive `ILIKE` queries in PostgreSQL.
-- Results are sorted by a simple relevance score based on matched fields and occurrence count.
+- Results are matched via case-insensitive ILIKE across fields; no scoring is returned.
 - Pagination is applied to the combined result set.

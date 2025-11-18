@@ -4,8 +4,8 @@
 // Provides a single comprehensive search endpoint supporting:
 // - Universal search across Tests, Courses, Blogs, Skills, ESL Resources
 // - Filtered search within one of the above collections
-// Implements case-insensitive text search, pagination, scoring, excerpts, and
-// query execution time metrics.
+// Implements case-insensitive text search, pagination, and
+// query execution time metrics. Results items contain only: link, title, description.
 
 const { Op } = require('sequelize');
 const models = require('../models');
@@ -29,36 +29,37 @@ function ilikeTerm(q) {
   return `%${q}%`;
 }
 
-// Helper: compute excerpt and score based on the first matched field
-function buildExcerptAndScore(entry, fields, q) {
-  const queryLC = q.toLowerCase();
-  for (const field of fields) {
-    const val = entry[field];
-    if (!val || typeof val !== 'string') continue;
-    const lc = val.toLowerCase();
-    const idx = lc.indexOf(queryLC);
-    if (idx !== -1) {
-      const start = Math.max(0, idx - 60);
-      const end = Math.min(val.length, idx + queryLC.length + 60);
-      const excerpt = `${start > 0 ? '…' : ''}${val.slice(start, end)}${end < val.length ? '…' : ''}`;
-      // Simple scoring heuristic: field weight + occurrence bonus
-      const weight = field === 'title' || field === 'name' ? 1.0
-        : field === 'description' ? 0.85
-        : 0.75;
-      // Count occurrences for a tiny boost
-      let occurrences = 0;
-      let pos = 0;
-      while (true) {
-        const found = lc.indexOf(queryLC, pos);
-        if (found === -1) break;
-        occurrences += 1;
-        pos = found + queryLC.length;
-      }
-      const score = Number((weight + Math.min(occurrences * 0.05, 0.25)).toFixed(3));
-      return { excerpt, score, matchedField: field };
-    }
+// Helper: build link for known public-facing routes
+function buildLink(type, item) {
+  const id = item?.id;
+  if (id === undefined || id === null) return null;
+  const levelArr = Array.isArray(item?.level) ? item.level : null;
+  const firstLevel = levelArr && levelArr.length ? String(levelArr[0]) : '';
+  const cefr = (firstLevel.match(/^[ABC]\d/i)?.[0] || '').toLowerCase();
+  const levelCode = ['a1','a2','b1','b2','c1'].includes(cefr) ? cefr : null;
+  const safeLevel = levelCode || 'a1';
+
+  switch (type) {
+    case 'Blog':
+      return `/esl-resources/blogs/${id}`;
+    case 'Reading':
+      return `/skills/reading/${safeLevel}/${id}`;
+    case 'Writing':
+      return `/skills/writing/${safeLevel}/${id}`;
+    case 'Speaking':
+      return `/skills/speaking/${safeLevel}/${id}`;
+    case 'Audio':
+      return `/skills/listening/${safeLevel}/${id}`;
+    case 'EslAudio':
+      return `/esl-resources/audios/${id}`;
+    case 'EslVideo':
+      return `/esl-resources/videos/${id}`;
+    case 'Story':
+      return `/esl-resources/stories/${id}`;
+    case 'Course':
+    default:
+      return null;
   }
-  return { excerpt: null, score: 0.5, matchedField: null };
 }
 
 // ----------------------------------------------------------------------------
@@ -92,51 +93,14 @@ async function searchCompactUnified(query, limit) {
     }).then(rows => rows.map(r => ({ ...r.toJSON(), __type: s.type }))))
   );
 
-  // Build link for known public-facing routes (level-aware for Speaking)
-  function linkFor(type, item) {
-    const id = item?.id;
-    if (id === undefined || id === null) return null;
-    const levelArr = Array.isArray(item?.level) ? item.level : null;
-    const firstLevel = levelArr && levelArr.length ? String(levelArr[0]) : '';
-    const cefr = (firstLevel.match(/^[ABC]\d/i)?.[0] || '').toLowerCase();
-    const levelCode = ['a1','a2','b1','b2','c1'].includes(cefr) ? cefr : null;
-    const safeLevel = levelCode || 'a1';
-
-    switch (type) {
-      case 'Blog':
-        return `/esl-resources/blogs/${id}`;
-      case 'Reading':
-        // Level-specific dynamic routes
-        return `/skills/reading/${safeLevel}/${id}`;
-      case 'Writing':
-        // Level-specific dynamic routes
-        return `/skills/writing/${safeLevel}/${id}`;
-      case 'Speaking':
-        // Speaking uses level-specific dynamic routes
-        return `/skills/speaking/${safeLevel}/${id}`;
-      case 'Audio':
-        // Listening content uses level-specific dynamic routes
-        return `/skills/listening/${safeLevel}/${id}`;
-      case 'EslAudio':
-        return `/esl-resources/audios/${id}`;
-      case 'EslVideo':
-        return `/esl-resources/videos/${id}`;
-      case 'Story':
-        return `/esl-resources/stories/${id}`;
-      // Courses currently have no dynamic detail page; omit link
-      case 'Course':
-      default:
-        return null;
-    }
-  }
+  // Use shared link builder (see buildLink)
 
   const dynamicResults = dynamicResultsSettled.flatMap((p) => (p.status === 'fulfilled' ? p.value : []))
-    .map((r) => {
-      const link = linkFor(r.__type, r);
-      // For compact mode, set id to a navigable route when available
-      const id = link || r.id;
-      return { title: r.title, id, description: r.description || '', link };
-    });
+    .map((r) => ({
+      link: buildLink(r.__type, r),
+      title: r.title,
+      description: r.description || '',
+    }));
 
   // Static results: search words in title, short_description, or keywords (synonyms/plurals)
   const staticResults = STATIC_PAGES.filter((p) => {
@@ -144,7 +108,7 @@ async function searchCompactUnified(query, limit) {
     const d = (p.short_description || '').toLowerCase();
     const kws = Array.isArray(p.keywords) ? p.keywords.map((k) => String(k).toLowerCase()) : [];
     return words.some((w) => t.includes(w) || d.includes(w) || kws.some((kw) => kw.includes(w) || w.includes(kw)));
-  }).map((p) => ({ title: p.title, id: p.link, description: p.short_description, link: p.link }));
+  }).map((p) => ({ link: p.link, title: p.title, description: p.short_description }));
 
   const combined = [...dynamicResults, ...staticResults].slice(0, limit);
   const elapsedMs = Date.now() - started;
@@ -165,16 +129,11 @@ async function searchBlogs(q) {
     attributes: ['id', 'title', 'description', 'content', 'category'],
     limit: 200,
   });
-  return results.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, ['title', 'description', 'content', 'category'], q);
-    return {
-      collectionType: 'Blogs',
-      id: r.id,
-      title: r.title,
-      excerpt,
-      score,
-    };
-  });
+  return results.map((r) => ({
+    link: buildLink('Blog', r),
+    title: r.title,
+    description: r.description || '',
+  }));
 }
 
 async function searchCourses(q) {
@@ -189,16 +148,11 @@ async function searchCourses(q) {
     attributes: ['id', 'title', 'description', 'category'],
     limit: 200,
   });
-  return results.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, ['title', 'description', 'category'], q);
-    return {
-      collectionType: 'Courses',
-      id: r.id,
-      title: r.title,
-      excerpt,
-      score,
-    };
-  });
+  return results.map((r) => ({
+    link: buildLink('Course', r),
+    title: r.title,
+    description: r.description || '',
+  }));
 }
 
 async function searchSkills(q) {
@@ -211,7 +165,7 @@ async function searchSkills(q) {
           { content: { [Op.iLike]: ilikeTerm(q) } },
         ],
       },
-      attributes: ['id', 'title', 'description', 'content'],
+      attributes: ['id', 'title', 'description', 'content', 'level'],
       limit: 150,
     }),
     models.Writing.findAll({
@@ -222,7 +176,7 @@ async function searchSkills(q) {
           { content: { [Op.iLike]: ilikeTerm(q) } },
         ],
       },
-      attributes: ['id', 'title', 'description', 'content'],
+      attributes: ['id', 'title', 'description', 'content', 'level'],
       limit: 150,
     }),
     models.Speaking.findAll({
@@ -234,27 +188,21 @@ async function searchSkills(q) {
           { transcript: { [Op.iLike]: ilikeTerm(q) } },
         ],
       },
-      attributes: ['id', 'title', 'description', 'content', 'transcript'],
+      attributes: ['id', 'title', 'description', 'content', 'transcript', 'level'],
       limit: 150,
     }),
   ]);
 
-  const mapWithType = (arr, subType, fields) => arr.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, fields, q);
-    return {
-      collectionType: 'Skills',
-      subType,
-      id: r.id,
-      title: r.title,
-      excerpt,
-      score,
-    };
-  });
+  const mapWithType = (arr, subType) => arr.map((r) => ({
+    link: buildLink(subType, r),
+    title: r.title,
+    description: r.description || '',
+  }));
 
   return [
-    ...mapWithType(readings, 'Reading', ['title', 'description', 'content']),
-    ...mapWithType(writings, 'Writing', ['title', 'description', 'content']),
-    ...mapWithType(speakings, 'Speaking', ['title', 'description', 'content', 'transcript']),
+    ...mapWithType(readings, 'Reading'),
+    ...mapWithType(writings, 'Writing'),
+    ...mapWithType(speakings, 'Speaking'),
   ];
 }
 
@@ -294,22 +242,16 @@ async function searchEslResources(q) {
     }),
   ]);
 
-  const mapWithType = (arr, subType, fields) => arr.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, fields, q);
-    return {
-      collectionType: 'Esl Resources',
-      subType,
-      id: r.id,
-      title: r.title,
-      excerpt,
-      score,
-    };
-  });
+  const mapWithType = (arr, subType) => arr.map((r) => ({
+    link: buildLink(subType, r),
+    title: r.title,
+    description: r.description || '',
+  }));
 
   return [
-    ...mapWithType(eslAudios, 'EslAudio', ['title', 'description', 'transcript']),
-    ...mapWithType(eslVideos, 'EslVideo', ['title', 'description']),
-    ...mapWithType(stories, 'Story', ['title', 'description', 'contentText']),
+    ...mapWithType(eslAudios, 'EslAudio'),
+    ...mapWithType(eslVideos, 'EslVideo'),
+    ...mapWithType(stories, 'Story'),
   ];
 }
 
@@ -340,29 +282,17 @@ async function searchTests(q) {
     }),
   ]);
 
-  const sectionsMapped = sections.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, ['name', 'description'], q);
-    return {
-      collectionType: 'Tests',
-      subType: 'QuizSection',
-      id: r.id,
-      title: r.name,
-      excerpt,
-      score,
-    };
-  });
+  const sectionsMapped = sections.map((r) => ({
+    link: '/tutelage-tests',
+    title: r.name,
+    description: r.description || '',
+  }));
 
-  const questionsMapped = questions.map((r) => {
-    const { excerpt, score } = buildExcerptAndScore(r, ['text', 'optionA', 'optionB', 'optionC', 'optionD'], q);
-    return {
-      collectionType: 'Tests',
-      subType: 'QuizQuestion',
-      id: r.id,
-      title: r.text?.slice(0, 120) || null,
-      excerpt,
-      score,
-    };
-  });
+  const questionsMapped = questions.map((r) => ({
+    link: '/tutelage-tests',
+    title: r.text?.slice(0, 120) || null,
+    description: '',
+  }));
 
   return [...sectionsMapped, ...questionsMapped];
 }
@@ -395,7 +325,7 @@ exports.search = async (req, res) => {
       });
     }
 
-    // Compact unified mode: returns title, id, description and includes static pages
+    // Compact unified mode: returns link, title, description and includes static pages
     if (format === 'compact') {
       const { results, meta } = await searchCompactUnified(query, limit * Math.max(page, 1));
       const totalResults = results.length;
@@ -440,8 +370,7 @@ exports.search = async (req, res) => {
       results = [...blogs, ...courses, ...skills, ...esl, ...tests];
     }
 
-    // Sort by score descending for better relevance
-    results.sort((a, b) => b.score - a.score);
+    // Results already match the query via ILIKE across fields; no scoring returned
 
     const totalResults = results.length;
     const totalPages = Math.max(Math.ceil(totalResults / limit), 1);

@@ -34,14 +34,10 @@ function fetchJson(path) {
       console.log(`Query '${q}': ${results.length} results (mode=${r.json?.mode})`);
       const sample = results.slice(0, 3);
       console.log('Sample items:', sample);
-      const isCompact = r.json?.mode === 'compact';
       for (const it of sample) {
         if (!it.title || typeof it.title !== 'string') throw new Error('Missing title');
-        if (typeof it.id !== 'number' && typeof it.id !== 'string') throw new Error('Invalid id');
-        const hasDesc = typeof it.description === 'string';
-        const hasExcerpt = typeof it.excerpt === 'string';
-        if (isCompact && !hasDesc) throw new Error('Invalid description in compact mode');
-        if (!isCompact && !hasDesc && !hasExcerpt) throw new Error('Invalid description/excerpt in universal mode');
+        if (typeof it.description !== 'string') throw new Error('Missing or invalid description');
+        if (it.link !== null && it.link !== undefined && typeof it.link !== 'string') throw new Error('Invalid link');
       }
     }
     console.log('Compact search endpoint tests passed');
