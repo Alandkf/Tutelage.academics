@@ -18,6 +18,12 @@ const LEVEL_OPTIONS = [
 	{ value: 'c2', label: 'C2 Proficient' }
 ]
 
+// Helper function to get level value from label
+const getLevelValueFromLabel = (label) => {
+	const option = LEVEL_OPTIONS.find(opt => opt.label === label);
+	return option ? option.value : '';
+};
+
 const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
 	const [formData, setFormData] = useState({
 		title: '',
@@ -35,15 +41,17 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 
 	useEffect(() => {
 		if (mode === 'edit' && initialValues) {
-			const levelValue = Array.isArray(initialValues.level) 
-				? initialValues.level[0]?.toLowerCase().split(' ')[0] 
-				: (initialValues.level ? initialValues.level.toLowerCase().split(' ')[0] : '');
+			// Extract first level from array and convert label to value
+			const levelLabel = Array.isArray(initialValues.level) 
+				? initialValues.level[0] 
+				: initialValues.level;
+			const levelValue = getLevelValueFromLabel(levelLabel) || '';
 			
 			setFormData({
 				title: initialValues.title || '',
 				videoRef: initialValues.videoRef || '',
 				description: initialValues.description || '',
-				level: levelValue || '',
+				level: levelValue,
 				tags: initialValues.tags || [],
 				pdf: null,
 				taskPdf: null
@@ -126,7 +134,7 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 
 				<div>
 					<Label htmlFor="level">Level *</Label>
-					<Select value={formData.level} onValueChange={handleLevelChange} required>
+					<Select key={formData.level} value={formData.level} onValueChange={handleLevelChange} required>
 						<SelectTrigger id="level"><SelectValue placeholder="Select a level" /></SelectTrigger>
 						<SelectContent>
 							{LEVEL_OPTIONS.map(level => (

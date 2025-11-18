@@ -18,7 +18,17 @@ const LEVEL_OPTIONS = [
 	{ value: 'c2', label: 'C2 Proficient' }
 ]
 
+// Helper function to get level value from label
+const getLevelValueFromLabel = (label) => {
+	console.log('getLevelValueFromLabel called with:', label);
+	const option = LEVEL_OPTIONS.find(opt => opt.label === label);
+	console.log('Found option:', option);
+	return option ? option.value : '';
+};
+
 const AudioForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
+	console.log('initialValues audio: ', initialValues);
+	
 	const [formData, setFormData] = useState({
 		title: '',
 		audioRef: '',
@@ -36,29 +46,49 @@ const AudioForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 	const [loading, setLoading] = useState(false)
 
 	useEffect(() => {
-		if (mode === 'edit' && initialValues) {
-			const levelValue = Array.isArray(initialValues.level) 
-				? initialValues.level[0]?.toLowerCase().split(' ')[0] 
-				: (initialValues.level ? initialValues.level.toLowerCase().split(' ')[0] : '');
-			
+		if (mode === 'create') {
 			setFormData({
+				title: '',
+				audioRef: '',
+				imageUrl: '',
+				description: '',
+				transcript: '',
+				level: '',
+				tags: [],
+				pdf: null,
+				taskPdf: null
+			})
+			setPdfPreview(null)
+			setTaskPdfPreview(null)
+		}
+	}, [mode])
+
+	useEffect(() => {
+		if (mode === 'edit' && initialValues) {
+			// Extract first level from array and convert label to value
+			const levelLabel = Array.isArray(initialValues.level) 
+				? initialValues.level[0] 
+				: initialValues.level;
+			const levelValue = getLevelValueFromLabel(levelLabel) || undefined;
+			console.log('Setting level value:', levelValue, 'from label:', levelLabel);
+			
+			setFormData(prev => ({
+				...prev,
 				title: initialValues.title || '',
 				audioRef: initialValues.audioRef || '',
 				imageUrl: initialValues.imageUrl || '',
 				description: initialValues.description || '',
 				transcript: initialValues.transcript || '',
-				level: levelValue || '',
-				tags: initialValues.tags || [],
-				pdf: null,
-				taskPdf: null
-			})
+				level: levelValue,
+				tags: initialValues.tags || []
+			}))
 			setPdfPreview(initialValues.pdf || null)
 			setTaskPdfPreview(initialValues.taskPdf || null)
 		}
 	}, [mode, initialValues])
 
 	const handleLevelChange = (level) => {
-		setFormData(prev => ({ ...prev, level }))
+		setFormData(prev => ({ ...prev, level: level || '' }))
 	}
 
 	const handleAddTag = (fromInput = null) => {
@@ -203,7 +233,7 @@ const AudioForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel 
 
 			<div>
 				<Label htmlFor="level">Level *</Label>
-				<Select value={formData.level} onValueChange={handleLevelChange} required>
+				<Select key={formData.level} value={formData.level} onValueChange={handleLevelChange} required>
 					<SelectTrigger id="level">
 						<SelectValue placeholder="Select a level" />
 					</SelectTrigger>

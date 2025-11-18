@@ -18,6 +18,12 @@ const LEVEL_OPTIONS = [
   { value: 'c2', label: 'C2 Proficient' }
 ]
 
+// Helper function to get level value from label
+const getLevelValueFromLabel = (label) => {
+	const option = LEVEL_OPTIONS.find(opt => opt.label === label);
+	return option ? option.value : '';
+};
+
 const ReadingForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
   const [values, setValues] = useState({
     title: '',
@@ -36,13 +42,19 @@ const ReadingForm = ({ mode = 'create', initialValues = null, onSuccess, onCance
 
   useEffect(() => {
     if (mode === 'edit' && initialValues) {
+      // Extract first level from array and convert label to value
+      const levelLabel = Array.isArray(initialValues.level) 
+        ? initialValues.level[0] 
+        : initialValues.level;
+      const levelValue = getLevelValueFromLabel(levelLabel) || '';
+      
       setValues(prev => ({
         ...prev,
         title: initialValues.title || '',
         description: initialValues.description || '',
         content: initialValues.content || '',
         imageUrl: initialValues.imageUrl || '',
-        level: Array.isArray(initialValues.level) ? (initialValues.level[0]?.toLowerCase().split(' ')[0] || '') : (initialValues.level ? String(initialValues.level).toLowerCase().split(' ')[0] : ''),
+        level: levelValue,
         tags: initialValues.tags || []
       }))
       setPdfPreview(initialValues.pdf || null)
@@ -114,7 +126,7 @@ const ReadingForm = ({ mode = 'create', initialValues = null, onSuccess, onCance
         </div>
         <div>
           <Label htmlFor="level">Level</Label>
-          <Select value={values.level} onValueChange={(val) => setValues(v => ({ ...v, level: val }))}>
+          <Select key={values.level} value={values.level} onValueChange={(val) => setValues(v => ({ ...v, level: val }))}>
             <SelectTrigger id="level"><SelectValue placeholder="Select a level" /></SelectTrigger>
             <SelectContent>
               {LEVEL_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
