@@ -53,9 +53,8 @@ const TutelageAi = () => {
 
                 {/* Practice Now Button */}
                 {(() => {
-                  const practiceHref = BASE_URL_PROD || BASE_URL || '/';
                   return (
-                    <Link href={practiceHref} target="_blank" rel="noopener noreferrer">
+                    <Link href={BASE_URL_PROD} target="_blank" rel="noopener noreferrer">
                   <Button 
                     size="lg" 
                     className="px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"

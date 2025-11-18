@@ -313,16 +313,13 @@ const SearchPage = () => {
                   Find Your English Level
                 </CardTitle>
                 <CardDescription>
-                  Take our placement test to determine your current English proficiency
+                  Our free 30-minutes English placement test helps you identify your current level of English proficiency. It assesses grammar, vocabulary, and comprehension to provide an accurate overview of your strengths and areas for development.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Get an accurate assessment of your English skills and receive personalized learning recommendations.
-                </p>
-                <Link href="/tutelage-tests/languageplacement">
+                <Link href="/tutelage-tests/free-practice-test">
                   <Button variant="outline" className="w-full mb-3">
-                    Take Placement Test
+                    Take Free Test
                   </Button>
                 </Link>
               </CardContent>
@@ -340,12 +337,12 @@ const SearchPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Link href="/tutelage-tests/practicetests">
+                <Link href="/tutelage-tests/language-placement">
                   <Button variant="ghost" className="w-full text-sm justify-start">
-                    Free Practice Tests
+                    Language Placement Test
                   </Button>
                 </Link>
-                <Link href="/tutelage-tests/mockexams">
+                <Link href="/tutelage-tests/mock-exam">
                   <Button variant="ghost" className="w-full text-sm justify-start">
                     Mock Exams
                   </Button>
@@ -368,7 +365,7 @@ const SearchPage = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   Choose from our wide range of English courses designed for all levels and purposes.
                 </p>
-                <Link href="/courses/enroll">
+                <Link href="/courses">
                   <Button variant="outline" className="w-full">
                     Browse Courses
                   </Button>
