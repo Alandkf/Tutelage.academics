@@ -9,7 +9,6 @@ import { SpeakingCard } from "@/components/admin/speaking/SpeakingCard"
 import VideoForm from "@/components/forms/VideoForm"
 import { RefreshCw, Plus } from "lucide-react"
 import { toast } from "sonner"
-import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
 import BASE_URL from "@/app/config/url"
 
@@ -25,7 +24,6 @@ const Videos = () => {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteVideo, setDeleteVideo] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const { user } = useAuth()
 
   // Fetch speakings with cursor-based pagination
   const fetchVideos = async (reset = false) => {
@@ -131,12 +129,10 @@ const Videos = () => {
     <div className="mx-auto w-full">
      <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Speakings</h1>
-        {user?.role === "ADMIN" && (
           <Button onClick={() => setShowCreate(true)} className="gap-2 px-4">
             <Plus className="h-5 w-5" />
             Create Speaking
           </Button>
-        )}
       </div>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Input
@@ -169,12 +165,10 @@ const Videos = () => {
                 <Link href={`/admin-dashboard/speakings/${item.id}`}>
                   <SpeakingCard {...item} />
                 </Link>
-                {user?.role === "ADMIN" && (
                   <div className="absolute top-2 right-2 flex gap-1 z-10">
                     <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(item) }}>Edit</Button>
                     <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(item) }}>Delete</Button>
                   </div>
-                )}
               </div>
             )
           })

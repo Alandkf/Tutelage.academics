@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import EslAudioForm from "@/components/forms/EslAudioForm"
 import { Plus, RefreshCw, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { useAuth } from "@/components/AuthContext"
 import BASE_URL from "@/app/config/url"
 import Image from "next/image"
 import Link from "next/link"
@@ -22,7 +21,6 @@ const EslAudios = () => {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteAudio, setDeleteAudio] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const { user } = useAuth()
 
   const fetchAudios = async () => {
     setLoading(true)
@@ -139,11 +137,9 @@ const EslAudios = () => {
     <div className="mx-auto w-full h-full flex flex-col">
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">ESL Audios</h1>
-        {user?.role === "ADMIN" && (
           <Button onClick={() => setShowCreate(true)} className="gap-2 max-w-48">
             <Plus className="h-5 w-5" />Create ESL Audio
           </Button>
-        )}
       </div>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Input placeholder="Search ESL audios..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="max-w-xs" />
@@ -176,12 +172,10 @@ const EslAudios = () => {
                   </div>
                 )}
               </div>
-              {user?.role === "ADMIN" && (
                 <div className="absolute top-2 right-2 flex gap-1" onClick={(e) => e.preventDefault()}>
                   <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(audio); }} className="h-8 px-2"><Edit className="h-4 w-4" /></Button>
                   <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(audio); }} className="h-8 px-2"><Trash2 className="h-4 w-4" /></Button>
                 </div>
-              )}
             </Link>
           ))}
         </div>

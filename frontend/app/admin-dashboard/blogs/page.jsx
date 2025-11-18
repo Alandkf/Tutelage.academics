@@ -127,12 +127,10 @@ export default function BlogsPage() {
     <div className="mx-auto w-full">
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Blogs</h1>
-        {user?.role === "ADMIN" && (
           <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />
             Create Blog
           </Button>
-        )}
       </div>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Input
@@ -167,12 +165,10 @@ export default function BlogsPage() {
                   author={blog.author?.name || ''}
                   authorEmail={blog.author?.email || ''}
                 />
-                {user?.role === "ADMIN" && (
                   <div className="absolute top-2 right-2 flex gap-1 ">
                     <Button size="sm" variant="outline" onClick={() => handleEdit(blog)}><Edit className="h-4 w-4" /></Button>
                     <Button size="sm" variant="destructive" onClick={() => handleDelete(blog)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                )}
               </div>
             )
           })

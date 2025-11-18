@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import ReadingForm from "@/components/forms/ReadingForm"
 import { Plus, RefreshCw, Edit, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { useAuth } from "@/components/AuthContext"
 import { useInfiniteScroll } from "@/app/config/useInfiniteScroll"
 import BASE_URL from "@/app/config/url"
 import Image from "next/image"
@@ -25,7 +24,6 @@ const Readings = () => {
   const [showDelete, setShowDelete] = useState(false)
   const [deleteReading, setDeleteReading] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const { user } = useAuth()
 
   const fetchReadings = async (reset = false) => {
     setLoading(true)
@@ -161,12 +159,10 @@ const Readings = () => {
     <div className="mx-auto w-full h-full flex flex-col">
       <div className="flex flex-row justify-between gap-4 mb-4">
         <h1 className="text-2xl font-bold text-foreground">Readings</h1>
-        {user?.role === "ADMIN" && (
           <Button onClick={() => setShowCreate(true)} className="gap-2 ">
             <Plus className="h-5 w-5" />
             Create Reading
           </Button>
-        )}
       </div>
       <div className="mb-4 flex items-center justify-between gap-2">
         <Input placeholder="Search readings..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="max-w-xs" />
@@ -184,7 +180,7 @@ const Readings = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {readings.map((reading, idx) => (
-            <Link key={reading.id} href={`/admin-dashboard/readings/${reading.id}`} ref={idx === readings.length - 1 ? lastReadingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
+            <Link key={idx} href={`/admin-dashboard/readings/${reading.id}`} ref={idx === readings.length - 1 ? lastReadingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
               <div className="relative h-44 w-full overflow-hidden">
                 <Image src={reading.imageUrl || '/placeholder-16-9.png'} alt={reading.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
               </div>
@@ -199,12 +195,10 @@ const Readings = () => {
                   </div>
                 )}
               </div>
-              {user?.role === "ADMIN" && (
                 <div className="absolute top-2 right-2 flex gap-1" onClick={(e) => e.preventDefault()}>
                   <Button size="sm" variant="outline" onClick={(e) => { e.preventDefault(); handleEdit(reading); }} className="h-8 px-2"><Edit className="h-4 w-4" /></Button>
                   <Button size="sm" variant="destructive" onClick={(e) => { e.preventDefault(); handleDelete(reading); }} className="h-8 px-2"><Trash2 className="h-4 w-4" /></Button>
                 </div>
-              )}
             </Link>
           ))}
         </div>

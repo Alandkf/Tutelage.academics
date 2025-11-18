@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuth } from '@/components/AuthContext'
 import BASE_URL from '@/app/config/url'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import EslAudioForm from '@/components/forms/EslAudioForm'
@@ -18,7 +17,6 @@ import { usePdfModal } from '@/hooks/usePdfModal'
 export default function AdminEslAudioDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { user } = useAuth()
   const [audio, setAudio] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
@@ -106,7 +104,6 @@ export default function AdminEslAudioDetailPage() {
         <Button variant="outline" onClick={() => router.back()} className="gap-2">
           <ArrowLeft className="w-4 h-4" />Back
         </Button>
-        {user?.role === 'ADMIN' && (
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowEdit(true)} className="gap-2">
               <Edit className="w-4 h-4" />Edit
@@ -115,7 +112,6 @@ export default function AdminEslAudioDetailPage() {
               <Trash2 className="w-4 h-4" />Delete
             </Button>
           </div>
-        )}
       </div>
 
       <h1 className="text-3xl font-bold text-foreground mb-4">{audio.title}</h1>
