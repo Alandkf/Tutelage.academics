@@ -148,7 +148,7 @@ export default function Navbar (){
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <div className="flex-1 flex items-center justify-center">
-              <div className="hidden lg:flex lg:space-x-2 xl:space-x-8">
+              <div className="hidden lg:flex lg:space-x-2 xl:space-x-4 2xl:space-x-7">
                 {navItems.map((item) => {
                   const isActive = pathname === item.href.trim()
                   return (
@@ -160,7 +160,7 @@ export default function Navbar (){
                     >
                       <Link
                         href={item.href}
-                        className={`px-4 py-2 text-lg font-semibold flex items-center gap-1 transition-colors duration-200 ${isActive ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
+                        className={`px-4 py-2 text-base xl:text-lg font-semibold flex items-center gap-1 transition-colors duration-200 ${isActive ? 'text-primary font-bold' : 'text-foreground hover:text-primary'}`}
                       >
                         {item.name}
                         {item.dropdown && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -15,14 +15,13 @@ import Image from 'next/image'
 const SearchPage = () => {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('')
-  const [results, setResults] = useState([])  
+  const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalResults, setTotalResults] = useState(0)
   const [hasSearched, setHasSearched] = useState(false)
-
-  // Available filters based on backend (levels is not available)
+  const topRef = useRef(null)  // Available filters based on backend (levels is not available)
   const availableFilters = [
     { value: 'tests', label: 'Tests' },
     { value: 'courses', label: 'Courses' },
@@ -77,8 +76,12 @@ const SearchPage = () => {
 
   const handlePageChange = (newPage) => {
     setPage(newPage)
-    // Trigger search with new page
-    setTimeout(() => handleSearch(), 0)
+    // Trigger search with new page first
+    handleSearch()
+    // Scroll to top after a brief delay to ensure content has loaded
+    setTimeout(() => {
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   const resetSearch = () => {
@@ -93,7 +96,7 @@ const SearchPage = () => {
 
   return (
     <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div ref={topRef} className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="lg:col-span-2">
@@ -102,14 +105,48 @@ const SearchPage = () => {
                 <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
                   Search
                 </h1>
-                <p className="text-muted-foreground text-lg">
-                  Find courses, blogs, skills, tests, and ESL resources
-                </p>
               </div>
 
               {/* Search Form */}
               <div className="space-y-4 mb-8">
-                <div className="flex flex-col sm:flex-row gap-4">
+                {/* Mobile: Input and Category stuck together, Button separate */}
+                <div className="flex gap-2 sm:hidden">
+                  <div className="flex gap-0 flex-1">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        placeholder="Search for anything..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        className="w-full rounded-r-none border-r-0"
+                      />
+                    </div>
+                    <Select value={filter} onValueChange={setFilter}>
+                      <SelectTrigger className="w-32 rounded-l-none border-l-0">
+                        <SelectValue placeholder="All" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        {availableFilters.map((f) => (
+                          <SelectItem key={f.value} value={f.value}>
+                            {f.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={handleSearch}
+                    disabled={loading}
+                    className="px-4"
+                  >
+                    {loading ? 'Searching...' : 'Search'}
+                  </Button>
+                </div>
+
+                {/* Desktop: Original layout */}
+                <div className="hidden sm:flex sm:flex-row gap-4">
                   <div className="flex-1">
                     <Input
                       type="text"
@@ -150,7 +187,13 @@ const SearchPage = () => {
               </div>
 
               {/* Search Results */}
-              {hasSearched && (
+              {!hasSearched ? (
+                <div className="text-center py-12">
+                  <Search className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground text-lg">Ready to search</p>
+                  <p className="text-muted-foreground text-sm mt-2">Enter your search terms above to find courses, blogs, skills, tests, and ESL resources</p>
+                </div>
+              ) : (
                 <div className="space-y-6">
                   {results.length === 0 ? (
                     <div className="text-center py-12">
@@ -160,31 +203,18 @@ const SearchPage = () => {
                   ) : (
                     <>
                       <div className="space-y-4">
-                        {results.map((result, index) => (
-                          <div key={`${result.id}-${index}`} className="pb-4 border-b border-border last:border-b-0">
-                            {result.link ? (
-                              <Link href={result.link} className="block hover:opacity-80 transition-opacity">
-                                <h3 className="text-lg font-semibold text-foreground underline decoration-primary underline-offset-2">
-                                  {result.title}
+                        {results?.map((result, index) => (
+                          <div key={`${result.id}-${index}`} className="pb-8 border-b border-border last:border-b-0 cursor-pointer">
+                              <Link href={result?.link || '/'} className="block hover:opacity-80 transition-opacity">
+                                <h3 className="text-xl font-semibold text-foreground underline underline-offset-2">
+                                  {result?.title}
                                 </h3>
-                                {result.description && (
-                                  <p className="text-muted-foreground mt-2 text-sm">
-                                    {result.description}
+                               
+                                  <p className="text-muted-foreground mt-6 text-base leading-relaxed">
+                                    {result?.description}
                                   </p>
-                                )}
+                              
                               </Link>
-                            ) : (
-                              <div>
-                                <h3 className="text-lg font-semibold text-foreground underline decoration-primary underline-offset-2">
-                                  {result.title}
-                                </h3>
-                                {result.description && (
-                                  <p className="text-muted-foreground mt-2 text-sm">
-                                    {result.description}
-                                  </p>
-                                )}
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
