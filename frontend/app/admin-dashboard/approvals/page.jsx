@@ -41,6 +41,26 @@ export default function ApprovalsPage() {
     fetchApprovals()
   }, [])
 
+  // Handle scrolling to specific approval from notification click
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '')
+      if (hash.startsWith('approval-')) {
+        const element = document.getElementById(hash)
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Add a temporary highlight effect
+            element.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50')
+            setTimeout(() => {
+              element.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50')
+            }, 3000)
+          }, 500) // Wait for content to load
+        }
+      }
+    }
+  }, [approvals])
+
   // Handle approve/reject
   const handleAction = async (id, action) => {
     setActionLoading(id)
@@ -187,6 +207,7 @@ export default function ApprovalsPage() {
 
               return (
                 <Card
+                  id={`approval-${approval.id}`}
                   key={approval.id}
                   className="overflow-hidden border-l-4 transition-all duration-200 hover:shadow-md"
                   style={{ borderLeftColor: actionConfig.color.includes('emerald') ? '#10b981' :
