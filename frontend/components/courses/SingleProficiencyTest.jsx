@@ -33,7 +33,7 @@ const SingleProficiencyTest = ({
   }
 
   const handleRequestPriceClick = () => {
-    router.push('/courses/englishproficiencytests#form-section')
+    router.push('/courses/Englishproficiencytests#form-section')
   }
 
   return (

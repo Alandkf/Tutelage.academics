@@ -45,7 +45,7 @@ export default function Navbar (){
         { name: "English for kids and teens", href: "/courses/englishforkids" },
         { name: "English for adults", href: "/courses/englishforadults" },
         { name: "Academic English", href: "/courses/academicenglish" },
-        { name: "English proficiency Tests", href: "/courses/englishproficiencytests" },
+        { name: "English proficiency Tests", href: "/courses/Englishproficiencytests" },
         { name: "Business English", href: "/courses/businessenglish" },
       ],
     },

@@ -22,7 +22,7 @@ export const Footer = () => {
     { name: "English for Kids and Teens", href: "/courses/englishforkids" },
     { name: "English for Adults", href: "/courses/englishforadults" },
     { name: "Academic English", href: "/courses/academicenglish" },
-    { name: "English Proficiency Tests", href: "/courses/englishproficiencytests" },
+    { name: "English Proficiency Tests", href: "/courses/Englishproficiencytests" },
     { name: "Business English", href: "/courses/businessenglish" },
   ]
 

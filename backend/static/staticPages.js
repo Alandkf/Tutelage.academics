@@ -97,31 +97,31 @@ const STATIC_PAGES = [
   {
     title: 'English Proficiency Tests',
     short_description: 'Prepare for IELTS, PTE, and TOEFL exams with targeted practice.',
-    link: '/courses/englishproficiencytests',
+    link: '/courses/Englishproficiencytests',
     keywords: ['ielts', 'pte', 'toefl', 'test', 'exam', 'exams', 'certification']
   },
   {
     title: 'IELTS Academic',
     short_description: 'Focused preparation for IELTS Academic modules and tasks.',
-    link: '/courses/englishproficiencytests/ieltsacademic',
+    link: '/courses/Englishproficiencytests/ieltsacademic',
     keywords: ['ielts academic', 'ielts', 'academic']
   },
   {
     title: 'IELTS General',
     short_description: 'Prepare for IELTS General Training with practice and tips.',
-    link: '/courses/englishproficiencytests/ieltsgeneral',
+    link: '/courses/Englishproficiencytests/ieltsgeneral',
     keywords: ['ielts general', 'general training', 'ielts', 'general']
   },
   {
     title: 'PTE Preparation Course',
     short_description: 'Get ready for the PTE exam with strategy and practice.',
-    link: '/courses/englishproficiencytests/ptepreparationcourse',
+    link: '/courses/Englishproficiencytests/ptepreparationcourse',
     keywords: ['pte', 'pearson', 'pte exam', 'pte test']
   },
   {
     title: 'TOEFL Preparation Course',
     short_description: 'Build skills for success on the TOEFL exam.',
-    link: '/courses/englishproficiencytests/toeflpreparationcourse',
+    link: '/courses/Englishproficiencytests/toeflpreparationcourse',
     keywords: ['toefl', 'toefl ibt', 'ets', 'toefl exam']
   },
   {
