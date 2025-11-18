@@ -181,7 +181,7 @@ const EslVideos = () => {
           {videos.map((video, idx) => {
             const thumbnail = video.thumbnailUrl || getYouTubeThumbnail(video.videoRef) || '/placeholder-16-9.png'
             return (
-              <Link key={video.id} href={`/admin-dashboard/eslVideos/${video.id}`} ref={idx === videos.length - 1 ? lastVideoRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
+              <Link key={idx} href={`/admin-dashboard/eslVideos/${video.id}`} ref={idx === videos.length - 1 ? lastVideoRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
                 <div className="relative h-44 w-full overflow-hidden">
                   <Image src={thumbnail} alt={video.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
                 </div>
