@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import LanguageWrapper from './LanguageWrapper'
 import Language from './Language'
-
+import { BASE_URL_PROD } from '../app/config/url'
 
 export default function Navbar (){
   const [activeDropdown, setActiveDropdown] = useState(null)
@@ -21,6 +21,7 @@ export default function Navbar (){
   const [desktopSearchQuery, setDesktopSearchQuery] = useState('')
   const pathname = usePathname()
   const router = useRouter()
+
 
   const toggleMobileDropdown = (name) => {
     setMobileOpenDropdowns(prev => ({ ...prev, [name]: !prev[name] }))
@@ -158,7 +159,7 @@ export default function Navbar (){
                 <h1>Tutelage</h1>
               </div>
               <p className='text-foreground'>|</p>
-              <Link href="http://tutelage.vercel.app" className='text-muted-foreground font-bold cursor-pointer'>
+              <Link href={BASE_URL_PROD} className='text-muted-foreground font-bold cursor-pointer'>
                 <h1>Tutelage AI</h1>
               </Link>
             </div>
@@ -227,9 +228,11 @@ export default function Navbar (){
                             <h1>Tutelage</h1>
                         </div>
                         <p className='text-foreground'>|</p>
-                        <div className='text-muted-foreground font-bold cursor-pointer'>
-                            <h1>Tutelage AI</h1>
-                        </div>
+                        <Link href={BASE_URL_PROD}>
+                          <div className='text-muted-foreground font-bold cursor-pointer'>
+                              <h1>Tutelage AI</h1>
+                          </div>
+                        </Link>
                     </div>
               </div>
 

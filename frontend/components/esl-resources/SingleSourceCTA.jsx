@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Sparkles } from 'lucide-react'
+import { BASE_URL_PROD } from '@/app/config/url'
 
 const AICallToAction = () => {
   return (
@@ -20,7 +21,7 @@ const AICallToAction = () => {
             Ready to practice with instant feedback? Tutelage AI is your personal English learning assistant, available 24/7 to help you improve your speaking, writing, and comprehension skills. Get personalized guidance, track your progress, and learn at your own pace with our advanced AI technology designed specifically for English learners.
           </p>
           
-          <Link href="#">
+          <Link href={BASE_URL_PROD} target="_blank" rel="noopener noreferrer">
             <Button 
               size="lg" 
               variant="secondary"
