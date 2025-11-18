@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { ChevronDown, Menu, X, Search } from 'lucide-react'
 import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import LanguageWrapper from './LanguageWrapper'
 import Language from './Language'
 
@@ -17,10 +18,19 @@ export default function Navbar (){
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   // track which top-level mobile dropdowns are open (by name)
   const [mobileOpenDropdowns, setMobileOpenDropdowns] = useState({})
+  const [desktopSearchQuery, setDesktopSearchQuery] = useState('')
   const pathname = usePathname()
+  const router = useRouter()
 
   const toggleMobileDropdown = (name) => {
     setMobileOpenDropdowns(prev => ({ ...prev, [name]: !prev[name] }))
+  }
+
+  const handleDesktopSearch = () => {
+    if (desktopSearchQuery.trim()) {
+      router.push(`/search?query=${encodeURIComponent(desktopSearchQuery.trim())}`)
+      setDesktopSearchQuery('')
+    }
   }
 
   const navItems = [
@@ -115,11 +125,23 @@ export default function Navbar (){
           <div className="flex items-center gap-2 ml-auto">
             {/* Desktop search */}
             <div className="hidden md:flex items-center gap-2">
-              <Input
-                type="text"
-                placeholder="Search..."
-                className="w-48 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  value={desktopSearchQuery}
+                  onChange={(e) => setDesktopSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleDesktopSearch()}
+                  className="w-48 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm pr-10"
+                />
+                <button
+                  onClick={handleDesktopSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Search"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
               <LanguageWrapper >
                 <Language />
               </LanguageWrapper>
@@ -294,6 +316,17 @@ export default function Navbar (){
 // Mobile search overlay
 function MobileSearchOverlay() {
   const [open, setOpen] = useState(false)
+  const [mobileSearchQuery, setMobileSearchQuery] = useState('')
+  const router = useRouter()
+
+  const handleMobileSearch = () => {
+    if (mobileSearchQuery.trim()) {
+      setOpen(false)
+      router.push(`/search?query=${encodeURIComponent(mobileSearchQuery.trim())}`)
+      setMobileSearchQuery('')
+    }
+  }
+
   return (
     <>
       <button
@@ -307,20 +340,32 @@ function MobileSearchOverlay() {
       </button>
       {open && (
         <div className="fixed inset-0 z-[100] bg-background/95 flex items-start justify-center pt-10 px-4">
-          <div className="relative w-full max-w-xs mx-auto">
-            <Input
-              type="text"
-              placeholder="Search..."
-              className="w-full bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm"
-              autoFocus
-            />
-            <button
-              className="absolute top-2 right-2 text-muted-foreground hover:text-primary"
-              onClick={() => setOpen(false)}
-              aria-label="Close search"
+          <div className="relative w-full max-w-xs mx-auto space-y-4">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search..."
+                value={mobileSearchQuery}
+                onChange={(e) => setMobileSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleMobileSearch()}
+                className="w-full bg-background border border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 shadow-sm pr-10"
+                autoFocus
+              />
+              <button
+                className="absolute top-2 right-2 text-muted-foreground hover:text-primary"
+                onClick={() => setOpen(false)}
+                aria-label="Close search"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <Button
+              onClick={handleMobileSearch}
+              className="w-full"
             >
-              <X className="w-5 h-5" />
-            </button>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
           </div>
         </div>
       )}

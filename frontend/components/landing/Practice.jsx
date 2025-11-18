@@ -138,7 +138,7 @@ const Practice = () => {
 					{/* Left Button */}
 					<Button
 						size="icon"
-						className="absolute left-2 md:-left-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+						className="absolute max-md:hidden left-2 md:-left-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
 						onClick={handlePrev}
 					>
 						<ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
@@ -204,7 +204,7 @@ const Practice = () => {
 					{/* Right Button */}
 					<Button
 						size="icon"
-						className="absolute right-2 md:-right-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+						className="absolute max-md:hidden right-2 md:-right-2 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-primary/70 md:bg-primary text-primary-foreground w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
 						onClick={handleNext}
 					>
 						<ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />

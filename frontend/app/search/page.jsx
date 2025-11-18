@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExternalLink, GraduationCap, FileText, Target, Info, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import BASE_URL from '@/app/config/url'
 import { BASE_URL_PROD } from '@/app/config/url'
 import { toast } from 'sonner'
@@ -21,7 +22,10 @@ const SearchPage = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [totalResults, setTotalResults] = useState(0)
   const [hasSearched, setHasSearched] = useState(false)
-  const topRef = useRef(null)  // Available filters based on backend (levels is not available)
+  const topRef = useRef(null)
+  const searchParams = useSearchParams()
+
+  // Available filters based on backend (levels is not available)
   const availableFilters = [
     { value: 'tests', label: 'Tests' },
     { value: 'courses', label: 'Courses' },
@@ -30,22 +34,33 @@ const SearchPage = () => {
     { value: 'esl resources', label: 'ESL Resources' }
   ]
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      toast.error('Please enter a search query')
-      return
+  // Handle URL parameters and auto-search
+  useEffect(() => {
+    const urlQuery = searchParams.get('query')
+    const urlFilter = searchParams.get('filter')
+    if (urlQuery && urlQuery.trim()) {
+      setQuery(urlQuery.trim())
+      if (urlFilter) {
+        setFilter(urlFilter)
+      }
+      // Trigger search automatically
+      setTimeout(() => {
+        performSearch(urlQuery.trim(), urlFilter || '', 1)
+      }, 100)
     }
+  }, [searchParams])
 
+  const performSearch = async (searchQuery, searchFilter = '', searchPage = 1) => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
-        query: query.trim(),
-        page: page.toString(),
+        query: searchQuery.trim(),
+        page: searchPage.toString(),
         limit: '10'
       })
 
-      if (filter && filter !== 'all') {
-        params.append('filter', filter)
+      if (searchFilter && searchFilter !== 'all') {
+        params.append('filter', searchFilter)
       }
 
       const response = await fetch(`${BASE_URL}/api/search?${params}`)
@@ -57,6 +72,7 @@ const SearchPage = () => {
         setTotalPages(data.meta?.totalPages || 1)
         setTotalResults(data.meta?.totalResults || 0)
         setHasSearched(true)
+        setPage(searchPage)
       } else {
         toast.error(data.message || 'Search failed')
         setResults([])
@@ -74,10 +90,19 @@ const SearchPage = () => {
     }
   }
 
+  const handleSearch = async () => {
+    if (!query.trim()) {
+      toast.error('Please enter a search query')
+      return
+    }
+
+    await performSearch(query, filter, 1)
+  }
+
   const handlePageChange = (newPage) => {
     setPage(newPage)
-    // Trigger search with new page first
-    handleSearch()
+    // Trigger search with new page
+    performSearch(query, filter, newPage)
     // Scroll to top after a brief delay to ensure content has loaded
     setTimeout(() => {
       topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })

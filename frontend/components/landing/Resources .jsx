@@ -7,7 +7,7 @@ const Resources = () => {
   return (
     <>
       {/* Resources Section */}
-      <div className="py-16 md:py-20 px-4">
+      <div className="py-12 md:py-20 px-4">
         {/* Section Title */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
           <div className="text-center">

@@ -39,7 +39,7 @@ const GlobalTestMastery = () => {
   ]
 
   return (
-    <div className="py-16 md:py-20 md:pb-28 px-4">
+    <div className="py-12 md:pb-28 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
         <div className="text-center mb-12">
