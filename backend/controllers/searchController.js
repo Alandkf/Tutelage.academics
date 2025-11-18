@@ -70,8 +70,7 @@ async function searchCompactUnified(query, limit) {
 
   // Dynamic models to include (must have title/description)
   const sources = [
-    { type: 'Audio', model: models.Audio, attributes: ['id', 'title', 'description'] },
-    { type: 'Video', model: models.Video, attributes: ['id', 'title', 'description'] },
+    { type: 'Audio', model: models.Audio, attributes: ['id', 'title', 'description', 'level'] },
     { type: 'Blog', model: models.Blog, attributes: ['id', 'title', 'description'] },
     { type: 'Reading', model: models.Reading, attributes: ['id', 'title', 'description', 'level'] },
     { type: 'Writing', model: models.Writing, attributes: ['id', 'title', 'description', 'level'] },
@@ -101,19 +100,23 @@ async function searchCompactUnified(query, limit) {
     const firstLevel = levelArr && levelArr.length ? String(levelArr[0]) : '';
     const cefr = (firstLevel.match(/^[ABC]\d/i)?.[0] || '').toLowerCase();
     const levelCode = ['a1','a2','b1','b2','c1'].includes(cefr) ? cefr : null;
+    const safeLevel = levelCode || 'a1';
 
     switch (type) {
       case 'Blog':
         return `/esl-resources/blogs/${id}`;
       case 'Reading':
-        // Root-level dynamic page exists
-        return `/skills/reading/${id}`;
+        // Level-specific dynamic routes
+        return `/skills/reading/${safeLevel}/${id}`;
       case 'Writing':
-        // Root-level dynamic page exists
-        return `/skills/writing/${id}`;
+        // Level-specific dynamic routes
+        return `/skills/writing/${safeLevel}/${id}`;
       case 'Speaking':
         // Speaking uses level-specific dynamic routes
-        return levelCode ? `/skills/speaking/${levelCode}/${id}` : null;
+        return `/skills/speaking/${safeLevel}/${id}`;
+      case 'Audio':
+        // Listening content uses level-specific dynamic routes
+        return `/skills/listening/${safeLevel}/${id}`;
       case 'EslAudio':
         return `/esl-resources/audios/${id}`;
       case 'EslVideo':
@@ -122,8 +125,6 @@ async function searchCompactUnified(query, limit) {
         return `/esl-resources/stories/${id}`;
       // Courses currently have no dynamic detail page; omit link
       case 'Course':
-      case 'Audio':
-      case 'Video':
       default:
         return null;
     }
