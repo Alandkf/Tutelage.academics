@@ -1,14 +1,14 @@
+// Contact page component - handles contact form submissions and displays contact information
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExternalLink, GraduationCap, FileText, Target, Info } from 'lucide-react'
@@ -23,50 +23,24 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useTranslation } from 'react-i18next'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// Form validation schema
-const enrollmentSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits').max(15, 'Phone number must be less than 15 digits'),
-  age: z.string().min(1, 'Age is required').refine((val) => {
-    const num = parseInt(val)
-    return num >= 5 && num <= 100
-  }, 'Age must be between 5 and 100'),
-  profession: z.string().min(1, 'Please select your profession'),
-  course: z.string().min(1, 'Please select a course')
+// Contact form schema
+const contactSchema = z.object({
+  firstName: z.string().min(1, "First name is required").min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(1, "Last name is required").min(2, "Last name must be at least 2 characters"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  country: z.string().min(1, "Please select a country"),
+  topic: z.string().min(1, "Topic is required").min(5, "Topic must be at least 5 characters"),
+  message: z.string().min(1, "Message is required").min(10, "Message must be at least 10 characters")
 })
 
-const COUNTRIES = [
-  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
-  'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
-  'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
-  'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
-  'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
-  'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
-  'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
-  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
-  'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait', 'Kyrgyzstan',
-  'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar',
-  'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia',
-  'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal',
-  'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan',
-  'Palau', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar',
-  'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia',
-  'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
-  'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan',
-  'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
-  'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City',
-  'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
-];
-
 const ContactPage = () => {
-  const { t, i18n } = useTranslation()
-  const isRTL = i18n.language === 'ku'
   const searchParams = useSearchParams()
   const [preselectedCourse, setPreselectedCourse] = useState('')
   const [selectKey, setSelectKey] = useState(0) 
+  const [loading, setLoading] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
   // Form setup
   const {
@@ -75,18 +49,42 @@ const ContactPage = () => {
     setValue,
     watch,
     reset,
+    control,
     formState: { errors, isSubmitting }
   } = useForm({
-    resolver: zodResolver(enrollmentSchema),
+    resolver: zodResolver(contactSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
-      phone: '',
-      age: '',
-      profession: '',
-      course: ''
+      country: '',
+      topic: '',
+      message: ''
     }
   })
+
+  const COUNTRIES = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+    'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+    'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+    'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+    'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+    'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+    'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+    'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel',
+    'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kosovo', 'Kuwait', 'Kyrgyzstan',
+    'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar',
+    'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia',
+    'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal',
+    'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan',
+    'Palau', 'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar',
+    'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia',
+    'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa',
+    'South Korea', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan',
+    'Tajikistan', 'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan',
+    'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City',
+    'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+  ]
 
   // Get course from URL parameters
   useEffect(() => {
@@ -98,12 +96,12 @@ const ContactPage = () => {
       if (courses.includes(decodedCourse)) {
         setPreselectedCourse(decodedCourse)
         reset({
-          name: '',
+          firstName: '',
+          lastName: '',
           email: '',
-          phone: '',
-          age: '',
-          profession: '',
-          course: decodedCourse
+          country: '',
+          topic: '',
+          message: decodedCourse
         })
         setSelectKey(prev => prev + 1)
       } else {
@@ -113,12 +111,12 @@ const ContactPage = () => {
         if (matchedCourse) {
           setPreselectedCourse(matchedCourse)
           reset({
-            name: '',
+            firstName: '',
+            lastName: '',
             email: '',
-            phone: '',
-            age: '',
-            profession: '',
-            course: matchedCourse
+            country: '',
+            topic: '',
+            message: matchedCourse
           })
           setSelectKey(prev => prev + 1)
         }
@@ -131,7 +129,7 @@ const ContactPage = () => {
     try {
       setLoading(true)
       
-      const response = await fetch(`${BASE_URL}/api/enrollment`, {
+      const response = await fetch(`${BASE_URL}/api/enrollment/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,38 +140,38 @@ const ContactPage = () => {
       const result = await response.json()
       
       if (!response.ok) {
-        toast("Enrollment Failed", {
+        toast("Message Failed", {
           description: result.message || 'Please check your information and try again'
         });
         return;
       }
       
       if (result.warning) {
-        toast("Enrollment Submitted", {
-          description: result.message || 'Your application has been received successfully'
+        toast("Message Submitted", {
+          description: result.message 
         });
       } else {
-        toast("Enrollment Successful! 🎉", {
+        toast("Message sent Successfully", {
           description: "Check your email for confirmation details"
         });
       }
       
       setShowSuccessDialog(true)
       
-      setValue('name', '')
+      setValue('firstName', '')
+      setValue('lastName', '')
       setValue('email', '')
-      setValue('phone', '')
-      setValue('age', '')
-      setValue('profession', '')
+      setValue('country', '')
+      setValue('topic', '')
       if (!preselectedCourse) {
-        setValue('course', '')
+        setValue('message', '')
       }
       
     } catch (error) {
-      console.error('Enrollment error:', error)
+      console.error('Contact error:', error)
       
       toast("Connection Error", {
-        description: "Unable to submit enrollment. Please check your internet connection and try again."
+        description: "Unable to submit contact form. Please check your internet connection and try again."
       });
       
     } finally {
@@ -187,153 +185,134 @@ const ContactPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Left Side */}
           <div className="lg:col-span-2">
             <div className="bg-card border border-border rounded-lg shadow-sm p-6 sm:p-8">
               <div className="mb-8">
-                <h1 className={`text-3xl sm:text-4xl font-bold text-foreground mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {t('enroll.title')} {preselectedCourse ? `${t('enroll.titleWithCourse')} ${preselectedCourse}` : ''}
+                <h1 className={`text-3xl sm:text-4xl font-bold text-foreground mb-2`}>
+                  Enroll Now{preselectedCourse ? ` for ${preselectedCourse}` : ''}
                 </h1>
-                <p className={`text-muted-foreground text-lg ${isRTL ? 'text-right' : ''}`}>
-                  {t('enroll.subtitle')}
+                <p className={`text-muted-foreground text-lg`}>
+                  Fill out the form below to get started with your English learning journey.
                 </p>
               </div>
 
               {/* Enrollment Form */}
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Name Field */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">
+                      First Name *
+                    </Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="Enter your first name"
+                      {...register('firstName')}
+                      className={`${errors.firstName ? 'border-destructive focus:ring-destructive' : ''}`}
+                    />
+                    {errors.firstName && (
+                      <p className={`text-sm text-destructive`}>{errors.firstName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">
+                      Last Name *
+                    </Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Enter your last name"
+                      {...register('lastName')}
+                      className={`${errors.lastName ? 'border-destructive focus:ring-destructive' : ''}`}
+                    />
+                    {errors.lastName && (
+                      <p className={`text-sm text-destructive`}>{errors.lastName.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email and Country Field - Full Width */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country">
+                      Country *
+                    </Label>
+                    <Controller
+                      name="country"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="">
+                            <SelectValue placeholder="Select your country" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {COUNTRIES.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.country && (
+                      <p className={`text-sm text-destructive`}>{errors.country.message}</p>
+                    )}
+                  </div>
+                  <div className="sm:col-span-2 space-y-2">
+                    <Label htmlFor="email">
+                      Email *
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email address"
+                      {...register('email')}
+                      className={`${errors.email ? 'border-destructive focus:ring-destructive' : ''}`}
+                    />
+                    {errors.email && (
+                      <p className={`text-sm text-destructive`}>{errors.email.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Topic Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="name" className={isRTL ? 'text-right block' : ''}>
-                    {t('enroll.form.fullName')} {t('enroll.form.required')}
+                  <Label htmlFor="topic">
+                    Topic *
                   </Label>
                   <Input
-                    id="name"
+                    id="topic"
                     type="text"
-                    placeholder={t('enroll.form.fullNamePlaceholder')}
-                    {...register('name')}
-                    className={`${errors.name ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
+                    placeholder="What would you like to discuss?"
+                    {...register('topic')}
+                    className={`${errors.topic ? 'border-destructive focus:ring-destructive' : ''}`}
                   />
-                  {errors.name && (
-                    <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.name.message}</p>
+                  {errors.topic && (
+                    <p className={`text-sm text-destructive`}>{errors.topic.message}</p>
                   )}
                 </div>
 
-                {/* Email Field - Full Width */}
+                {/* Message Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className={isRTL ? 'text-right block' : ''}>
-                    {t('enroll.form.email')} {t('enroll.form.required')}
+                  <Label htmlFor="message">
+                    Message *
                   </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={t('enroll.form.emailPlaceholder')}
-                    {...register('email')}
-                    className={`${errors.email ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
+                  <textarea
+                    id="message"
+                    {...register('message')}
+                    className={`w-full mt-2 rounded-md border border-border bg-background text-foreground p-2 min-h-[120px] resize-none ${errors.message ? 'border-destructive focus:ring-destructive' : ''}`}
+                    placeholder="Tell us more about your inquiry"
                   />
-                  {errors.email && (
-                    <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.email.message}</p>
+                  {errors.message && (
+                    <p className={`text-sm text-destructive`}>{errors.message.message}</p>
                   )}
-                </div>
-
-                {/* Phone and Age Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className={isRTL ? 'text-right block' : ''}>
-                      {t('enroll.form.phone')} {t('enroll.form.required')}
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder={t('enroll.form.phonePlaceholder')}
-                      {...register('phone')}
-                      className={`${errors.phone ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
-                    />
-                    {errors.phone && (
-                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.phone.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="age" className={isRTL ? 'text-right block' : ''}>
-                      {t('enroll.form.age')} {t('enroll.form.required')}
-                    </Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      min="5"
-                      max="100"
-                      placeholder={t('enroll.form.agePlaceholder')}
-                      {...register('age')}
-                      className={`${errors.age ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}
-                    />
-                    {errors.age && (
-                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.age.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Profession and Course Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {/* Profession with Tooltip */}
-                  <div className="space-y-2">
-                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-                      <Label className={isRTL ? 'text-right' : ''}>{t('enroll.form.profession')} {t('enroll.form.required')}</Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="w-5 h-5 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center cursor-help hover:bg-sky-200 dark:hover:bg-sky-900/50 transition-colors">
-                              <Info className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <p className="text-sm">{t('enroll.form.professionTooltip')}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <Select onValueChange={(value) => setValue('profession', value)}>
-                      <SelectTrigger className={`${errors.profession ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}>
-                        <SelectValue placeholder={t('enroll.form.professionPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {professionOptions.map((profession) => (
-                          <SelectItem key={profession} value={profession}>
-                            {profession}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.profession && (
-                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.profession.message}</p>
-                    )}
-                  </div>
-
-                  {/* Course Selection */}
-                  <div className="space-y-2">
-                    <Label className={isRTL ? 'text-right block' : ''}>{t('enroll.form.course')} {t('enroll.form.required')}</Label>
-                    <Select 
-                      key={selectKey}
-                      onValueChange={(value) => setValue('course', value)} 
-                      defaultValue={watch('course')}
-                    >
-                      <SelectTrigger className={`${errors.course ? 'border-destructive focus:ring-destructive' : ''} ${isRTL ? 'text-right' : ''}`}>
-                        <SelectValue placeholder={t('enroll.form.coursePlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {courses.map((course) => (
-                          <SelectItem key={course} value={course}>
-                            {course}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.course && (
-                      <p className={`text-sm text-destructive ${isRTL ? 'text-right' : ''}`}>{errors.course.message}</p>
-                    )}
-                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -343,16 +322,9 @@ const ContactPage = () => {
                   className="w-full text-lg py-3"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? t('enroll.form.submittingButton') : t('enroll.form.submitButton')}
+                  {isSubmitting ? "Submitting..." : "Submit Enrollment"}
                 </Button>
               </form>
-
-              {/* Info Message */}
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <p className={`text-sm text-muted-foreground text-center ${isRTL ? 'text-right' : ''}`}>
-                  {t('enroll.infoMessage')}
-                </p>
-              </div>
             </div>
           </div>
 

@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail, sendContactEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -437,10 +437,92 @@ const processMockTestBooking = async (req, res) => {
   }
 };
 
+/**
+ * Process contact form submission
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const processContact = async (req, res) => {
+  try {
+    console.log('📝 Processing contact form');
+    
+    const { firstName, lastName, email, country, topic, message } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !country || !topic || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+    
+    const contactData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim().toLowerCase(),
+      country: country.trim(),
+      topic: topic.trim(),
+      message: message.trim()
+    };
+    
+    console.log('📧 Sending contact email...');
+    
+    // Send contact email to admin
+    try {
+      await sendContactEmail(contactData);
+      
+      console.log('✅ Contact email sent successfully');
+      console.log(`📋 Contact from: ${contactData.name} - ${topic}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Contact form submitted successfully! However, there was an issue sending the email. Our team will contact you directly.',
+        data: {
+          name: contactData.name,
+          email: contactData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Contact form submitted successfully! We will get back to you soon.',
+      data: {
+        name: contactData.name,
+        email: contactData.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Contact processing error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process contact form. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   processEnrollment,
   processPricingRequest,
   processTestResult,
   processPlacementTestBooking,
-  processMockTestBooking
+  processMockTestBooking,
+  processContact
 };

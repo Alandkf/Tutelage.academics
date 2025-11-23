@@ -41,8 +41,8 @@ export default function Navbar (){
       dropdown: null,
     },
      {
-      name: "Languages",
-      href: "/langauges",
+      name: "languages",
+      href: "/languages",
       dropdown: [
         { name: "English Language", href: "/courses" },
         { name: "Kurdish Language", href: "/languages/kurdish" },
