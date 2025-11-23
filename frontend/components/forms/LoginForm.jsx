@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff } from "lucide-react"
 import BASE_URL from "@/app/config/url"
 import { useAuth } from "@/components/AuthContext"
+import Image from "next/image"
 console.log('BASE_URL:', BASE_URL);
 
 // Define form schema with Zod
@@ -76,23 +77,9 @@ const LoginForm = () => {
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="space-y-2 text-center">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+        <div className="mx-auto mb-4 pt-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
           {/* You can replace this with an actual logo */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-10 w-10 text-primary"
-          >
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-            <path d="M6 12v5c3 3 9 3 12 0v-5" />
-          </svg>
+          <Image src={"/only-logo-black-border-yellow-bg.svg"} alt='logo' width={50} height={50} />
         </div>
         <CardTitle className="text-2xl font-bold">Tutelage</CardTitle>
         <CardDescription>Sign in to your account to continue</CardDescription>

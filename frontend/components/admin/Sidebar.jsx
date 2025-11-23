@@ -8,6 +8,7 @@ import { Home, Users, ShoppingBag, MonitorCog, Menu, X, Newspaper, Video, FileVo
 import { Button } from "@/components/ui/button"
 import AdminProfileSection from "@/components/admin/AdminProfileSection"
 import { useAuth } from "@/components/AuthContext"
+import Image from "next/image"
 
 const menuItems = [
   { icon: Home, name: "Dashboard", href: "/admin-dashboard" },
@@ -80,11 +81,12 @@ export default function Sidebar() {
           animate={{ width: 200 }}
           transition={{ duration: 0.2 }}
         >
-          <div className="h-14 px-3 flex items-center border-b border-border">
-            <span className="font-bold text-lg">Tutelage</span>
+          <div className="h-14 py-4 px-3 flex items-center gap-4 border-b border-border">
+              <Image src={"/only-logo-black-border-yellow-bg.svg"} alt='logo' width={30} height={30} />
+              <h1 className="font-bold text-lg">Tutelage</h1>
           </div>
           
-          <nav className="flex-1 py-2 flex flex-col gap-1 px-3">
+          <nav className="flex-1 py-2 flex flex-col gap-1 px-3 overflow-auto">
             {filteredMenuItems.map((item) => (
               <Link key={item.name} href={item.href} className="w-full">
                 <div
@@ -126,13 +128,16 @@ export default function Sidebar() {
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
             >
               <div className="flex items-center justify-between p-4 border-b border-border">
-                <h1 className="font-bold text-lg">Tutelage</h1>
+                <div className='flex items-center gap-4'>
+                   <Image src={"/only-logo-black-border-yellow-bg.svg"} alt='logo' width={30} height={30} />
+                   <h1 className="font-bold text-lg">Tutelage</h1>
+                </div>
                 <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="h-8 w-8 p-0">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
               
-              <nav className="p-2">
+              <nav className="p-2 overflow-y-auto max-h-[calc(100vh-200px)]">
                 {filteredMenuItems.map((item) => (
                   <Link 
                     key={item.name} 

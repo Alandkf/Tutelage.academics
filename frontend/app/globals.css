@@ -124,7 +124,7 @@ html, body {
 
 /* Added custom scrollbar styling for smooth interactions */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 2px;
   height: 6px;
 }
 
