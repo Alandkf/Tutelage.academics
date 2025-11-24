@@ -1,8 +1,8 @@
 'use client'
 
-import CoursesCTA from '@/components/courses/CoursesCTA'
 import LanguagesHero from '@/components/Languages/LanguagesHero'
 import LanguagesShowcase from '@/components/Languages/LanguagesShowcase'
+import LanguageCTA from '@/components/Languages/LanguageCTA'
 
 export default function CoursesPage() {
 
@@ -10,7 +10,7 @@ export default function CoursesPage() {
     <>
       <LanguagesHero />
       <LanguagesShowcase />
-      <CoursesCTA />
+      <LanguageCTA />
     </>
   )
 }

@@ -1,16 +1,17 @@
 'use client'
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 
-const CoursesCTA = () => {
-  const { t, i18n } = useTranslation()
-  const isRTL = i18n.language === 'ku'
+const LanguageCTA = () => {
   
-  const features = t('courses.CoursesCTA.features', { returnObjects: true })
+  const features = [
+     "5-Minute Assessment",
+     "Personalized Results",
+     "Expert Recommendations"
+  ]
 
   return (
     <section className="py-20 bg-muted/30">
@@ -25,11 +26,11 @@ const CoursesCTA = () => {
         {/* Heading */}
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            {t('courses.CoursesCTA.title')}
+            Not Sure Which Course is Right for You?
           </h2>
           
-          <p className={`text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto ${isRTL ? 'text-center' : ''}`}>
-            {t('courses.CoursesCTA.description')}
+          <p className={`text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto `}>
+            Take our comprehensive assessment quiz to discover the perfect English course tailored to your current level, learning goals, and career aspirations. Get personalized recommendations in just a few minutes.
           </p>
         </div>
 
@@ -49,9 +50,9 @@ const CoursesCTA = () => {
             <Button 
               size="lg" 
               className="px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
-            >
-              {t('courses.CoursesCTA.buttonText')}
-              <ChevronRight className={`w-6 h-6 ${isRTL ? 'mr-3 rotate-180' : 'ml-3'}`} />
+              >
+              Take the Course Quiz
+              <ChevronRight className="w-6 h-6 ml-3" />
             </Button>
           </Link>
         </div>
@@ -59,7 +60,7 @@ const CoursesCTA = () => {
         {/* Additional info */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">
-            {t('courses.CoursesCTA.info')}
+            Free assessment • No registration required • Instant results
           </p>
         </div>
       </div>
@@ -67,4 +68,4 @@ const CoursesCTA = () => {
   )
 }
 
-export default CoursesCTA
+export default LanguageCTA

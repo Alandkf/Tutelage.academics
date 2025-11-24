@@ -2,15 +2,22 @@
 
 import i18n from '@/i18n';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const languages = [
-  { code: 'en', label: 'English', url: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png?20250221172329" },
-  { code: 'ku', label: 'Kurdish', url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Flag_of_Kurdistan.svg/1200px-Flag_of_Kurdistan.svg.png" },
-];
+
+  
 
 const Language = () => {
+    const pathname = usePathname();
+
+  const languages = [
+    { code: 'en', label: 'English', url: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png?20250221172329" },
+    { code: 'ku', label: pathname === '/languages/kurdish' ? 'العربیە' : 'کوردی' , url: pathname === '/languages/kurdish' ?   "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Flag_of_Iraq.svg/2560px-Flag_of_Iraq.svg.png" : "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Flag_of_Kurdistan.svg/1200px-Flag_of_Kurdistan.svg.png" },
+  ];
+
+
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('English');

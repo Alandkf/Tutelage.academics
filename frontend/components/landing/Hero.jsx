@@ -12,9 +12,9 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
   const [heroSearchFilter, setHeroSearchFilter] = useState('')
   const router = useRouter()
 
-  const safeTitle = title || 'Your Solution For English Language Learning'
-  const safeSubtitle = subtitle || 'Driven by technology and expertise, we have empowered English learners worldwide since 2010, transforming the way language is taught and mastered. Discover new opportunities and reach your goals with Tutelage.'
-  const imageSrc = imageUrl || '/hero.jpg'
+  const safeTitle = title || 'Empowering learners worldwide with virtual education'
+  const safeSubtitle = subtitle || 'High-quality courses, engaging tests, and curated resources for success.'
+  const imageSrc = imageUrl || 'https://www.selectenglish.co.uk/wp-content/uploads/2020/10/online-class-e1603379051771.jpg'
 
   const handleHeroSearch = (e) => {
     e.preventDefault()
