@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
 
+const FRONTEND_URL = process.env.FRONTEND_URL
+
 // Create reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -242,7 +244,7 @@ async function sendPricingRequestEmail(pricingData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <div style="display: flex; align-items: center; justify-center; gap: 12px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               TUTELAGE
             </h1>
@@ -585,7 +587,7 @@ async function sendTestResultEmail(resultData) {
           </div>
 
           <div style="text-align: center;">
-            <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}/courses" class="cta-button">
+            <a href="${FRONTEND_URL}/courses" class="cta-button">
               Explore Our Courses
             </a>
           </div>
@@ -623,8 +625,8 @@ async function sendTestResultEmail(resultData) {
           <div class="footer">
             <p><strong>Tutelage - Your Partner in English Learning</strong></p>
             <p>
-              <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}">Visit Our Website</a> | 
-              <a href="${process.env.FRONTEND_URL || 'https://tutelage.com'}/contact">Contact Us</a>
+              <a href="${FRONTEND_URL}">Visit Our Website</a> | 
+              <a href="${FRONTEND_URL}/contact">Contact Us</a>
             </p>
             <p style="margin-top: 15px; font-size: 12px;">
               This email was sent to ${email} because you completed an English placement test on our platform.
@@ -1374,7 +1376,7 @@ const sendApprovalRequestNotification = async (payload) => {
           <p><strong>Requested By:</strong> ${requestedByEmail}</p>
           ${changesSummary ? `<p><strong>Changes Summary:</strong> ${changesSummary}</p>` : ''}
           <p>Please review and approve or reject this request in the admin dashboard.</p>
-          <a href="${process.env.FRONTEND_URL}/admin-dashboard/approvals" class="button">Review Request</a>
+          <a href="${FRONTEND_URL}/admin-dashboard/approvals" class="button">Review Request</a>
         </div>
         <div class="footer">
           <p>&copy; 2024 Tutelage. All rights reserved.</p>
@@ -1433,12 +1435,10 @@ async function sendContactEmail(contactData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+              TUTELAGE
+           </h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
                  English Learning Platform
               </p>
         </div>
@@ -1542,12 +1542,10 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+              TUTELAGE
+           </h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
                  Language Learning Platform
               </p>
         </div>
@@ -1649,12 +1647,10 @@ async function sendArabicEnrollmentConfirmationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+              TUTELAGE
+           </h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
                  Language Learning Platform
               </p>
         </div>
@@ -1753,12 +1749,10 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+              TUTELAGE
+           </h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
                  Language Learning Platform
               </p>
         </div>
@@ -1860,12 +1854,10 @@ async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+              TUTELAGE
+           </h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
                  Language Learning Platform
               </p>
         </div>
