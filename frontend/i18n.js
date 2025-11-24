@@ -225,7 +225,7 @@ const resources = {
           description: "Join our live online Adult ESL classes and start speaking with confidence! Our courses—available for both small groups (3-5 students) and private study—are designed and taught interactively to maximize your real-life conversation time. We provide a thorough language placement test and use the Tutelage Method for a detailed, effective curriculum with continuous feedback on your progress. Private students get a dedicated instructor, flexible packages, and Tutelage AI, a personalized 24/7 practice partner outside of class. All participants receive a certificate of participation. Don't miss this chance to become one of our success stories!"
         },
         faq: {
-          title: "Frequently Asked Questions",
+          title: "Frequently Asked Questions(FAQs)",
           subtitle: "About Tutelage's English for Adults courses",
           questions: [
             {
@@ -396,7 +396,7 @@ const resources = {
         }
                   },
         faq: {
-          title: "Frequently Asked Questions",
+          title: "Frequently Asked Questions(FAQs)",
           subtitle: "About Tutelage's Arabic courses",
           questions: [
             {
@@ -444,16 +444,16 @@ const resources = {
         }
       },
       KurdishCourse: {
-        title: "Arabic Language Classes",
-        description: "Why enroll in Tutelage Arabic classes? Experience interactive and engaging Arabic classes that fully immerse you in the language. With a skilled teacher and a well-designed curriculum, you’ll quickly boost your confidence and improve your everyday Arabic skills. This course is ideal for anyone who wants to learn or enhance their Arabic proficiency.",
-        secondTitle: "Discover your ideal class!",
+        title: "Kurdish Language Classes",
+        description: "Why enroll in Tutelage Kurdish classes? Our Kurdish classes are interactive and engaging, designed to fully immerse students in the language. With a qualified teacher and a well-structured curriculum, you’ll build confidence and improve your everyday Kurdish skills quickly and effectively. Whether you are a member of the Kurdish diaspora or a passionate individual seeking to learn or improve the Kurdish language, this course is specifically designed for you.",
+        secondTitle: "Find your perfect class",
         classTypes: {
           online: {
             title: "Online Private Classes",
             features: [
               "Online Private Classes",
-              "One-on-one Arabic language instruction",
-              " Personalized study plan based on your goals",
+              "One-on-one Kurdish language instruction",
+              "Personalized study plan based on your goals",
               "Daily materials, homework, and feedback",
               "Flexible scheduling for online lessons",
               "Continuous progress tracking and teacher support",
@@ -466,7 +466,7 @@ const resources = {
             title: "In-Person Private Classes",
             features: [
               "In-Person Private Classes",
-              "One-on-one Arabic language instruction",
+              "One-on-one Kurdish language instruction",
               "Personalized study plan based on your goals",
               "Printed and in-class materials with guided practice",
               "Suited schedule for face-to-face lessons",
@@ -478,24 +478,24 @@ const resources = {
             buttonText: "Ask for Price"
           },
         },
-        thirdTitle: "Arabic Classes for All Ages!",
+        thirdTitle: "Available classes for everyone!",
         thirdCard: {
           kids:{
             title: "For Kids",
-            desc: "Enjoy interactive Arabic lessons full of games, fun activities and shortstories that make learning simple and exciting."
+            desc: "Fun and interactive Kurdish classes with games and activities to make learning enjoyable and easy."
           },
           teens:{
             title: "For Teens",
-            desc: "Dynamic Arabic classes designed to boost language skills, confidence, and communication abilities for teenagers."
+            desc: "Engaging Kurdish lessons that boost language skills, confidence, and communication for teens."
           },
           adults:{
             title: "For Adults",
-            desc: "Practical Arabic courses that help adults enhance everyday communication and achieve greater fluency efficiently."
+            desc: "Practical Kurdish classes for adults to improve everyday communication and fluency efficiently."
         }
                   },
         faq: {
-          title: "Frequently Asked Questions",
-          subtitle: "About Tutelage's Arabic courses",
+          title: "Frequently Asked Questions(FAQs)",
+          subtitle: "About Tutelage's Kurdish courses",
           questions: [
             {
               question: "Who can join the classes?",
@@ -987,102 +987,98 @@ const resources = {
         }
       },
        KurdishCourse: {
-        title: "کۆرسی زمانی عەرەبی",
-        description: "بۆچی بەشداری لە کۆرسی زمانی عەرەبی توتڵج بکەم ؟ئەزموونی باشترین و بەچێژترین کۆرسی زمانی عەرەبی بکەن کە بە تەواوی دەتکاتە کەشی فێربوونی زمانەکەوە. بە کەمترین ماوە متمانە بەخۆبوون و کارامەییە پێویستەکانی زمانەکەت بەرەوپێش ببە. ئەم کۆرسە بۆهەر کەسێک گونجاوە کە بیەوێت توانای زمان پاراویی بەرەو پێش ببات لە زمانی عەرەبیدا",
-        secondTitle: "دەربارەی کۆرسە نمونەییەکەت بزانە",
+        title: "دروس اللغة الكردية — تعليم احترافي لجميع المستويات",
+        description: "تعل اللغة الكردية بثقة... أينما كنت!  نقّدم درو ًسا خصوصية في اللغة الكردية حضورًيا وعبر اإلنترنت، بإشراف معلم مؤهل ومنهج متكامل مص ّمم ف ّعا وممت ًعا منذ الدرس األول. اًل بعناية ليالئم احتياجاتك، ويضمن لك تعل ًما،لماذا تختار دراسة اللغة الكردية مع Tutelage؟ تتميز دوراتنا بأنها: تفاعلية ابة وجذّ تعتمد على الممارسة والشرح الواضح تساعدك على اكتساب الطالقة والثقة بالنفس بسرعة مناسبة لجميع األعمار والمستويات سواء كنت من أبناء الجالية الكردية أو مهت ًما بتعلم اللغة ألسباب شخصية أو مهنية، فهذه الدورة مصممة خصي ًصا لك",
+        secondTitle: "اختر نوع الصف المناسب لك",
         classTypes: {
           online: {
-            title: "کۆرسی تایبەتی ئۆناڵین",
+            title: "الدروس الخاصة عبر اإلنترنت",
             features: [
-              "کۆرسی تایبەتی ئۆناڵین",
-              "کۆرسی تایبەتی یەک فێرخوازی زمانی عەرەبی",
-              "دانانی مەنهەجی تایبەت بە خۆت بەپێی ئامانجەکانت",
-              "ناردنی فیدباک و ئەرکی ڕۆژانە بۆ فێرخواز لەگەڵ سەرچاوەی زیادە",
-              "دانانی کاتەکانی کۆرسی ئۆناڵین بە پێی فێرخواز",
-              "هاریکاری و پشتگیری بەردەوامی ڕاهێنەر بۆ فێرخواز",
-              "پێدانای بڕوانامەی دانپێدانراوی توتڵج لەگەڵ تەواوبوونی کۆرس",
-              "چێژ لە وانەکانت وەربگرە لە هەمووکات و شێوێنێکدا"
+             " تعليم فردي مباشر مع معلم مختص",
+              "خطة دراسية مصممة حسب أهدافك",
+              "مواد تعليمية يومية + واجبات منزلية + مالحظات متابعة",
+              "جدول دراسي مرن ومريح",
+              "متابعة لتطّور مستوى الطالب",
+              "شهادة معتمدة عند إتمام الدورة",
             ],
-            buttonText: "داواکاری نرخ"
+            buttonText: "اسأل عن األسعار"
           },
           inPerson: {
-            title: "کۆرسی تایبەتی ڕووبەڕووی",
+            title: "الدروس الخاصة الحضورية",
             features: [
-              "کۆرسی تایبەتی ڕووبەڕووی",
-              "وانەی تایبەتی ڕووبەڕوو لەگەڵ مامۆستا",
-              "پالنی وانەخوێندنی تایبەت بە فیرخواز بەپێی ئامانجەکانت",
-              "بابەتی ڕۆژانە و ڕاهێنانی جۆراو جۆر و ئامادەکراو",
-              "کاتی وانەخوێندن بە تایبەت لەگەڵ کاتی فیرخواز دەگونجێندرێت",
-              "هاریکاری بەردەوامی مامۆستای وانە و هەڵسەنگاندن لە کاتی کۆرسدا",
-              "وەرگرتنی بڕوانامەی فەرمی توتلج لە تەواوبوونی کۆرسەکەدا",
-              "جێژ لە وانەکانت ببینە لە ژینگەیەکی تایبەت بە فێربوون",
-              "تێبینی: ئەم وانەیە تەنها لە کوردستان – شاری سلێمانی بەردەستە"
+            " دروس فردية داخل الصف مع تدريب عملي",
+           " خطة تعليمية شخصية",
+            " مواد مطبوعة وأنشطة داخل الصف",
+            " جدول مناسب للطالب الحضوريين",
+            " متابعة مباشرة وتقييم مستمر",
+            " شهادة توجيهية عند إتمام الدورة",
+            " مالحظة: متوفرة في مواقع محددة فقط"
             ],
-            buttonText: "داواکاری نرخ"
+            buttonText: "اسأل عن األسعار"
           },
         },
-        thirdTitle: "کۆرسی زمانی عەرەبی تایبەت بە هەموو تەمەنەکەن",
+        thirdTitle: "برامج مناسبة لكل الفئات",
         thirdCard: {
           kids:{
-            title: "تایبەت بە مندااڵن",
-            desc: "چێژ وەربگرە لە وانەی زمانی عەرەبی تایبەت بە مندااڵن کە چەندین چاالکی جیاواز و یاری جۆراوجۆر و کورتە چیرۆک لەخۆ دەگریت. ئامانجی ئەم کۆرسە فێرکردنی زمانەکەیە بەشێوەیەکی سادە و ئاسان بۆ مندااڵن"
+            title: "لألطفال",
+            desc: ". دروس ممتعة وتفاعلية مع ألعاب وأنشطة تجعل تعلم الكردية سهالً ومشوقًا"
           },
           teens:{
-            title: "تایبەت بە تازەپێگەیشتووان",
-            desc: "کۆرسی تایبەت بە تەمەنی تازەپێگەیشتووان بە جۆرێک دیزاین کراون کە هاریکاری فێرخوازان بکەن بە بەهێزکردنی توانا زمانەوانییەکانیان و دروست کردنی بڕوابەخۆبوون بۆ گفتووگۆکردن بە زمانەکە وە هاریکارییەکی باشیان بکات تایبەت بە وانەکانی قوتابخانە"
+            title: "للمراهقين",
+            desc: "صفوف مشوقة تعزز مهارات التواصل والثقة بالنفس والطالقة"
           },
           adults:{
-            title: "تایبەت بە تەمەنی گەورە",
-            desc: "وانەی زمانی عەرەبی تایبەت بە گەوران جیاواز لە تەمەنەکانی تر، هاریکاری فیرخواز دەکات بۆ فێربوونی زۆرترین دەستەواژە و تەکنیکەکانی گفتووگۆکردنی ژیانی ڕۆژانە بە شێوازی عەرەبی جڵفی"
+            title: "للبالغين",
+            desc: "دروس عملية تساعدك على تحسين التواصل اليومي وتطوير طالقتك في اللغة بسرعة"
         }
                   },
         faq: {
-          title: "پرسیارە باوەکان",
-          subtitle: "دەربارەی کۆرسی زمانی عەرەبی توتڵج",
+          title: "األسئلة الشائعة",
+          subtitle: "تعرف على المزيد حول دورة اللغة الكردية مع Tutelage",
           questions: [
             {
-              question: "کێ دەتوانێت بەشداری لەم کۆرسانەدا بکات ؟",
-              answer: "کۆرسەکانمان بەردەستن بۆ سەرجەم ئاست و تەمەنە جیاوازەکان لە منداڵ و تازە پێگەشتووان و تەمەنی گەورە"
+              question: "من يمكنه االنضمام إلى الدروس؟",
+              answer: "يمكن لألطفال والمراهقين والبالغين التسجيل في أي مستوى"
             },
             {
-              question: "ئایا کۆرسەکان ڕووبەڕوون یاخود ئۆناڵین؟",
-              answer: "کۆرسەکان بە هەردوو شێوازەکە بەردەستن ، بەاڵم کۆرسە ڕووبەڕووەکان تەنها لە شوێنی دیاریکراو بەردەستن"
+              question: "هل الصفوف متاحة حضورًيا أو عبر اإلنترنت؟",
+              answer: "نعم، نوفر كال الخيارين"
             },
             {
-              question: "هەر وانەیەک چەند کاتژمێرە ؟",
-              answer: "کاتی وانەکان جێگیر نین و بەپێی پێویستی فێرخواز دادەنرێت"
+              question: "ما مدة كل درس؟",
+              answer: "مدة الدرس مرنة ويتم ترتيبها حسب وقت الطالب"
             },
             {
-              question: "ئایا سەرچاوە بۆ فیرخواز دابین دەکەن؟",
-              answer: "بەڵێ، هەموو فێرخوازێک ڕۆژانە سەرچاوە و بابەتی تایبەت بە خۆی بۆ دابین دەکرێت لەگەڵ هەڵسەنگاندنی ئاستەکەی"
+              question: "ل توفرون مواد تعليمية؟",
+              answer: "نعم، جميع الطالب يحصلون على مواد، واجبات، مالحظات يومية"
             },
             {
-              question: "ئایا دەتوانم خۆم خشتەی وانەکانم ڕێکبخەم؟",
-              answer: "ەڵێ، لە هەردوو کاڵسی ئۆنالین و ڕووبەڕوو فیرخواز سەرپشک دەکرێت لە هەڵبژاردنی کاتی وانەخویندنی تایبەت بە خۆی"
+              question: "هل أستطيع اختيار الجدول؟",
+              answer: "بالتأكيد، نوفر جداول مرنة تناسب الجميع"
             },
             {
-              question: "ئایا بڕوانامە وەردەگرم؟",
-              answer: "بڕوانامەی فەرمی و تایبەت بە توتڵج دەدریت بە فێرخوازان بە تەواوبوونی کۆرسەکانمان"
+              question: "هل أحصل على شهادة؟",
+              answer: "نعم، يحصل الطالب على شهادة عند إتمام الدورة"
             }
           ]
         },
         enrollForm: {
-          title: "هەرئێستا خۆت تۆمار بکە",
-          subtitle: "بەشداری بکە لە کۆرسی زمانی عەرەبی توتڵج و دەستپێبکە بە گەیشتن بە ئامانجەکانی فێربوونت",
-          firstName: "ناوی یەکەم",
-          lastName: "ناوی دووەم",
-          age: "تەمەن",
-          country: "وڵات",
-          classType: "جۆری کڵاس",
-          online: "ئۆنڵاین",
-          inPerson: "ڕووبەڕوو",
-          phone: "ژمارەتەلەفون",
-          email: "ئیمەیڵ",
-          interestedIn: "دەتەوێت فێری چ زمانێک بیت",
-          kurdish: "کوردی",
-          arabic: "عەرەبی",
-          submitButton: "ناردن",
-          submittingButton: "ناردن...",
+          title: "س ّجل اآلن!",
+          subtitle: "امأل المعلومات التالية للبدء:",
+          firstName: "االسم األول",
+          lastName: "سم العائلة",
+          age: "العمر",
+          country: "البلد",
+          classType: "نوع الصف",
+          online: "عبر اإلنترنت",
+          inPerson: "حضوري",
+          phone: "رقم الهاتف",
+          email: "البريد اإللكتروني",
+          interestedIn: "مهتم بـ",
+          kurdish: "الكردية",
+          arabic: "العربية",
+          submitButton: "إرسال",
+          submittingButton: "إرسال...",
           required: "*"
         }
       }

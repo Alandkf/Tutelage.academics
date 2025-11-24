@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronRight, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronRight, HelpCircle, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import BASE_URL from '@/app/config/url'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -245,7 +245,7 @@ const ArabicLanguageCourse = () => {
                             className=" md:px-12 py-4 flex items-center justify-center md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                         >
                             {enrollButtonText}
-                            <ChevronUp className={`w-6 h-6 ${isRTL ? 'mr-3 rotate-180' : 'ml-3'}`} />
+                            <ChevronDown className={`w-6 h-6 ${isRTL ? 'mr-3' : 'ml-3'}`} />
                         </Button>
                     </Link>
                 </div>

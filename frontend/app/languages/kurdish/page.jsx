@@ -41,7 +41,7 @@ const KurdishLanguagePage = () => {
   const isRTL = i18n.language === 'ku'
   
   const title = t('KurdishCourse.title')
-  const heroImage = "https://qantara.de/sites/default/files/import/2014-08/54884-arabic-calligraphy_picture-alliance-tone-koene.jpg" 
+  const heroImage = "https://localization.saudisoft.com/wp-content/uploads/2022/11/Kurdish-blog.webp" 
   const description = t('KurdishCourse.description')
   const enrollButtonText = t('inglishForAdults.first.enrollButtonText')
 
@@ -245,7 +245,7 @@ const KurdishLanguagePage = () => {
                             className=" md:px-12 py-4 flex items-center justify-center md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                         >
                             {enrollButtonText}
-                            <ChevronUp className={`w-6 h-6 ${isRTL ? 'mr-3 rotate-180' : 'ml-3'}`} />
+                            <ChevronDown className={`w-6 h-6 ${isRTL ? 'mr-3' : 'ml-3'}`} />
                         </Button>
                     </Link>
                 </div>
