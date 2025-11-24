@@ -14,8 +14,11 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import BASE_URL from '@/app/config/url';
 import DashboardUsersTableSkeleton from '../../skeletons/DashboardUsersTableSkeleton';
+import { useAuth } from '@/components/AuthContext';
+
 
 export function DashboardUsersTable() {
+  const { user: CurrentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,10 +37,10 @@ export function DashboardUsersTable() {
           // Get only first 5 users
           setUsers(data.users.slice(0, 5))
         } else {
-          console.error('Failed to fetch users:', data.message)
+          console.log('Failed to fetch users:', data.message)
         }
       } catch (error) {
-        console.error('Error fetching users:', error)
+        console.log('Error fetching users:', error)
         setError(error.message)
       } finally{
         setLoading(false);
@@ -121,7 +124,7 @@ export function DashboardUsersTable() {
         </Table>
       </div>
       
-      <div className="mt-4 text-left">
+      <div className={`mt-4 text-left ${CurrentUser?.role === 'ADMIN' ? '' : 'hidden'}`}>
         <Button variant="outline" size="sm" onClick={viewAllUsersHandler}>
           View All Users
         </Button>

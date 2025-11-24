@@ -14,7 +14,7 @@ const adminAuth = require('../middlewares/adminAuth');
  * Get basic dashboard statistics
  * Requires admin authentication
  */
-router.get('/', isAuthenticated, adminAuth, getDashboardStats);
+router.get('/', isAuthenticated, getDashboardStats);
 
 /**
  * GET /api/stats/detailed

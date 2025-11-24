@@ -90,10 +90,10 @@ const DashboardOverview = () => {
         if (data.success) {
           setStats(data.data)
         } else {
-          console.error('Failed to fetch stats:', data.message)
+          console.log('Failed to fetch stats:', data.message)
         }
       } catch (error) {
-        console.error('Error fetching dashboard stats:', error)
+        console.log('Error fetching dashboard stats:', error)
       } finally {
         setLoading(false)
       }

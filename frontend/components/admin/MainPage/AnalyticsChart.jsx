@@ -41,7 +41,7 @@ const AnalyticsChart = () => {
         setStats(statsData.data)
         setDailyData(dailyDataRes.data || [])
       } catch (err) {
-        console.error('Error fetching analytics:', err)
+        console.log('Error fetching analytics:', err)
         setError(err.message)
       } finally {
         setLoading(false)
