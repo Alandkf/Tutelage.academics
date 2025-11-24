@@ -162,7 +162,7 @@ const KurdishLanguagePage = () => {
         return
       }
 
-      const response = await fetch(`${BASE_URL}/api/enrollment/arabic`, {
+      const response = await fetch(`${BASE_URL}/api/enrollment/kurdish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

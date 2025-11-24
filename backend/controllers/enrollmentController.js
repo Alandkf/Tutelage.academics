@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail, sendContactEmail, sendArabicEnrollmentApplicationEmail, sendArabicEnrollmentConfirmationEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail, sendContactEmail, sendArabicEnrollmentApplicationEmail, sendArabicEnrollmentConfirmationEmail, sendKurdishEnrollmentApplicationEmail, sendKurdishEnrollmentConfirmationEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -614,6 +614,102 @@ const processArabicEnrollment = async (req, res) => {
   }
 };
 
+/**
+ * Process Kurdish course enrollment form submission
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const processKurdishEnrollment = async (req, res) => {
+  try {
+    console.log('📝 Processing Kurdish course enrollment application');
+    
+    const { firstName, lastName, age, country, classType, phone, email, interestedIn } = req.body;
+    
+    // Validate required fields
+    if (!firstName || !lastName || !age || !country || !classType || !phone || !email || !interestedIn) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+    
+    // Validate phone number (basic validation)
+    if (phone.length < 10 || phone.length > 15) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid phone number'
+      });
+    }
+    
+    const enrollmentData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      age: age,
+      country: country.trim(),
+      classType: classType.trim(),
+      interestedIn: interestedIn.trim()
+    };
+    
+    console.log('📧 Sending Kurdish enrollment emails...');
+    
+    // Send emails concurrently with better error handling
+    try {
+      await Promise.all([
+        sendKurdishEnrollmentApplicationEmail(enrollmentData),
+        sendKurdishEnrollmentConfirmationEmail(enrollmentData)
+      ]);
+      
+      console.log('✅ Kurdish enrollment emails sent successfully');
+      console.log(`📋 New Kurdish enrollment: ${enrollmentData.name} applied for ${classType}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Kurdish enrollment application submitted successfully! However, there was an issue sending confirmation emails. Our team will contact you directly.',
+        data: {
+          name: enrollmentData.name,
+          classType: enrollmentData.classType,
+          email: enrollmentData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Kurdish enrollment application submitted successfully! Check your email for confirmation.',
+      data: {
+        name: enrollmentData.name,
+        classType: enrollmentData.classType,
+        email: enrollmentData.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Kurdish enrollment processing error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process Kurdish enrollment application. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   processEnrollment,
   processPricingRequest,
@@ -621,5 +717,6 @@ module.exports = {
   processPlacementTestBooking,
   processMockTestBooking,
   processContact,
-  processArabicEnrollment
+  processArabicEnrollment,
+  processKurdishEnrollment
 };

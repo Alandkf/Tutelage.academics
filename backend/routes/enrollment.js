@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { processEnrollment, processPricingRequest, processTestResult, processPlacementTestBooking, processMockTestBooking, processContact, processArabicEnrollment } = require('../controllers/enrollmentController');
+const { processEnrollment, processPricingRequest, processTestResult, processPlacementTestBooking, processMockTestBooking, processContact, processArabicEnrollment, processKurdishEnrollment } = require('../controllers/enrollmentController');
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required for enrollment)
@@ -60,6 +60,13 @@ router.post('/contact', processContact);
  * Body: { firstName, lastName, age, country, classType, phone, email, interestedIn }
  */
 router.post('/arabic', processArabicEnrollment);
+
+/**
+ * POST /api/enrollment/kurdish
+ * Submit Kurdish course enrollment application
+ * Body: { firstName, lastName, age, country, classType, phone, email, interestedIn }
+ */
+router.post('/kurdish', processKurdishEnrollment);
 
 
 module.exports = router;

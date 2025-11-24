@@ -1726,6 +1726,217 @@ async function sendArabicEnrollmentConfirmationEmail(enrollmentData) {
   });
 }
 
+/**
+ * Send Kurdish enrollment application email to admin
+ * @param {Object} enrollmentData - The Kurdish enrollment form data
+ */
+async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
+  const {
+    firstName,
+    lastName,
+    age,
+    country,
+    classType,
+    phone,
+    email,
+    interestedIn
+  } = enrollmentData;
+  
+  const currentDate = new Date().toLocaleDateString();
+  const currentTime = new Date().toLocaleTimeString();
+  
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER,
+    subject: `New Kurdish Course Enrollment Application: ${firstName} ${lastName}`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header with Tutelage branding -->
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                 TUTELAGE
+              </h1>
+            </div>
+              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+                 Language Learning Platform
+              </p>
+        </div>
+        
+        <!-- Main content -->
+        <div style="padding: 30px 20px; background-color: #ffffff;">
+          <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
+            New Kurdish Course Enrollment Application
+          </h2>
+          
+          <!-- Application details -->
+          <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">Application Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333; width: 140px;">Date Submitted:</td>
+                <td style="padding: 8px 0; color: #666;">${currentDate} at ${currentTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">First Name:</td>
+                <td style="padding: 8px 0; color: #666;">${firstName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Last Name:</td>
+                <td style="padding: 8px 0; color: #666;">${lastName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
+                <td style="padding: 8px 0; color: #666;">${email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Phone:</td>
+                <td style="padding: 8px 0; color: #666;">${phone}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Age:</td>
+                <td style="padding: 8px 0; color: #666;">${age} years</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Country:</td>
+                <td style="padding: 8px 0; color: #666;">${country}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Class Type:</td>
+                <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${classType}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Interested In:</td>
+                <td style="padding: 8px 0; color: #666;">${interestedIn}</td>
+              </tr>
+            </table>
+          </div>
+          
+          <!-- Action required section -->
+          <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 30px;">
+            <h3 style="color: #856404; margin-top: 0; font-size: 16px;">
+              📋 Action Required
+            </h3>
+            <p style="color: #856404; margin-bottom: 0; line-height: 1.5;">
+              Please review this Kurdish course enrollment application and contact the student to discuss their learning goals, schedule availability, and proceed with the enrollment process.
+            </p>
+          </div>
+          
+          <!-- Contact info -->
+          <div style="margin-top: 25px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+              <strong>Quick Contact:</strong> You can reply directly to this email to reach ${firstName} ${lastName} at ${email}
+            </p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="color: #ffffff; margin: 0; font-size: 14px;">
+            <strong>Tutelage Language Learning Platform</strong>
+          </p>
+          <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
+            Empowering students to achieve language fluency
+          </p>
+        </div>
+      </div>
+    `,
+    replyTo: email,
+  });
+}
+
+/**
+ * Send Kurdish enrollment confirmation email to the student
+ * @param {Object} enrollmentData - The Kurdish enrollment form data
+ */
+async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
+  const { firstName, lastName, email, classType } = enrollmentData;
+  
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Kurdish Course Enrollment Application Received - Welcome to Tutelage!',
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header with Tutelage branding -->
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                 TUTELAGE
+              </h1>
+            </div>
+              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+                 Language Learning Platform
+              </p>
+        </div>
+        
+        <!-- Main content -->
+        <div style="padding: 30px 20px; background-color: #ffffff;">
+          <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
+            Thank You for Your Kurdish Course Application!
+          </h2>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear <strong>${firstName} ${lastName}</strong>,</p>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Thank you for applying to enroll in our <strong style="color: #f59e0b;">Kurdish Language Course</strong> at Tutelage! 
+            We're excited about the opportunity to help you achieve your Kurdish learning goals.
+          </p>
+          
+          <!-- What happens next -->
+          <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">📚 What Happens Next?</h3>
+            <ol style="color: #333; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Application Review:</strong> Our team will review your application within 24-48 hours</li>
+              <li><strong>Contact & Assessment:</strong> We'll contact you via phone or email to discuss your learning goals and assess your current level</li>
+              <li><strong>Course Scheduling:</strong> Once approved, we'll help you choose the best schedule that fits your availability</li>
+              <li><strong>Welcome Package:</strong> You'll receive course materials and access to our learning platform</li>
+            </ol>
+          </div>
+          
+          <!-- Course benefits -->
+          <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #856404; margin-top: 0; font-size: 16px;">
+              🌟 Why You Chose Tutelage Kurdish Course
+            </h3>
+            <ul style="color: #856404; margin: 0; padding-left: 20px; line-height: 1.6;">
+              <li>Expert native Kurdish instructors</li>
+              <li>Personalized learning approach tailored to your goals</li>
+              <li>Small class sizes for maximum attention</li>
+              <li>Interactive and engaging curriculum</li>
+              <li>Flexible scheduling options</li>
+              <li>Cultural insights and real-world application</li>
+            </ul>
+          </div>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            If you have any questions while we process your application, please don't hesitate to reply to this email or contact us directly.
+          </p>
+          
+          <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p style="color: #333; margin: 0; font-size: 16px;">
+              <strong>Ready to start your Kurdish journey?</strong>
+            </p>
+            <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+              We look forward to welcoming you to the Tutelage family!
+            </p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="color: #ffffff; margin: 0; font-size: 14px;">
+            <strong>Tutelage Language Learning Platform</strong>
+          </p>
+          <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
+            Empowering students to achieve language fluency
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
 module.exports = {
   transporter,
   sendEnrollmentApplicationEmail,
@@ -1739,7 +1950,9 @@ module.exports = {
   sendApprovalRequestNotification,
   sendContactEmail,
   sendArabicEnrollmentApplicationEmail,
-  sendArabicEnrollmentConfirmationEmail
+  sendArabicEnrollmentConfirmationEmail,
+  sendKurdishEnrollmentApplicationEmail,
+  sendKurdishEnrollmentConfirmationEmail
 };
 
 
