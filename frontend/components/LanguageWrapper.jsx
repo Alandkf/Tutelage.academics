@@ -6,7 +6,8 @@ export default function LanguageWrapper({ children }) {
   const pathname = usePathname();
   
   const LanguageRoutes = [
-    '/languages',
+    '/languages/kurdish',
+    '/languages/arabic',
   ];
 
 

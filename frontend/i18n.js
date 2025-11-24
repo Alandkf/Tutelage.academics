@@ -344,6 +344,202 @@ const resources = {
           message: "Our team will be in touch with you via email or phone number within 24 hours to discuss your learning goals and help you get started on your English learning journey.",
           button: "Continue Exploring"
         }
+      },
+      ArabicCourse: {
+        title: "Arabic Language Classes",
+        description: "Why enroll in Tutelage Arabic classes? Experience interactive and engaging Arabic classes that fully immerse you in the language. With a skilled teacher and a well-designed curriculum, you’ll quickly boost your confidence and improve your everyday Arabic skills. This course is ideal for anyone who wants to learn or enhance their Arabic proficiency.",
+        secondTitle: "Discover your ideal class!",
+        classTypes: {
+          online: {
+            title: "Online Private Classes",
+            features: [
+              "Online Private Classes",
+              "One-on-one Arabic language instruction",
+              " Personalized study plan based on your goals",
+              "Daily materials, homework, and feedback",
+              "Flexible scheduling for online lessons",
+              "Continuous progress tracking and teacher support",
+              "Tutelage certificate awarded upon completion",
+              "Enjoy lessons at any time and from any place."
+            ],
+            buttonText: "Ask for Price"
+          },
+          inPerson: {
+            title: "In-Person Private Classes",
+            features: [
+              "In-Person Private Classes",
+              "One-on-one Arabic language instruction",
+              "Personalized study plan based on your goals",
+              "Printed and in-class materials with guided practice",
+              "Suited schedule for face-to-face lessons",
+              "Continuous progress tracking and teacher support",
+              "Tutelage certificate awarded upon completion",
+              "Enjoy learning in a supportive classroom environment",
+              "Note: this course only available at select locations."
+            ],
+            buttonText: "Ask for Price"
+          },
+        },
+        thirdTitle: "Arabic Classes for All Ages!",
+        thirdCard: {
+          kids:{
+            title: "For Kids",
+            desc: "Enjoy interactive Arabic lessons full of games, fun activities and shortstories that make learning simple and exciting."
+          },
+          teens:{
+            title: "For Teens",
+            desc: "Dynamic Arabic classes designed to boost language skills, confidence, and communication abilities for teenagers."
+          },
+          adults:{
+            title: "For Adults",
+            desc: "Practical Arabic courses that help adults enhance everyday communication and achieve greater fluency efficiently."
+        }
+                  },
+        faq: {
+          title: "Frequently Asked Questions",
+          subtitle: "About Tutelage's Arabic courses",
+          questions: [
+            {
+              question: "Who can join the classes?",
+              answer: "Our classes are open to kids, teens, and adults at all levels."
+            },
+            {
+              question: "Are classes online, in-person?",
+              answer: "We offer private online classes and face-to-face classes available at select locations."
+            },
+            {
+              question: "How long is each class?",
+              answer: "Class duration is flexible and can be adjusted to your schedule and learning goals."
+            },
+            {
+              question: "Do you provide study materials?",
+              answer: "Yes, all students receive daily materials, homework, and feedback."
+            },
+            {
+              question: "Can I choose my schedule?",
+              answer: "Absolutely! We offer flexible scheduling for both online and in-person lessons."
+            },
+            {
+              question: "Will I get a certificate?",
+              answer: "Yes, a Tutelage certificate is awarded upon completion of the course."
+            }
+          ]
+        },
+        enrollForm: {
+          title: "Enroll now!",
+          subtitle: "Register your Arabic class",
+          firstName: "First name",
+          lastName: "Last name",
+          age: "Age",
+          country: "Country",
+          classType: "Type of class",
+          phone: "Phone",
+          email: "Email",
+          interestedIn: "Interested in",
+          selectClassType: "Select class type",
+          selectLanguage: "Select language",
+          submitButton: "Submit",
+          submittingButton: "Submitting...",
+          required: "*"
+        }
+      },
+      KurdishCourse: {
+        title: "Arabic Language Classes",
+        description: "Why enroll in Tutelage Arabic classes? Experience interactive and engaging Arabic classes that fully immerse you in the language. With a skilled teacher and a well-designed curriculum, you’ll quickly boost your confidence and improve your everyday Arabic skills. This course is ideal for anyone who wants to learn or enhance their Arabic proficiency.",
+        secondTitle: "Discover your ideal class!",
+        classTypes: {
+          online: {
+            title: "Online Private Classes",
+            features: [
+              "Online Private Classes",
+              "One-on-one Arabic language instruction",
+              " Personalized study plan based on your goals",
+              "Daily materials, homework, and feedback",
+              "Flexible scheduling for online lessons",
+              "Continuous progress tracking and teacher support",
+              "Tutelage certificate awarded upon completion",
+              "Enjoy lessons at any time and from any place."
+            ],
+            buttonText: "Ask for Price"
+          },
+          inPerson: {
+            title: "In-Person Private Classes",
+            features: [
+              "In-Person Private Classes",
+              "One-on-one Arabic language instruction",
+              "Personalized study plan based on your goals",
+              "Printed and in-class materials with guided practice",
+              "Suited schedule for face-to-face lessons",
+              "Continuous progress tracking and teacher support",
+              "Tutelage certificate awarded upon completion",
+              "Enjoy learning in a supportive classroom environment",
+              "Note: this course only available at select locations."
+            ],
+            buttonText: "Ask for Price"
+          },
+        },
+        thirdTitle: "Arabic Classes for All Ages!",
+        thirdCard: {
+          kids:{
+            title: "For Kids",
+            desc: "Enjoy interactive Arabic lessons full of games, fun activities and shortstories that make learning simple and exciting."
+          },
+          teens:{
+            title: "For Teens",
+            desc: "Dynamic Arabic classes designed to boost language skills, confidence, and communication abilities for teenagers."
+          },
+          adults:{
+            title: "For Adults",
+            desc: "Practical Arabic courses that help adults enhance everyday communication and achieve greater fluency efficiently."
+        }
+                  },
+        faq: {
+          title: "Frequently Asked Questions",
+          subtitle: "About Tutelage's Arabic courses",
+          questions: [
+            {
+              question: "Who can join the classes?",
+              answer: "Our classes are open to kids, teens, and adults at all levels."
+            },
+            {
+              question: "Are classes online, in-person?",
+              answer: "We offer private online classes and face-to-face classes available at select locations."
+            },
+            {
+              question: "How long is each class?",
+              answer: "Class duration is flexible and can be adjusted to your schedule and learning goals."
+            },
+            {
+              question: "Do you provide study materials?",
+              answer: "Yes, all students receive daily materials, homework, and feedback."
+            },
+            {
+              question: "Can I choose my schedule?",
+              answer: "Absolutely! We offer flexible scheduling for both online and in-person lessons."
+            },
+            {
+              question: "Will I get a certificate?",
+              answer: "Yes, a Tutelage certificate is awarded upon completion of the course."
+            }
+          ]
+        },
+        enrollForm: {
+          title: "Enroll now!",
+          subtitle: "Register your Arabic class",
+          firstName: "First name",
+          lastName: "Last name",
+          age: "Age",
+          country: "Country",
+          classType: "Type of class",
+          phone: "Phone",
+          email: "Email",
+          interestedIn: "Interested in",
+          selectClassType: "Select class type",
+          selectLanguage: "Select language",
+          submitButton: "Submit",
+          submittingButton: "Submitting...",
+          required: "*"
+        }
       }
     }
   },
@@ -688,6 +884,206 @@ const resources = {
           description: "سوپاس بۆ تۆماربوونت لەگەڵ توتڵج! داواکاریەکەمان بە سەرکەوتوویی وەرگرتووە.",
           message: "تیمەکەمان لە ماوەی ٢٤ کاتژمێردا لە ڕێگەی ئیمەیڵ یان ژمارەی تەلەفۆنەوە پەیوەندیت پێوە دەکات بۆ گفتوگۆ دەربارەی ئامانجەکانی فێربوونت و یارمەتیدانت بۆ دەستپێکردنی گەشتی فێربوونی ئینگلیزیت.",
           button: "بەردەوامبوون لە گەڕان"
+        }
+      },
+       ArabicCourse: {
+        title: "کۆرسی زمانی عەرەبی",
+        description: "بۆچی بەشداری لە کۆرسی زمانی عەرەبی توتڵج بکەم ؟ئەزموونی باشترین و بەچێژترین کۆرسی زمانی عەرەبی بکەن کە بە تەواوی دەتکاتە کەشی فێربوونی زمانەکەوە. بە کەمترین ماوە متمانە بەخۆبوون و کارامەییە پێویستەکانی زمانەکەت بەرەوپێش ببە. ئەم کۆرسە بۆهەر کەسێک گونجاوە کە بیەوێت توانای زمان پاراویی بەرەو پێش ببات لە زمانی عەرەبیدا",
+        secondTitle: "دەربارەی کۆرسە نمونەییەکەت بزانە",
+        classTypes: {
+          online: {
+            title: "کۆرسی تایبەتی ئۆناڵین",
+            features: [
+              "کۆرسی تایبەتی ئۆناڵین",
+              "کۆرسی تایبەتی یەک فێرخوازی زمانی عەرەبی",
+              "دانانی مەنهەجی تایبەت بە خۆت بەپێی ئامانجەکانت",
+              "ناردنی فیدباک و ئەرکی ڕۆژانە بۆ فێرخواز لەگەڵ سەرچاوەی زیادە",
+              "دانانی کاتەکانی کۆرسی ئۆناڵین بە پێی فێرخواز",
+              "هاریکاری و پشتگیری بەردەوامی ڕاهێنەر بۆ فێرخواز",
+              "پێدانای بڕوانامەی دانپێدانراوی توتڵج لەگەڵ تەواوبوونی کۆرس",
+              "چێژ لە وانەکانت وەربگرە لە هەمووکات و شێوێنێکدا"
+            ],
+            buttonText: "داواکاری نرخ"
+          },
+          inPerson: {
+            title: "کۆرسی تایبەتی ڕووبەڕووی",
+            features: [
+              "کۆرسی تایبەتی ڕووبەڕووی",
+              "وانەی تایبەتی ڕووبەڕوو لەگەڵ مامۆستا",
+              "پالنی وانەخوێندنی تایبەت بە فیرخواز بەپێی ئامانجەکانت",
+              "بابەتی ڕۆژانە و ڕاهێنانی جۆراو جۆر و ئامادەکراو",
+              "کاتی وانەخوێندن بە تایبەت لەگەڵ کاتی فیرخواز دەگونجێندرێت",
+              "هاریکاری بەردەوامی مامۆستای وانە و هەڵسەنگاندن لە کاتی کۆرسدا",
+              "وەرگرتنی بڕوانامەی فەرمی توتلج لە تەواوبوونی کۆرسەکەدا",
+              "جێژ لە وانەکانت ببینە لە ژینگەیەکی تایبەت بە فێربوون",
+              "تێبینی: ئەم وانەیە تەنها لە کوردستان – شاری سلێمانی بەردەستە"
+            ],
+            buttonText: "داواکاری نرخ"
+          },
+        },
+        thirdTitle: "کۆرسی زمانی عەرەبی تایبەت بە هەموو تەمەنەکەن",
+        thirdCard: {
+          kids:{
+            title: "تایبەت بە مندااڵن",
+            desc: "چێژ وەربگرە لە وانەی زمانی عەرەبی تایبەت بە مندااڵن کە چەندین چاالکی جیاواز و یاری جۆراوجۆر و کورتە چیرۆک لەخۆ دەگریت. ئامانجی ئەم کۆرسە فێرکردنی زمانەکەیە بەشێوەیەکی سادە و ئاسان بۆ مندااڵن"
+          },
+          teens:{
+            title: "تایبەت بە تازەپێگەیشتووان",
+            desc: "کۆرسی تایبەت بە تەمەنی تازەپێگەیشتووان بە جۆرێک دیزاین کراون کە هاریکاری فێرخوازان بکەن بە بەهێزکردنی توانا زمانەوانییەکانیان و دروست کردنی بڕوابەخۆبوون بۆ گفتووگۆکردن بە زمانەکە وە هاریکارییەکی باشیان بکات تایبەت بە وانەکانی قوتابخانە"
+          },
+          adults:{
+            title: "تایبەت بە تەمەنی گەورە",
+            desc: "وانەی زمانی عەرەبی تایبەت بە گەوران جیاواز لە تەمەنەکانی تر، هاریکاری فیرخواز دەکات بۆ فێربوونی زۆرترین دەستەواژە و تەکنیکەکانی گفتووگۆکردنی ژیانی ڕۆژانە بە شێوازی عەرەبی جڵفی"
+        }
+                  },
+        faq: {
+          title: "پرسیارە باوەکان",
+          subtitle: "دەربارەی کۆرسی زمانی عەرەبی توتڵج",
+          questions: [
+            {
+              question: "کێ دەتوانێت بەشداری لەم کۆرسانەدا بکات ؟",
+              answer: "کۆرسەکانمان بەردەستن بۆ سەرجەم ئاست و تەمەنە جیاوازەکان لە منداڵ و تازە پێگەشتووان و تەمەنی گەورە"
+            },
+            {
+              question: "ئایا کۆرسەکان ڕووبەڕوون یاخود ئۆناڵین؟",
+              answer: "کۆرسەکان بە هەردوو شێوازەکە بەردەستن ، بەاڵم کۆرسە ڕووبەڕووەکان تەنها لە شوێنی دیاریکراو بەردەستن"
+            },
+            {
+              question: "هەر وانەیەک چەند کاتژمێرە ؟",
+              answer: "کاتی وانەکان جێگیر نین و بەپێی پێویستی فێرخواز دادەنرێت"
+            },
+            {
+              question: "ئایا سەرچاوە بۆ فیرخواز دابین دەکەن؟",
+              answer: "بەڵێ، هەموو فێرخوازێک ڕۆژانە سەرچاوە و بابەتی تایبەت بە خۆی بۆ دابین دەکرێت لەگەڵ هەڵسەنگاندنی ئاستەکەی"
+            },
+            {
+              question: "ئایا دەتوانم خۆم خشتەی وانەکانم ڕێکبخەم؟",
+              answer: "ەڵێ، لە هەردوو کاڵسی ئۆنالین و ڕووبەڕوو فیرخواز سەرپشک دەکرێت لە هەڵبژاردنی کاتی وانەخویندنی تایبەت بە خۆی"
+            },
+            {
+              question: "ئایا بڕوانامە وەردەگرم؟",
+              answer: "بڕوانامەی فەرمی و تایبەت بە توتڵج دەدریت بە فێرخوازان بە تەواوبوونی کۆرسەکانمان"
+            }
+          ]
+        },
+        enrollForm: {
+          title: "هەرئێستا خۆت تۆمار بکە",
+          subtitle: "بەشداری بکە لە کۆرسی زمانی عەرەبی توتڵج و دەستپێبکە بە گەیشتن بە ئامانجەکانی فێربوونت",
+          firstName: "ناوی یەکەم",
+          lastName: "ناوی دووەم",
+          age: "تەمەن",
+          country: "وڵات",
+          classType: "جۆری کڵاس",
+          online: "ئۆنڵاین",
+          inPerson: "ڕووبەڕوو",
+          phone: "ژمارەتەلەفون",
+          email: "ئیمەیڵ",
+          interestedIn: "دەتەوێت فێری چ زمانێک بیت",
+          kurdish: "کوردی",
+          arabic: "عەرەبی",
+          submitButton: "ناردن",
+          submittingButton: "ناردن...",
+          required: "*"
+        }
+      },
+       KurdishCourse: {
+        title: "کۆرسی زمانی عەرەبی",
+        description: "بۆچی بەشداری لە کۆرسی زمانی عەرەبی توتڵج بکەم ؟ئەزموونی باشترین و بەچێژترین کۆرسی زمانی عەرەبی بکەن کە بە تەواوی دەتکاتە کەشی فێربوونی زمانەکەوە. بە کەمترین ماوە متمانە بەخۆبوون و کارامەییە پێویستەکانی زمانەکەت بەرەوپێش ببە. ئەم کۆرسە بۆهەر کەسێک گونجاوە کە بیەوێت توانای زمان پاراویی بەرەو پێش ببات لە زمانی عەرەبیدا",
+        secondTitle: "دەربارەی کۆرسە نمونەییەکەت بزانە",
+        classTypes: {
+          online: {
+            title: "کۆرسی تایبەتی ئۆناڵین",
+            features: [
+              "کۆرسی تایبەتی ئۆناڵین",
+              "کۆرسی تایبەتی یەک فێرخوازی زمانی عەرەبی",
+              "دانانی مەنهەجی تایبەت بە خۆت بەپێی ئامانجەکانت",
+              "ناردنی فیدباک و ئەرکی ڕۆژانە بۆ فێرخواز لەگەڵ سەرچاوەی زیادە",
+              "دانانی کاتەکانی کۆرسی ئۆناڵین بە پێی فێرخواز",
+              "هاریکاری و پشتگیری بەردەوامی ڕاهێنەر بۆ فێرخواز",
+              "پێدانای بڕوانامەی دانپێدانراوی توتڵج لەگەڵ تەواوبوونی کۆرس",
+              "چێژ لە وانەکانت وەربگرە لە هەمووکات و شێوێنێکدا"
+            ],
+            buttonText: "داواکاری نرخ"
+          },
+          inPerson: {
+            title: "کۆرسی تایبەتی ڕووبەڕووی",
+            features: [
+              "کۆرسی تایبەتی ڕووبەڕووی",
+              "وانەی تایبەتی ڕووبەڕوو لەگەڵ مامۆستا",
+              "پالنی وانەخوێندنی تایبەت بە فیرخواز بەپێی ئامانجەکانت",
+              "بابەتی ڕۆژانە و ڕاهێنانی جۆراو جۆر و ئامادەکراو",
+              "کاتی وانەخوێندن بە تایبەت لەگەڵ کاتی فیرخواز دەگونجێندرێت",
+              "هاریکاری بەردەوامی مامۆستای وانە و هەڵسەنگاندن لە کاتی کۆرسدا",
+              "وەرگرتنی بڕوانامەی فەرمی توتلج لە تەواوبوونی کۆرسەکەدا",
+              "جێژ لە وانەکانت ببینە لە ژینگەیەکی تایبەت بە فێربوون",
+              "تێبینی: ئەم وانەیە تەنها لە کوردستان – شاری سلێمانی بەردەستە"
+            ],
+            buttonText: "داواکاری نرخ"
+          },
+        },
+        thirdTitle: "کۆرسی زمانی عەرەبی تایبەت بە هەموو تەمەنەکەن",
+        thirdCard: {
+          kids:{
+            title: "تایبەت بە مندااڵن",
+            desc: "چێژ وەربگرە لە وانەی زمانی عەرەبی تایبەت بە مندااڵن کە چەندین چاالکی جیاواز و یاری جۆراوجۆر و کورتە چیرۆک لەخۆ دەگریت. ئامانجی ئەم کۆرسە فێرکردنی زمانەکەیە بەشێوەیەکی سادە و ئاسان بۆ مندااڵن"
+          },
+          teens:{
+            title: "تایبەت بە تازەپێگەیشتووان",
+            desc: "کۆرسی تایبەت بە تەمەنی تازەپێگەیشتووان بە جۆرێک دیزاین کراون کە هاریکاری فێرخوازان بکەن بە بەهێزکردنی توانا زمانەوانییەکانیان و دروست کردنی بڕوابەخۆبوون بۆ گفتووگۆکردن بە زمانەکە وە هاریکارییەکی باشیان بکات تایبەت بە وانەکانی قوتابخانە"
+          },
+          adults:{
+            title: "تایبەت بە تەمەنی گەورە",
+            desc: "وانەی زمانی عەرەبی تایبەت بە گەوران جیاواز لە تەمەنەکانی تر، هاریکاری فیرخواز دەکات بۆ فێربوونی زۆرترین دەستەواژە و تەکنیکەکانی گفتووگۆکردنی ژیانی ڕۆژانە بە شێوازی عەرەبی جڵفی"
+        }
+                  },
+        faq: {
+          title: "پرسیارە باوەکان",
+          subtitle: "دەربارەی کۆرسی زمانی عەرەبی توتڵج",
+          questions: [
+            {
+              question: "کێ دەتوانێت بەشداری لەم کۆرسانەدا بکات ؟",
+              answer: "کۆرسەکانمان بەردەستن بۆ سەرجەم ئاست و تەمەنە جیاوازەکان لە منداڵ و تازە پێگەشتووان و تەمەنی گەورە"
+            },
+            {
+              question: "ئایا کۆرسەکان ڕووبەڕوون یاخود ئۆناڵین؟",
+              answer: "کۆرسەکان بە هەردوو شێوازەکە بەردەستن ، بەاڵم کۆرسە ڕووبەڕووەکان تەنها لە شوێنی دیاریکراو بەردەستن"
+            },
+            {
+              question: "هەر وانەیەک چەند کاتژمێرە ؟",
+              answer: "کاتی وانەکان جێگیر نین و بەپێی پێویستی فێرخواز دادەنرێت"
+            },
+            {
+              question: "ئایا سەرچاوە بۆ فیرخواز دابین دەکەن؟",
+              answer: "بەڵێ، هەموو فێرخوازێک ڕۆژانە سەرچاوە و بابەتی تایبەت بە خۆی بۆ دابین دەکرێت لەگەڵ هەڵسەنگاندنی ئاستەکەی"
+            },
+            {
+              question: "ئایا دەتوانم خۆم خشتەی وانەکانم ڕێکبخەم؟",
+              answer: "ەڵێ، لە هەردوو کاڵسی ئۆنالین و ڕووبەڕوو فیرخواز سەرپشک دەکرێت لە هەڵبژاردنی کاتی وانەخویندنی تایبەت بە خۆی"
+            },
+            {
+              question: "ئایا بڕوانامە وەردەگرم؟",
+              answer: "بڕوانامەی فەرمی و تایبەت بە توتڵج دەدریت بە فێرخوازان بە تەواوبوونی کۆرسەکانمان"
+            }
+          ]
+        },
+        enrollForm: {
+          title: "هەرئێستا خۆت تۆمار بکە",
+          subtitle: "بەشداری بکە لە کۆرسی زمانی عەرەبی توتڵج و دەستپێبکە بە گەیشتن بە ئامانجەکانی فێربوونت",
+          firstName: "ناوی یەکەم",
+          lastName: "ناوی دووەم",
+          age: "تەمەن",
+          country: "وڵات",
+          classType: "جۆری کڵاس",
+          online: "ئۆنڵاین",
+          inPerson: "ڕووبەڕوو",
+          phone: "ژمارەتەلەفون",
+          email: "ئیمەیڵ",
+          interestedIn: "دەتەوێت فێری چ زمانێک بیت",
+          kurdish: "کوردی",
+          arabic: "عەرەبی",
+          submitButton: "ناردن",
+          submittingButton: "ناردن...",
+          required: "*"
         }
       }
     }

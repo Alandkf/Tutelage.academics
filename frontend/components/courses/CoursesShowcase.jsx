@@ -61,7 +61,7 @@ const CoursesShowcase = () => {
                       src={courseImages[index]}
                       alt={`${course.title} course`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform duration-500"
+                      className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 50vw"
                     />
                   </div>
