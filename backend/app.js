@@ -80,7 +80,7 @@ const SHOULD_SKIP_DB = (
 // Configure Cross-Origin Resource Sharing for frontend communication
 
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: FRONTEND_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-Refresh-Token']
