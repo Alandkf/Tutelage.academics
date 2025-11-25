@@ -316,6 +316,8 @@ class AuthController {
       return res.status(200).json({
         success: true,
         user: userData,
+        accessToken,
+        refreshToken,
         message: 'Login successful'
       });
       
@@ -354,8 +356,8 @@ class AuthController {
   static async refreshToken(req, res) {
     try {
       console.log('🔄 Starting token refresh process');
-      
-      const refreshToken = req.cookies.refreshToken;
+
+      const refreshToken = req.cookies.refreshToken || req.header('X-Refresh-Token') || req.body?.refreshToken;
       
       if (!refreshToken) {
         console.log('❌ Token refresh failed: No refresh token provided');
@@ -406,6 +408,8 @@ class AuthController {
       return res.status(200).json({
         success: true,
         user: userData,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
         message: 'Token refreshed successfully'
       });
       

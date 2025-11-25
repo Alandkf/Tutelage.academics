@@ -12,7 +12,14 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/me`, { credentials: "include" })
+      // Read access token from localStorage for header-based auth (fallback when cookies are blocked)
+      let token = null
+      try { token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null } catch {}
+
+      const res = await fetch(`${BASE_URL}/api/auth/me`, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      })
       const data = await res.json()
       
       if (data.success) setUser(data.user)

@@ -63,6 +63,13 @@ const LoginForm = () => {
 
       // Handle successful login
       console.log('Login successful:', data)
+      // Persist tokens for header-based auth in case cookies are blocked
+      if (data?.accessToken) {
+        try { localStorage.setItem('accessToken', data.accessToken) } catch {}
+      }
+      if (data?.refreshToken) {
+        try { localStorage.setItem('refreshToken', data.refreshToken) } catch {}
+      }
       // Refresh auth context so user and role are available immediately
       try { await refresh() } catch {}
       router.push('/admin-dashboard')
