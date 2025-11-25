@@ -9,6 +9,7 @@ const { Video, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
 
+
 // Convert incoming level(s) to CEFR labels as an array
 function normalizeLevels(input) {
   if (input === undefined || input === null) return null;
