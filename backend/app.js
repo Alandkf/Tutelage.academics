@@ -54,6 +54,9 @@ const approvalsRoutes = require('./routes/approvals');
 // ============================================================================
 
 const app = express();
+// Trust first proxy (e.g., Nginx/Cloudflare) so secure cookies work
+// when TLS terminates at the proxy and X-Forwarded-* headers are present.
+app.set('trust proxy', 1);
 const FRONTEND_URL = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, ''); // Remove trailing slash
 const SERVER_PORT = process.env.PORT || 3001;
 
@@ -110,6 +113,8 @@ const SESSION_CONFIG = {
   // store: sessionStore, // COMMENTED OUT - using default memory store
   resave: false,
   saveUninitialized: false,
+  // Trust reverse proxy for secure cookie handling in production
+  proxy: true,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true, // Prevent XSS attacks
