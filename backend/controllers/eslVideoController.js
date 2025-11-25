@@ -151,22 +151,13 @@ exports.createEslVideo = async (req, res) => {
 
 exports.getAllEslVideos = async (req, res) => {
   try {
-    const { cursor, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { page = 1, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const where = {};
     
     if (search) where.title = { [Op.like]: `%${search}%` };
     
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
-
-    // Cursor-based pagination
-    if (cursor) {
-      if (sortOrder.toUpperCase() === 'DESC') {
-        where.id = { [Op.lt]: parseInt(cursor) };
-      } else {
-        where.id = { [Op.gt]: parseInt(cursor) };
-      }
-    }
 
     // Tag filtering
     let idFilter = null;
@@ -181,23 +172,28 @@ exports.getAllEslVideos = async (req, res) => {
       }
     }
 
-    // Fetch one extra to check hasMore
-    const fetchLimit = parseInt(limit) + 1;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
     const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
 
+    const totalItems = await EslVideo.count({
+      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
+      distinct: true
+    });
+    const totalPages = Math.ceil(totalItems / parseInt(limit));
+
     const rows = await EslVideo.findAll({
-      where: idFilter ? { ...where, id: { ...where.id, [Op.in]: idFilter } } : where,
+      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
       order,
-      limit: fetchLimit,
+      limit: parseInt(limit),
+      offset,
       distinct: true
     });
 
-    const hasMore = rows.length > parseInt(limit);
-    const items = hasMore ? rows.slice(0, parseInt(limit)) : rows;
-    const nextCursor = items.length > 0 ? items[items.length - 1].id : null;
+    const hasNextPage = parseInt(page) < totalPages;
+    const hasPrevPage = parseInt(page) > 1;
 
     // Attach tags and analytics
-    const enriched = await Promise.all(items.map(async (row) => {
+    const enriched = await Promise.all(rows.map(async (row) => {
       const tags = await includeTagsFor(row.id);
       const metrics = await ResourceAnalytics.findOne({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: row.id } });
       return { ...row.toJSON(), tags, metrics };
@@ -208,10 +204,11 @@ exports.getAllEslVideos = async (req, res) => {
       message: 'Esl Videos fetched successfully',
       data: enriched,
       pagination: {
-        nextCursor,
-        hasMore,
-        itemsPerPage: parseInt(limit),
-        totalItemsReturned: enriched.length
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+        currentPage: parseInt(page),
+        totalItems
       }
     });
   } catch (err) {

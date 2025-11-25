@@ -43,37 +43,17 @@ const VideoGrid = () => {
   const fetchVideos = async (page) => {
     setLoading(true)
     try {
-      // fetch ESL videos instead of blogs; preserve pagination parameters
-      const offset = (page - 1) * itemsPerPage
       const response = await fetch(
-        `${BASE_URL}/api/esl-videos?limit=${itemsPerPage}&offset=${offset}`,
+        `${BASE_URL}/api/esl-videos?page=${page}&limit=${itemsPerPage}`,
         { credentials: 'include' }
       )
       const data = await response.json()
 
       if (data.success) {
-        // handle both paginated blog-style responses and simple array responses
-        if (data.data && Array.isArray(data.data)) {
-          // endpoint returned an array of videos
-          setVideos(data.data)
-          const hasNext = data.data.length === itemsPerPage
-          setHasNextPage(hasNext)
-          setHasPrevPage(page > 1)
-          // If there are more pages, expose a "+10" jump so the UI can show page+10.
-          // We don't know the real total from this endpoint, so show a window up to +10 pages.
-          setTotalPages(hasNext ? page + 10 : page)
-        } else if (data.data && data.data.blogs) {
-          // fallback: response in original paginated shape
-          setVideos(data.data.blogs)
-          setTotalPages(data.data.pagination.totalPages)
-          setHasNextPage(data.data.pagination.hasNextPage)
-          setHasPrevPage(data.data.pagination.hasPrevPage)
-        } else {
-          setVideos([])
-          setHasNextPage(false)
-          setHasPrevPage(false)
-          setTotalPages(1)
-        }
+        setVideos(data.data)
+        setTotalPages(data.pagination.totalPages)
+        setHasNextPage(data.pagination.hasNextPage)
+        setHasPrevPage(data.pagination.hasPrevPage)
       }
     } catch (error) {
       console.error('Error fetching videos:', error)
