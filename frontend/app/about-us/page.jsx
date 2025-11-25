@@ -13,7 +13,7 @@ const AboutUs = () => {
       <Foundation />
       <TutelageAiAbout />
       <AchievementsSection />
-      <PartnershipsSection />
+      <PartnershipsSection /> 
     </div>
   )
 }
