@@ -1469,10 +1469,12 @@ async function sendContactEmail(contactData) {
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Country:</td>
                 <td style="padding: 8px 0; color: #666;">${country}</td>
               </tr>
+              ${topic && `
               <tr>
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Topic:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${topic}</td>
               </tr>
+                `}
             </table>
           </div>
           

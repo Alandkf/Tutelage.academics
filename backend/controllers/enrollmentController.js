@@ -449,7 +449,7 @@ const processContact = async (req, res) => {
     const { firstName, lastName, email, country, topic, message } = req.body;
     
     // Validate required fields
-    if (!firstName || !lastName || !email || !country || !topic || !message) {
+    if (!firstName || !lastName || !email || !country || !message) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
