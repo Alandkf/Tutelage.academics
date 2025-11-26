@@ -449,10 +449,17 @@ class AuthController {
         console.log('✅ Session destroyed successfully');
         
         // Clear all authentication cookies
-        const cookieOptions = { path: '/' };
-        res.clearCookie('token', getCookieOptions(COOKIE_MAX_AGE_ACCESS));
-        res.clearCookie('refreshToken', getCookieOptions(COOKIE_MAX_AGE_REFRESH));
-        res.clearCookie('connect.sid', getCookieOptions(COOKIE_MAX_AGE_ACCESS));
+        const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: process.env.MAIN_DOMAIN, // .tutelage.krd
+        path: "/"
+      };
+      
+        res.clearCookie('token', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
+        res.clearCookie('connect.sid', cookieOptions);
         
         console.log('🍪 Authentication cookies cleared');
         
