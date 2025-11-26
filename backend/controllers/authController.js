@@ -36,8 +36,9 @@ class AuthController {
   static getCookieOptions(maxAge) {
     return {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      domain: process.env.MAIN_DOMAIN || 'localhost',
+      secure: true,
+      sameSite: 'none',
       maxAge,
       path: '/'
     };
