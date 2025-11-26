@@ -237,7 +237,7 @@ const VideoGrid = () => {
                     key={page}
                     onClick={() => handlePageClick(page)}
                     disabled={page === currentPage}
-                    className={`min-w-[40px] h-[40px] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    className={`min-w-10 h-10 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                       currentPage === page
                         ? 'bg-primary text-primary-foreground cursor-not-allowed'
                         : 'bg-background text-foreground hover:bg-muted border border-border cursor-pointer'

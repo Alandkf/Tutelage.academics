@@ -450,9 +450,9 @@ class AuthController {
         
         // Clear all authentication cookies
         const cookieOptions = { path: '/' };
-        res.clearCookie('token', cookieOptions);
-        res.clearCookie('refreshToken', cookieOptions);
-        res.clearCookie('connect.sid', cookieOptions);
+        res.clearCookie('token', getCookieOptions(COOKIE_MAX_AGE_ACCESS));
+        res.clearCookie('refreshToken', getCookieOptions(COOKIE_MAX_AGE_REFRESH));
+        res.clearCookie('connect.sid', getCookieOptions(COOKIE_MAX_AGE_ACCESS));
         
         console.log('🍪 Authentication cookies cleared');
         
