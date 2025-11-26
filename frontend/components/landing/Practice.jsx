@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { motion } from "framer-motion";
+import { useInView } from "framer-motion";
 import BASE_URL from '@/app/config/url' // added import for fetching
 
 const Practice = () => {
@@ -13,6 +15,8 @@ const Practice = () => {
 	const [isTransitioning, setIsTransitioning] = useState(true);
 	const [cardsPerView, setCardsPerView] = useState(3.5);
 	const sliderRef = useRef(null);
+	const sectionRef = useRef(null);
+	const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
 	// dynamic articles fetched from backend
 	const [articles, setArticles] = useState([]);
@@ -126,12 +130,17 @@ const Practice = () => {
 	};
 
 	return (
-		<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background">
+		<section className="py-16 px-4 sm:px-6 lg:px-8 bg-background" ref={sectionRef}>
 			<div className="max-w-7xl mx-auto">
 				{/* Title */}
-				<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-12 text-foreground">
+				<motion.h2
+					initial={{ opacity: 0 }}
+					animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+					transition={{ duration: 0.6, delay: 0.3 }}
+					className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-12 text-foreground"
+				>
 					Practice anytime with our free resources
-				</h2>
+				</motion.h2>
 
 				{/* Slider Container */}
 				<div className="relative md:px-16">
@@ -213,14 +222,20 @@ const Practice = () => {
 
 				{/* All Resources Button */}
 				<div className="flex justify-center mt-12">
-					<Link href="/esl-resources">
-						<Button
-							size="lg"
-							className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
-						>
-							All Resources
-						</Button>
-					</Link>
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+						transition={{ duration: 0.6, delay: 0.2 }}
+					>
+						<Link href="/esl-resources">
+							<Button
+								size="lg"
+								className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+							>
+								All Resources
+							</Button>
+						</Link>
+					</motion.div>
 				</div>
 			</div>
 		</section>
