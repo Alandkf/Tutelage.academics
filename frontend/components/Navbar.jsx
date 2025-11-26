@@ -113,7 +113,12 @@ export default function Navbar (){
   ]
 
   return (
-    <nav className="top-0 z-50 bg-background md:pt-4 ">
+    <motion.nav
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8 , ease: 'easeOut' }}
+      className="top-0 z-50 bg-background md:pt-4 "
+    >
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 bg-background">
         <div className="max-w-7xl w-full flex items-center justify-between mx-auto">
@@ -312,7 +317,7 @@ export default function Navbar (){
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   )
 }
 
