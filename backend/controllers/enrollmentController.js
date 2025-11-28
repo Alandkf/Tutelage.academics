@@ -14,10 +14,10 @@ const processEnrollment = async (req, res) => {
   try {
     console.log('📝 Processing course enrollment application');
     
-    const { name, email, phone, age, profession, course } = req.body;
+    const { name, email, phone, age, profession, course, proficiencyType } = req.body;
     
     // Validate required fields
-    if (!name || !email || !phone || !age || !profession || !course) {
+    if (!name || !email || !phone || !age || !profession || !course || !proficiencyType) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
@@ -47,7 +47,8 @@ const processEnrollment = async (req, res) => {
       phone: phone.trim(),
       age: age,
       profession: profession.trim(),
-      course: course.trim()
+      course: course.trim(),
+      proficiencyType: proficiencyType.trim()
     };
     
     console.log('📧 Sending enrollment emails...');

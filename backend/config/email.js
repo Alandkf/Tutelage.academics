@@ -40,7 +40,8 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
     phone,
     age,
     profession,
-    course
+    course,
+    proficiencyType
   } = enrollmentData;
   
   const currentDate = new Date().toLocaleDateString();
@@ -102,6 +103,13 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${course}</td>
               </tr>
+              ${
+                proficiencyType && 
+                `<tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
+                <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${proficiencyType}</td>
+              </tr>`
+              }
             </table>
           </div>
           
