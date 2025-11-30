@@ -25,7 +25,6 @@ const {
 // ============================================================================
 // ALL ROUTES REQUIRE ADMIN AUTHENTICATION
 // ============================================================================
-router.use(isAuthenticated, adminAuth);
 
 // ============================================================================
 // QUIZ CONFIGURATION ROUTES
@@ -34,9 +33,10 @@ router.use(isAuthenticated, adminAuth);
 /**
  * GET /api/admin/quiz/config
  * Fetch the current quiz configuration (totalQuestions, timeLimitMinutes)
- */
+*/
 router.get('/config', getQuizConfig);
 
+router.use(isAuthenticated, adminAuth);
 /**
  * PUT /api/admin/quiz/config
  * Update quiz configuration (validates constraints)
