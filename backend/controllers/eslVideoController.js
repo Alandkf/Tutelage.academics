@@ -76,7 +76,7 @@ const bumpAnalytics = async (resourceId, field = 'views', amount = 1) => {
 
 exports.createEslVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, level, tags } = req.body;
     const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
     const createdBy = req.user?.id || 1;
@@ -93,7 +93,7 @@ exports.createEslVideo = async (req, res) => {
         videoRef,
         description,
         pdf,
-        taskPdf,
+        taskPdfs: Array.isArray(req.body?.taskPdfs) ? req.body.taskPdfs : [],
         level: normalizedLevel,
         thumbnailUrl,
         tags: tagNames
@@ -131,12 +131,21 @@ exports.createEslVideo = async (req, res) => {
       videoRef, 
       description, 
       pdf, 
-      taskPdf, 
       level: normalizedLevel, 
       thumbnailUrl, 
-      tags: tagNames.length ? tagNames : null, // Store in array column too
+      tags: tagNames.length ? tagNames : null, 
       createdBy 
     });
+
+    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
+      const rows = req.body.taskPdfs
+        .filter(p => p && p.filePath && p.fileName)
+        .map(p => ({ resourceType: 'esl_video', resourceId: video.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+      if (rows.length) {
+        const { TaskPdf } = require('../models');
+        await TaskPdf.bulkCreate(rows);
+      }
+    }
     
     // Also sync to join table for relational queries
     if (tagNames.length) await attachTags(video.id, tagNames);
