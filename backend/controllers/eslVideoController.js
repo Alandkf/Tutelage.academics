@@ -286,7 +286,7 @@ exports.getEslVideoById = async (req, res) => {
 exports.updateEslVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, taskPdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, level, tags } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
     const role = req.user?.role;
@@ -304,7 +304,7 @@ exports.updateEslVideo = async (req, res) => {
       if (videoRef !== undefined) payload.videoRef = videoRef;
       if (description !== undefined) payload.description = description;
       if (pdf !== undefined) payload.pdf = pdf;
-      if (taskPdf !== undefined) payload.taskPdf = taskPdf;
+      if (Array.isArray(req.body?.taskPdfs)) payload.taskPdfs = req.body.taskPdfs;
       if (level !== undefined) payload.level = normalizeLevels(level);
       if (videoRef !== undefined) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
       if (tagNames !== null) payload.tags = tagNames;
@@ -340,7 +340,6 @@ exports.updateEslVideo = async (req, res) => {
       videoRef, 
       description, 
       pdf, 
-      taskPdf, 
       level: normalizeLevels(level) 
     };
     if (videoRef) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
@@ -351,6 +350,16 @@ exports.updateEslVideo = async (req, res) => {
     }
     
     await video.update(payload);
+
+    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
+      const rows = req.body.taskPdfs
+        .filter(p => p && p.filePath && p.fileName)
+        .map(p => ({ resourceType: 'esl_video', resourceId: video.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+      if (rows.length) {
+        const { TaskPdf } = require('../models');
+        await TaskPdf.bulkCreate(rows);
+      }
+    }
     
     // Sync join table if tags were provided
     if (tagNames !== null) {

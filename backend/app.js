@@ -40,11 +40,7 @@ const tagRoutes = require('./routes/tags');
 const analyticsRoutes = require('./routes/analytics');
 const eslVideoRoutes = require('./routes/eslVideos');
 const eslAudioRoutes = require('./routes/eslAudios');
-<<<<<<< HEAD
 const taskPdfRoutes = require('./routes/taskPdfs');
-=======
-const eslResourcesRoutes = require('./routes/eslResources');
->>>>>>> 66e74694f9c557fe2d3969f3805c789bb2488d84
 const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
@@ -158,11 +154,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/esl-videos', eslVideoRoutes);
 app.use('/api/esl-audios', eslAudioRoutes);
-<<<<<<< HEAD
 app.use('/api/task-pdfs', taskPdfRoutes);
-=======
-app.use('/api/esl-resources', eslResourcesRoutes);  // Mixed ESL resources
->>>>>>> 66e74694f9c557fe2d3969f3805c789bb2488d84
 app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
