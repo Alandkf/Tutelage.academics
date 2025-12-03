@@ -1,35 +1,32 @@
-// ============================================================================
-// GOOGLE ANALYTICS CONFIGURATION
-// ============================================================================
-// Initialize Google Analytics Data API client
-
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
-const path = require('path');
-const fs = require('fs');
 
-
-// Initialize the Google Analytics Data API client (only if credentials are configured)
 let analyticsDataClient = null;
-const keyFilePath = process.env.GA_KEY_FILE_PATH
-  ? path.resolve(__dirname, process.env.GA_KEY_FILE_PATH)
-  : null;
 
-if (!keyFilePath || !fs.existsSync(keyFilePath)) {
-  console.warn('⚠️  Warning: GA_KEY_FILE_PATH not set or file missing; Google Analytics client disabled');
+if (!process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_CLIENT_EMAIL) {
+  console.warn("⚠️ Google Analytics credentials missing. Client disabled.");
 } else {
   try {
-    analyticsDataClient = new BetaAnalyticsDataClient({ keyFilename: keyFilePath });
+    analyticsDataClient = new BetaAnalyticsDataClient({
+      credentials: {
+        type: process.env.GOOGLE_TYPE,
+        project_id: process.env.GOOGLE_PROJECT_ID,
+        private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        auth_uri: process.env.GOOGLE_AUTH_URI,
+        token_uri: process.env.GOOGLE_TOKEN_URI,
+        auth_provider_x509_cert_url: process.env.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+        client_x509_cert_url: process.env.GOOGLE_CLIENT_X509_CERT_URL,
+        universe_domain: process.env.GOOGLE_UNIVERSE_DOMAIN
+      }
+    });
   } catch (err) {
-    console.warn('⚠️  Warning: Failed to initialize Google Analytics client:', err?.message || err);
-    analyticsDataClient = null;
+    console.warn("⚠️ Cannot init Google Analytics client:", err.message);
   }
 }
 
 const propertyId = process.env.GA_PROPERTY_ID;
-
-if (!propertyId) {
-  console.warn('⚠️  Warning: GA_PROPERTY_ID not found in environment variables');
-}
 
 module.exports = {
   analyticsDataClient,
