@@ -85,9 +85,8 @@ const createBlog = async (req, res) => {
     // Normalize level(s) to an array of CEFR labels
     const normalizedLevels = normalizeLevels(level);
 
-    // Get PDF paths from uploaded files
-    const pdfPath = req.files?.pdfFile?.[0]?.path || null;
-    const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || null;
+    // Get PDF URLs from middleware (pdfUpload already processed them into req.body)
+    const { pdf, taskPdf } = req.body;
 
     // MAIN_MANAGER users queue creation for approval
     if (role === 'MAIN_MANAGER') {
@@ -98,7 +97,7 @@ const createBlog = async (req, res) => {
         category: category ?? tag ?? null,
         description: description ?? discription ?? desccription ?? null,
         level: normalizedLevels,
-        pdf: pdfPath,
+        pdf: pdf || null,
         taskPdf: taskPdfPath,
         tags: Array.isArray(tags)
           ? tags
@@ -138,8 +137,8 @@ const createBlog = async (req, res) => {
       category: category ?? tag ?? null,
       description: description ?? discription ?? desccription ?? null,
       level: normalizedLevels,
-      pdf: pdfPath,
-      taskPdf: taskPdfPath,
+      pdf: pdf || null,
+      taskPdf: taskPdf || null,
       createdBy
     });
 
@@ -334,8 +333,8 @@ const updateBlog = async (req, res) => {
     // Role handling: MAIN_MANAGER queues approval, ADMIN applies immediately
     if (req.user.role === 'MAIN_MANAGER') {
       const normalizedLevelUpdate = level !== undefined ? normalizeLevels(level) : blog.level;
-      const pdfPath = req.files?.pdfFile?.[0]?.path || blog.pdf;
-      const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || blog.taskPdf;
+      const pdfUrl = req.body.pdf || blog.pdf;
+      const taskPdfUrl = req.body.taskPdf || blog.taskPdf;
 
       const payload = {
         title: title ?? blog.title,
@@ -344,8 +343,8 @@ const updateBlog = async (req, res) => {
         category: (category ?? tag ?? blog.category),
         description: (description ?? discription ?? desccription ?? blog.description),
         level: normalizedLevelUpdate,
-        pdf: pdfPath,
-        taskPdf: taskPdfPath,
+        pdf: pdfUrl,
+        taskPdf: taskPdfUrl,
         // capture tags for later application by admin approval
         tags: (tags !== undefined)
           ? (Array.isArray(tags) ? tags : String(tags).split(',').map(t => t.trim()).filter(Boolean))
@@ -393,9 +392,9 @@ const updateBlog = async (req, res) => {
       ? normalizeLevels(level)
       : blog.level;
 
-    // Get PDF paths from uploaded files
-    const pdfPath = req.files?.pdfFile?.[0]?.path || blog.pdf;
-    const taskPdfPath = req.files?.taskPdfFile?.[0]?.path || blog.taskPdf;
+    // Get PDF URLs from middleware (pdfUpload already processed them into req.body)
+    const pdfUrl = req.body.pdf || blog.pdf;
+    const taskPdfUrl = req.body.taskPdf || blog.taskPdf;
 
     await blog.update({
       title: title || blog.title,
@@ -404,8 +403,8 @@ const updateBlog = async (req, res) => {
       category: (category ?? tag ?? blog.category),
       description: (description ?? discription ?? desccription ?? blog.description),
       level: normalizedLevelUpdate,
-      pdf: pdfPath,
-      taskPdf: taskPdfPath
+      pdf: pdfUrl,
+      taskPdf: taskPdfUrl
     });
 
     // Update tags

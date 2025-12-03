@@ -103,11 +103,18 @@ async function searchCompactUnified(query, limit) {
     }));
 
   // Static results: search words in title, short_description, or keywords (synonyms/plurals)
+  // Case-insensitive matching
   const staticResults = STATIC_PAGES.filter((p) => {
     const t = (p.title || '').toLowerCase();
     const d = (p.short_description || '').toLowerCase();
     const kws = Array.isArray(p.keywords) ? p.keywords.map((k) => String(k).toLowerCase()) : [];
-    return words.some((w) => t.includes(w) || d.includes(w) || kws.some((kw) => kw.includes(w) || w.includes(kw)));
+    // Check if any word matches or if full query matches
+    const queryLower = query.toLowerCase();
+    return words.some((w) => 
+      t.includes(w) || 
+      d.includes(w) || 
+      kws.some((kw) => kw.includes(w) || w.includes(kw))
+    ) || t.includes(queryLower) || d.includes(queryLower);
   }).map((p) => ({ link: p.link, title: p.title, description: p.short_description }));
 
   const combined = [...dynamicResults, ...staticResults].slice(0, limit);
@@ -268,45 +275,32 @@ async function searchEslResources(q) {
 }
 
 async function searchTests(q) {
-  const [sections, questions] = await Promise.all([
-    models.QuizSection.findAll({
-      where: {
-        [Op.or]: [
-          { name: { [Op.iLike]: ilikeTerm(q) } },
-          { description: { [Op.iLike]: ilikeTerm(q) } },
-        ],
-      },
-      attributes: ['id', 'name', 'description'],
-      limit: 150,
-    }),
-    models.QuizQuestion.findAll({
-      where: {
-        [Op.or]: [
-          { text: { [Op.iLike]: ilikeTerm(q) } },
-          { optionA: { [Op.iLike]: ilikeTerm(q) } },
-          { optionB: { [Op.iLike]: ilikeTerm(q) } },
-          { optionC: { [Op.iLike]: ilikeTerm(q) } },
-          { optionD: { [Op.iLike]: ilikeTerm(q) } },
-        ],
-      },
-      attributes: ['id', 'text', 'optionA', 'optionB', 'optionC', 'optionD'],
-      limit: 200,
-    }),
-  ]);
-
-  const sectionsMapped = sections.map((r) => ({
-    link: '/tutelage-tests',
-    title: r.name,
-    description: r.description || '',
+  // Return only static test pages from staticPages.js
+  const queryLower = q.toLowerCase();
+  const words = queryLower.split(/\s+/).filter(w => w.length > 0);
+  
+  const testPages = STATIC_PAGES.filter((p) => {
+    // Only include pages that are test-related
+    const isTestPage = p.link.includes('/tutelage-tests') || p.keywords?.some(k => k.toLowerCase().includes('test'));
+    if (!isTestPage) return false;
+    
+    const t = (p.title || '').toLowerCase();
+    const d = (p.short_description || '').toLowerCase();
+    const kws = Array.isArray(p.keywords) ? p.keywords.map((k) => String(k).toLowerCase()) : [];
+    
+    // Match if query or any word appears in title, description, or keywords
+    return words.some((w) => 
+      t.includes(w) || 
+      d.includes(w) || 
+      kws.some((kw) => kw.includes(w) || w.includes(kw))
+    ) || t.includes(queryLower) || d.includes(queryLower);
+  }).map((p) => ({ 
+    link: p.link, 
+    title: p.title, 
+    description: p.short_description 
   }));
 
-  const questionsMapped = questions.map((r) => ({
-    link: '/tutelage-tests',
-    title: r.text?.slice(0, 120) || null,
-    description: '',
-  }));
-
-  return [...sectionsMapped, ...questionsMapped];
+  return testPages;
 }
 
 // Main controller
@@ -379,7 +373,27 @@ exports.search = async (req, res) => {
         searchEslResources(query),
         searchTests(query),
       ]);
-      results = [...blogs, ...courses, ...skills, ...esl, ...tests];
+      
+      // Add static pages to universal search
+      const queryLower = query.toLowerCase();
+      const words = queryLower.split(/\s+/).filter(w => w.length > 0);
+      const staticResults = STATIC_PAGES.filter((p) => {
+        const t = (p.title || '').toLowerCase();
+        const d = (p.short_description || '').toLowerCase();
+        const kws = Array.isArray(p.keywords) ? p.keywords.map((k) => String(k).toLowerCase()) : [];
+        // Match if query or any word appears in title, description, or keywords
+        return words.some((w) => 
+          t.includes(w) || 
+          d.includes(w) || 
+          kws.some((kw) => kw.includes(w) || w.includes(kw))
+        ) || t.includes(queryLower) || d.includes(queryLower);
+      }).map((p) => ({ 
+        link: p.link, 
+        title: p.title, 
+        description: p.short_description 
+      }));
+      
+      results = [...blogs, ...courses, ...skills, ...esl, ...tests, ...staticResults];
     }
 
     // Results already match the query via ILIKE across fields; no scoring returned

@@ -138,7 +138,7 @@ exports.createEslAudio = async (req, res) => {
 
 exports.getAllEslAudios = async (req, res) => {
   try {
-    const { search, level, tags, sortBy = 'date', sortOrder = 'desc', limit = 20, offset = 0 } = req.query;
+    const { cursor, page, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC', limit = 9 } = req.query;
     const where = {};
     if (search) {
       where[Op.or] = [
@@ -150,6 +150,7 @@ exports.getAllEslAudios = async (req, res) => {
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
 
+    // Tag filtering
     let idFilter = null;
     if (tags) {
       const tagNames = String(tags).split(',').map(t => t.trim()).filter(Boolean);
@@ -161,25 +162,89 @@ exports.getAllEslAudios = async (req, res) => {
         idFilter = matchedIds.length ? matchedIds : [-1];
       }
     }
+    if (Array.isArray(idFilter)) where.id = { [Op.in]: idFilter };
 
-    const order = [];
-    order.push(['createdAt', sortOrder.toUpperCase()]);
+    // PAGE-BASED PAGINATION
+    if (page !== undefined) {
+      const currentPage = parseInt(page);
+      const itemsPerPage = parseInt(limit);
+      const offset = (currentPage - 1) * itemsPerPage;
+      const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
 
-    const rows = await EslAudio.findAll({
-      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
+      const totalItems = await EslAudio.count({ where, distinct: true });
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      const rows = await EslAudio.findAll({
+        where,
+        order,
+        limit: itemsPerPage,
+        offset,
+        distinct: true
+      });
+
+      const hasNextPage = currentPage < totalPages;
+      const hasPrevPage = currentPage > 1;
+
+      // Attach tags and analytics
+      const enriched = await Promise.all(rows.map(async (row) => {
+        const tagList = await includeTagsFor(row.id);
+        const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'audio', resourceId: row.id } });
+        return { ...row.toJSON(), tags: tagList, metrics };
+      }));
+
+      return res.status(200).json({ 
+        success: true, 
+        message: 'ESL Audios fetched successfully',
+        data: enriched,
+        pagination: {
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+          currentPage,
+          totalItems
+        }
+      });
+    }
+
+    // CURSOR-BASED PAGINATION (for infinity scroll)
+    if (cursor) {
+      if ((sortOrder || 'DESC').toUpperCase() === 'DESC') where.id = { ...(where.id || {}), [Op.lt]: parseInt(cursor) };
+      else where.id = { ...(where.id || {}), [Op.gt]: parseInt(cursor) };
+    }
+
+    const fetchLimit = parseInt(limit) + 1;
+    const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
+    
+    let rows = await EslAudio.findAll({
+      where,
       order,
-      limit: Number(limit),
-      offset: Number(offset)
+      limit: fetchLimit,
+      distinct: true
     });
 
-    // Attach tags from join table to each row
-    const enriched = await Promise.all(rows.map(async (row) => {
+    const hasMore = rows.length > parseInt(limit);
+    const items = hasMore ? rows.slice(0, parseInt(limit)) : rows;
+
+    // Attach tags and analytics
+    const enriched = await Promise.all(items.map(async (row) => {
       const tagList = await includeTagsFor(row.id);
       const metrics = await ResourceAnalytics.findOne({ where: { resourceType: 'audio', resourceId: row.id } });
       return { ...row.toJSON(), tags: tagList, metrics };
     }));
 
-    res.status(200).json({ success: true, data: enriched });
+    const nextCursor = enriched.length > 0 ? enriched[enriched.length - 1].id : null;
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'ESL Audios fetched successfully',
+      data: enriched,
+      pagination: {
+        nextCursor,
+        hasMore,
+        itemsPerPage: parseInt(limit),
+        totalItemsReturned: enriched.length
+      }
+    });
   } catch (err) {
     console.error('Error fetching ESL audios:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
