@@ -151,7 +151,7 @@ exports.createEslVideo = async (req, res) => {
 
 exports.getAllEslVideos = async (req, res) => {
   try {
-    const { page = 1, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, page, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const where = {};
     
     if (search) where.title = { [Op.like]: `%${search}%` };
@@ -171,44 +171,87 @@ exports.getAllEslVideos = async (req, res) => {
         idFilter = matchedIds.length ? matchedIds : [-1];
       }
     }
+    if (Array.isArray(idFilter)) where.id = { [Op.in]: idFilter };
 
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    // PAGE-BASED PAGINATION
+    if (page !== undefined) {
+      const currentPage = parseInt(page);
+      const itemsPerPage = parseInt(limit);
+      const offset = (currentPage - 1) * itemsPerPage;
+      const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
+
+      const totalItems = await EslVideo.count({ where, distinct: true });
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      const rows = await EslVideo.findAll({
+        where,
+        order,
+        limit: itemsPerPage,
+        offset,
+        distinct: true
+      });
+
+      const hasNextPage = currentPage < totalPages;
+      const hasPrevPage = currentPage > 1;
+
+      // Attach tags and analytics
+      const enriched = await Promise.all(rows.map(async (row) => {
+        const tags = await includeTagsFor(row.id);
+        const metrics = await ResourceAnalytics.findOne({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: row.id } });
+        return { ...row.toJSON(), tags, metrics };
+      }));
+
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Esl Videos fetched successfully',
+        data: enriched,
+        pagination: {
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+          currentPage,
+          totalItems
+        }
+      });
+    }
+
+    // CURSOR-BASED PAGINATION (for infinity scroll)
+    if (cursor) {
+      if ((sortOrder || 'DESC').toUpperCase() === 'DESC') where.id = { ...(where.id || {}), [Op.lt]: parseInt(cursor) };
+      else where.id = { ...(where.id || {}), [Op.gt]: parseInt(cursor) };
+    }
+
+    const fetchLimit = parseInt(limit) + 1;
     const order = [[sortBy, sortOrder.toUpperCase()], ['id', sortOrder.toUpperCase()]];
-
-    const totalItems = await EslVideo.count({
-      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
-      distinct: true
-    });
-    const totalPages = Math.ceil(totalItems / parseInt(limit));
-
-    const rows = await EslVideo.findAll({
-      where: idFilter ? { ...where, id: { [Op.in]: idFilter } } : where,
+    
+    let rows = await EslVideo.findAll({
+      where,
       order,
-      limit: parseInt(limit),
-      offset,
+      limit: fetchLimit,
       distinct: true
     });
 
-    const hasNextPage = parseInt(page) < totalPages;
-    const hasPrevPage = parseInt(page) > 1;
+    const hasMore = rows.length > parseInt(limit);
+    const items = hasMore ? rows.slice(0, parseInt(limit)) : rows;
 
     // Attach tags and analytics
-    const enriched = await Promise.all(rows.map(async (row) => {
+    const enriched = await Promise.all(items.map(async (row) => {
       const tags = await includeTagsFor(row.id);
       const metrics = await ResourceAnalytics.findOne({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: row.id } });
       return { ...row.toJSON(), tags, metrics };
     }));
+
+    const nextCursor = enriched.length > 0 ? enriched[enriched.length - 1].id : null;
 
     res.status(200).json({ 
       success: true, 
       message: 'Esl Videos fetched successfully',
       data: enriched,
       pagination: {
-        totalPages,
-        hasNextPage,
-        hasPrevPage,
-        currentPage: parseInt(page),
-        totalItems
+        nextCursor,
+        hasMore,
+        itemsPerPage: parseInt(limit),
+        totalItemsReturned: enriched.length
       }
     });
   } catch (err) {
