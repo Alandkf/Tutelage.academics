@@ -24,7 +24,7 @@ const getLevelValueFromLabel = (label) => {
 	return option ? option.value : '';
 };
 
-const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel, showTranscript = false }) => {
+const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel, showTranscript = true }) => {
 	const [formData, setFormData] = useState({
 		title: '',
 		videoRef: '',
@@ -253,19 +253,17 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel,
 				/>
 			</div>
 
-			{showTranscript && (
-				<div>
-					<Label htmlFor="transcript">Transcript</Label>
-					<Textarea
-						id="transcript"
-						name="transcript"
-						value={formData.transcript}
-						onChange={handleChange}
-						placeholder="Video transcript"
-						rows={5}
-					/>
-				</div>
-			)}
+			<div>
+				<Label htmlFor="transcript">Transcript</Label>
+				<Textarea
+					id="transcript"
+					name="transcript"
+					value={formData.transcript}
+					onChange={handleChange}
+					placeholder="Video transcript"
+					rows={5}
+				/>
+			</div>
 
 			<div>
 				<Label htmlFor="level">Level *</Label>
