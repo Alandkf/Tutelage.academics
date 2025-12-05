@@ -46,17 +46,39 @@ export default function AdminEslVideoDetailPage() {
     // eslint-disable-next-line
   }, [params.id])
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
+    console.log('🎯 handleEditSuccess called (single video page)');
+    console.log('📦 Received formData:', formData);
+    
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('videoRef', values.videoRef ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('videoRef', formData.videoRef ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
       
+      if (formData.pdf && formData.pdf instanceof File) {
+        console.log('📄 Adding PDF:', formData.pdf.name);
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+        formData.taskPdfs.forEach((file, index) => {
+          if (file instanceof File) {
+            console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        console.log('🗑️ Adding deleted IDs:', formData.deletedTaskPdfIds);
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
+      
+      console.log('📤 Sending FormData to API...');
       const res = await fetch(`${BASE_URL}/api/esl-videos/${params.id}`, {
         method: 'PUT',
         credentials: 'include',
@@ -153,25 +175,22 @@ export default function AdminEslVideoDetailPage() {
         </div>
       )}
 
-      {video.tasks && video.tasks.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
-                <div className="flex flex-col gap-2">
-                  {video.tasks.map((task, idx) => {
-                    const taskPdf = task?.filePath
-                    if (!taskPdf) return null
-                    return (
-                      <PdfButton 
-                        key={idx}
-                        pdfUrl={taskPdf} 
-                        onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
-                        label={task?.fileName || `Task PDF ${idx + 1}`}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-            )}
+      {/* Display task PDFs from taskPdfs association */}
+      {video.taskPdfs && video.taskPdfs.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
+          <div className="flex flex-col gap-2">
+            {video.taskPdfs.map((taskPdf, idx) => (
+              <PdfButton 
+                key={taskPdf.id || idx}
+                pdfUrl={taskPdf.filePath} 
+                onOpen={(url) => openPdf(url, taskPdf.fileName || `Task PDF ${idx + 1}`)} 
+                label={taskPdf.fileName || `Task PDF ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {video.tags && video.tags.length > 0 && (
         <div className="mb-4">
