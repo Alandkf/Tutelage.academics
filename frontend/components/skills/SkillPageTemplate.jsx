@@ -65,7 +65,7 @@ const SkillPageTemplate = ({ skillData }) => {
                 key={index}
                 className="max-w-7xl h-full mx-auto border border-border rounded-sm shadow-lg lg:rounded-tr-[4rem] lg:rounded-bl-[4rem] max-lg:rounded-tl-[2rem] max-lg:rounded-br-[2rem]"
               >
-                <div className={`flex ${isEven ? 'flex-col-reverse lg:flex-row' : 'flex-col lg:flex-row-reverse'} items-stretch gap-0`}>
+                <div className={`flex flex-col-reverse ${isEven ? 'lg:flex-row' : 'flex-col lg:flex-row-reverse'} items-stretch gap-0`}>
                   {/* Content Side */}
                   <div className="w-full lg:w-1/2 flex items-center px-4 sm:px-6 lg:ml-10">
                     <div className="w-full py-10 lg:py-0 lg:pr-12">                      
