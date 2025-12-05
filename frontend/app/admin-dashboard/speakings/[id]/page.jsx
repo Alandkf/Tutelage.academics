@@ -239,14 +239,23 @@ export default function AdminSpeakingDetailPage() {
         </div>
       )}
 
-      {speaking.taskPdf && (
+      {speaking.tasks && speaking.tasks.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <PdfButton 
-            pdfUrl={speaking.taskPdf} 
-            onOpen={(url) => openPdf(url, 'Task PDF')} 
-            label="Task PDF"
-          />
+          <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
+          <div className="flex flex-col gap-2">
+            {speaking.tasks.map((task, idx) => {
+              const taskPdf = task?.filePath
+              if (!taskPdf) return null
+              return (
+                <PdfButton 
+                  key={idx}
+                  pdfUrl={taskPdf} 
+                  onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
+                  label={task?.fileName || `Task PDF ${idx + 1}`}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
 
