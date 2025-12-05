@@ -18,6 +18,7 @@ export default function AdminStoryDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [story, setStory] = useState(null)
+  console.log('story, ', story);
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
@@ -31,7 +32,7 @@ export default function AdminStoryDetailPage() {
       const res = await fetch(`${BASE_URL}/api/stories/${params.id}`, { credentials: 'include' })
       const data = await res.json()
       if (data.success) {
-        setStory(data.data.story)
+        setStory(data.data)
       } else {
         toast('Story not found', { variant: 'destructive' })
         router.push('/admin-dashboard/stories')
@@ -166,16 +167,25 @@ export default function AdminStoryDetailPage() {
         </div>
       )}
 
-      {story.taskPdf && (
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <PdfButton 
-            pdfUrl={story.taskPdf} 
-            onOpen={(url) => openPdf(url, 'Task PDF')} 
-            label="Task PDF"
-          />
-        </div>
-      )}
+       {story.tasks && story.tasks.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
+                      <div className="flex flex-col gap-2">
+                        {story.tasks.map((task, idx) => {
+                          const taskPdf = task?.filePath
+                          if (!taskPdf) return null
+                          return (
+                            <PdfButton 
+                              key={idx}
+                              pdfUrl={taskPdf} 
+                              onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
+                              label={task?.fileName || `Task PDF ${idx + 1}`}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
 
       {story.tags && story.tags.length > 0 && (
         <div className="mb-4">

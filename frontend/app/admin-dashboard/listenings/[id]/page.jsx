@@ -17,7 +17,7 @@ import { usePdfModal } from '@/hooks/usePdfModal'
 export default function AdminListeningDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const [listening, setListening] = useState(null)
+  const [listening, setListening] = useState(null)  
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
@@ -148,14 +148,23 @@ export default function AdminListeningDetailPage() {
         </div>
       )}
 
-      {listening.taskPdf && (
+      {listening.tasks && listening.tasks.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-lg font-semibold mb-2">Task PDF</h3>
-          <PdfButton 
-            pdfUrl={listening.taskPdf} 
-            onOpen={(url) => openPdf(url, 'Task PDF')} 
-            label="Task PDF"
-          />
+          <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
+          <div className="flex flex-col gap-2">
+            {listening.tasks.map((task, idx) => {
+              const taskPdf = task?.filePath
+              if (!taskPdf) return null
+              return (
+                <PdfButton 
+                  key={idx}
+                  pdfUrl={taskPdf} 
+                  onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
+                  label={task?.fileName || `Task PDF ${idx + 1}`}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
 
