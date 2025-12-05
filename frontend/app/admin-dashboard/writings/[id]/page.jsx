@@ -47,18 +47,32 @@ export default function AdminWritingDetailPage() {
     // eslint-disable-next-line
   }, [params.id])
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('content', values.content ?? '')
-      fd.append('imageUrl', values.imageUrl ?? '')
-      fd.append('contentImageUrl', values.contentImageUrl ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('contentImageUrl', formData.contentImageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdf && formData.pdf instanceof File) {
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
       
       const res = await fetch(`${BASE_URL}/api/writings/${params.id}`, {
         method: 'PUT',
@@ -157,22 +171,19 @@ export default function AdminWritingDetailPage() {
         </div>
       )}
 
-      {writing.tasks && writing.tasks.length > 0 && (
+      {/* Display task PDFs from taskPdfs association */}
+      {writing.taskPdfs && writing.taskPdfs.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
           <div className="flex flex-col gap-2">
-            {writing.tasks.map((task, idx) => {
-              const taskPdf = task?.filePath
-              if (!taskPdf) return null
-              return (
-                <PdfButton 
-                  key={idx}
-                  pdfUrl={taskPdf} 
-                  onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
-                  label={task?.fileName || `Task PDF ${idx + 1}`}
-                />
-              )
-            })}
+            {writing.taskPdfs.map((taskPdf, idx) => (
+              <PdfButton 
+                key={taskPdf.id || idx}
+                pdfUrl={taskPdf.filePath} 
+                onOpen={(url) => openPdf(url, taskPdf.fileName || `Task PDF ${idx + 1}`)} 
+                label={taskPdf.fileName || `Task PDF ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
       )}

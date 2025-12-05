@@ -60,18 +60,28 @@ const Writings = () => {
 
   const lastWritingRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchWritings })
 
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('content', values.content ?? '')
-      fd.append('imageUrl', values.imageUrl ?? '')
-      fd.append('contentImageUrl', values.contentImageUrl ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('contentImageUrl', formData.contentImageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdf && formData.pdf instanceof File) {
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
       
       const res = await fetch(`${BASE_URL}/api/writings`, {
         method: "POST",
@@ -93,19 +103,33 @@ const Writings = () => {
     setShowEdit(true)
   }
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     if (!editWriting) return
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('content', values.content ?? '')
-      fd.append('imageUrl', values.imageUrl ?? '')
-      fd.append('contentImageUrl', values.contentImageUrl ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('contentImageUrl', formData.contentImageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdf && formData.pdf instanceof File) {
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
       
       const res = await fetch(`${BASE_URL}/api/writings/${editWriting.id}`, {
         method: "PUT",
