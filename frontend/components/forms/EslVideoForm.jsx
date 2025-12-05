@@ -163,7 +163,7 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 				</div>
 
 				<div>
-					<Label>PDF File</Label>
+					<Label>Preparation File</Label>
 					<div className="flex items-center gap-2">
 						<Input id="pdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'pdf')} className="hidden" />
 						<Button type="button" variant="outline" onClick={() => document.getElementById('pdf').click()} className="gap-2">
@@ -174,7 +174,7 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 				</div>
 
 				<div>
-					<Label>Task PDF File</Label>
+					<Label>Task PDF Files</Label>
 					<div className="flex items-center gap-2">
 						<Input id="taskPdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'taskPdf')} className="hidden" />
 						<Button type="button" variant="outline" onClick={() => document.getElementById('taskPdf').click()} className="gap-2">

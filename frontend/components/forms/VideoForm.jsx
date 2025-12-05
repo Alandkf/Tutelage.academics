@@ -271,7 +271,7 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel,
 			</div>
 
 			<div>
-				<Label htmlFor="pdf">PDF File</Label>
+				<Label htmlFor="pdf">Preparation File</Label>
 				<div className="flex items-center gap-2">
 					<Input
 						id="pdf"
@@ -294,7 +294,7 @@ const VideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel,
 			</div>
 
 			<div>
-				<Label htmlFor="taskPdf">Task PDF File</Label>
+				<Label htmlFor="taskPdf">Task PDF Files</Label>
 				<div className="flex items-center gap-2">
 					<Input
 						id="taskPdf"

@@ -149,7 +149,7 @@ const ReadingForm = ({ mode = 'create', initialValues = null, onSuccess, onCance
           </div>
         </div>
         <div>
-          <Label>PDF File (optional)</Label>
+          <Label>Preparation File (optional)</Label>
           <div className="flex items-center gap-2">
             <input id="pdfFile" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'pdfFile')} className="hidden" />
             <Button type="button" variant="outline" onClick={() => document.getElementById('pdfFile').click()} className="gap-2">
@@ -159,7 +159,7 @@ const ReadingForm = ({ mode = 'create', initialValues = null, onSuccess, onCance
           </div>
         </div>
         <div>
-          <Label>Task PDF File (optional)</Label>
+          <Label>Task PDF Files (optional)</Label>
           <div className="flex items-center gap-2">
             <input id="taskPdfFile" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'taskPdfFile')} className="hidden" />
             <Button type="button" variant="outline" onClick={() => document.getElementById('taskPdfFile').click()} className="gap-2">
