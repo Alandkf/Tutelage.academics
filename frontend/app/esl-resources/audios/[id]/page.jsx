@@ -18,7 +18,6 @@ const SingleAudio = () => {
   const params = useParams()
   const router = useRouter()
   const [audio, setAudio] = useState(null)
-  console.log('audio', audio);
   
   const [loading, setLoading] = useState(true)
 
@@ -228,17 +227,17 @@ const SingleAudio = () => {
         )}
 
         {/* Tasks (render stacked full-width boxes) */}
-        {Array.isArray(audio?.taskPdf) && audio.taskPdf.length > 0 ? (
+        {Array.isArray(audio?.tasks) && audio.tasks.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
-            {audio.taskPdf.map((task, idx) => {
-              const taskPdf = task?.pdf || audio?.pdf || task?.taskPdf || audio?.taskPdf || null;
+            {audio.tasks.map((task, idx) => {
+              const taskPdf = task?.filePath
               return (
                 <div key={idx} className="border rounded-md overflow-hidden">
                   <button
                     onClick={() => toggleTask(idx)}
                     className="w-full flex items-center justify-between px-4 py-5 bg-card"
                   >
-                    <span className="font-medium text-foreground">Task {idx + 1}</span>
+                    <span className="font-medium text-foreground">Task {idx + 1} {}</span>
                     <span className="text-muted-foreground">
                       {openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </span>
@@ -271,41 +270,6 @@ const SingleAudio = () => {
                 </div>
               )
             })}
-          </div>
-        ) : audio?.pdf ? (
-          // No explicit tasks — show single Task 1 using audio.pdf
-          <div className="grid grid-cols-1 gap-4">
-            <div className="border rounded-md overflow-hidden">
-              <button
-                onClick={() => toggleTask(0)}
-                className="w-full flex items-center justify-between px-4 py-5 bg-card"
-              >
-                <span className="font-medium text-foreground">Task 1</span>
-                <span className="text-muted-foreground">
-                  {openTasks[0] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                </span>
-              </button>
-              <AnimatePresence initial={false}>
-                {openTasks[0] && (
-                  <motion.div
-                    key="task-0"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
-                    className="overflow-hidden border-t bg-background"
-                  >
-                    <div className="px-4 py-3">
-                      <PdfButton 
-                        pdfUrl={audio.pdf} 
-                        onOpen={openPdf}
-                        label="Task PDF"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
         ) : null }
 

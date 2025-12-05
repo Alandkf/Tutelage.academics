@@ -8,6 +8,7 @@
 const { Blog, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Convert incoming level(s) to CEFR labels as an array
 function normalizeLevels(input) {
@@ -305,10 +306,11 @@ const getBlogById = async (req, res) => {
     }
 
     const tagList = await includeTagsFor(blog.id);
+    const tasks = await getTasks(blog.id);
 
     res.status(200).json({
       success: true,
-      data: { ...blog.toJSON(), tags: tagList }
+      data: { ...blog.toJSON(), tags: tagList, tasks }
     });
   } catch (error) {
     console.error('Error fetching blog:', error);

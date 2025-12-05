@@ -6,6 +6,7 @@
 const { EslVideo, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
 const { Op } = require('sequelize');
 const { sendApprovalRequestNotification } = require('../config/email');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Helpers
 const normalizeLevels = (input) => {
@@ -274,9 +275,10 @@ exports.getEslVideoById = async (req, res) => {
     const { id } = req.params;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
+    const tasks = await getTasks(video.id);
     const tags = await includeTagsFor(video.id);
     const metrics = await bumpAnalytics(video.id, 'views', 1);
-    res.status(200).json({ success: true, message: 'Esl Video fetched successfully', data: { ...video.toJSON(), tags, metrics } });
+    res.status(200).json({ success: true, message: 'Esl Video fetched successfully', data: { ...video.toJSON(), tags, metrics, tasks } });
   } catch (err) {
     console.error('Error fetching ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

@@ -6,6 +6,7 @@
 const { EslAudio, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
 const { Op } = require('sequelize');
 const { sendApprovalRequestNotification } = require('../config/email');
+const { getTasks } = require('../scripts/fetchTasks');
 
 const normalizeLevels = (input) => {
   if (input === undefined || input === null) return null;
@@ -265,9 +266,10 @@ exports.getEslAudioById = async (req, res) => {
     const { id } = req.params;
     const audio = await EslAudio.findByPk(id);
     if (!audio) return res.status(404).json({ success: false, message: 'Audio not found' });
+    const tasks = await getTasks(audio.id);    
     const tags = await includeTagsFor(audio.id);
     const metrics = await bumpAnalytics(audio.id, 'views', 1); // count a detail view
-    res.status(200).json({ success: true, data: { ...audio.toJSON(), tags, metrics } });
+    res.status(200).json({ success: true, data: { ...audio.toJSON(), tags, metrics, tasks } });
   } catch (err) {
     console.error('Error fetching ESL audio:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });

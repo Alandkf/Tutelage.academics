@@ -6,6 +6,7 @@
 const { Story, User, ResourceTag, Tag, ResourceAnalytics, Sequelize, ApprovalRequest } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
+const { getTasks } = require('../scripts/fetchTasks');
 
 function normalizeLevels(input) {
   if (input === undefined || input === null) return null;
@@ -255,10 +256,13 @@ exports.getStoryById = async (req, res) => {
     if (!story) return res.status(404).json({ success: false, message: 'Story not found' });
     const analytics = await ensureAnalytics(story.id);
     await analytics.update({ views: analytics.views + 1 });
+    const tasks = await getTasks(story.id);
+    console.log("this is tasks: ", tasks);
+    
     // Attach tag names
     const mappings = await ResourceTag.findAll({ where: { resourceType: 'story', resourceId: story.id }, include: [{ model: Tag, as: 'tag' }] });
     const tagNames = mappings.map(m => m.tag?.name).filter(Boolean);
-    res.status(200).json({ success: true, message: "Story Fetched Successfully" , data: { story, tags: tagNames } });
+    res.status(200).json({ success: true, message: "Story Fetched Successfully" , data: { ...story.toJSON(), tags: tagNames, tasks } });
   } catch (err) {
     console.error('Error fetching story:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
