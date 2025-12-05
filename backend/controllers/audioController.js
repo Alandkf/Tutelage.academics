@@ -8,6 +8,7 @@
 const { Audio, User, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Convert incoming level(s) to CEFR labels as an array
 function normalizeLevels(input) {
@@ -398,11 +399,12 @@ const getAudioById = async (req, res) => {
 
     // Include tag names in detail response
     const tagList = await includeTagsFor(audio.id);
-
+    const tasks = await getTasks(audio.id);
+    
     res.status(200).json({
       success: true,
       message: 'Audio content fetched successfully',
-      data: { ...audio.toJSON(), tags: tagList }
+      data: { ...audio.toJSON(), tags: tagList, tasks }
     });
   } catch (error) {
     console.error('Error fetching audio:', error);
