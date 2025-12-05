@@ -67,6 +67,9 @@ export default function BlogsPage() {
 
   // Handlers
   const handleCreateSuccess = async (formData) => {
+    console.log('🎯 handleCreateSuccess called');
+    console.log('📦 Received formData:', formData);
+    
     try {
       const fd = new FormData()
       fd.append('title', formData.title ?? '')
@@ -75,20 +78,39 @@ export default function BlogsPage() {
       fd.append('imageRef', formData.imageRef ?? '')
       fd.append('level', formData.level ?? '')
       fd.append('tags', formData.tags?.join(',') ?? '')
-      if (formData.pdf) fd.append('pdfFile', formData.pdf)
-      if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+      
+      // Handle single PDF
+      if (formData.pdf && formData.pdf instanceof File) {
+        console.log('📄 Adding PDF:', formData.pdf.name);
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      // Handle multiple task PDFs
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+        formData.taskPdfs.forEach((file, index) => {
+          if (file instanceof File) {
+            console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+            fd.append('taskPdfs', file) // Use 'taskPdfs' field name
+          }
+        })
+      }
 
+      console.log('📤 Sending FormData to API...');
       const res = await fetch(`${BASE_URL}/api/blogs`, {
         method: "POST",
         credentials: "include",
         body: fd
       })
       const data = await res.json()
+      console.log('📥 API Response:', data);
+      
       if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
       resetAndFetch()
       toast(data.message, { variant: "success" })
     } catch (e) {
+      console.error('❌ Error:', e);
       toast(e.message, { variant: "destructive" })
     }
   }
@@ -208,6 +230,9 @@ export default function BlogsPage() {
             mode="edit"
             initialValues={editBlog}
             onSuccess={async (formData) => {
+              console.log('🎯 handleEditSuccess called');
+              console.log('📦 Received formData:', formData);
+              
               if (!editBlog) return
               try {
                 const fd = new FormData()
@@ -217,21 +242,46 @@ export default function BlogsPage() {
                 fd.append('imageRef', formData.imageRef ?? '')
                 fd.append('level', formData.level ?? '')
                 fd.append('tags', formData.tags?.join(',') ?? '')
-                if (formData.pdf) fd.append('pdfFile', formData.pdf)
-                if (formData.taskPdf) fd.append('taskPdfFile', formData.taskPdf)
+                
+                // Handle single PDF
+                if (formData.pdf && formData.pdf instanceof File) {
+                  console.log('📄 Adding PDF:', formData.pdf.name);
+                  fd.append('pdfFile', formData.pdf)
+                }
+                
+                // Handle multiple task PDFs
+                if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+                  console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+                  formData.taskPdfs.forEach((file, index) => {
+                    if (file instanceof File) {
+                      console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+                      fd.append('taskPdfs', file)
+                    }
+                  })
+                }
+                
+                // Handle deleted task PDF IDs
+                if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+                  console.log('🗑️ Adding deleted IDs:', formData.deletedTaskPdfIds);
+                  fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+                }
 
+                console.log('📤 Sending FormData to API...');
                 const res = await fetch(`${BASE_URL}/api/blogs/${editBlog.id}`, {
                   method: "PUT",
                   credentials: "include",
                   body: fd
                 })
                 const data = await res.json()
+                console.log('📥 API Response:', data);
+                
                 if (!res.ok || !data.success) throw new Error(data.message)
                 setShowEdit(false)
                 setEditBlog(null)
                 resetAndFetch()
                 toast(data.message, { variant: "success" })
               } catch (e) {
+                console.error('❌ Error:', e);
                 toast(e.message, { variant: "destructive" })
               }
             }}

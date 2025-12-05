@@ -47,29 +47,57 @@ const SingleBlog = () => {
     // eslint-disable-next-line
   }, [params.id])
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
+    console.log('🎯 handleEditSuccess called (single blog page)');
+    console.log('📦 Received formData:', formData);
+    
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('content', values.content ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('imageRef', values.imageRef ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('imageRef', formData.imageRef ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
       
+      // Handle single PDF
+      if (formData.pdf && formData.pdf instanceof File) {
+        console.log('📄 Adding PDF:', formData.pdf.name);
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      // Handle multiple task PDFs
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+        formData.taskPdfs.forEach((file, index) => {
+          if (file instanceof File) {
+            console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      // Handle deleted task PDF IDs
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        console.log('🗑️ Adding deleted IDs:', formData.deletedTaskPdfIds);
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
+      
+      console.log('📤 Sending FormData to API...');
       const res = await fetch(`${BASE_URL}/api/blogs/${params.id}`, {
         method: 'PUT',
         credentials: 'include',
         body: fd
       })
       const data = await res.json()
+      console.log('📥 API Response:', data);
+      
       if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
       fetchBlog()
       toast(data.message, { variant: 'success' })
     } catch (e) {
+      console.error('❌ Error:', e);
       toast(e.message, { variant: 'destructive' })
     }
   }
@@ -148,25 +176,22 @@ const SingleBlog = () => {
         </div>
       )}
 
-       {blog.tasks && blog.tasks.length > 0 && (
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
-                      <div className="flex flex-col gap-2">
-                        {blog.tasks.map((task, idx) => {
-                          const taskPdf = task?.filePath
-                          if (!taskPdf) return null
-                          return (
-                            <PdfButton 
-                              key={idx}
-                              pdfUrl={taskPdf} 
-                              onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
-                              label={task?.fileName || `Task PDF ${idx + 1}`}
-                            />
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
+      {/* Display task PDFs from the taskPdfs association */}
+      {blog.taskPdfs && blog.taskPdfs.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
+          <div className="flex flex-col gap-2">
+            {blog.taskPdfs.map((taskPdf, idx) => (
+              <PdfButton 
+                key={taskPdf.id || idx}
+                pdfUrl={taskPdf.filePath} 
+                onOpen={(url) => openPdf(url, taskPdf.fileName || `Task PDF ${idx + 1}`)} 
+                label={taskPdf.fileName || `Task PDF ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {blog.tags && blog.tags.length > 0 && (
         <div className="mb-4">
@@ -224,9 +249,9 @@ const SingleBlog = () => {
 
       {/* Reusable PDF Modal */}
       <PdfModal 
-        isOpen={pdfModalOpen} 
-        onClose={closePdf} 
-        pdfUrl={pdfModalUrl} 
+        isOpen={pdfModalOpen}
+        onClose={closePdf}
+        pdfUrl={pdfModalUrl}
         title={pdfModalTitle}
       />
     </div>
