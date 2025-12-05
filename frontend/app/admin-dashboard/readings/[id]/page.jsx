@@ -47,26 +47,37 @@ export default function AdminReadingDetailPage() {
     // eslint-disable-next-line
   }, [params.id])
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     try {
-      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
-      const reqInit = { method: 'PUT', credentials: 'include' }
-      if (isFile) {
-        const fd = new FormData()
-        fd.append('title', values.title ?? '')
-        fd.append('description', values.description ?? '')
-        fd.append('content', values.content ?? '')
-        fd.append('imageUrl', values.imageUrl ?? '')
-        fd.append('level', values.level ?? '')
-        fd.append('tags', values.tags?.join(',') ?? '')
-        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
-        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
-        reqInit.body = fd
-      } else {
-        reqInit.headers = { 'Content-Type': 'application/json' }
-        reqInit.body = JSON.stringify(values)
+      const fd = new FormData()
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdfFile && formData.pdfFile instanceof File) {
+        fd.append('pdfFile', formData.pdfFile)
       }
-      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, reqInit)
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
+      
+      const res = await fetch(`${BASE_URL}/api/readings/${params.id}`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: fd
+      })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
@@ -156,23 +167,19 @@ export default function AdminReadingDetailPage() {
         </div>
       )}
 
-
-      {reading.tasks && reading.tasks.length > 0 && (
+      {/* Display task PDFs from taskPdfs association */}
+      {reading.taskPdfs && reading.taskPdfs.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
           <div className="flex flex-col gap-2">
-            {reading.tasks.map((task, idx) => {
-              const taskPdf = task?.filePath
-              if (!taskPdf) return null
-              return (
-                <PdfButton 
-                  key={idx}
-                  pdfUrl={taskPdf} 
-                  onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
-                  label={task?.fileName || `Task PDF ${idx + 1}`}
-                />
-              )
-            })}
+            {reading.taskPdfs.map((taskPdf, idx) => (
+              <PdfButton 
+                key={taskPdf.id || idx}
+                pdfUrl={taskPdf.filePath} 
+                onOpen={(url) => openPdf(url, taskPdf.fileName || `Task PDF ${idx + 1}`)} 
+                label={taskPdf.fileName || `Task PDF ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
       )}

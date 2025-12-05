@@ -71,26 +71,33 @@ const Readings = () => {
 
   const lastReadingRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchReadings })
 
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
     try {
-      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
-      const reqInit = { method: "POST", credentials: "include" }
-      if (isFile) {
-        const fd = new FormData()
-        fd.append('title', values.title ?? '')
-        fd.append('description', values.description ?? '')
-        fd.append('content', values.content ?? '')
-        fd.append('imageUrl', values.imageUrl ?? '')
-        fd.append('level', values.level ?? '')
-        fd.append('tags', values.tags?.join(',') ?? '')
-        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
-        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
-        reqInit.body = fd
-      } else {
-        reqInit.headers = { "Content-Type": "application/json" }
-        reqInit.body = JSON.stringify(values)
+      const fd = new FormData()
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdfFile && formData.pdfFile instanceof File) {
+        fd.append('pdfFile', formData.pdfFile)
       }
-      const res = await fetch(`${BASE_URL}/api/readings`, reqInit)
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      const res = await fetch(`${BASE_URL}/api/readings`, {
+        method: "POST",
+        credentials: "include",
+        body: fd
+      })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message)
       setShowCreate(false)
@@ -106,27 +113,38 @@ const Readings = () => {
     setShowEdit(true)
   }
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
     if (!editReading) return
     try {
-      const isFile = Boolean(values?.pdfFile || values?.taskPdfFile)
-      const reqInit = { method: "PUT", credentials: "include" }
-      if (isFile) {
-        const fd = new FormData()
-        fd.append('title', values.title ?? '')
-        fd.append('description', values.description ?? '')
-        fd.append('content', values.content ?? '')
-        fd.append('imageUrl', values.imageUrl ?? '')
-        fd.append('level', values.level ?? '')
-        fd.append('tags', values.tags?.join(',') ?? '')
-        if (values.pdfFile) fd.append('pdfFile', values.pdfFile)
-        if (values.taskPdfFile) fd.append('taskPdfFile', values.taskPdfFile)
-        reqInit.body = fd
-      } else {
-        reqInit.headers = { "Content-Type": "application/json" }
-        reqInit.body = JSON.stringify(values)
+      const fd = new FormData()
+      fd.append('title', formData.title ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('content', formData.content ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
+      
+      if (formData.pdfFile && formData.pdfFile instanceof File) {
+        fd.append('pdfFile', formData.pdfFile)
       }
-      const res = await fetch(`${BASE_URL}/api/readings/${editReading.id}`, reqInit)
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        formData.taskPdfs.forEach(file => {
+          if (file instanceof File) {
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
+      
+      const res = await fetch(`${BASE_URL}/api/readings/${editReading.id}`, {
+        method: "PUT",
+        credentials: "include",
+        body: fd
+      })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message)
       setShowEdit(false)
