@@ -8,6 +8,7 @@
 const { Reading, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Convert incoming level(s) to CEFR labels as an array
 function normalizeLevels(input) {
@@ -296,8 +297,10 @@ const getReadingById = async (req, res) => {
     if (!reading) {
       return res.status(404).json({ success: false, message: 'Reading content not found' });
     }
+    const tasks = await getTasks(reading.id);
+    
     const tagNames = await includeTagsFor(reading.id);
-    res.status(200).json({ success: true, message: 'Reading content fetched successfully', data: { ...reading.toJSON(), tags: tagNames } });
+    res.status(200).json({ success: true, message: 'Reading content fetched successfully', data: { ...reading.toJSON(), tags: tagNames, tasks } });
   } catch (error) {
     console.error('Error fetching reading:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
