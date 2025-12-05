@@ -10,6 +10,7 @@ import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { GA_MEASUREMENT_ID } from "@/lib/gtag";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Tutelage | Online English Learning Platform in Kurdistan",
@@ -50,11 +51,17 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <RefreshTokenProvider>
             <AuthProvider>
-              <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
+              <Suspense fallback={null}>
+                <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />
+              </Suspense>
               <NavbarWrapper>
+                <Suspense fallback={null}>
                   <Navbar />
+                </Suspense>
               </NavbarWrapper>
-              <div className="relative z-10">{children}</div>
+              <Suspense fallback={null}>
+                <div className="relative z-10">{children}</div>
+              </Suspense>
               <FooterWrapper>
                 <Footer />
               </FooterWrapper>

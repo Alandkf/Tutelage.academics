@@ -61,8 +61,7 @@ const Stories = () => {
   const lastStoryRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchStories })
 
   const handleCreateSuccess = async (formData) => {
-    console.log('🎯 handleCreateSuccess called');
-    console.log('📦 Received formData:', formData);
+ 
     
     try {
       const fd = new FormData()
@@ -112,8 +111,6 @@ const Stories = () => {
   }
 
   const handleEditSuccess = async (formData) => {
-    console.log('🎯 handleEditSuccess called');
-    console.log('📦 Received formData:', formData);
     
     if (!editStory) return
     try {
