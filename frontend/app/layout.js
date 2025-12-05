@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/AuthContext";
 import RefreshTokenProvider from "@/components/AuthHook";
 import Navbar from "@/components/Navbar";
 import NavbarWrapper from "@/components/NavbarWrapper";
+import FooterWrapper from "@/components/FooterWrapper";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
@@ -54,7 +55,9 @@ export default function RootLayout({ children }) {
                   <Navbar />
               </NavbarWrapper>
               <div className="relative z-10">{children}</div>
-              <Footer />
+              <FooterWrapper>
+                <Footer />
+              </FooterWrapper>
               <Toaster />
             </AuthProvider>
           </RefreshTokenProvider>
