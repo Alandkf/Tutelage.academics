@@ -148,22 +148,19 @@ export default function AdminListeningDetailPage() {
         </div>
       )}
 
-      {listening.tasks && listening.tasks.length > 0 && (
+      {/* Display task PDFs from taskPdfs association */}
+      {listening.taskPdfs && listening.taskPdfs.length > 0 && (
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Task PDFs</h3>
           <div className="flex flex-col gap-2">
-            {listening.tasks.map((task, idx) => {
-              const taskPdf = task?.filePath
-              if (!taskPdf) return null
-              return (
-                <PdfButton 
-                  key={idx}
-                  pdfUrl={taskPdf} 
-                  onOpen={(url) => openPdf(url, task?.fileName || `Task PDF ${idx + 1}`)} 
-                  label={task?.fileName || `Task PDF ${idx + 1}`}
-                />
-              )
-            })}
+            {listening.taskPdfs.map((taskPdf, idx) => (
+              <PdfButton 
+                key={taskPdf.id || idx}
+                pdfUrl={taskPdf.filePath} 
+                onOpen={(url) => openPdf(url, taskPdf.fileName || `Task PDF ${idx + 1}`)} 
+                label={taskPdf.fileName || `Task PDF ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
       )}
