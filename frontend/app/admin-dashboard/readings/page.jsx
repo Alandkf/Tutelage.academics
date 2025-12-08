@@ -211,7 +211,7 @@ const Readings = () => {
           {readings.map((reading, idx) => (
             <Link key={idx} href={`/admin-dashboard/readings/${reading.id}`} ref={idx === readings.length - 1 ? lastReadingRef : null} className="relative group bg-card border border-border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 block">
               <div className="relative h-44 w-full overflow-hidden">
-                <Image src={reading.imageUrl || '/placeholder-16-9.png'} alt={reading.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
+                <Image src={reading.imageUrl} alt={reading.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
               </div>
               <div className="p-4">
                 <h3 className="text-lg font-bold text-foreground mb-2 truncate">{reading.title}</h3>
