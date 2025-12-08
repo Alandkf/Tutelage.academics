@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import BASE_URL from '@/app/config/url'
 import StoryCardSkeleton from '@/components/skeletons/StoryCardSkeleton'
 import {
@@ -13,6 +15,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+const CATEGORY_OPTIONS = [
+  { value: 'all', label: 'All Categories' },
+  { value: 'Science', label: 'Science' },
+  { value: 'Math', label: 'Math' },
+  { value: 'Conversation', label: 'Conversation' },
+  { value: 'Grammar', label: 'Grammar' },
+  { value: 'Vocabulary', label: 'Vocabulary' },
+  { value: 'Business', label: 'Business' },
+  { value: 'Culture', label: 'Culture' }
+]
 
 const getYouTubeThumbnail = (url, preferMax = false) => {
   if (!url) return null;
@@ -37,16 +50,26 @@ const VideoGrid = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [hasNextPage, setHasNextPage] = useState(false)
   const [hasPrevPage, setHasPrevPage] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
 
   const itemsPerPage = 6
 
-  const fetchVideos = async (page) => {
+  const fetchVideos = useCallback(async (page, search = '', category = 'all') => {
     setLoading(true)
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/esl-videos?page=${page}&limit=${itemsPerPage}`,
-        { credentials: 'include' }
-      )
+      let url = `${BASE_URL}/api/esl-videos?page=${page}&limit=${itemsPerPage}`
+      
+      if (search.trim()) {
+        url += `&search=${encodeURIComponent(search.trim())}`
+      }
+      
+      if (category !== 'all') {
+        url += `&category=${encodeURIComponent(category)}`
+      }
+      
+      const response = await fetch(url, { credentials: 'include' })
       const data = await response.json()
 
       if (data.success) {
@@ -60,11 +83,27 @@ const VideoGrid = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [itemsPerPage])
 
+  // Debounced search effect
   useEffect(() => {
-    fetchVideos(currentPage)
-  }, [currentPage])
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput)
+      setCurrentPage(1) // Reset to page 1 on new search
+    }, 500) // 500ms delay
+
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  // Category change effect
+  useEffect(() => {
+    setCurrentPage(1) // Reset to page 1 on category change
+  }, [selectedCategory])
+
+  // Fetch videos when page, search, or category changes
+  useEffect(() => {
+    fetchVideos(currentPage, searchQuery, selectedCategory)
+  }, [currentPage, searchQuery, selectedCategory, fetchVideos])
 
   const handleNextPage = () => {
     if (hasNextPage) {
@@ -126,11 +165,42 @@ const VideoGrid = () => {
   return (
     <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Title */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+        {/* Header */}
+        <div className="mb-12">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-8 text-center">
             Our Best Videos
           </h2>
+          
+          {/* Search and Filter Section */}
+          <div className="flex flex-row gap-4 items-start sm:items-center">
+            {/* Search Input */}
+            <div className="relative flex-1 w-3/4 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search videos by title, description, tags, or category..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10 w-full py-6"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="min-w-[120px] max-w-[150px] w-1/4">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full py-6">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_OPTIONS.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         {/* Blog Grid - Show skeletons when loading */}

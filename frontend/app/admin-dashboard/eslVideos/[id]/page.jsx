@@ -16,6 +16,7 @@ export default function AdminEslVideoDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [video, setVideo] = useState(null)
+  console.log('🎯 AdminEslVideoDetailPage rendered with video:', video);
   const [loading, setLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
@@ -56,6 +57,7 @@ export default function AdminEslVideoDetailPage() {
       fd.append('videoRef', formData.videoRef ?? '')
       fd.append('description', formData.description ?? '')
       fd.append('level', formData.level ?? '')
+      fd.append('category', formData.category ?? '')
       fd.append('tags', formData.tags?.join(',') ?? '')
       
       if (formData.pdf && formData.pdf instanceof File) {
@@ -211,6 +213,13 @@ export default function AdminEslVideoDetailPage() {
               <span key={i} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded">{lvl}</span>
             ))}
           </div>
+        </div>
+      )}
+
+      {video.category && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Category</h3>
+          <span className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded">{video.category}</span>
         </div>
       )}
 

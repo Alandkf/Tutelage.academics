@@ -70,6 +70,7 @@ const EslVideos = () => {
       fd.append('videoRef', formData.videoRef ?? '')
       fd.append('description', formData.description ?? '')
       fd.append('level', formData.level ?? '')
+      fd.append('category', formData.category ?? '')
       fd.append('tags', formData.tags?.join(',') ?? '')
       
       if (formData.pdf && formData.pdf instanceof File) {
@@ -119,6 +120,7 @@ const EslVideos = () => {
       fd.append('videoRef', formData.videoRef ?? '')
       fd.append('description', formData.description ?? '')
       fd.append('level', formData.level ?? '')
+      fd.append('category', formData.category ?? '')
       fd.append('tags', formData.tags?.join(',') ?? '')
       
       if (formData.pdf && formData.pdf instanceof File) {

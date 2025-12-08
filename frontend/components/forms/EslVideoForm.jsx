@@ -18,6 +18,16 @@ const LEVEL_OPTIONS = [
 	{ value: 'c2', label: 'C2 Proficient' }
 ]
 
+const CATEGORY_OPTIONS = [
+	{ value: 'Science', label: 'Science' },
+	{ value: 'Math', label: 'Math' },
+	{ value: 'Conversation', label: 'Conversation' },
+	{ value: 'Grammar', label: 'Grammar' },
+	{ value: 'Vocabulary', label: 'Vocabulary' },
+	{ value: 'Business', label: 'Business' },
+	{ value: 'Culture', label: 'Culture' }
+]
+
 // Helper function to get level value from label
 const getLevelValueFromLabel = (label) => {
 	const option = LEVEL_OPTIONS.find(opt => opt.label === label);
@@ -30,6 +40,7 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 		videoRef: '',
 		description: '',
 		level: '',
+		category: '',
 		tags: [],
 		pdf: null,
 		taskPdfs: [] // Changed from taskPdf to taskPdfs array
@@ -54,6 +65,7 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 				videoRef: initialValues.videoRef || '',
 				description: initialValues.description || '',
 				level: levelValue,
+				category: initialValues.category || '',
 				tags: initialValues.tags || [],
 				pdf: null,
 				taskPdfs: []
@@ -80,6 +92,10 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 
 	const handleLevelChange = (level) => {
 		setFormData(prev => ({ ...prev, level }))
+	}
+
+	const handleCategoryChange = (category) => {
+		setFormData(prev => ({ ...prev, category }))
 	}
 
 	const handleAddTag = () => {
@@ -195,6 +211,18 @@ const EslVideoForm = ({ mode = 'create', initialValues = null, onSuccess, onCanc
 						<SelectContent>
 							{LEVEL_OPTIONS.map(level => (
 								<SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div>
+					<Label htmlFor="category">Category</Label>
+					<Select key={formData.category} value={formData.category} onValueChange={handleCategoryChange}>
+						<SelectTrigger id="category"><SelectValue placeholder="Select a category" /></SelectTrigger>
+						<SelectContent>
+							{CATEGORY_OPTIONS.map(category => (
+								<SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
