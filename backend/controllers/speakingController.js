@@ -4,9 +4,10 @@
 // Handles CRUD operations for Speaking content with pagination and filtering.
 // ============================================================================
 
-const { Speaking, User, Tag, ResourceTag, ApprovalRequest } = require('../models');
+const { Speaking, User, Tag, ResourceTag, ApprovalRequest, TaskPdf } = require('../models');
 const { sendApprovalRequestNotification } = require('../config/email');
 const { Op } = require('sequelize');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Convert incoming level(s) to CEFR labels as an array
 function normalizeLevels(input) {
@@ -136,13 +137,23 @@ const createSpeaking = async (req, res) => {
       createdBy
     });
 
-    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
-      const rows = req.body.taskPdfs
+    // Handle multiple task PDFs
+    const taskPdfsArray = Array.isArray(req.body?.taskPdfs) ? req.body.taskPdfs : [];
+    if (taskPdfsArray.length) {
+      console.log('📎 Processing', taskPdfsArray.length, 'task PDFs for speaking creation...');
+      const rows = taskPdfsArray
         .filter(p => p && p.filePath && p.fileName)
-        .map(p => ({ resourceType: 'speaking', resourceId: speaking.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+        .map(p => ({ 
+          resourceType: 'speaking', 
+          resourceId: speaking.id, 
+          filePath: p.filePath, 
+          fileName: p.fileName, 
+          fileSize: p.fileSize || null, 
+          uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() 
+        }));
       if (rows.length) {
-        const { TaskPdf } = require('../models');
-        await TaskPdf.bulkCreate(rows);
+        const created = await TaskPdf.bulkCreate(rows);
+        console.log('✅', created.length, 'task PDFs created successfully');
       }
     }
 
@@ -210,7 +221,10 @@ const getAllSpeakings = async (req, res) => {
       // Try the standard query (works when level column is a string)
       speakings = await Speaking.findAll({
         where: whereClause,
-        include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+        include: [
+          { model: User, as: 'author', attributes: ['id', 'name', 'email'] },
+          { model: TaskPdf, as: 'taskPdfs' } // Added TaskPdf include
+        ],
         limit: fetchLimit,
         order: [
           [sortBy, sortOrder.toUpperCase()],
@@ -252,7 +266,10 @@ const getAllSpeakings = async (req, res) => {
 
         speakings = await Speaking.findAll({
           where: combinedWhere,
-          include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+          include: [
+            { model: User, as: 'author', attributes: ['id', 'name', 'email'] },
+            { model: TaskPdf, as: 'taskPdfs' } // Added TaskPdf include
+          ],
           limit: fetchLimit,
           order: [
             [sortBy, sortOrder.toUpperCase()],
@@ -316,7 +333,10 @@ const getPaginatedSpeakings = async (req, res) => {
 
     const { count, rows } = await Speaking.findAndCountAll({
       where: whereClause,
-      include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }],
+      include: [
+        { model: User, as: 'author', attributes: ['id', 'name', 'email'] },
+        { model: TaskPdf, as: 'taskPdfs' } // Added TaskPdf include
+      ],
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [[sortBy, sortOrder.toUpperCase()]],
@@ -353,7 +373,10 @@ const getSpeakingById = async (req, res) => {
     const { id } = req.params;
 
     const speaking = await Speaking.findByPk(id, {
-      include: [{ model: User, as: 'author', attributes: ['id', 'name', 'email'] }]
+      include: [
+        { model: User, as: 'author', attributes: ['id', 'name', 'email'] },
+        { model: TaskPdf, as: 'taskPdfs' } // Added TaskPdf include
+      ]
     });
 
     if (!speaking) {
@@ -361,7 +384,9 @@ const getSpeakingById = async (req, res) => {
     }
 
     const tagNames = await includeTagsFor(speaking.id);
-    res.status(200).json({ success: true, message: 'Speaking content fetched successfully', data: { ...speaking.toJSON(), tags: tagNames } });
+    const tasks = await getTasks(speaking.id);
+    
+    res.status(200).json({ success: true, message: 'Speaking content fetched successfully', data: { ...speaking.toJSON(), tags: tagNames, tasks } });
   } catch (error) {
     console.error('Error fetching speaking:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -374,7 +399,7 @@ const getSpeakingById = async (req, res) => {
 const updateSpeaking = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags } = req.body;
+    const { title, description, discription, content, transcript, videoRef, pdf, level, imageUrl, imageurl, tags, deletedTaskPdfIds } = req.body;
 
     const speaking = await Speaking.findByPk(id);
     if (!speaking) {
@@ -431,6 +456,25 @@ const updateSpeaking = async (req, res) => {
       ? normalizeLevels(level)
       : speaking.level;
 
+    // Handle deletion of existing task PDFs
+    if (deletedTaskPdfIds) {
+      try {
+        const idsToDelete = JSON.parse(deletedTaskPdfIds);
+        if (Array.isArray(idsToDelete) && idsToDelete.length > 0) {
+          await TaskPdf.destroy({
+            where: {
+              id: { [Op.in]: idsToDelete },
+              resourceType: 'speaking',
+              resourceId: speaking.id
+            }
+          });
+          console.log(`✅ Deleted ${idsToDelete.length} task PDFs`);
+        }
+      } catch (parseErr) {
+        console.error('❌ Error parsing deletedTaskPdfIds:', parseErr);
+      }
+    }
+
     await speaking.update({
       title: title ?? speaking.title,
       description: (description ?? discription ?? speaking.description),
@@ -445,13 +489,23 @@ const updateSpeaking = async (req, res) => {
         : (tags !== undefined ? String(tags).split(',').map(t => t.trim()).filter(Boolean) : speaking.tags)
     });
 
-    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
-      const rows = req.body.taskPdfs
+    // Handle multiple task PDFs
+    const taskPdfsArray = Array.isArray(req.body?.taskPdfs) ? req.body.taskPdfs : [];
+    if (taskPdfsArray.length) {
+      console.log('📎 Processing', taskPdfsArray.length, 'new task PDFs...');
+      const rows = taskPdfsArray
         .filter(p => p && p.filePath && p.fileName)
-        .map(p => ({ resourceType: 'speaking', resourceId: speaking.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+        .map(p => ({ 
+          resourceType: 'speaking', 
+          resourceId: speaking.id, 
+          filePath: p.filePath, 
+          fileName: p.fileName, 
+          fileSize: p.fileSize || null, 
+          uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() 
+        }));
       if (rows.length) {
-        const { TaskPdf } = require('../models');
-        await TaskPdf.bulkCreate(rows);
+        const created = await TaskPdf.bulkCreate(rows);
+        console.log(`✅ Added ${created.length} new task PDFs`);
       }
     }
 

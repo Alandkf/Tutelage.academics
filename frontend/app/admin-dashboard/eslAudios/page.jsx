@@ -60,19 +60,36 @@ const EslAudios = () => {
 
   const lastAudioRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchAudios })
 
-  const handleCreateSuccess = async (values) => {
+  const handleCreateSuccess = async (formData) => {
+    console.log('🎯 handleCreateSuccess called');
+    console.log('📦 Received formData:', formData);
+    
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('imageUrl', values.imageUrl ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('transcript', values.transcript ?? '')
-      fd.append('audioRef', values.audioRef ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('transcript', formData.transcript ?? '')
+      fd.append('audioRef', formData.audioRef ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
       
+      if (formData.pdf && formData.pdf instanceof File) {
+        console.log('📄 Adding PDF:', formData.pdf.name);
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+        formData.taskPdfs.forEach((file, index) => {
+          if (file instanceof File) {
+            console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      console.log('📤 Sending FormData to API...');
       const res = await fetch(`${BASE_URL}/api/esl-audios`, {
         method: "POST",
         credentials: "include",
@@ -93,20 +110,42 @@ const EslAudios = () => {
     setShowEdit(true)
   }
 
-  const handleEditSuccess = async (values) => {
+  const handleEditSuccess = async (formData) => {
+    console.log('🎯 handleEditSuccess called');
+    console.log('📦 Received formData:', formData);
+    
     if (!editAudio) return
     try {
       const fd = new FormData()
-      fd.append('title', values.title ?? '')
-      fd.append('imageUrl', values.imageUrl ?? '')
-      fd.append('description', values.description ?? '')
-      fd.append('transcript', values.transcript ?? '')
-      fd.append('audioRef', values.audioRef ?? '')
-      fd.append('level', values.level ?? '')
-      fd.append('tags', values.tags?.join(',') ?? '')
-      if (values.pdf) fd.append('pdfFile', values.pdf)
-      if (values.taskPdf) fd.append('taskPdfFile', values.taskPdf)
+      fd.append('title', formData.title ?? '')
+      fd.append('imageUrl', formData.imageUrl ?? '')
+      fd.append('description', formData.description ?? '')
+      fd.append('transcript', formData.transcript ?? '')
+      fd.append('audioRef', formData.audioRef ?? '')
+      fd.append('level', formData.level ?? '')
+      fd.append('tags', formData.tags?.join(',') ?? '')
       
+      if (formData.pdf && formData.pdf instanceof File) {
+        console.log('📄 Adding PDF:', formData.pdf.name);
+        fd.append('pdfFile', formData.pdf)
+      }
+      
+      if (Array.isArray(formData.taskPdfs) && formData.taskPdfs.length > 0) {
+        console.log('📎 Adding task PDFs:', formData.taskPdfs.length);
+        formData.taskPdfs.forEach((file, index) => {
+          if (file instanceof File) {
+            console.log(`📎 Adding task PDF ${index + 1}:`, file.name);
+            fd.append('taskPdfs', file)
+          }
+        })
+      }
+      
+      if (Array.isArray(formData.deletedTaskPdfIds) && formData.deletedTaskPdfIds.length > 0) {
+        console.log('🗑️ Adding deleted IDs:', formData.deletedTaskPdfIds);
+        fd.append('deletedTaskPdfIds', JSON.stringify(formData.deletedTaskPdfIds))
+      }
+      
+      console.log('📤 Sending FormData to API...');
       const res = await fetch(`${BASE_URL}/api/esl-audios/${editAudio.id}`, {
         method: "PUT",
         credentials: "include",

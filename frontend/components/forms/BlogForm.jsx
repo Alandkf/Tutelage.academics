@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X, Upload } from "lucide-react"
+import { X, Upload, Trash2 } from "lucide-react"
 
 const LEVEL_OPTIONS = [
 	{ value: 'a1', label: 'A1 Beginner' },
@@ -25,6 +25,8 @@ const getLevelValueFromLabel = (label) => {
 };
 
 const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }) => {
+	console.log('in: ', initialValues);
+	
 	const [formData, setFormData] = useState({
 		title: '',
 		content: '',
@@ -33,11 +35,13 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 		level: '',
 		tags: [],
 		pdf: null,
-		taskPdf: null
+		taskPdfs: []
 	})
 	const [tagInput, setTagInput] = useState('')
 	const [pdfPreview, setPdfPreview] = useState(null)
-	const [taskPdfPreview, setTaskPdfPreview] = useState(null)
+	const [taskPdfsPreview, setTaskPdfsPreview] = useState([])
+	const [existingTaskPdfs, setExistingTaskPdfs] = useState([])
+	const [deletedTaskPdfIds, setDeletedTaskPdfIds] = useState([])
 	const [loading, setLoading] = useState(false)
 
 	useEffect(() => {
@@ -56,10 +60,26 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 				level: levelValue,
 				tags: initialValues.tags || [],
 				pdf: null,
-				taskPdf: null
+				taskPdfs: []
 			})
-			setPdfPreview(initialValues.pdf || null)
-			setTaskPdfPreview(initialValues.taskPdf || null)
+			
+			// Handle PDF preview - extract filename from URL or object
+			if (initialValues.pdf) {
+				setPdfPreview(typeof initialValues.pdf === 'string' 
+					? initialValues.pdf.split('/').pop() 
+					: 'Existing PDF')
+			}
+			
+			// Handle taskPdfs preview - safely extract filenames from array of objects
+			if (Array.isArray(initialValues.taskPdfs) && initialValues.taskPdfs.length > 0) {
+				const existing = initialValues.taskPdfs.map(pdf => ({
+					id: pdf.id,
+					name: pdf?.fileName || pdf?.filePath?.split('/').pop() || 'Unknown',
+					filePath: pdf?.filePath,
+					existing: true
+				}))
+				setExistingTaskPdfs(existing)
+			}
 		}
 	}, [mode, initialValues])
 
@@ -98,19 +118,62 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 	}
 
 	const handleFileChange = (e, field) => {
-		const file = e.target.files?.[0]
-		if (file) {
-			setFormData(prev => ({ ...prev, [field]: file }))
-			if (field === 'pdf') setPdfPreview(file.name)
-			if (field === 'taskPdf') setTaskPdfPreview(file.name)
+		if (field === 'taskPdfs') {
+			const files = Array.from(e.target.files || [])
+			if (files.length > 0) {
+				// Append new files to existing ones
+				setFormData(prev => {
+					const currentFiles = Array.isArray(prev.taskPdfs) ? prev.taskPdfs : []
+					return { ...prev, taskPdfs: [...currentFiles, ...files] }
+				})
+				
+				// Add to preview
+				const newPreviews = files.map(f => ({ 
+					name: f.name, 
+					existing: false,
+					file: f 
+				}))
+				setTaskPdfsPreview(prev => [...prev, ...newPreviews])
+			}
+			// Reset input
+			e.target.value = ''
+		} else {
+			const file = e.target.files?.[0]
+			if (file) {
+				setFormData(prev => ({ ...prev, [field]: file }))
+				if (field === 'pdf') setPdfPreview(file.name)
+			}
 		}
+	}
+
+	const handleRemoveTaskPdf = (index) => {
+		setFormData(prev => {
+			const newFiles = Array.isArray(prev.taskPdfs) 
+				? prev.taskPdfs.filter((_, i) => i !== index)
+				: []
+			return { ...prev, taskPdfs: newFiles }
+		})
+		setTaskPdfsPreview(prev => prev.filter((_, i) => i !== index))
+	}
+
+	const handleRemoveExistingTaskPdf = (index) => {
+		const fileToRemove = existingTaskPdfs[index]
+		if (fileToRemove?.id) {
+			setDeletedTaskPdfIds(prev => [...prev, fileToRemove.id])
+		}
+		setExistingTaskPdfs(prev => prev.filter((_, i) => i !== index))
 	}
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 		setLoading(true)
 		try {
-			await onSuccess(formData)
+			// Include deleted file IDs in the form data
+			const submitData = {
+				...formData,
+				deletedTaskPdfIds: deletedTaskPdfIds
+			}
+			await onSuccess(submitData)
 		} finally {
 			setLoading(false)
 		}
@@ -170,24 +233,89 @@ const BlogForm = ({ mode = 'create', initialValues = null, onSuccess, onCancel }
 				</div>
 
 				<div>
-					<Label>PDF File</Label>
+					<Label>Preparation File</Label>
 					<div className="flex items-center gap-2">
 						<Input id="pdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'pdf')} className="hidden" />
 						<Button type="button" variant="outline" onClick={() => document.getElementById('pdf').click()} className="gap-2">
 							<Upload className="h-4 w-4" />Choose PDF
 						</Button>
-						{pdfPreview && <span className="text-sm text-muted-foreground">{pdfPreview}</span>}
+						{pdfPreview && <span className="text-sm text-muted-foreground truncate max-w-[200px]">{pdfPreview}</span>}
 					</div>
 				</div>
 
 				<div>
-					<Label>Task PDF File</Label>
-					<div className="flex items-center gap-2">
-						<Input id="taskPdf" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'taskPdf')} className="hidden" />
-						<Button type="button" variant="outline" onClick={() => document.getElementById('taskPdf').click()} className="gap-2">
-							<Upload className="h-4 w-4" />Choose Task PDF
-						</Button>
-						{taskPdfPreview && <span className="text-sm text-muted-foreground">{taskPdfPreview}</span>}
+					<Label>Task PDF Files (Multiple)</Label>
+					<div className="space-y-2">
+						<div className="flex items-center gap-2">
+							<Input 
+								id="taskPdfs" 
+								type="file" 
+								accept=".pdf" 
+								multiple
+								onChange={(e) => handleFileChange(e, 'taskPdfs')} 
+								className="hidden" 
+							/>
+							<Button 
+								type="button" 
+								variant="outline" 
+								onClick={() => document.getElementById('taskPdfs').click()} 
+								className="gap-2"
+							>
+								<Upload className="h-4 w-4" />
+								Add Task PDFs
+							</Button>
+							{(existingTaskPdfs.length + taskPdfsPreview.length) > 0 && (
+								<span className="text-sm text-muted-foreground">
+									{existingTaskPdfs.length + taskPdfsPreview.length} file(s)
+								</span>
+							)}
+						</div>
+
+						{/* Existing files from database */}
+						{existingTaskPdfs.length > 0 && (
+							<div className="space-y-1">
+								<Label className="text-xs text-muted-foreground">Existing Files</Label>
+								{existingTaskPdfs.map((file, index) => (
+									<div key={`existing-${index}`} className="flex items-center justify-between bg-muted px-3 py-2 rounded-md">
+										<span className="text-sm truncate flex-1">
+											{file.name}
+											<span className="text-xs text-muted-foreground ml-2">(saved)</span>
+										</span>
+										<button
+											type="button"
+											onClick={() => handleRemoveExistingTaskPdf(index)}
+											className="ml-2 p-1 hover:bg-destructive/10 hover:text-destructive rounded"
+											title="Remove file"
+										>
+											<Trash2 className="h-3 w-3" />
+										</button>
+									</div>
+								))}
+							</div>
+						)}
+
+						{/* New files to upload */}
+						{taskPdfsPreview.length > 0 && (
+							<div className="space-y-1">
+								<Label className="text-xs text-muted-foreground">New Files to Upload</Label>
+								{taskPdfsPreview.map((file, index) => (
+									<div key={`new-${index}`} className="flex items-center justify-between bg-primary/5 px-3 py-2 rounded-md border border-primary/20">
+										<span className="text-sm truncate flex-1">
+											{file.name}
+											<span className="text-xs text-primary ml-2">(new)</span>
+										</span>
+										<button
+											type="button"
+											onClick={() => handleRemoveTaskPdf(index)}
+											className="ml-2 p-1 hover:bg-destructive/10 hover:text-destructive rounded"
+											title="Remove file"
+										>
+											<X className="h-3 w-3" />
+										</button>
+									</div>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 

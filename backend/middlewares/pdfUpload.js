@@ -7,7 +7,7 @@
 // ============================================================================
 
 const multer = require('multer');
-const { uploadPdfBuffer } = require('../utils/restPdfClient');
+const { uploadPdfBuffer: uploadR2PdfBuffer, publicUrlForKey } = require('../utils/r2Client');
 
 // Memory storage so files are available as buffers
 const storage = multer.memoryStorage();
@@ -32,44 +32,47 @@ const upload = multer({
 const pdfUpload = (req, res, next) => {
   const fields = upload.fields([
     { name: 'pdfFile', maxCount: 1 },
-    { name: 'taskPdfFile', maxCount: 1 },
-    { name: 'taskPdfFiles', maxCount: 10 },
+    { name: 'taskPdfs', maxCount: 10 }, // Changed from 'taskPdfFiles' to 'taskPdfs'
   ]);
 
   fields(req, res, async (err) => {
     if (err) {
+      console.error('❌ Multer error:', err);
       return res.status(400).json({ success: false, message: err.message || 'Invalid upload' });
     }
+
 
     try {
       // If direct URLs are provided, leave them as-is. Otherwise, upload any files.
       const pdfFile = req.files?.pdfFile?.[0];
-      const taskPdfFile = req.files?.taskPdfFile?.[0];
-      const taskPdfFiles = req.files?.taskPdfFiles || [];
+      const taskPdfs = req.files?.taskPdfs || []; // Changed from taskPdfFile
 
       if (pdfFile) {
-        const url = await uploadPdfBuffer(pdfFile.buffer, pdfFile.originalname);
-        req.body.pdf = url;
+        const { key } = await uploadR2PdfBuffer(pdfFile.buffer, pdfFile.originalname, { uploadedBy: String(req.user?.id || ''), type: 'primary_pdf' });
+        const publicUrl = publicUrlForKey(key);
+        req.body.pdf = publicUrl || `/api/files/r2/${encodeURIComponent(key)}`;
       }
 
       const collected = [];
-      if (taskPdfFile) {
-        const url = await uploadPdfBuffer(taskPdfFile.buffer, taskPdfFile.originalname);
-        collected.push({ filePath: url, fileName: taskPdfFile.originalname, fileSize: taskPdfFile.size, uploadDate: new Date().toISOString() });
-      }
-      if (Array.isArray(taskPdfFiles) && taskPdfFiles.length) {
-        for (const f of taskPdfFiles) {
-          const url = await uploadPdfBuffer(f.buffer, f.originalname);
+      if (Array.isArray(taskPdfs) && taskPdfs.length) {
+        console.log('⬆️ Uploading', taskPdfs.length, 'task PDFs...');
+        for (const f of taskPdfs) {
+          const { key } = await uploadR2PdfBuffer(f.buffer, f.originalname, { uploadedBy: String(req.user?.id || ''), type: 'task_pdf' });
+          const direct = publicUrlForKey(key);
+          const url = direct || `/api/files/r2/${encodeURIComponent(key)}`;
           collected.push({ filePath: url, fileName: f.originalname, fileSize: f.size, uploadDate: new Date().toISOString() });
+          console.log('✅ Uploaded:', f.originalname, '→', key);
         }
       }
+      
       if (collected.length) {
         req.body.taskPdfs = collected;
+        console.log('✅ Total task PDFs processed:', collected.length);
       }
 
       next();
     } catch (e) {
-      console.error('PDF upload failed:', e);
+      console.error('❌ PDF upload failed:', e);
       return res.status(502).json({ success: false, message: 'PDF upload failed', error: e.message });
     }
   });

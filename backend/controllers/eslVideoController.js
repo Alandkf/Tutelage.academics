@@ -3,9 +3,10 @@
 // ============================================================================
 // CRUD, search, filter, sort, tag assignment, and analytics for ESL videos.
 
-const { EslVideo, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest } = require('../models');
+const { EslVideo, Tag, ResourceTag, ResourceAnalytics, ApprovalRequest, TaskPdf } = require('../models');
 const { Op } = require('sequelize');
 const { sendApprovalRequestNotification } = require('../config/email');
+const { getTasks } = require('../scripts/fetchTasks');
 
 // Helpers
 const normalizeLevels = (input) => {
@@ -76,7 +77,7 @@ const bumpAnalytics = async (resourceId, field = 'views', amount = 1) => {
 
 exports.createEslVideo = async (req, res) => {
   try {
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, level, tags, category } = req.body;
     const normalizedLevel = normalizeLevels(level);
     const thumbnailUrl = getYouTubeThumbnail(videoRef);
     const createdBy = req.user?.id || 1;
@@ -133,21 +134,31 @@ exports.createEslVideo = async (req, res) => {
       pdf, 
       level: normalizedLevel, 
       thumbnailUrl, 
-      tags: tagNames.length ? tagNames : null, 
+      tags: tagNames.length ? tagNames : null,
+      category: category || null,
       createdBy 
     });
 
-    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
-      const rows = req.body.taskPdfs
+    // Handle multiple task PDFs
+    const taskPdfsArray = Array.isArray(req.body?.taskPdfs) ? req.body.taskPdfs : [];
+    if (taskPdfsArray.length) {
+      console.log('📎 Processing', taskPdfsArray.length, 'task PDFs for ESL video creation...');
+      const rows = taskPdfsArray
         .filter(p => p && p.filePath && p.fileName)
-        .map(p => ({ resourceType: 'esl_video', resourceId: video.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+        .map(p => ({ 
+          resourceType: 'esl_video', 
+          resourceId: video.id, 
+          filePath: p.filePath, 
+          fileName: p.fileName, 
+          fileSize: p.fileSize || null, 
+          uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() 
+        }));
       if (rows.length) {
-        const { TaskPdf } = require('../models');
-        await TaskPdf.bulkCreate(rows);
+        const created = await TaskPdf.bulkCreate(rows);
+        console.log('✅', created.length, 'task PDFs created successfully');
       }
     }
     
-    // Also sync to join table for relational queries
     if (tagNames.length) await attachTags(video.id, tagNames);
     
     const tagList = await includeTagsFor(video.id);
@@ -160,10 +171,24 @@ exports.createEslVideo = async (req, res) => {
 
 exports.getAllEslVideos = async (req, res) => {
   try {
-    const { cursor, page, limit = 9, search, level, tags, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
+    const { cursor, page, limit = 9, search, level, tags, category, sortBy = 'createdAt', sortOrder = 'DESC' } = req.query;
     const where = {};
     
-    if (search) where.title = { [Op.like]: `%${search}%` };
+    // Enhanced search across title, description, tags, and category (case-insensitive)
+    if (search) {
+      const searchTerm = search.trim();
+      where[Op.or] = [
+        { title: { [Op.iLike]: `%${searchTerm}%` } },
+        { description: { [Op.iLike]: `%${searchTerm}%` } },
+        { tags: { [Op.overlap]: [searchTerm] } },
+        { category: { [Op.iLike]: `%${searchTerm}%` } }
+      ];
+    }
+    
+    // Category filter (case-insensitive)
+    if (category) {
+      where.category = { [Op.iLike]: category.trim() };
+    }
     
     const levelsFilter = normalizeLevels(level);
     if (levelsFilter) where.level = { [Op.overlap]: levelsFilter };
@@ -235,6 +260,7 @@ exports.getAllEslVideos = async (req, res) => {
     
     let rows = await EslVideo.findAll({
       where,
+      include: [{ model: TaskPdf, as: 'taskPdfs' }], // Added TaskPdf include
       order,
       limit: fetchLimit,
       distinct: true
@@ -272,11 +298,14 @@ exports.getAllEslVideos = async (req, res) => {
 exports.getEslVideoById = async (req, res) => {
   try {
     const { id } = req.params;
-    const video = await EslVideo.findByPk(id);
+    const video = await EslVideo.findByPk(id, {
+      include: [{ model: TaskPdf, as: 'taskPdfs' }] // Added TaskPdf include
+    });
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
+    const tasks = await getTasks(video.id);
     const tags = await includeTagsFor(video.id);
     const metrics = await bumpAnalytics(video.id, 'views', 1);
-    res.status(200).json({ success: true, message: 'Esl Video fetched successfully', data: { ...video.toJSON(), tags, metrics } });
+    res.status(200).json({ success: true, message: 'Esl Video fetched successfully', data: { ...video.toJSON(), tags, metrics, tasks } });
   } catch (err) {
     console.error('Error fetching ESL video:', err);
     res.status(500).json({ success: false, message: 'Internal server error', error: err.message });
@@ -286,7 +315,7 @@ exports.getEslVideoById = async (req, res) => {
 exports.updateEslVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, videoRef, description, pdf, level, tags } = req.body;
+    const { title, videoRef, description, pdf, level, tags, category, deletedTaskPdfIds } = req.body;
     const video = await EslVideo.findByPk(id);
     if (!video) return res.status(404).json({ success: false, message: 'Video not found' });
     const role = req.user?.role;
@@ -308,6 +337,7 @@ exports.updateEslVideo = async (req, res) => {
       if (level !== undefined) payload.level = normalizeLevels(level);
       if (videoRef !== undefined) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
       if (tagNames !== null) payload.tags = tagNames;
+      if (category !== undefined) payload.category = category;
       const approval = await ApprovalRequest.create({
         resourceType: 'EslVideo',
         resourceId: video.id,
@@ -344,24 +374,57 @@ exports.updateEslVideo = async (req, res) => {
     };
     if (videoRef) payload.thumbnailUrl = getYouTubeThumbnail(videoRef);
     
+    // Update category if provided
+    if (category !== undefined) {
+      payload.category = category;
+    }
+    
     // Update tags array column if tags were provided
     if (tagNames !== null) {
       payload.tags = tagNames.length ? tagNames : null;
     }
     
+    // Handle deletion of existing task PDFs
+    if (deletedTaskPdfIds) {
+      try {
+        const idsToDelete = JSON.parse(deletedTaskPdfIds);
+        if (Array.isArray(idsToDelete) && idsToDelete.length > 0) {
+          await TaskPdf.destroy({
+            where: {
+              id: { [Op.in]: idsToDelete },
+              resourceType: 'esl_video',
+              resourceId: video.id
+            }
+          });
+          console.log(`✅ Deleted ${idsToDelete.length} task PDFs`);
+        }
+      } catch (parseErr) {
+        console.error('❌ Error parsing deletedTaskPdfIds:', parseErr);
+      }
+    }
+
     await video.update(payload);
 
-    if (Array.isArray(req.body?.taskPdfs) && req.body.taskPdfs.length) {
-      const rows = req.body.taskPdfs
+    // Handle multiple task PDFs
+    const taskPdfsArray = Array.isArray(req.body?.taskPdfs) ? req.body.taskPdfs : [];
+    if (taskPdfsArray.length) {
+      console.log('📎 Processing', taskPdfsArray.length, 'new task PDFs...');
+      const rows = taskPdfsArray
         .filter(p => p && p.filePath && p.fileName)
-        .map(p => ({ resourceType: 'esl_video', resourceId: video.id, filePath: p.filePath, fileName: p.fileName, fileSize: p.fileSize || null, uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() }));
+        .map(p => ({ 
+          resourceType: 'esl_video', 
+          resourceId: video.id, 
+          filePath: p.filePath, 
+          fileName: p.fileName, 
+          fileSize: p.fileSize || null, 
+          uploadDate: p.uploadDate ? new Date(p.uploadDate) : new Date() 
+        }));
       if (rows.length) {
-        const { TaskPdf } = require('../models');
-        await TaskPdf.bulkCreate(rows);
+        const created = await TaskPdf.bulkCreate(rows);
+        console.log(`✅ Added ${created.length} new task PDFs`);
       }
     }
     
-    // Sync join table if tags were provided
     if (tagNames !== null) {
       await ResourceTag.destroy({ where: { resourceType: DB_RESOURCE_TYPE, resourceId: id } });
       if (tagNames.length) await attachTags(video.id, tagNames);

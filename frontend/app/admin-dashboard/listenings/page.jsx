@@ -61,11 +61,13 @@ const Audio = () => {
   const lastAudioRef = useInfiniteScroll({ loading, hasMore, onLoadMore: fetchAudios })
 
   const handleCreateSuccess = async (formData) => {
+    
     try {
+      // FormData is already prepared by AudioForm with all fields
       const res = await fetch(`${BASE_URL}/api/audios`, {
         method: "POST",
         credentials: "include",
-        body: formData // FormData is already prepared by AudioForm
+        body: formData // FormData already contains pdf, taskPdfs, tags, etc.
       })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message)
@@ -83,12 +85,16 @@ const Audio = () => {
   }
 
   const handleEditSuccess = async (formData) => {
+    console.log('🎯 handleEditSuccess called');
+    console.log('📦 Received formData:', formData);
+    
     if (!editAudio) return
     try {
+      // FormData is already prepared by AudioForm with all fields
       const res = await fetch(`${BASE_URL}/api/audios/${editAudio.id}`, {
         method: "PUT",
         credentials: "include",
-        body: formData // FormData is already prepared by AudioForm
+        body: formData // FormData already contains pdf, taskPdfs, deletedTaskPdfIds, tags, etc.
       })
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message)

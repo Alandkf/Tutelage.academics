@@ -8,6 +8,13 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
+import BASE_URL from '@/app/config/url'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+
 
 const BusinessEnglishPage = () => {
   const router = useRouter()
@@ -204,6 +211,86 @@ const inPersonClass = {
       question: "How long does each level take?",
       answer: "Course duration varies based on your starting level and pace, but each level is designed to build skills progressively and effectively."
     }
+  ]
+
+  
+    // Form state - simplified for pricing request (matching Kids page)
+    const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      interestedIn: '',
+    })
+    const [formLoading, setFormLoading] = useState(false)
+  
+    const handleInputChange = (field, value) => {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+
+   const handleFormSubmit = async (e) => {
+    e.preventDefault()
+    setFormLoading(true)
+
+    try {
+      const requiredFields = ['firstName', 'lastName', 'email', 'interestedIn']
+      const missingFields = requiredFields.filter(field => !formData[field])
+      
+      if (missingFields.length > 0) {
+        toast("Please fill in all required fields", { variant: "destructive" })
+        return
+      }
+
+      const response = await fetch(`${BASE_URL}/api/enrollment/pricing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          course: formData.interestedIn
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        toast("Request Failed", {
+          description: result.message || 'Please check your information and try again'
+        })
+        return
+      }
+
+      toast("Pricing Information Sent! 🎉", {
+        description: "Check your email for detailed course information and pricing"
+      })
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        interestedIn: '',
+      })
+
+    } catch (error) {
+      toast("Connection Error", {
+        description: "Unable to submit request. Please try again later."
+      })
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+    const courseOptions = [
+    'English for Kids and Teens',
+    'English for Adults', 
+    'Academic English',
+    'Business English',
+    'English Proficiency Tests'  
   ]
 
   return (
@@ -420,6 +507,102 @@ const inPersonClass = {
             </div>
           </div>
         </div>
+
+        {/* Request Pricing and Course Information Section */}
+      <div className="py-20 bg-muted/20" id="form-section">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-6">
+              {t('inglishForAdults.requestPricing.title')}
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              {t('inglishForAdults.requestPricing.description')}
+            </p>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg shadow-sm p-8 sm:p-10 lg:p-12">
+            <form onSubmit={handleFormSubmit} className="space-y-8">
+              {/* First Row: Names */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-1 items-start">
+                  <Label htmlFor="firstName" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForAdults.requestPricing.form.firstName')} {t('inglishForAdults.requestPricing.form.required')}
+                  </Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    required
+                    className={isRTL ? 'text-right' : ''}
+                  />
+                </div>
+                <div className="flex flex-col gap-1 items-start">
+                  <Label htmlFor="lastName" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                    {t('inglishForAdults.requestPricing.form.lastName')} {t('inglishForAdults.requestPricing.form.required')}
+                  </Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    required
+                    className={isRTL ? 'text-right' : ''}
+                  />
+                </div>
+              </div>
+
+              {/* Second Row: Email and Course Interest (side by side on md+) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="flex flex-col gap-1 items-start">
+                                <Label htmlFor="email" className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                                  {t('inglishForKids.requestPricing.form.email')} {t('inglishForKids.requestPricing.form.required')}
+                                </Label>
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  value={formData.email}
+                                  onChange={(e) => handleInputChange('email', e.target.value)}
+                                  required
+                                  className={isRTL ? 'text-right' : ''}
+                                />
+                              </div>
+              
+                              <div className="flex flex-col gap-1 items-start">
+                                <Label className={`text-base font-medium ${isRTL ? 'self-end' : ''}`}>
+                                  {t('inglishForKids.requestPricing.form.interestedIn')} {t('inglishForKids.requestPricing.form.required')}
+                                </Label>
+                                <Select value={formData.interestedIn} onValueChange={(value) => handleInputChange('interestedIn', value)}>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={t('inglishForKids.requestPricing.form.selectCourse')} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {courseOptions.map((course) => (
+                                      <SelectItem key={course} value={course}>
+                                        {course}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+              {/* Submit Button */}
+              <div className="pt-6 flex justify-center">
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={formLoading}
+                >
+                  {formLoading ? t('inglishForAdults.requestPricing.form.submittingButton') : t('inglishForAdults.requestPricing.form.submitButton')}
+                  <ChevronRight className={`w-5 h-5 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
 
       </div>
     </>

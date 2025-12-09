@@ -17,6 +17,7 @@ const SingleArticleA1 = () => {
 	const params = useParams()
 	const router = useRouter()
 	const [article, setArticle] = useState(null)
+	
 	const [loading, setLoading] = useState(true)
 
 	// PDF modal using custom hook
@@ -126,51 +127,56 @@ const SingleArticleA1 = () => {
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
 				<div className="grid grid-cols-1 gap-4">
 					{Array.isArray(article?.tasks) && article.tasks.length > 0 ? (
-						article.tasks.map((task, idx) => (
+					<div className="grid grid-cols-1 gap-4">
+						{article.tasks.map((task, idx) => {
+						const taskPdf = task?.filePath
+						return (
 							<div key={idx} className="border rounded-md overflow-hidden">
-								<button onClick={() => toggleTask(idx)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-									<span className="font-medium">Task {idx + 1}</span>
-									<span>{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
-								</button>
-								<AnimatePresence initial={false}>
-									{openTasks[idx] && (
-										<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION }} className="overflow-hidden border-t">
-											<div className="px-4 py-3">
-												<div className="text-sm leading-relaxed">{task.content || 'Task details will be added here.'}</div>
-												{article?.taskPdf && (
-													<div className="mt-3">
-														<PdfButton pdfUrl={article.taskPdf} onOpen={(url) => openPdf(url, `Task ${idx + 1} PDF`)} label={`Task ${idx + 1} PDF`} />
-													</div>
-												)}
-											</div>
-										</motion.div>
-									)}
-								</AnimatePresence>
-							</div>
-						))
-					) : (
-						<div className="border rounded-md overflow-hidden">
-							<button onClick={() => toggleTask(0)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-								<span className="font-medium">Task 1</span>
-								<span>{openTasks[0] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+							<button
+								onClick={() => toggleTask(idx)}
+								className="w-full flex items-center justify-between px-4 py-5 bg-card"
+							>
+								<span className="font-medium text-foreground">Task {idx + 1} {}</span>
+								<span className="text-muted-foreground">
+								{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+								</span>
 							</button>
 							<AnimatePresence initial={false}>
-								{openTasks[0] && (
-									<motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION }} className="overflow-hidden border-t">
-										<div className="px-4 py-3">
-											{article?.taskPdf && <PdfButton pdfUrl={article.taskPdf} onOpen={(url) => openPdf(url, 'Task PDF')} label="Task PDF" />}
+								{openTasks[idx] && (
+								<motion.div
+									key={`task-${idx}`}
+									initial={{ height: 0, opacity: 0 }}
+									animate={{ height: 'auto', opacity: 1 }}
+									exit={{ height: 0, opacity: 0 }}
+									transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
+									className="overflow-hidden border-t bg-background"
+								>
+									<div className="px-4 py-3">
+									<div className="text-sm text-foreground leading-relaxed">{task?.content || ''}</div>
+									{taskPdf && (
+										<div className="mt-3">
+										<PdfButton 
+											pdfUrl={taskPdf} 
+											onOpen={openPdf}
+											label="Task PDF"
+										/>
 										</div>
-									</motion.div>
+									)}
+									</div>
+								</motion.div>
 								)}
 							</AnimatePresence>
-						</div>
-					)}
+							</div>
+						)
+						})}
+					</div>
+					) : null }
 				</div>
 			</div>
 
 			{/* Tags */}
 			{Array.isArray(article?.tags) && article.tags.length > 0 && (
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pb-6">
+				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 					<h3 className="text-3xl font-bold mb-6">Tags</h3>
 					<div className="flex flex-wrap gap-3">
 						{article.tags.map((t, i) => (

@@ -130,50 +130,55 @@ const SingleAudioB2 = () => {
       )}
 
       {/* Tasks */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="grid grid-cols-1 gap-4">
-          {Array.isArray(audio?.tasks) && audio.tasks.length > 0 ? (
-            audio.tasks.map((task, idx) => (
-              <div key={idx} className="border rounded-md overflow-hidden">
-                <button onClick={() => toggleTask(idx)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-                  <span className="font-medium">Task {idx + 1}</span>
-                  <span>{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {openTasks[idx] && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION }} className="overflow-hidden border-t">
-                      <div className="px-4 py-3">
-                        <div className="text-sm leading-relaxed">{task.content || 'Task details will be added here.'}</div>
-                        {audio?.taskPdf && (
-                          <div className="mt-3">
-                            <PdfButton pdfUrl={audio.taskPdf} onOpen={(url) => openPdf(url, `Task ${idx + 1} PDF`)} label={`Task ${idx + 1} PDF`} />
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))
-          ) : (
-            <div className="border rounded-md overflow-hidden">
-              <button onClick={() => toggleTask(0)} className="w-full flex items-center justify-between px-4 py-3 bg-card">
-                <span className="font-medium">Task 1</span>
-                <span>{openTasks[0] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
-              </button>
-              <AnimatePresence initial={false}>
-                {openTasks[0] && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: ANIM_DURATION }} className="overflow-hidden border-t">
-                    <div className="px-4 py-3">
-                      {audio?.taskPdf && <PdfButton pdfUrl={audio.taskPdf} onOpen={(url) => openPdf(url, 'Task PDF')} label="Task PDF" />}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-      </div>
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+				<div className="grid grid-cols-1 gap-4">
+					{Array.isArray(audio?.tasks) && audio.tasks.length > 0 ? (
+					<div className="grid grid-cols-1 gap-4">
+						{audio.tasks.map((task, idx) => {
+						const taskPdf = task?.filePath
+						return (
+							<div key={idx} className="border rounded-md overflow-hidden">
+							<button
+								onClick={() => toggleTask(idx)}
+								className="w-full flex items-center justify-between px-4 py-5 bg-card"
+							>
+								<span className="font-medium text-foreground">Task {idx + 1} {}</span>
+								<span className="text-muted-foreground">
+								{openTasks[idx] ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+								</span>
+							</button>
+							<AnimatePresence initial={false}>
+								{openTasks[idx] && (
+								<motion.div
+									key={`task-${idx}`}
+									initial={{ height: 0, opacity: 0 }}
+									animate={{ height: 'auto', opacity: 1 }}
+									exit={{ height: 0, opacity: 0 }}
+									transition={{ duration: ANIM_DURATION, ease: 'easeInOut' }}
+									className="overflow-hidden border-t bg-background"
+								>
+									<div className="px-4 py-3">
+									<div className="text-sm text-foreground leading-relaxed">{task?.content || ''}</div>
+									{taskPdf && (
+										<div className="mt-3">
+										<PdfButton 
+											pdfUrl={taskPdf} 
+											onOpen={openPdf}
+											label="Task PDF"
+										/>
+										</div>
+									)}
+									</div>
+								</motion.div>
+								)}
+							</AnimatePresence>
+							</div>
+						)
+						})}
+					</div>
+					) : null }
+				</div>
+			</div>
 
       {/* Tags */}
       {Array.isArray(audio?.tags) && audio.tags.length > 0 && (

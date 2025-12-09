@@ -46,6 +46,7 @@ const adminQuizRoutes = require('./routes/adminQuiz');
 const quizRoutes = require('./routes/quiz');
 const searchRoutes = require('./routes/search');
 const pdfProxyRoutes = require('./routes/pdfProxy');
+const fileRoutes = require('./routes/files');
 const statsRoutes = require('./routes/stats');
 const websiteAnalyticsRoutes = require('./routes/websiteAnalytics');
 const approvalsRoutes = require('./routes/approvals');
@@ -161,6 +162,7 @@ app.use('/api/admin/quiz', adminQuizRoutes);  // Admin quiz management
 app.use('/api/quiz', quizRoutes);             // Public quiz endpoints (frontend)
 app.use('/api/search', searchRoutes);
 app.use('/api/pdf', pdfProxyRoutes);          // PDF proxy for inline viewing
+app.use('/api/files', fileRoutes);            // R2 file routes (download/metadata)
 app.use('/api/stats', statsRoutes);           // Dashboard statistics
 app.use('/api/website-analytics', websiteAnalyticsRoutes); // Google Analytics data
 app.use('/api/approvals', approvalsRoutes);               // Admin approvals workflow
