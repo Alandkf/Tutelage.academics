@@ -7,7 +7,7 @@
 // ============================================================================
 
 const multer = require('multer');
-const { uploadPdfBuffer } = require('../utils/restPdfClient');
+const { uploadPdfBuffer: uploadR2PdfBuffer, publicUrlForKey } = require('../utils/r2Client');
 
 // Memory storage so files are available as buffers
 const storage = multer.memoryStorage();
@@ -48,22 +48,20 @@ const pdfUpload = (req, res, next) => {
       const taskPdfs = req.files?.taskPdfs || []; // Changed from taskPdfFile
 
       if (pdfFile) {
-        const url = await uploadPdfBuffer(pdfFile.buffer, pdfFile.originalname);
-        req.body.pdf = url;
+        const { key } = await uploadR2PdfBuffer(pdfFile.buffer, pdfFile.originalname, { uploadedBy: String(req.user?.id || ''), type: 'primary_pdf' });
+        const publicUrl = publicUrlForKey(key);
+        req.body.pdf = publicUrl || `/api/files/r2/${encodeURIComponent(key)}`;
       }
 
       const collected = [];
       if (Array.isArray(taskPdfs) && taskPdfs.length) {
         console.log('⬆️ Uploading', taskPdfs.length, 'task PDFs...');
         for (const f of taskPdfs) {
-          const url = await uploadPdfBuffer(f.buffer, f.originalname);
-          collected.push({ 
-            filePath: url, 
-            fileName: f.originalname, 
-            fileSize: f.size, 
-            uploadDate: new Date().toISOString() 
-          });
-          console.log('✅ Uploaded:', f.originalname, '→', url);
+          const { key } = await uploadR2PdfBuffer(f.buffer, f.originalname, { uploadedBy: String(req.user?.id || ''), type: 'task_pdf' });
+          const direct = publicUrlForKey(key);
+          const url = direct || `/api/files/r2/${encodeURIComponent(key)}`;
+          collected.push({ filePath: url, fileName: f.originalname, fileSize: f.size, uploadDate: new Date().toISOString() });
+          console.log('✅ Uploaded:', f.originalname, '→', key);
         }
       }
       
