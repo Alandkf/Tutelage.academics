@@ -3,6 +3,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const { sequelize } = require('../models');
 const seed = require('./seed');
+const { seedAdminUser } = require('./seedUser');
 
 async function resetAndSeed() {
   try {
@@ -27,13 +28,22 @@ async function resetAndSeed() {
     await sequelize.sync({ force: true }); // force:true ensures creation from models
     console.log('✅ Tables recreated');
 
-    console.log('🌱 Running seed script...');
-    if (typeof seed.main === 'function') {
-      await seed.main();
-      console.log('✅ Seeding complete');
-    } else {
-      console.warn('⚠️ seed.main is not available; import the seeder functions directly if needed.');
-    }
+    console.log('👤 Creating admin user...');
+    const adminUser = await seedAdminUser();
+    console.log('✅ Admin user created successfully');
+    console.log('=' .repeat(50));
+    console.log('LOGIN CREDENTIALS:');
+    console.log('Email: seed-admin@gmail.com');
+    console.log('Password: password123');
+    console.log('=' .repeat(50));
+
+    // console.log('🌱 Running seed script...');
+    // if (typeof seed.main === 'function') {
+    //   await seed.main();
+    //   console.log('✅ Seeding complete');
+    // } else {
+    //   console.warn('⚠️ seed.main is not available; import the seeder functions directly if needed.');
+    // }
 
     console.log('🎉 Reset and seed finished');
     process.exit(0);
