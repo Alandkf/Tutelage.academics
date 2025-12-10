@@ -296,9 +296,9 @@ const SingleVideo = () => {
 
         {/* Tasks (render stacked full-width boxes) */}
         <div className="grid grid-cols-1 gap-4">
-          {Array.isArray(video?.tasks) && video.tasks.length > 0 ? (
+          {Array.isArray(video?.taskPdfs) && video.taskPdfs.length > 0 ? (
 						<div className="grid grid-cols-1 gap-4">
-							{video.tasks.map((task, idx) => {
+							{video.taskPdfs.map((task, idx) => {
 							const taskPdf = task?.filePath
 							return (
 								<div key={idx} className="border rounded-md overflow-hidden">
