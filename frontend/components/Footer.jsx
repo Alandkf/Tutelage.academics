@@ -205,11 +205,11 @@ export const Footer = () => {
                 {/* Contact Information */}
                 <div className="space-y-3">
                   <h5 className="text-base font-bold text-white">Contact Information</h5>
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-center space-x-3">
                     <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                     <div className="text-left">
-                      <p className="text-white text-sm">Suli Innovation house</p>
-                      <p className="text-white text-sm">Sulaimaniyah - Kurdistan Region</p>
+                      <p className="text-white text-sm">New Chwar Chra, Sulaimaniyah</p>
+                      <p className="text-white text-sm">Kurdistan Region, Iraq</p>
                     </div>
                   </div>
                   
@@ -220,13 +220,13 @@ export const Footer = () => {
                         href="tel:+9647501534240"
                         className="text-white hover:text-primary transition-colors duration-200 text-sm"
                       >
-                        (964+) 07501534240
+                        (+964) 07501534340
                       </a>
                       <a
                         href="tel:+9647701946364"
                         className="text-white hover:text-primary transition-colors duration-200 text-sm"
                       >
-                        (964+) 07701946364
+                        (+964) 07701946364
                       </a>
                     </div>
                   </div>
