@@ -246,9 +246,9 @@ export const Footer = () => {
                 <div className="space-y-2">
                   <h5 className="text-base font-bold text-white">Office Hours</h5>
                   <div className="text-white text-sm space-y-1">
-                    <p>Sunday: 1:00 PM - 5:00 PM</p>
-                    <p>Tuesday: 1:00 PM - 5:00 PM</p>
-                    <p>Thursday: 1:00 PM - 5:00 PM</p>
+                    <p>Sunday - Thursday: 9:00 AM - 5:00 PM</p>
+                    <p>Saturday: By Appointment Only</p>
+                    <p>Friday: Closed</p>
                   </div>
                 </div>
               </div>
@@ -279,6 +279,10 @@ export const Footer = () => {
                     © {currentYear} Tutelage. All rights reserved.
                  </p>
               </div>
+            </div>
+
+            <div>
+              Developed by <span className="text-primary font-bold">Nexa Void</span> team
             </div>
 
             {/* Social Media Links */}
