@@ -51,7 +51,7 @@ export default function HeroSection({ title, subtitle, imageUrl }) {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-          className="text-6xl sm:text-7xl max-md:leading-20 md:text-5xl max-w-5xl font-semibold text-white drop-shadow mb-10 md:mb-4">{safeTitle}
+          className="text-6xl sm:text-7xl leading-[130%] md:text-5xl max-w-5xl font-semibold text-white drop-shadow mb-10 md:mb-4">{safeTitle}
           </motion.h1>
           <motion.p
           initial={{ y: 20, opacity: 0 }}
