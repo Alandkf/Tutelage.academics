@@ -35,6 +35,7 @@ const Stories = () => {
       if (!reset && nextCursor) params.append("cursor", nextCursor)
       const res = await fetch(`${BASE_URL}/api/stories?${params.toString()}`, { credentials: "include" })
       const data = await res.json()
+      console.log("fetched data: ", data)
       if (!data.success) throw new Error(data.message || "Failed to fetch stories")
       setStories(prev => reset ? data.data.stories || [] : [...prev, ...(data.data.stories || [])])
       setHasMore(data.data.pagination?.hasMore ?? false)
