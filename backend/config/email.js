@@ -41,7 +41,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
 
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.krd',
     subject: `New Course Enrollment Application: ${course}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">

@@ -17,7 +17,7 @@ const processEnrollment = async (req, res) => {
     const { name, email, phone, age, profession, course, proficiencyType } = req.body;
     
     // Validate required fields
-    if (!name || !email || !phone || !age || !profession || !course || !proficiencyType) {
+    if (!name || !email || !phone || !age || !profession || !course ) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
@@ -48,7 +48,7 @@ const processEnrollment = async (req, res) => {
       age: age,
       profession: profession.trim(),
       course: course.trim(),
-      proficiencyType: proficiencyType.trim()
+      proficiencyType: proficiencyType?.trim()
     };
     
     console.log('📧 Sending enrollment emails...');
@@ -490,8 +490,8 @@ const processContact = async (req, res) => {
       console.error('❌ Email sending error:', emailError);
       
       return res.status(200).json({
-        success: true,
-        message: 'Contact form submitted successfully! However, there was an issue sending the email. Our team will contact you directly.',
+        success: false,
+        message: 'there was an issue sending the email.',
         data: {
           name: contactData.name,
           email: contactData.email
