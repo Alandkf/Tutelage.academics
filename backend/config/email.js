@@ -3,31 +3,23 @@
 // ============================================================================
 // Nodemailer setup for sending enrollment and notification emails
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const path = require('path');
 const fs = require('fs');
 
-const FRONTEND_URL = process.env.FRONTEND_URL
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
 
-// Create reusable transporter object using SMTP transport
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465, 
-  secure: true, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Test the connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ Email configuration error:', error);
-  } else {
-    console.log('✅ Email server is ready to send messages');
-  }
-});
+// Verify Resend is configured
+if (!process.env.RESEND_API_KEY) {
+  console.error('❌ RESEND_API_KEY is not configured in .env file');
+  console.log('📧 Get your free API key at https://resend.com');
+} else {
+  console.log('✅ Resend email service is configured and ready');
+}
 
 /**
  * Send enrollment application email to admin
@@ -43,13 +35,13 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
     course,
     proficiencyType
   } = enrollmentData;
-  
+
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-  
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
     subject: `New Course Enrollment Application: ${course}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -103,13 +95,12 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${course}</td>
               </tr>
-              ${
-                proficiencyType && 
-                `<tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
+              ${proficiencyType &&
+      `<tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Proficiency Type:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${proficiencyType}</td>
               </tr>`
-              }
+      }
             </table>
           </div>
           
@@ -152,9 +143,9 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
  */
 async function sendEnrollmentConfirmationEmail(enrollmentData) {
   const { name, email, course } = enrollmentData;
-  
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: 'Enrollment Application Received - Welcome to Tutelage!',
     html: `
@@ -243,9 +234,9 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
  */
 async function sendPricingRequestEmail(pricingData) {
   const { firstName, lastName, email, course } = pricingData;
-  
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: `${course} - Course Information & Pricing`,
     html: `
@@ -390,10 +381,10 @@ async function sendTestResultEmail(resultData) {
     totalQuestions,
     correctAnswers
   } = resultData;
-  
+
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-  
+
   // ✅ Calculate dynamic level ranges based on totalQuestions
   const ranges = [
     { level: 'A1 Beginner', min: 0, max: Math.floor(totalQuestions * 0.10), scoreMin: '0%', scoreMax: '10%' },
@@ -405,7 +396,7 @@ async function sendTestResultEmail(resultData) {
   ];
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: FROM_EMAIL,
     to: email,
     subject: `Your English Placement Test Results - ${level}`,
     html: `
@@ -647,9 +638,9 @@ async function sendTestResultEmail(resultData) {
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Test result email sent successfully:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('Test result email sent successfully:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('Error sending test result email:', error);
     throw error;
@@ -787,16 +778,16 @@ const sendPlacementTestBookingEmail = async (bookingData) => {
   `;
 
   const mailOptions = {
-    from: `"Tutelage Bookings" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER, // Send to admin
+    from: FROM_EMAIL,
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
     subject: `🎯 New Placement Test Booking - ${name}`,
     html: htmlContent
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Placement test booking notification sent to admin:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('✅ Placement test booking notification sent to admin:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('❌ Error sending placement test booking email:', error);
     throw error;
@@ -957,16 +948,16 @@ const sendPlacementTestConfirmationEmail = async (bookingData) => {
   `;
 
   const mailOptions = {
-    from: `"Tutelage Language Center" <${process.env.EMAIL_USER}>`,
+    from: FROM_EMAIL,
     to: email,
     subject: `✓ Your Placement Test Booking Confirmed - Tutelage`,
     html: htmlContent
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Placement test confirmation sent to student:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('✅ Placement test confirmation sent to student:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('❌ Error sending placement test confirmation:', error);
     throw error;
@@ -1129,17 +1120,17 @@ const sendMockTestBookingEmail = async (bookingData) => {
   `;
 
   const mailOptions = {
-    from: `"Tutelage Mock Test Bookings" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
+    from: FROM_EMAIL,
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
     subject: `🎯 New ${testType} Booking - ${name}`,
     html: htmlContent,
     replyTo: email
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Mock test booking notification sent to admin:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('✅ Mock test booking notification sent to admin:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('❌ Error sending mock test booking email:', error);
     throw error;
@@ -1322,16 +1313,16 @@ const sendMockTestConfirmationEmail = async (bookingData) => {
   `;
 
   const mailOptions = {
-    from: `"Tutelage Language Center" <${process.env.EMAIL_USER}>`,
+    from: FROM_EMAIL,
     to: email,
     subject: `✓ Your ${testType} Booking Confirmed - Tutelage`,
     html: htmlContent
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Mock test confirmation sent to student:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('✅ Mock test confirmation sent to student:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('❌ Error sending mock test confirmation:', error);
     throw error;
@@ -1396,16 +1387,16 @@ const sendApprovalRequestNotification = async (payload) => {
   `;
 
   const mailOptions = {
-    from: `"Tutelage Admin" <${process.env.EMAIL_USER}>`,
+    from: FROM_EMAIL,
     to: adminEmail,
     subject: `[Approval] ${action} ${resourceType} #${resourceId} queued`,
     html: htmlContent
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Approval request notification sent to admin:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await resend.emails.send(mailOptions);
+    console.log('✅ Approval request notification sent to admin:', info.id);
+    return { success: true, messageId: info.id };
   } catch (error) {
     console.error('❌ Error sending approval request notification:', error);
     // Do not throw to avoid blocking business flow; return failure
@@ -1431,13 +1422,13 @@ async function sendContactEmail(contactData) {
     topic,
     message
   } = contactData;
-  
+
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-  
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
     subject: `New Contact Form Submission: ${topic}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -1540,13 +1531,13 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
     email,
     interestedIn
   } = enrollmentData;
-  
+
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-  
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
     subject: `New Arabic Course Enrollment Application: ${firstName} ${lastName}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -1648,7 +1639,7 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
  */
 async function sendArabicEnrollmentConfirmationEmail(enrollmentData) {
   const { firstName, lastName, email, classType } = enrollmentData;
-  
+
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
@@ -1747,10 +1738,10 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
     email,
     interestedIn
   } = enrollmentData;
-  
+
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-  
+
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_USER,
@@ -1855,7 +1846,7 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
  */
 async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
   const { firstName, lastName, email, classType } = enrollmentData;
-  
+
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
@@ -1940,7 +1931,7 @@ async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
 }
 
 module.exports = {
-  transporter,
+  resend,
   sendEnrollmentApplicationEmail,
   sendEnrollmentConfirmationEmail,
   sendPricingRequestEmail,
