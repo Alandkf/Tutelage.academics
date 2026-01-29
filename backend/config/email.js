@@ -1,7 +1,7 @@
 // ============================================================================
 // EMAIL CONFIGURATION
 // ============================================================================
-// Nodemailer setup for sending enrollment and notification emails
+// Resend setup for sending enrollment and notification emails
 
 const { Resend } = require('resend');
 const path = require('path');
