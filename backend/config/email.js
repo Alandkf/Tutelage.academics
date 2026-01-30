@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
-const FROM_EMAIL = process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const FROM_EMAIL = process.env.FROM_EMAIL;
 
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -41,7 +41,7 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
 
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.krd',
+    to: FROM_EMAIL,
     subject: `New Course Enrollment Application: ${course}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -779,7 +779,7 @@ const sendPlacementTestBookingEmail = async (bookingData) => {
 
   const mailOptions = {
     from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
+    to: FROM_EMAIL,
     subject: `🎯 New Placement Test Booking - ${name}`,
     html: htmlContent
   };
@@ -1121,7 +1121,7 @@ const sendMockTestBookingEmail = async (bookingData) => {
 
   const mailOptions = {
     from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
+    to: FROM_EMAIL,
     subject: `🎯 New ${testType} Booking - ${name}`,
     html: htmlContent,
     replyTo: email
@@ -1343,7 +1343,6 @@ const sendApprovalRequestNotification = async (payload) => {
     changesSummary
   } = payload;
 
-  const adminEmail = process.env.EMAIL_USER;
   const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -1388,7 +1387,7 @@ const sendApprovalRequestNotification = async (payload) => {
 
   const mailOptions = {
     from: FROM_EMAIL,
-    to: adminEmail,
+    to: FROM_EMAIL,
     subject: `[Approval] ${action} ${resourceType} #${resourceId} queued`,
     html: htmlContent
   };
@@ -1425,95 +1424,100 @@ async function sendContactEmail(contactData) {
 
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
-
-  await resend.emails.send({
-    from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
-    subject: `New Contact Form Submission: ${topic}`,
-    html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <!-- Header with Tutelage branding -->
-        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
-              TUTELAGE
-           </h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                 English Learning Platform
+  console.log("this is from email : " , FROM_EMAIL);
+  
+  try{ 
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [FROM_EMAIL],
+      subject: `New Contact Form Submission: ${topic}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+          <!-- Header with Tutelage branding -->
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                TUTELAGE
+             </h1>
+                <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
+                   English Learning Platform
+                </p>
+          </div>
+          
+          <!-- Main content -->
+          <div style="padding: 30px 20px; background-color: #ffffff;">
+            <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
+              New Contact Form Submission
+            </h2>
+            
+            <!-- Contact details -->
+            <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">Contact Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #333; width: 140px;">Date Submitted:</td>
+                  <td style="padding: 8px 0; color: #666;">${currentDate} at ${currentTime}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #333;">Name:</td>
+                  <td style="padding: 8px 0; color: #666;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
+                  <td style="padding: 8px 0; color: #666;">${email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #333;">Country:</td>
+                  <td style="padding: 8px 0; color: #666;">${country}</td>
+                </tr>
+                ${topic && `
+                <tr>
+                  <td style="padding: 8px 0; font-weight: bold; color: #333;">Topic:</td>
+                  <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${topic}</td>
+                </tr>
+                  `}
+              </table>
+            </div>
+            
+            <!-- Message -->
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">Message</h3>
+              <p style="color: #333; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message}</p>
+            </div>
+            
+            <!-- Action required section -->
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 30px;">
+              <h3 style="color: #856404; margin-top: 0; font-size: 16px;">
+                📋 Action Required
+              </h3>
+              <p style="color: #856404; margin-bottom: 0; line-height: 1.5;">
+                Please review this contact form submission and respond to the user as soon as possible.
               </p>
-        </div>
-        
-        <!-- Main content -->
-        <div style="padding: 30px 20px; background-color: #ffffff;">
-          <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
-            New Contact Form Submission
-          </h2>
-          
-          <!-- Contact details -->
-          <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-            <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">Contact Details</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333; width: 140px;">Date Submitted:</td>
-                <td style="padding: 8px 0; color: #666;">${currentDate} at ${currentTime}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Name:</td>
-                <td style="padding: 8px 0; color: #666;">${name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Email:</td>
-                <td style="padding: 8px 0; color: #666;">${email}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Country:</td>
-                <td style="padding: 8px 0; color: #666;">${country}</td>
-              </tr>
-              ${topic && `
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #333;">Topic:</td>
-                <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${topic}</td>
-              </tr>
-                `}
-            </table>
+            </div>
+            
+            <!-- Contact info -->
+            <div style="margin-top: 25px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+              <p style="margin: 0; color: #666; font-size: 14px;">
+                <strong>Quick Reply:</strong> You can reply directly to this email to reach ${name} at ${email}
+              </p>
+            </div>
           </div>
           
-          <!-- Message -->
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #f59e0b; margin-top: 0; font-size: 18px;">Message</h3>
-            <p style="color: #333; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message}</p>
-          </div>
-          
-          <!-- Action required section -->
-          <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 30px;">
-            <h3 style="color: #856404; margin-top: 0; font-size: 16px;">
-              📋 Action Required
-            </h3>
-            <p style="color: #856404; margin-bottom: 0; line-height: 1.5;">
-              Please review this contact form submission and respond to the user as soon as possible.
+          <!-- Footer -->
+          <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+            <p style="color: #ffffff; margin: 0; font-size: 14px;">
+              <strong>Tutelage English Learning Platform</strong>
             </p>
-          </div>
-          
-          <!-- Contact info -->
-          <div style="margin-top: 25px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
-            <p style="margin: 0; color: #666; font-size: 14px;">
-              <strong>Quick Reply:</strong> You can reply directly to this email to reach ${name} at ${email}
+            <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
+              Empowering students to achieve English fluency
             </p>
           </div>
         </div>
-        
-        <!-- Footer -->
-        <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
-          <p style="color: #ffffff; margin: 0; font-size: 14px;">
-            <strong>Tutelage English Learning Platform</strong>
-          </p>
-          <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
-            Empowering students to achieve English fluency
-          </p>
-        </div>
-      </div>
-    `,
-    replyTo: email,
-  });
+      `,
+      replyTo: email,
+    });
+  }catch(err){
+    console.log("error sending email: ", err)
+  }
 }
 
 /**
@@ -1537,7 +1541,7 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
 
   await resend.emails.send({
     from: FROM_EMAIL,
-    to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'admin@tutelage.com',
+    to: FROM_EMAIL,
     subject: `New Arabic Course Enrollment Application: ${firstName} ${lastName}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -1640,8 +1644,8 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
 async function sendArabicEnrollmentConfirmationEmail(enrollmentData) {
   const { firstName, lastName, email, classType } = enrollmentData;
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: 'Arabic Course Enrollment Application Received - Welcome to Tutelage!',
     html: `
@@ -1742,9 +1746,9 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
   const currentDate = new Date().toLocaleDateString();
   const currentTime = new Date().toLocaleTimeString();
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: FROM_EMAIL,
     subject: `New Kurdish Course Enrollment Application: ${firstName} ${lastName}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -1847,8 +1851,8 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
 async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
   const { firstName, lastName, email, classType } = enrollmentData;
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+  await resend.emails.send({
+    from: FROM_EMAIL,
     to: email,
     subject: 'Kurdish Course Enrollment Application Received - Welcome to Tutelage!',
     html: `

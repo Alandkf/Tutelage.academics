@@ -250,7 +250,7 @@ const initializeServer = async () => {
             }
             console.log(`🔐 Session store: Memory (consider using database sessions for production)`);
             console.log(`📚 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`📧 Email service: ${process.env.EMAIL_USER ? 'Configured' : 'Not configured'}`);
+            console.log(`📧 Email service: ${process.env.FRON_EMAIL ? 'Configured' : 'Not configured'}`);
             console.log('='.repeat(60) + '\n');
             
             console.log('✅ All systems operational - API endpoints ready to serve requests\n');
