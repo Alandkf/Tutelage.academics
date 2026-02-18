@@ -3,7 +3,7 @@
 // ============================================================================
 // Handles course enrollment form submissions and email notifications
 
-const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail, sendContactEmail, sendArabicEnrollmentApplicationEmail, sendArabicEnrollmentConfirmationEmail, sendKurdishEnrollmentApplicationEmail, sendKurdishEnrollmentConfirmationEmail } = require('../config/email');
+const { sendEnrollmentApplicationEmail, sendEnrollmentConfirmationEmail, sendPricingRequestEmail, sendProficiencyPricingRequestEmail, sendTestResultEmail, sendPlacementTestBookingEmail, sendPlacementTestConfirmationEmail, sendMockTestBookingEmail, sendMockTestConfirmationEmail, sendContactEmail, sendArabicEnrollmentApplicationEmail, sendArabicEnrollmentConfirmationEmail, sendKurdishEnrollmentApplicationEmail, sendKurdishEnrollmentConfirmationEmail } = require('../config/email');
 
 /**
  * Process course enrollment form submission
@@ -14,10 +14,10 @@ const processEnrollment = async (req, res) => {
   try {
     console.log('📝 Processing course enrollment application');
     
-    const { name, email, phone, age, profession, course, proficiencyType } = req.body;
+    const { name, email, phone, age, profession, course, proficiencyType, classType } = req.body;
     
     // Validate required fields
-    if (!name || !email || !phone || !age || !profession || !course ) {
+    if (!name || !email || !phone || !age || !profession || !course || !classType) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
@@ -48,7 +48,8 @@ const processEnrollment = async (req, res) => {
       age: age,
       profession: profession.trim(),
       course: course.trim(),
-      proficiencyType: proficiencyType?.trim()
+      proficiencyType: proficiencyType?.trim(),
+      classType: classType?.trim()
     };
     
     console.log('📧 Sending enrollment emails...');
@@ -61,7 +62,7 @@ const processEnrollment = async (req, res) => {
       ]);
       
       console.log('✅ Enrollment emails sent successfully');
-      console.log(`📋 New enrollment: ${name} applied for ${course}`);
+      console.log(`📋 New enrollment: ${enrollmentData.name} applied for ${enrollmentData.course} in ${enrollmentData.classType}`);
       
     } catch (emailError) {
       console.error('❌ Email sending error:', emailError);
@@ -72,6 +73,7 @@ const processEnrollment = async (req, res) => {
         data: {
           name: enrollmentData.name,
           course: enrollmentData.course,
+          classType: enrollmentData.classType,
           email: enrollmentData.email
         },
         warning: 'Email notification issue - team will contact you directly'
@@ -84,6 +86,7 @@ const processEnrollment = async (req, res) => {
       data: {
         name: enrollmentData.name,
         course: enrollmentData.course,
+        classType: enrollmentData.classType,
         email: enrollmentData.email
       }
     });
@@ -107,6 +110,122 @@ const processEnrollment = async (req, res) => {
 const processPricingRequest = async (req, res) => {
   try {
     console.log('💰 Processing pricing request');
+    
+    const { firstName, lastName, email, course } = req.body;
+
+   // Define pricing based on the course
+    let publicPrice = 0;
+    let privatePrice = 0;
+    let customPrice = 0;
+
+    switch (course.trim().toLowerCase()) {
+      case 'english for kids and teens':
+        publicPrice = 249;
+        privatePrice = 299;
+        customPrice = 29;
+        break;
+      case 'english for adults':
+        publicPrice = 149;
+        privatePrice = 299;
+        customPrice = 29;
+        break;
+      case 'academic english':
+        publicPrice = 174;
+        privatePrice = 349;
+        customPrice = 34;
+        break;
+      case 'english proficiency tests':
+        publicPrice = 174;
+        privatePrice = 349;
+        customPrice = 34;
+        break;
+      case 'business english':
+        publicPrice = 174;
+        privatePrice = 349;
+        customPrice = 34;
+        break;
+      default:
+        publicPrice = 249;
+        privatePrice = 299;
+        customPrice = 29;
+        break;
+    }
+    
+    // Validate required fields
+    if (!firstName || !lastName || !email || !course) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+    
+    const pricingData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      name: `${firstName.trim()} ${lastName.trim()}`,
+      email: email.trim().toLowerCase(),
+      course: course.trim()
+      , publicPrice, privatePrice, customPrice
+    };
+    
+    console.log('📧 Sending pricing information email...');
+    
+    // Send pricing email to user
+    try {
+      //add some condition to send different emails based on course 
+      await sendPricingRequestEmail(pricingData);
+      
+      console.log('✅ Pricing email sent successfully');
+      console.log(`📋 Pricing request: ${pricingData.name} for ${pricingData.course}`);
+      
+    } catch (emailError) {
+      console.error('❌ Email sending error:', emailError);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Pricing request submitted successfully! However, there was an issue sending the email. Our team will contact you directly.',
+        data: {
+          name: pricingData.name,
+          course: pricingData.course,
+          email: pricingData.email
+        },
+        warning: 'Email notification issue - team will contact you directly'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Pricing information sent successfully! Check your email.',
+      data: {
+        name: pricingData.name,
+        course: pricingData.course,
+        email: pricingData.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Pricing request processing error:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process pricing request. Please try again or contact support.',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+const processProficiencyPricingRequest = async (req, res) => {
+  try {
+    console.log('💰 Processing proficiency pricing request');
     
     const { firstName, lastName, email, course } = req.body;
     
@@ -140,10 +259,10 @@ const processPricingRequest = async (req, res) => {
     // Send pricing email to user
     try {
       //add some condition to send different emails based on course 
-      await sendPricingRequestEmail(pricingData);
+      await sendProficiencyPricingRequestEmail(pricingData);
       
-      console.log('✅ Pricing email sent successfully');
-      console.log(`📋 Pricing request: ${pricingData.name} for ${course}`);
+      console.log('✅ Proficiency pricing email sent successfully');
+      console.log(`📋 Proficiency pricing request: ${pricingData.name} for ${pricingData.course}`);
       
     } catch (emailError) {
       console.error('❌ Email sending error:', emailError);
@@ -715,6 +834,7 @@ const processKurdishEnrollment = async (req, res) => {
 module.exports = {
   processEnrollment,
   processPricingRequest,
+  processProficiencyPricingRequest,
   processTestResult,
   processPlacementTestBooking,
   processMockTestBooking,

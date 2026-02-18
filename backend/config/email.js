@@ -33,7 +33,8 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
     age,
     profession,
     course,
-    proficiencyType
+    proficiencyType,
+    classType
   } = enrollmentData;
 
   const currentDate = new Date().toLocaleDateString();
@@ -42,19 +43,19 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
   await resend.emails.send({
     from: FROM_EMAIL,
     to: FROM_EMAIL,
-    subject: `New Course Enrollment Application: ${course}`,
+    subject: `New Course Enrollment Application: ${course} - ${classType}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
-                 English Learning Platform
-              </p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              TUTELAGE
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -95,8 +96,12 @@ async function sendEnrollmentApplicationEmail(enrollmentData) {
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Course Applied:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${course}</td>
               </tr>
-              ${proficiencyType &&
-      `<tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #333;">Class Type:</td>
+                <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${classType}</td>
+              </tr>
+              ${proficiencyType &&`
+              <tr>
                 <td style="padding: 8px 0; font-weight: bold; color: #333;">Proficiency Type:</td>
                 <td style="padding: 8px 0; color: #f59e0b; font-weight: bold;">${proficiencyType}</td>
               </tr>`
@@ -152,14 +157,14 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-              <h1 style=" color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                 TUTELAGE
-              </h1>
-            </div>
-              <p style=" color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
-                 English Learning Platform
-              </p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              TUTELAGE
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -233,6 +238,95 @@ async function sendEnrollmentConfirmationEmail(enrollmentData) {
  * @param {Object} pricingData - The pricing request data
  */
 async function sendPricingRequestEmail(pricingData) {
+  const { firstName, lastName, email, course, publicPrice, privatePrice, customPrice } = pricingData;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: `${course} - Course Information & Pricing`,
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header with Tutelage branding -->
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              TUTELAGE
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
+        </div>
+        
+        <!-- Main content -->
+        <div style="padding: 30px 20px; background-color: #ffffff;">
+          <h2 style="color: #111111; border-bottom: 3px solid #f59e0b; padding-bottom: 15px; margin-bottom: 25px; font-size: 24px;">
+            ${course} - Course Information
+          </h2>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">Dear <strong>${firstName} ${lastName}</strong>,</p>
+          
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Thank you for your interest in our English courses for children and teens.
+          </p>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Please find our pricing below:
+          </p>
+
+          <ul style="color: #333; line-height: 1.8; margin: 20px 0; padding-left: 20px;">
+            <li><strong>Public course package:</strong> $${publicPrice}</li>
+            <li><strong>Private course package:</strong> $${privatePrice}</li>
+            <li><strong>Design Your Own Package:</strong> $${customPrice} per lesson for one hour</li>
+          </ul>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            If you require further information or wish to proceed with registration, please do not hesitate to contact us.
+          </p>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            To enroll, please use the link below:
+          </p>
+
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="https://www.tutelage.krd/courses/enroll" style="background-color: #f59e0b; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+              Enroll Now
+            </a>
+          </div>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            We hope to make the learning journey enjoyable and rewarding!
+          </p>
+
+          <p style="color: #333; font-size: 16px; line-height: 1.6;">
+            Best wishes,
+          </p>
+
+          <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p style="color: #333; margin: 0; font-size: 16px;">
+              <strong>Have questions?</strong>
+            </p>
+            <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">
+              Reply to this email or contact us directly for personalized assistance!
+            </p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #111111; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="color: #ffffff; margin: 0; font-size: 14px;">
+            <strong>Tutelage English Learning Platform</strong>
+          </p>
+          <p style="color: #a1a1aa; margin: 5px 0 0 0; font-size: 12px;">
+            Empowering students to achieve English fluency
+          </p>
+        </div>
+      </div>
+    `,
+  });
+}
+
+async function sendProficiencyPricingRequestEmail(pricingData) {
   const { firstName, lastName, email, course } = pricingData;
 
   await resend.emails.send({
@@ -1434,14 +1528,16 @@ async function sendContactEmail(contactData) {
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
           <!-- Header with Tutelage branding -->
-          <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
-                TUTELAGE
-             </h1>
-                <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                   English Learning Platform
-                </p>
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              TUTELAGE
+            </h1>
           </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
+        </div>
           
           <!-- Main content -->
           <div style="padding: 30px 20px; background-color: #ffffff;">
@@ -1547,12 +1643,14 @@ async function sendArabicEnrollmentApplicationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               TUTELAGE
-           </h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                 Language Learning Platform
-              </p>
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -1650,14 +1748,16 @@ async function sendArabicEnrollmentConfirmationEmail(enrollmentData) {
     subject: 'Arabic Course Enrollment Application Received - Welcome to Tutelage!',
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <!-- Header with Tutelage branding -->
+       <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               TUTELAGE
-           </h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                 Language Learning Platform
-              </p>
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -1754,12 +1854,14 @@ async function sendKurdishEnrollmentApplicationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               TUTELAGE
-           </h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                 Language Learning Platform
-              </p>
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -1859,12 +1961,14 @@ async function sendKurdishEnrollmentConfirmationEmail(enrollmentData) {
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header with Tutelage branding -->
         <div style="background: linear-gradient(135deg, #f59e0b 0%, #fec016 100%); padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0;">
-           <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;">
+            <h1 style="width: 100%; color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
               TUTELAGE
-           </h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; text-align: center;">
-                 Language Learning Platform
-              </p>
+            </h1>
+          </div>
+          <p style="width: 100%; color: #ffffff; margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+            English Learning Platform
+          </p>
         </div>
         
         <!-- Main content -->
@@ -1939,6 +2043,7 @@ module.exports = {
   sendEnrollmentApplicationEmail,
   sendEnrollmentConfirmationEmail,
   sendPricingRequestEmail,
+  sendProficiencyPricingRequestEmail,
   sendTestResultEmail,
   sendPlacementTestBookingEmail,
   sendPlacementTestConfirmationEmail,
