@@ -1,77 +1,46 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* :root{
-  --main : #fec016;
-  --onMain : #ffffff;
-  --secondary : #111111;
-  --onSecondary : #ffffff;
-  --accent : #f59e0b;
-  --onAccent : #ffffff;
-  --muted : #1e1e1e;
-  --onMuted : #a1a1aa;
-  --border : #2c2c2c;
-  --input : #3c3c3c;
-  --ring : #525252;
-} */
 html, body {
   margin: 0;
   padding: 0;
 }
-*{
+* {
   scroll-behavior: smooth;
 }
 
-
 @custom-variant dark (&:is(.dark *));
 
+/* LEO Institute palette (light only) */
 :root {
-  /* Updated color palette for Tutelage theme */
-  --background: oklch(1 0 0); /* White */
-  --foreground: oklch(0.145 0 0); /* Black */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #f59e0b; /* dim yellow */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: #111111;
-  --secondary-foreground: #ffffff;
-  --muted: #f2f2f2;
-  --muted-foreground: #4a4a50;
-  --accent: #fec016 ; /* Logo color */
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(100% 0.00011 271.152);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
-  /* ...existing code... */
-}
+  color-scheme: light; /* light-only: opt out of browser auto-dark */
+  --background: #ffffff;
+  --foreground: #14213d;
+  --card: #ffffff;
+  --card-foreground: #14213d;
+  --popover: #ffffff;
+  --popover-foreground: #14213d;
+  --primary: #1e3a6e; /* LEO navy */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f6fa;
+  --secondary-foreground: #1e3a6e;
+  --muted: #f4f6fa;
+  --muted-foreground: #525d73;
+  /* shadcn uses "accent" for hover surfaces, so keep it a soft tint and expose brand red separately */
+  --accent: #e8edf6;
+  --accent-foreground: #1e3a6e;
+  --destructive: #c8202f;
+  --destructive-foreground: #ffffff;
+  --border: #dde3ee;
+  --input: #dde3ee;
+  --ring: #1e3a6e;
+  --radius: 0.75rem;
 
-.dark {
-  --background: #111111;
-  --foreground: #fff;
-  --card: #111112;
-  --card-foreground: #fff;
-  --popover: #18181b;
-  --popover-foreground: #fff;
-  --primary: #f59e0b;
-  --primary-foreground: #fff;
-  --secondary: #232323;
-  --secondary-foreground: #fff;
-  --muted: #1e1e1e;
-  --muted-foreground: #a1a1aa;
-  --accent: #fdbe10;
-  --accent-foreground: #fff;
-  --destructive: #e11d48;
-  --destructive-foreground: #fff;
-  --border: #232323;
-  --input: #232323;
-  --ring: #f59e0b;
-  --radius: 0.625rem;
-  /* ...existing code... */
+  --leo-navy: #1e3a6e;
+  --leo-navy-dark: #142a52;
+  --leo-red: #c8202f;
+  --leo-yellow: #ffd43b;
+  --leo-surface: #f4f6fa;
 }
 
 @theme inline {
@@ -94,23 +63,16 @@ html, body {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-leo-navy: var(--leo-navy);
+  --color-leo-navy-dark: var(--leo-navy-dark);
+  --color-leo-red: var(--leo-red);
+  --color-leo-yellow: var(--leo-yellow);
+  --color-leo-surface: var(--leo-surface);
 }
 
 @layer base {
@@ -119,24 +81,21 @@ html, body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+  :lang(ckb), :lang(ckb) body {
+    font-family: var(--font-arabic), var(--font-inter), system-ui, sans-serif;
   }
 }
 
-/* Added custom scrollbar styling for smooth interactions */
 ::-webkit-scrollbar {
-  width: 2px;
+  width: 8px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgb(234, 179, 8);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(234, 179, 8, 0.7);
+  background: var(--leo-navy);
+  border-radius: 4px;
 }
