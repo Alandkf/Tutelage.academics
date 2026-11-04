@@ -1,44 +1,21 @@
-import GlobalTestMastery from '@/components/landing/GlobalTestMastery '
-import HeroSection from '@/components/landing/Hero'
-import ImproveYourEnglishSkills from '@/components/landing/ImproveYourEnglishSkills'
-import OnlineCourses from '@/components/landing/OnlineCourses'
-import Practice from '@/components/landing/Practice'
-import Resources from '@/components/landing/Resources '
-import Tests from '@/components/landing/Tests'
-import TutelageAi from '@/components/landing/TutelageAi'
+import Hero from '@/components/leo/Hero'
+import Stats from '@/components/leo/Stats'
+import About from '@/components/leo/About'
+import AiShowcase from '@/components/leo/AiShowcase'
+import Courses from '@/components/leo/Courses'
+import Testimonials from '@/components/leo/Testimonials'
+import Contact from '@/components/leo/Contact'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL
-
-async function getLatestLandingSection() {
-  try {
-    const res = await fetch(`${BASE_URL}/api/landing-sections/1`, { cache: 'no-store' })
-    const data = await res.json()
-    if (data?.success && data?.landingSection) {
-      return data.landingSection
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-export default async function Home() {
-  const landing = await getLatestLandingSection()
+export default function Home() {
   return (
     <>
-      {/* HERO SECTION */}
-      <HeroSection
-        title={landing?.title}
-        subtitle={landing?.subtitle}
-        imageUrl={landing?.imageUrl}
-      />
-      <TutelageAi />
-      <Resources />
-      <OnlineCourses />
-      <Tests />
-      <GlobalTestMastery />
-      <Practice />
-      <ImproveYourEnglishSkills />
+      <Hero />
+      <Stats />
+      <About />
+      <AiShowcase />
+      <Courses />
+      <Testimonials />
+      <Contact />
     </>
   )
 }
