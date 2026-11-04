@@ -1,8 +1,8 @@
 'use client'
 
-import LanguagesHero from '@/components/Languages/LanguagesHero'
-import LanguagesShowcase from '@/components/Languages/LanguagesShowcase'
-import LanguageCTA from '@/components/Languages/LanguageCTA'
+import LanguagesHero from '@/components/languages/LanguagesHero'
+import LanguagesShowcase from '@/components/languages/LanguagesShowcase'
+import LanguageCTA from '@/components/languages/LanguageCTA'
 
 export default function CoursesPage() {
 
